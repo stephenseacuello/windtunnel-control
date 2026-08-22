@@ -1,0 +1,175 @@
+{
+  "_README": [
+    "Wind tunnel configuration. One file, both instruments.",
+    "",
+    "THE DRIVE COMMANDS RPM, NOT Hz. Parameter 1105 REF1 MAX reads 2435 rpm,",
+    "confirmed by 2002 MAXIMUM SPEED = 2435 and 9908 MOTOR NOM SPEED = 1770.",
+    "Every speed in this file and in the code is in rpm. 'hz_limit' is a",
+    "legacy key name; its VALUE is rpm.",
+    "",
+    "Verified on hardware 2026-08-19: PMC link up (par 5306 climbing, 5307 = 0),",
+    "Chroma answering over USB-TMC with every SCPI command accepted."
+  ],
+  "transport": {
+    "kind": "pmc",
+    "port": "/dev/cu.usbmodem1101",
+    "baudrate": 115200,
+    "host_watchdog_ms": 5000,
+    "_note": "PMC owns the Modbus loop and both watchdogs. ONLY ONE device may be landed on X1-29/30/31 \u2014 the FTDI cable does not get wired while the PMC is. Set kind='direct' only if the PMC is physically disconnected.",
+    "feedback_scale": 295.0,
+    "_feedback_note": "PMC telemetry field f2 x 295 = rpm. Measured: commanded 500 rpm, f2 settled 1.68 -> 496 rpm (0.9% low, which is slip). Composed of the sketch reporting output_Hz/10 and the 1770/60 nameplate ratio. Would become 1.0 if the sketch read par 0102 SPEED instead of 0103 OUTPUT FREQ."
+  },
+  "drive_serial": {
+    "baudrate": 19200,
+    "parity": "E",
+    "stopbits": 1,
+    "station_id": 1,
+    "_note": "Drive parameters 5303 / 5304 / 5302. Parity is EVEN to match the PMC firmware \u2014 a drive parameter is three keypad presses, reflashing in the field is not. Par 5308 shows a stable historical count from before this was set; stable is fine, climbing is not."
+  },
+  "drive_reference": {
+    "unit": "rpm",
+    "ref1_max": 2435.0,
+    "par_1105_ref1_max": 2435,
+    "par_2002_maximum_speed": 2435,
+    "par_9908_motor_nom_speed": 1770,
+    "_note": "20000 reference counts == 2435 rpm. The PMC line protocol cannot read parameters, so acs550.py takes ref1_max from here \u2014 and refuses to connect rather than guess, because a wrong full scale makes every commanded speed wrong by exactly that ratio with nothing to report it.",
+    "_field_weakening_warning": "2435 rpm is 82.5 Hz on a 1770 rpm motor, so the fan runs well above base speed. Available motor torque falls as 1/N there while fan torque rises as N^2. Watch motor current above ~1800 rpm; the drive is rated 46.2 A."
+  },
+  "hz_limit": 2400.0,
+  "_limit_note": "IN RPM despite the key name. 2400 sits just under the 2435 full scale.",
+  "calibration": {
+    "domain": "rpm",
+    "drive_unit": "rpm",
+    "coeffs": [
+      0.021321246923707956,
+      -0.42407711238720436
+    ],
+    "hz_range": [
+      0.0,
+      2400.0
+    ],
+    "rpm_per_hz": 29.5,
+    "r2": 0.9995933642091527,
+    "residual_std": 0.3343401331469344,
+    "units": "m/s",
+    "source": "Test 1, Feb 13 2026 \u2014 measured wind speed vs RPM",
+    "notes": "Native RPM fit. The drive commands SPEED (par 1105 = 2435 rpm), so there is no Hz stage and none should be reintroduced. Fit gives 50.75 m/s at 2400 rpm against Test 1's measured 51.24 \u2014 agreement to 1%."
+  },
+  "calibration_status": "RPM-native, verified against par 1105 / 2002 / 9908",
+  "velocity_units": "m/s",
+  "load": {
+    "model": "Chroma 63004-150-60",
+    "serial": "630041501113",
+    "identity": "Chroma,63004-150-60,630041501113,2.01",
+    "kind": "visa",
+    "resource": "USB0::2665::2176::630041501113::0::INSTR",
+    "channel": 1,
+    "verified": true,
+    "_note": "USB-TMC via VISA. macOS has no kernel usbtmc driver, so pyvisa + pyvisa-py + pyusb are required. Every SCPI command in chroma_load.py was verified accepted on 2026-08-19. The GPIB/LAN slot is a blanking plate \u2014 USB is the only digital interface on this unit.",
+    "_interlock": "Load ON before wind UP, load OFF only after the fan is confirmed stopped. With the load off the turbine sees an open circuit and runs away.",
+    "volt_off_v": 0.5,
+    "volt_on_v": 0.0,
+    "volt_range": "Middle",
+    "_volt_off_note": "Below this the load stops sinking. Settable; confirmed down to 0.5 V. At the shipped 3.00 V the stall-threshold measurement is censored at low wind. THE INSTRUMENT IS THE SOURCE OF TRUTH - read it each session.",
+    "cc_full_scale_a": {
+      "low": 2.0,
+      "mid": 6.0,
+      "high": 60.0
+    },
+    "cr_full_scale_ohm": {
+      "low": 250.0,
+      "mid": 1250.0,
+      "high": 2500.0
+    },
+    "setpoint_resolution_a": 0.0001,
+    "ratings": {
+      "volts": 150.0,
+      "amps": 60.0,
+      "watts": 400.0,
+      "_note": "corner limits, not simultaneous - 400 W binds everywhere between"
+    },
+    "programmable_protection": false,
+    "_protection_note": "fw 2.01 rejects every :PROT: mnemonic with 3,'Command Error'. No OVP/OCP/OPP over SCPI; the caller must enforce the 400 W envelope.",
+    "resource_note": "The Chroma pads its serial with NULs. The resource string here has them stripped so it survives JSON; VisaTransport._resolve() matches on the stripped form. Do NOT paste the NULs back in.",
+    "ranges_measured": {
+      "date": "2026-08-19",
+      "method": "demanded out-of-range values and bisected what the instrument refused, load OFF",
+      "behaviour": "out-of-range is REFUSED with 2,'Data Range Error', not clamped - but the setpoint then keeps its previous value"
+    },
+    "proven": {
+      "parses_scpi": "2026-08-19 - all 20 commands accepted",
+      "sinks_current": "2026-08-19 - 25 consecutive CC setpoints, 5 to 29.5 mA, against the turbine at 500 rpm fan; measured current matched demand to 0.1 mA at every step."
+    }
+  },
+  "turbine": {
+    "radius_m": null,
+    "n_blades": 3,
+    "hub_radius_m": 0.0,
+    "name": "",
+    "v_open_circuit_at_15mps": null,
+    "rpm_source": null,
+    "_todo": "Three numbers needed before the first Cp sweep: tip radius from the axis of rotation (NOT blade length), open-circuit DC volts at a moderate wind speed (sets the resistance ladder), and where rotor RPM is read from.",
+    "blade_under_test": "v2_Ra20",
+    "measured_p_max": {
+      "_note": "P_max(v) per fan rpm, blade v2_Ra20, from load_ramp.py --mode peak. Electrical power at the Chroma terminals - NOT Cp, which needs rotor RPM.",
+      "500": {
+        "p_w": 0.028,
+        "i_a": 0.015,
+        "v_v": 1.897,
+        "censored_by_voff_3v": true
+      },
+      "1200": {
+        "p_w": 0.962,
+        "i_a": 0.15,
+        "v_v": 6.413
+      },
+      "1800": {
+        "p_w": 3.8,
+        "i_a": 0.35,
+        "v_v": 10.858
+      }
+    },
+    "scaling": {
+      "p_exponent": 3.73,
+      "v_oc_exponent": 1.39,
+      "_note": "P ~ v^3.73 and V_oc ~ v^1.39 fitted over 600-1100 rpm of the live sweep. Both exceed the constant-Cp expectation (3.0 and 1.0), so Cp is still climbing with Reynolds across the whole test range. A blade ranked at 10 m/s may not rank the same at 38."
+    },
+    "reference_sweep": {
+      "blade": "v2_Ra20",
+      "date": "2026-08-20",
+      "file": "logs/sweep_v2_Ra20_summary.csv",
+      "protocol": "94bed28333f7",
+      "points": 14,
+      "all_clean": true,
+      "p_exponent": 3.754,
+      "p_exponent_r2": 0.99841,
+      "p_max_w_at_1800": 3.7217,
+      "i_at_p_max_a_at_1800": 0.328,
+      "_note": "First full 14-point sweep, 500-1800 rpm, all points stopped on the power roll-off. P ~ v^3.754 with R2 0.998 over the whole 10.2-38.0 m/s range. Peak powers use the PARABOLIC FIT, not the raw argmax: over a flat maximum the argmax is biased high (+1.3% mean here, positive in 13 of 14 points) and the bias grows with the number of samples near the peak, so blades sampled differently would be compared unfairly. Reproduces the earlier standalone 1200 and 1800 rpm runs to 0.3% and 0.2%.",
+      "_caveat": "P_max(v) is electrical power at the Chroma terminals. It is NOT Cp and cannot separate rotor aerodynamics from generator matching. Rotor RPM from Jeong's DAQ is still the missing channel.",
+      "_metadata_warning": "This blade ID was run with --notes 'PLA, 0.1mm, Ra 20' and later 'PETG, 0.2mm, Ra 20'. One is wrong. Resolve before comparing anything to it.",
+      "notes": "PETG, 0.2mm layers, Ra 20",
+      "_notes_note": "Confirmed 2026-08-20: PETG 0.2mm is correct for every test so far. An earlier aborted run was mislabelled 'PLA, 0.1mm'; that run produced no usable points and is not in any curve."
+    }
+  },
+  "tau": 0.8,
+  "tau_down": 0.8,
+  "dead_time": 0.0,
+  "_tau_note": "0.80 s fitted by analyze.py from an 8 s 1-cosine gust (R2 0.997), not from the step response. A step saturates the drive ramp and charges ramp time to the fan; a 1-cosine does not. Prefer gust runs for tau. Still drive-and-fan, not air.",
+  "temperature_c": null,
+  "pressure_pa": 101325.0,
+  "_ambient_note": "Record per session. Air density cannot be reconstructed later.",
+  "hardware_verified": {
+    "date": "2026-08-19",
+    "control_board": "SMIO-01C rev Q",
+    "rs485_terminals": "28=SCR, 29=B, 30=A, 31=AGND, 32=SCR (read off the silkscreen)",
+    "x1_as_found": "EMPTY \u2014 no analog, digital or relay wiring landed",
+    "rs485_termination_dip": "must be ON; photographed OFF as found",
+    "control_source_as_found": "1001 = DI1,2 and 1103 = AI1 \u2014 restore these to roll back",
+    "manual_fallback": "the keypad, via LOC/REM \u2014 works regardless of 1001/1103"
+  },
+  "drive_ramps": {
+    "accel_2202_s": 6.0,
+    "decel_2203_s": 6.0
+  }
+}

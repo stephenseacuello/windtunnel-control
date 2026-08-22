@@ -1,0 +1,66 @@
+# Wind tunnel dashboard as a systemd service.
+#
+#   sudo cp windtunnel.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now windtunnel
+#   journalctl -u windtunnel -f
+#
+# Two deliberate choices worth understanding before you change them:
+#
+# 1. Restart=on-failure, NOT Restart=always.
+#    If the dashboard is crash-looping, the fan is stopping and restarting
+#    with it. on-failure with a start limit means a persistent fault ends up
+#    parked and visible in systemctl status, rather than thrashing quietly.
+#
+# 2. It binds to 127.0.0.1.
+#    There is no authentication. Reach it with an SSH tunnel:
+#        ssh -L 5000:localhost:5000 pi@tunnel-pi
+#    Do not "fix" this by changing --host to 0.0.0.0 unless you have thought
+#    hard about who is on that network, because anyone who can reach the Pi
+#    could start a 15 HP fan.
+#
+# Note there is no UPS anywhere in this design. If the Pi loses power you WANT
+# it to die hard, so the drive's comm watchdog stops the fan. Battery-backing
+# the controller would defeat the safety property.
+
+[Unit]
+Description=Aerolab wind tunnel dashboard
+Documentation=file:///home/pi/windtunnel-control/PLAYBOOK.md
+After=network.target
+# The USB-RS485 cable must be present. Without this the service starts before
+# udev has created /dev/ttyVFD and fails on a cold boot.
+Requires=dev-ttyVFD.device
+After=dev-ttyVFD.device
+
+[Service]
+Type=simple
+User=pi
+Group=dialout
+WorkingDirectory=/home/pi/windtunnel-control/webapp
+Environment="PATH=/home/pi/tunnel/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/pi/tunnel/bin/python app.py --port /dev/ttyVFD --host 127.0.0.1 --http-port 5000
+
+Restart=on-failure
+RestartSec=10
+StartLimitBurst=5
+StartLimitIntervalSec=300
+
+# SIGINT rather than SIGTERM: Flask's shutdown path runs the controller's
+# finally block, which issues a stop to the drive. A hard kill would leave the
+# fan turning until the drive's own watchdog trips it a few seconds later —
+# which does work, but a clean ramp-down is better.
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/pi/windtunnel-control
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=windtunnel
+
+[Install]
+WantedBy=multi-user.target

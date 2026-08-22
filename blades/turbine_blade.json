@@ -1,0 +1,13 @@
+{
+  "_source": "~/Downloads/turbine_meters.stl, converted ASCII -> binary. Original SolidWorks 2024 master is ~/Downloads/turbine.STEP (AP214, 2026-07-01).",
+  "units": "metres",
+  "part": "ONE BLADE, not the assembled rotor",
+  "span_mm": 245.1,
+  "chord_mm": 48.0,
+  "max_thickness_mm": 24.5,
+  "twist": "strongly twisted - the projected section oscillates about twice over the span",
+  "tip_radius_m": null,
+  "_tip_radius_note": "STILL UNKNOWN and still blocking. This file gives BLADE SPAN (245 mm), which is not tip radius. Tip radius is measured from the AXIS OF ROTATION, so it is hub radius + the blade root offset + 245 mm. The hub is not in this file. lambda scales linearly with tip radius and Cp as 1/r^2, so guessing it is not an option.",
+  "n_blades": 3,
+  "notes": "Rename this file to match a --blade argument (e.g. v2_Ra20.stl) if this is the rotor that was swept - the dashboard joins geometry to results by name."
+}

@@ -1,0 +1,66 @@
+{
+  "mode": "gust",
+  "shape": "1mc",
+  "units": "Hz",
+  "mean": 900.0,
+  "amplitude": 300.0,
+  "length_s": 6.0,
+  "dt": 0.05,
+  "repeat": "1/1",
+  "tau": 1.205,
+  "diagnostics": {
+    "max_slew": 157.00786872883327,
+    "peak_to_peak": 300.0,
+    "mean": 942.8571428571429,
+    "std": 88.35226340609273,
+    "duration": 20.950000000000003,
+    "f_corner": 0.13207879094763098,
+    "amplitude_retained": 0.7982199556889623,
+    "predicted_peak_to_peak": 239.46598670668868,
+    "frac_power_above_corner": 0.2706742626211176,
+    "feedforward": {
+      "f_cutoff": 0.6603939547381549,
+      "tau_eff": 1.154,
+      "clipped_slew": false,
+      "clipped_range": false,
+      "overshoot_ratio": 1.4744088587733635,
+      "retained_compensated": 0.9632740068895191,
+      "retained_uncompensated": 0.7982199556889623,
+      "rms_error_compensated": 0.0854420693475642,
+      "rms_error_uncompensated": 0.1575975945761259,
+      "rms_improvement": 1.8444964615152868,
+      "improvement": 1.2067776557378784
+    }
+  },
+  "calibration": {
+    "domain": "rpm",
+    "drive_unit": "rpm",
+    "coeffs": [
+      0.021321246923707956,
+      -0.42407711238720436
+    ],
+    "hz_range": [
+      0.0,
+      2400.0
+    ],
+    "rpm_per_hz": 29.5,
+    "r2": 0.9995933642091527,
+    "residual_std": 0.3343401331469344,
+    "units": "m/s",
+    "source": "Test 1, Feb 13 2026 \u2014 measured wind speed vs RPM",
+    "notes": "Native RPM fit. The drive commands SPEED (par 1105 = 2435 rpm), so there is no Hz stage and none should be reintroduced. Fit gives 50.75 m/s at 2400 rpm against Test 1's measured 51.24 \u2014 agreement to 1%."
+  },
+  "written": "2026-08-20T14:32:43",
+  "run": {
+    "velocity_logged": 0,
+    "velocity_coverage": 0.0,
+    "samples_planned": 420,
+    "samples_played": 420,
+    "complete": true,
+    "requested_duration": 21.0,
+    "actual_duration": 20.956400082912296,
+    "late_samples": 1,
+    "max_lateness_s": 0.0,
+    "update_rate_hz": 20.0
+  }
+}

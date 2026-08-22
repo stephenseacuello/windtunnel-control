@@ -1,0 +1,15 @@
+{
+  "written": "2026-08-19T17:54:49",
+  "run": {
+    "velocity_logged": 0,
+    "velocity_coverage": 0.0,
+    "samples_planned": 600,
+    "samples_played": 600,
+    "complete": true,
+    "requested_duration": 30.0,
+    "actual_duration": 29.9559243330732,
+    "late_samples": 1,
+    "max_lateness_s": 0.0,
+    "update_rate_hz": 20.0
+  }
+}

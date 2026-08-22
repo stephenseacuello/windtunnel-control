@@ -1,0 +1,53 @@
+{
+  "mode": "gust",
+  "shape": "1mc",
+  "units": "Hz",
+  "mean": 500.0,
+  "amplitude": 200.0,
+  "length_s": 8.0,
+  "dt": 0.05,
+  "repeat": "1/1",
+  "tau": 0.8,
+  "diagnostics": {
+    "max_slew": 78.51963151813834,
+    "peak_to_peak": 200.0,
+    "mean": 534.7826086956521,
+    "std": 63.30530338504798,
+    "duration": 22.950000000000003,
+    "f_corner": 0.1989436788648692,
+    "amplitude_retained": 0.9229940412158925,
+    "predicted_peak_to_peak": 184.5988082431785,
+    "frac_power_above_corner": 0.0032807026853210798
+  },
+  "calibration": {
+    "domain": "rpm",
+    "drive_unit": "rpm",
+    "coeffs": [
+      0.021321246923707956,
+      -0.42407711238720436
+    ],
+    "hz_range": [
+      0.0,
+      2400.0
+    ],
+    "rpm_per_hz": 29.5,
+    "r2": 0.9995933642091527,
+    "residual_std": 0.3343401331469344,
+    "units": "m/s",
+    "source": "Test 1, Feb 13 2026 \u2014 measured wind speed vs RPM",
+    "notes": "Native RPM fit. The drive commands SPEED (par 1105 = 2435 rpm), so there is no Hz stage and none should be reintroduced. Fit gives 50.75 m/s at 2400 rpm against Test 1's measured 51.24 \u2014 agreement to 1%."
+  },
+  "written": "2026-08-20T14:45:04",
+  "run": {
+    "velocity_logged": 0,
+    "velocity_coverage": 0.0,
+    "samples_planned": 460,
+    "samples_played": 460,
+    "complete": true,
+    "requested_duration": 23.0,
+    "actual_duration": 22.952177499886602,
+    "late_samples": 1,
+    "max_lateness_s": 0.0,
+    "update_rate_hz": 20.0
+  }
+}

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wind Tunnel Control — URI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='uri.css') }}">
+</head>
+<body>
+
+<!-- ===== top strip: state is never hidden behind a tab ===== -->
+<div class="strip">
+  <div class="ident">
+    <div class="mark"></div>
+    <div>
+      <div class="title">WIND TUNNEL</div>
+      <div class="sub" id="ident-sub">ACS550-U1-046A-2 · 15 HP</div>
+    </div>
+  </div>
+
+  <div class="boot-error" id="stale-banner" style="display:none"></div>
+
+  <!-- Persistent safety frame. On every tab, always. The most dangerous
+       state on this rig used to be visible only inside one tab. -->
+  <div class="refusal" id="refusal" style="display:none"></div>
+
+  <div class="sf" id="sf-strip">
+    <span class="sf-i"><b id="sf-run">idle</b></span>
+    <span class="sf-i">fan <b id="sf-fan">—</b></span>
+    <span class="sf-i"><b id="sf-load">—</b></span>
+    <span class="sf-i"><span class="ilk-dot" id="sf-dot"></span>
+      <span id="sf-ilk">—</span></span>
+    <span class="sf-i sf-age">data <b id="sf-age">—</b></span>
+  </div>
+
+  <div class="annunciator" id="lamps">
+    <span class="lamp" id="l-link">LINK</span>
+    <span class="lamp" id="l-remote">REMOTE</span>
+    <span class="lamp ok" id="l-run">RUNNING</span>
+    <span class="lamp" id="l-setpt">AT SETPOINT</span>
+    <span class="lamp warn" id="l-alarm">ALARM</span>
+    <span class="lamp fault" id="l-fault">FAULT</span>
+    <span class="lamp warn" id="l-sim">SIMULATED</span>
+  </div>
+
+  <button class="estop" id="estop">E-STOP</button>
+</div>
+
+<div class="shell">
+  <nav class="rail" id="rail">
+    <div class="tab on" data-p="control">Control</div>
+    <div class="tab" data-p="turbine">Turbine</div>
+    <div class="tab" data-p="blades">Blades</div>
+    <div class="tab" data-p="profiles">Profiles</div>
+    <div class="tab" data-p="params">Parameters</div>
+    <div class="tab" data-p="commission">Commissioning</div>
+    <div class="tab" data-p="calib">Calibration</div>
+    <div class="tab" data-p="diag">Diagnostics</div>
+    <div class="tab" data-p="logs">Logs</div>
+    <div class="rail-foot" id="foot">—</div>
+  </nav>
+
+  <main class="main">
+
+  <!-- ============================ CONTROL ============================ -->
+  <section class="page on" id="p-control">
+    <div class="card" style="margin-bottom:14px">
+      <h3>Session <span class="lbl" id="sess-when"></span></h3>
+      <div class="row">
+        <label class="f">Operator <input type="text" id="se-op" placeholder="name" style="width:150px"></label>
+        <label class="f">Test section configuration
+          <input type="text" id="se-cfg" placeholder="e.g. 3-blade SLA rotor, 120 mm" style="width:280px"></label>
+        <label class="f">Project <input type="text" id="se-proj" placeholder="e.g. gust response" style="width:170px"></label>
+        <button class="pri" id="se-save">Set</button>
+      </div>
+      <div class="row">
+        <label class="f" style="flex:1 1 100%">Notes
+          <input type="text" id="se-notes" placeholder="anything you'd want to know six months from now" style="width:100%"></label>
+      </div>
+      <div class="sm dim" style="margin-top:6px">Stamped into every run's
+        metadata. It cannot be reconstructed afterwards.</div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3>Live state <span class="lbl" id="conn-note"></span></h3>
+        <div class="readouts">
+          <div class="ro meas"><div class="lbl">Measured</div>
+            <div class="big" id="m-hz">0<span class="unit">rpm</span></div></div>
+          <div class="ro meas"><div class="lbl">RPM</div>
+            <div class="big" id="m-rpm">—</div></div>
+          <div class="ro meas"><div class="lbl">Wind speed</div>
+            <div class="big" id="m-mps">—<span class="unit">m/s</span></div></div>
+          <div class="ro cmd"><div class="lbl">Commanded</div>
+            <div class="big" id="c-hz">0<span class="unit">rpm</span></div></div>
+          <div class="ro"><div class="lbl">Current</div>
+            <div class="big mono" id="m-amps">0.0<span class="unit">A</span></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Manual control</h3>
+        <div class="row">
+          <label class="f">Units
+            <select id="sp-units">
+              <option value="hz">Hz</option>
+              <option value="rpm">RPM</option>
+              <option value="mps">m/s</option>
+              <option value="mph">mph</option>
+            </select></label>
+          <label class="f">Setpoint
+            <input class="num" type="number" id="sp-val" value="500" step="50"></label>
+          <button class="pri" id="sp-set">Set</button>
+        </div>
+        <div class="row">
+          <input type="range" id="sp-slider" min="0" max="2400" step="10" value="500">
+          <span class="mono sm" id="sp-echo">500 rpm</span>
+        </div>
+        <div class="row">
+          <button class="go" id="btn-go">START</button>
+          <button id="btn-stop">Ramp stop</button>
+          <span class="sm dim" id="limit-note"></span>
+        </div>
+        <div class="note" id="ctl-note" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3>Wind speed <span class="lbl" id="vs-name">—</span></h3>
+      <div class="row">
+        <div class="ro meas" style="min-width:130px">
+          <div class="lbl">Measured</div>
+          <div class="big" id="v-meas">—<span class="unit">m/s</span></div></div>
+        <div class="ro cmd" style="min-width:130px">
+          <div class="lbl">Derived from Hz</div>
+          <div class="big" id="v-derived">—<span class="unit">m/s</span></div></div>
+        <div style="flex:1 1 200px" id="v-delta" class="sm dim"></div>
+      </div>
+      <div class="row" id="v-manual-row">
+        <label class="f">Manual reading <input class="num" type="number" id="v-manual" step="0.1" placeholder="m/s"></label>
+        <button class="pri sm" id="v-submit">Submit</button>
+        <span class="sm dim">manual readings go stale after 2 minutes</span>
+      </div>
+      <div class="row">
+        <label class="f">Closed-loop hold <input class="num" type="number" id="v-target" step="0.5" placeholder="m/s"></label>
+        <label class="f">Duration (s) <input class="num" type="number" id="v-dur" value="90"></label>
+        <button class="go" id="v-hold">Hold measured velocity</button>
+      </div>
+      <div id="v-out"></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3>Live trace <span class="lbl">last 3 minutes</span></h3>
+      <canvas class="plot tall" id="live-plot"></canvas>
+      <div class="legend">
+        <span><i style="background:#8a7038"></i>commanded</span>
+        <span><i style="background:#2277b3"></i>measured</span>
+        <span><i style="background:#5b7288"></i>current (A)</span>
+        <span><i style="background:#1f7a52"></i>measured m/s</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ PROFILES =========================== -->
+  <!-- ============================ TURBINE ============================ -->
+
+  <section class="page" id="p-turbine">
+
+    <div class="card" id="ilk-card">
+      <h3>Interlock</h3>
+      <div class="ilk" id="ilk">
+        <span class="ilk-dot" id="ilk-dot"></span>
+        <span id="ilk-text">—</span>
+      </div>
+      <div class="sm dim" style="margin-top:8px">
+        load&nbsp;ON → wind&nbsp;UP → test → wind&nbsp;DOWN → load&nbsp;OFF.
+        An unloaded rotor in moving air accelerates until something mechanical
+        stops it. Switching the load off is refused while the fan turns.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Electronic load <span class="lbl" id="load-ident">—</span></h3>
+      <div class="metrics">
+        <div class="metric"><div class="lbl">Terminal volts</div>
+          <div class="big" id="ld-v">—<span class="unit">V</span></div></div>
+        <div class="metric"><div class="lbl">Current</div>
+          <div class="big mono" id="ld-i">—<span class="unit">A</span></div></div>
+        <div class="metric"><div class="lbl">Power</div>
+          <div class="big" id="ld-w">—<span class="unit">W</span></div></div>
+        <div class="metric"><div class="lbl">Demand</div>
+          <div class="big mono dim" id="ld-d">—<span class="unit">A</span></div></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label class="f">Constant current
+          <input class="num" type="number" id="ld-set" value="0.005"
+                 step="0.005" min="0" max="2"></label>
+        <button class="pri" id="ld-apply">Set</button>
+        <button class="go" id="ld-on">Load ON</button>
+        <button id="ld-off">Load OFF</button>
+        <span class="sm dim" id="ld-note"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Blade sweep <span class="lbl" id="sw-state">idle</span></h3>
+      <div class="row">
+        <label class="f">Blade <input type="text" id="sw-blade"
+               placeholder="e.g. v2_Ra20" style="width:150px"></label>
+        <label class="f">Notes <input type="text" id="sw-notes"
+               placeholder="PETG, 0.2mm, Ra 20" style="width:230px"></label>
+      </div>
+      <div class="row">
+        <label class="f">From <input class="num" type="number" id="sw-from" value="500" step="100"></label>
+        <label class="f">To <input class="num" type="number" id="sw-to" value="1800" step="100"></label>
+        <label class="f">Step <input class="num" type="number" id="sw-step" value="100" step="50"></label>
+        <label class="f">mA/step <input class="num" type="number" id="sw-ma" value="20" step="5"></label>
+        <label class="f">Dwell s <input class="num" type="number" id="sw-dwell" value="1.0" step="0.5"></label>
+      </div>
+      <div class="row">
+        <button class="go" id="sw-go">Run sweep</button>
+        <button id="sw-abort">Abort</button>
+        <span class="sm dim" id="sw-note"></span>
+      </div>
+      <div class="bar"><div class="bar-fill" id="sw-bar"></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Live ramp <span class="lbl" id="sw-ramp-lbl">P vs I at the current wind speed</span></h3>
+      <canvas id="cv-ramp" height="220"></canvas>
+      <div class="sm dim">The ramp climbs, peaks, and rolls off. It stops once
+        power has fallen to 80% of that peak — never driven to stall.</div>
+    </div>
+
+    <div class="card">
+      <h3>Blade curve <span class="lbl">peak electrical power vs wind speed</span></h3>
+      <canvas id="cv-curve" height="240"></canvas>
+      <table class="tbl" id="sw-tbl"><thead><tr>
+        <th>fan rpm</th><th>m/s</th><th>P_max (W)</th><th>at (A)</th>
+        <th>stop</th></tr></thead><tbody></tbody></table>
+      <div class="sm dim">Electrical power at the load terminals. <b>Not Cp</b>
+        — that needs rotor RPM from the DAQ, which is not yet wired in.</div>
+    </div>
+
+  </section>
+
+  <!-- ============================= BLADES ============================= -->
+
+  <section class="page" id="p-blades">
+    <div class="split">
+      <div class="card" style="flex:0 0 250px">
+        <h3>Library</h3>
+        <div id="bl-list" class="sm dim">loading…</div>
+        <div class="sm dim" style="margin-top:14px">
+          Name the STL to match your <code>--blade</code> argument and it pairs
+          itself with that rotor's curve. See <code>blades/README.md</code>.
+        </div>
+      </div>
+
+      <div style="flex:1 1 400px; display:flex; flex-direction:column; gap:14px">
+        <div class="card">
+          <h3>Geometry <span class="lbl" id="bl-name">—</span></h3>
+          <canvas id="cv-mesh" height="300" style="cursor:grab"></canvas>
+          <div class="sm dim">Drag to rotate. STL only — STEP is a boundary
+            representation and needs CAD tessellation to draw at all.</div>
+        </div>
+
+        <div class="card">
+          <h3>Measured curve <span class="lbl" id="bl-meta">—</span></h3>
+          <canvas id="cv-blade" height="220"></canvas>
+          <table class="tbl" id="bl-tbl"><thead><tr>
+            <th>fan rpm</th><th>m/s</th><th>P_max (W)</th><th>at (A)</th>
+            <th>stop</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="p-profiles">
+    <div class="grid g2">
+      <div class="card">
+        <h3>Build a profile</h3>
+        <div class="row">
+          <label class="f">Shape
+            <select id="pf-kind">
+              <option value="1mc">1-cosine gust</option>
+              <option value="step">Step</option>
+              <option value="ramp">Ramp</option>
+              <option value="sine">Sinusoid</option>
+              <option value="vonkarman">von Kármán turbulence</option>
+              <option value="dryden">Dryden turbulence</option>
+            </select></label>
+          <label class="f">Units
+            <select id="pf-units">
+              <option value="hz">Hz</option>
+              <option value="rpm">RPM</option>
+              <option value="mps">m/s</option>
+              <option value="mph">mph</option>
+            </select></label>
+        </div>
+        <div class="row">
+          <label class="f">Mean <input class="num" type="number" id="pf-mean" value="20"></label>
+          <label class="f" id="w-amp">Amplitude <input class="num" type="number" id="pf-amp" value="5"></label>
+          <label class="f" id="w-len">Length (s) <input class="num" type="number" id="pf-length" value="20"></label>
+        </div>
+        <div class="row" id="w-turb" style="display:none">
+          <label class="f">Sigma <input class="num" type="number" id="pf-sigma" value="2"></label>
+          <label class="f">Length scale (m) <input class="num" type="number" id="pf-ls" value="40"></label>
+          <label class="f">Duration (s) <input class="num" type="number" id="pf-dur" value="120"></label>
+          <label class="f">Seed <input class="num" type="number" id="pf-seed" value="42"></label>
+        </div>
+        <div class="row" id="w-sine" style="display:none">
+          <label class="f">Frequency (Hz) <input class="num" type="number" id="pf-freq" value="0.05" step="0.01"></label>
+        </div>
+        <div class="row">
+          <label class="f">Settle (s) <input class="num" type="number" id="pf-settle" value="25"></label>
+          <label class="f">Feedforward
+            <select id="pf-ff"><option value="">off</option>
+              <option value="1">on (needs τ)</option></select></label>
+          <button class="pri" id="pf-preview">Preview</button>
+          <button id="pf-check" disabled>Pre-flight</button>
+          <button class="go" id="pf-run" disabled>Run</button>
+          <button class="danger" id="pf-abort" style="display:none">Abort</button>
+        </div>
+        <div class="bar" id="pf-bar" style="display:none"><i></i></div>
+        <div id="pf-diag"></div>
+      </div>
+
+      <div class="card">
+        <h3>Stepped sweep <span class="lbl">steady-state points</span></h3>
+        <p class="sm dim">Step, settle, acquire, advance. Logs a
+          <code>phase</code> column so the acquisition window is identifiable
+          afterwards — that is the marker to line Jeong's DAQ records up
+          against.</p>
+        <div class="row">
+          <label class="f">Units <select id="sw-units">
+            <option value="hz">Hz</option><option value="rpm">RPM</option>
+            <option value="mps">m/s</option><option value="mph">mph</option>
+          </select></label>
+          <label class="f">Start <input class="num" type="number" id="sw-start" value="10"></label>
+          <label class="f">Stop <input class="num" type="number" id="sw-stop" value="50"></label>
+          <label class="f">Step <input class="num" type="number" id="pfsw-step" value="5"></label>
+        </div>
+        <div class="row">
+          <label class="f">Settle (s) <input class="num" type="number" id="sw-settle" value="25"></label>
+          <label class="f">Acquire (s) <input class="num" type="number" id="pfsw-dwell" value="15"></label>
+          <button class="pri" id="sw-run">Run sweep</button>
+          <span class="sm dim" id="sw-est"></span>
+        </div>
+        <div id="sw-out"></div>
+      </div>
+
+      <div class="card">
+        <h3>Preview <span class="lbl" id="pf-desc"></span></h3>
+        <canvas class="plot tall" id="pf-plot"></canvas>
+        <div class="legend">
+          <span><i style="background:#8a7038"></i>commanded</span>
+          <span><i style="background:#2277b3"></i>predicted flow</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== PARAMETERS ========================== -->
+  <section class="page" id="p-params">
+    <div class="card">
+      <h3>Drive parameters
+        <span class="lbl"><button class="sm" id="pr-refresh">Refresh</button></span></h3>
+      <div class="note warn">Writes are persistent — the same as editing on the
+        keypad. There is no undo. Record the old value before changing
+        anything, and the control-source parameters are refused while the fan
+        is turning.</div>
+      <div id="pr-groups" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <!-- ========================== COMMISSIONING ======================== -->
+  <section class="page" id="p-commission">
+    <div class="note warn">These move the fan. They are the steps that decide
+      what the project can promise — run them in order, once, after wiring.
+      Test section clear before any of them.</div>
+
+    <div class="grid g2" style="margin-top:14px">
+      <div class="card">
+        <h3>1 · Verify the calibration <span class="lbl">10 min</span></h3>
+        <p class="sm dim">The velocity-vs-RPM half is measured. Only the
+          Hz→RPM link is assumed. One anemometer reading pins it down — you do
+          not need the motor nameplate.</p>
+        <div class="row">
+          <label class="f">Hold at (Hz) <input class="num" type="number" id="vf-hz" value="30"></label>
+          <label class="f">Settle (s) <input class="num" type="number" id="vf-settle" value="30"></label>
+          <label class="f">Hold (s) <input class="num" type="number" id="vf-hold" value="30"></label>
+          <button class="pri" id="vf-run">Run hold</button>
+        </div>
+        <div class="row">
+          <label class="f">Measured wind speed <input class="num" type="number" id="vf-meas" step="0.1" placeholder="m/s"></label>
+          <button class="go" id="vf-apply">Apply correction</button>
+        </div>
+        <div id="vf-out"></div>
+      </div>
+
+      <div class="card">
+        <h3>2 · Characterize <span class="lbl">15 min</span></h3>
+        <p class="sm dim">Step response → τ and the corner frequency. Saved to
+          the config, so every profile afterwards is checked against it
+          automatically. Run it twice: a positive step for the rising constant,
+          a negative one for the falling constant — the falling one is what
+          actually limits a symmetric gust.</p>
+        <div class="row">
+          <label class="f">Base (Hz) <input class="num" type="number" id="ch-base" value="20"></label>
+          <label class="f">Step (Hz) <input class="num" type="number" id="ch-step" value="10"></label>
+          <label class="f">Settle (s) <input class="num" type="number" id="ch-settle" value="30"></label>
+          <label class="f">Record (s) <input class="num" type="number" id="ch-record" value="30"></label>
+        </div>
+        <div class="row">
+          <button class="pri" id="ch-up">Step up (τ rising)</button>
+          <button class="pri" id="ch-down">Step down (τ falling)</button>
+        </div>
+        <div id="ch-out"></div>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:14px">
+      <div class="card">
+        <h3>3 · Frequency response <span class="lbl">optional, 20+ min</span></h3>
+        <p class="sm dim">Measures attenuation across the band rather than
+          inferring it from τ. Gives you the −3 dB bandwidth to quote.</p>
+        <div class="row">
+          <label class="f">Base (Hz) <input class="num" type="number" id="fr-base" value="25"></label>
+          <label class="f">Amplitude <input class="num" type="number" id="fr-amp" value="5"></label>
+          <label class="f">Cycles <input class="num" type="number" id="fr-cycles" value="6"></label>
+        </div>
+        <div class="row">
+          <label class="f" style="flex:1 1 240px">Frequencies (Hz, comma separated)
+            <input type="text" id="fr-freqs" value="0.02,0.05,0.1,0.2,0.5" style="width:100%"></label>
+          <button class="pri" id="fr-run">Run sweep</button>
+        </div>
+        <div id="fr-out"></div>
+      </div>
+
+      <div class="card">
+        <h3>Job <span class="lbl" id="jb-kind">idle</span></h3>
+        <div class="bar" id="jb-bar"><i></i></div>
+        <div class="row" style="margin-top:9px">
+          <button class="danger sm" id="jb-abort">Abort</button>
+          <span class="sm dim" id="jb-state"></span>
+        </div>
+        <pre id="jb-out" class="mono sm" style="margin-top:10px;max-height:230px;
+          overflow:auto;background:var(--wash2);padding:10px;border-radius:4px;
+          white-space:pre-wrap"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== CALIBRATION ========================= -->
+  <section class="page" id="p-calib">
+    <div class="grid g2">
+      <div class="card">
+        <h3>Calibration <span class="lbl" id="cal-status"></span></h3>
+        <div id="cal-body">loading…</div>
+      </div>
+      <div class="card">
+        <h3>Ambient conditions</h3>
+        <div class="row">
+          <label class="f">Temperature (°C) <input class="num" type="number" id="amb-t" value="21.5" step="0.1"></label>
+          <label class="f">Pressure (Pa) <input class="num" type="number" id="amb-p" value="101325"></label>
+          <button class="pri" id="amb-save">Record</button>
+        </div>
+        <div id="amb-body"></div>
+        <div class="note">Density scales dynamic pressure and every force with
+          it. Two identical sweeps on different days give different numbers,
+          and this is usually why. It cannot be reconstructed afterwards.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>Hz → RPM → wind speed</h3>
+      <div id="cal-table"></div>
+    </div>
+  </section>
+
+  <!-- =========================== DIAGNOSTICS ========================= -->
+  <section class="page" id="p-diag">
+    <div class="card">
+      <h3>Self-test <span class="lbl"><button class="sm" id="st-run">Run</button></span></h3>
+      <div class="note">Read-only. Verifies, against the actual drive, the
+        assumptions this software makes rather than knows. The fan cannot
+        move.</div>
+      <div id="st-body" style="margin-top:12px" class="dim sm">Not yet run.</div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>Status word</h3>
+      <div id="bits"></div>
+    </div>
+  </section>
+
+  <!-- ============================== LOGS ============================= -->
+  <section class="page" id="p-logs">
+    <div class="grid g2">
+      <div class="card">
+        <h3>Runs <span class="lbl"><button class="sm" id="lg-refresh">Refresh</button></span></h3>
+        <div id="lg-list" class="sm dim">loading…</div>
+      </div>
+      <div class="card">
+        <h3>Analysis <span class="lbl" id="lg-name"></span></h3>
+        <canvas class="plot" id="lg-plot"></canvas>
+        <div class="legend">
+          <span><i style="background:#8a7038"></i>commanded</span>
+          <span><i style="background:#2277b3"></i>measured</span>
+        </div>
+        <div class="row" style="margin-top:9px">
+          <button class="sm" id="lg-export" disabled>Export bundle</button>
+          <span class="sm dim">CSV + provenance + README for handoff</span>
+        </div>
+        <div id="lg-body" class="sm dim" style="margin-top:10px">
+          Select a run.</div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<div class="eventbar">
+  <span class="lbl">Events</span>
+  <div class="events" id="events"></div>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

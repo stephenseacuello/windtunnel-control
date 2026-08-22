@@ -1,0 +1,6 @@
+{
+  "material": "SYNTHETIC — generated to test the viewer, delete me",
+  "n_blades": 3,
+  "tip_radius_m": 0.072,
+  "notes": "Not a real rotor. Drop your own STL in blades/ named to match --blade."
+}

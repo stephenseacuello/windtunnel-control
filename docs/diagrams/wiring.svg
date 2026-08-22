@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1520" width="1100" height="1520" font-family="Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="1100" height="1520" fill="#ffffff"/>
+
+  <text x="45" y="42" font-size="22" font-weight="700" fill="#111">Aerolab Wind Tunnel — ACS550 Modbus RTU Wiring</text>
+  <text x="45" y="64" font-size="13" fill="#555">ACS550-U1-046A-2 · 15 HP · 208–240 V 3PH · S/N 2121803289 · fw 3.13 · FTDI USB-RS485-WE direct to X1</text>
+  <line x1="45" y1="76" x2="1055" y2="76" stroke="#111" stroke-width="1.5"/>
+
+  <!-- ============ PANEL 1 ============ -->
+  <text x="45" y="108" font-size="15" font-weight="700" fill="#111">1 — SYSTEM OVERVIEW</text>
+  <text x="45" y="126" font-size="12" fill="#666">Power and safety chain in red. Control path in teal. They never touch.</text>
+
+  <rect x="455" y="146" width="200" height="42" fill="#fff" stroke="#c62828" stroke-width="2"/>
+  <text x="555" y="172" font-size="13" text-anchor="middle" fill="#c62828" font-weight="600">208–240 V 3PH SUPPLY</text>
+  <line x1="555" y1="188" x2="555" y2="212" stroke="#c62828" stroke-width="2"/>
+  <polygon points="555,220 550,210 560,210" fill="#c62828"/>
+
+  <rect x="415" y="220" width="280" height="52" fill="#fff5f5" stroke="#c62828" stroke-width="2"/>
+  <text x="555" y="241" font-size="13" text-anchor="middle" fill="#c62828" font-weight="700">FUSED DISCONNECT + E-STOP</text>
+  <text x="555" y="259" font-size="11" text-anchor="middle" fill="#c62828">LOTO point · hardwired · never routed through software</text>
+  <line x1="555" y1="272" x2="555" y2="300" stroke="#c62828" stroke-width="2"/>
+  <polygon points="555,308 550,298 560,298" fill="#c62828"/>
+
+  <rect x="86" y="322" width="150" height="72" fill="#fff" stroke="#00796b" stroke-width="1.8"/>
+  <text x="161" y="346" font-size="13" text-anchor="middle" font-weight="700" fill="#00796b">RASPBERRY PI</text>
+  <text x="161" y="363" font-size="10.5" text-anchor="middle" fill="#555">run.py · at the tunnel</text>
+  <text x="161" y="381" font-size="10" text-anchor="middle" fill="#999">SSH in from the bench</text>
+
+  <line x1="236" y1="358" x2="272" y2="358" stroke="#00796b" stroke-width="1.6"/>
+  <polygon points="280,358 270,353 270,363" fill="#00796b"/>
+  <text x="256" y="349" font-size="10" text-anchor="middle" fill="#666">USB</text>
+
+  <rect x="280" y="330" width="152" height="56" fill="#e0f2f1" stroke="#00796b" stroke-width="1.6"/>
+  <text x="356" y="352" font-size="11.5" text-anchor="middle" font-weight="700" fill="#00796b">FTDI USB-RS485-WE</text>
+  <text x="356" y="368" font-size="10" text-anchor="middle" fill="#00796b">electronics in the USB plug</text>
+  <text x="356" y="381" font-size="10" text-anchor="middle" fill="#888">1.8 m · not isolated</text>
+
+  <line x1="432" y1="358" x2="448" y2="358" stroke="#00796b" stroke-width="2.4"/>
+  <polygon points="456,358 446,353 446,363" fill="#00796b"/>
+
+  <rect x="456" y="308" width="198" height="104" fill="#fff" stroke="#111" stroke-width="2"/>
+  <text x="555" y="332" font-size="14" text-anchor="middle" font-weight="700" fill="#111">ACS550 VFD</text>
+  <text x="555" y="352" font-size="11" text-anchor="middle" fill="#555">15 HP · embedded Modbus</text>
+  <rect x="474" y="364" width="162" height="34" fill="#e0f2f1" stroke="#00796b" stroke-width="1.2"/>
+  <text x="555" y="386" font-size="11.5" text-anchor="middle" fill="#00796b" font-weight="600">X1-29 · 30 · 31</text>
+
+  <line x1="654" y1="358" x2="694" y2="358" stroke="#c62828" stroke-width="2"/>
+  <polygon points="702,358 692,353 692,363" fill="#c62828"/>
+  <text x="678" y="348" font-size="10" text-anchor="middle" fill="#c62828">U2/V2/W2</text>
+
+  <rect x="702" y="330" width="130" height="56" fill="#fff" stroke="#111" stroke-width="1.6"/>
+  <text x="767" y="352" font-size="13" text-anchor="middle" font-weight="600" fill="#111">FAN MOTOR</text>
+  <text x="767" y="370" font-size="11" text-anchor="middle" fill="#555">3PH induction</text>
+
+  <line x1="832" y1="358" x2="872" y2="358" stroke="#111" stroke-width="1.6"/>
+  <polygon points="880,358 870,353 870,363" fill="#111"/>
+
+  <rect x="880" y="330" width="140" height="56" fill="#fff" stroke="#111" stroke-width="1.6"/>
+  <text x="950" y="352" font-size="13" text-anchor="middle" font-weight="600" fill="#111">WIND TUNNEL</text>
+  <text x="950" y="370" font-size="11" text-anchor="middle" fill="#555">test section</text>
+
+  <rect x="86" y="428" width="346" height="44" fill="#fafafa" stroke="#999" stroke-width="1.3" stroke-dasharray="5 3"/>
+  <text x="259" y="446" font-size="11.5" text-anchor="middle" fill="#555" font-weight="600">EXISTING AEROLAB PANEL — speed pot + start/stop</text>
+  <text x="259" y="462" font-size="10.5" text-anchor="middle" fill="#777">lands on X1 AI1 and DI1…DI6 — verify before you touch anything</text>
+  <line x1="432" y1="450" x2="470" y2="412" stroke="#999" stroke-width="1.3" stroke-dasharray="5 3"/>
+
+  <line x1="45" y1="500" x2="1055" y2="500" stroke="#ddd" stroke-width="1"/>
+
+  <!-- ============ PANEL 2 ============ -->
+  <text x="45" y="532" font-size="15" font-weight="700" fill="#111">2 — X1 CONTROL TERMINAL BLOCK</text>
+  <text x="45" y="550" font-size="12" fill="#666">One row of 32 terminals. Teal = used. Grey = likely occupied by Aerolab. Hatched = present but not needed here.</text>
+
+  <g font-family="Menlo, Consolas, monospace">
+    <rect x="45" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="59" y="570" font-size="10" text-anchor="middle" fill="#555">1</text><text x="59" y="700" transform="rotate(-90 59 700)" text-anchor="start" font-size="11" fill="#555">SCR</text>
+    <rect x="75" y="576" width="28" height="38" fill="#e8e8e8" stroke="#777"/><text x="89" y="570" font-size="10" text-anchor="middle" fill="#333">2</text><text x="89" y="700" transform="rotate(-90 89 700)" text-anchor="start" font-size="11" fill="#333" font-weight="600">AI1 speed pot</text>
+    <rect x="105" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="119" y="570" font-size="10" text-anchor="middle" fill="#555">3</text><text x="119" y="700" transform="rotate(-90 119 700)" text-anchor="start" font-size="11" fill="#555">AGND</text>
+    <rect x="135" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="149" y="570" font-size="10" text-anchor="middle" fill="#555">4</text><text x="149" y="700" transform="rotate(-90 149 700)" text-anchor="start" font-size="11" fill="#555">+10 V</text>
+    <rect x="165" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="179" y="570" font-size="10" text-anchor="middle" fill="#555">5</text><text x="179" y="700" transform="rotate(-90 179 700)" text-anchor="start" font-size="11" fill="#555">AI2</text>
+    <rect x="195" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="209" y="570" font-size="10" text-anchor="middle" fill="#555">6</text><text x="209" y="700" transform="rotate(-90 209 700)" text-anchor="start" font-size="11" fill="#555">AGND</text>
+    <rect x="225" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="239" y="570" font-size="10" text-anchor="middle" fill="#555">7</text><text x="239" y="700" transform="rotate(-90 239 700)" text-anchor="start" font-size="11" fill="#555">AO1 freq</text>
+    <rect x="255" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="269" y="570" font-size="10" text-anchor="middle" fill="#555">8</text><text x="269" y="700" transform="rotate(-90 269 700)" text-anchor="start" font-size="11" fill="#555">AO2 current</text>
+    <rect x="285" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="299" y="570" font-size="10" text-anchor="middle" fill="#555">9</text><text x="299" y="700" transform="rotate(-90 299 700)" text-anchor="start" font-size="11" fill="#555">AGND</text>
+    <rect x="315" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="329" y="570" font-size="10" text-anchor="middle" fill="#555">10</text><text x="329" y="700" transform="rotate(-90 329 700)" text-anchor="start" font-size="11" fill="#555">+24 V</text>
+    <rect x="345" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="359" y="570" font-size="10" text-anchor="middle" fill="#555">11</text><text x="359" y="700" transform="rotate(-90 359 700)" text-anchor="start" font-size="11" fill="#555">GND</text>
+    <rect x="375" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="389" y="570" font-size="10" text-anchor="middle" fill="#555">12</text><text x="389" y="700" transform="rotate(-90 389 700)" text-anchor="start" font-size="11" fill="#555">DCOM</text>
+    <rect x="405" y="576" width="28" height="38" fill="#e8e8e8" stroke="#777"/><text x="419" y="570" font-size="10" text-anchor="middle" fill="#333">13</text><text x="419" y="700" transform="rotate(-90 419 700)" text-anchor="start" font-size="11" fill="#333" font-weight="600">DI1 start/stop</text>
+    <rect x="435" y="576" width="28" height="38" fill="#e8e8e8" stroke="#777"/><text x="449" y="570" font-size="10" text-anchor="middle" fill="#333">14</text><text x="449" y="700" transform="rotate(-90 449 700)" text-anchor="start" font-size="11" fill="#333">DI2</text>
+    <rect x="465" y="576" width="28" height="38" fill="#fffde7" stroke="#f9a825" stroke-width="1.5"/><text x="479" y="570" font-size="10" text-anchor="middle" fill="#f57f17">15</text><text x="479" y="700" transform="rotate(-90 479 700)" text-anchor="start" font-size="11" fill="#f57f17" font-weight="600">DI3 loc/rem</text>
+    <rect x="495" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="509" y="570" font-size="10" text-anchor="middle" fill="#555">16</text><text x="509" y="700" transform="rotate(-90 509 700)" text-anchor="start" font-size="11" fill="#555">DI4</text>
+    <rect x="525" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="539" y="570" font-size="10" text-anchor="middle" fill="#555">17</text><text x="539" y="700" transform="rotate(-90 539 700)" text-anchor="start" font-size="11" fill="#555">DI5</text>
+    <rect x="555" y="576" width="28" height="38" fill="#f5f5f5" stroke="#999"/><text x="569" y="570" font-size="10" text-anchor="middle" fill="#555">18</text><text x="569" y="700" transform="rotate(-90 569 700)" text-anchor="start" font-size="11" fill="#555">DI6</text>
+    <rect x="585" y="576" width="88" height="38" fill="#f5f5f5" stroke="#999"/><text x="629" y="570" font-size="10" text-anchor="middle" fill="#555">19 · 20 · 21</text><text x="629" y="700" transform="rotate(-90 629 700)" text-anchor="start" font-size="11" fill="#555">RO1 ready</text>
+    <rect x="675" y="576" width="88" height="38" fill="#f5f5f5" stroke="#999"/><text x="719" y="570" font-size="10" text-anchor="middle" fill="#555">22 · 23 · 24</text><text x="719" y="700" transform="rotate(-90 719 700)" text-anchor="start" font-size="11" fill="#555">RO2 running</text>
+    <rect x="765" y="576" width="88" height="38" fill="#f5f5f5" stroke="#999"/><text x="809" y="570" font-size="10" text-anchor="middle" fill="#555">25 · 26 · 27</text><text x="809" y="700" transform="rotate(-90 809 700)" text-anchor="start" font-size="11" fill="#555">RO3 fault</text>
+
+    <rect x="855" y="576" width="28" height="38" fill="#fafafa" stroke="#bbb" stroke-dasharray="3 2"/><text x="869" y="570" font-size="10" text-anchor="middle" fill="#999">28</text><text x="869" y="700" transform="rotate(-90 869 700)" text-anchor="start" font-size="11" fill="#999">SCR — unused</text>
+    <rect x="885" y="576" width="28" height="38" fill="#b2dfdb" stroke="#00796b" stroke-width="1.8"/><text x="899" y="570" font-size="10" text-anchor="middle" fill="#00796b" font-weight="700">29</text><text x="899" y="700" transform="rotate(-90 899 700)" text-anchor="start" font-size="11" fill="#00796b" font-weight="700">B (+) ← ORANGE</text>
+    <rect x="915" y="576" width="28" height="38" fill="#b2dfdb" stroke="#00796b" stroke-width="1.8"/><text x="929" y="570" font-size="10" text-anchor="middle" fill="#00796b" font-weight="700">30</text><text x="929" y="700" transform="rotate(-90 929 700)" text-anchor="start" font-size="11" fill="#00796b" font-weight="700">A (−) ← YELLOW</text>
+    <rect x="945" y="576" width="28" height="38" fill="#b2dfdb" stroke="#00796b" stroke-width="1.8"/><text x="959" y="570" font-size="10" text-anchor="middle" fill="#00796b" font-weight="700">31</text><text x="959" y="700" transform="rotate(-90 959 700)" text-anchor="start" font-size="11" fill="#00796b" font-weight="700">AGND ← BLACK</text>
+    <rect x="975" y="576" width="28" height="38" fill="#fafafa" stroke="#bbb" stroke-dasharray="3 2"/><text x="989" y="570" font-size="10" text-anchor="middle" fill="#999">32</text><text x="989" y="700" transform="rotate(-90 989 700)" text-anchor="start" font-size="11" fill="#999">SCR — unused</text>
+  </g>
+
+  <line x1="929" y1="622" x2="929" y2="712" stroke="#00796b" stroke-width="1" stroke-dasharray="3 3"/>
+  <rect x="700" y="712" width="332" height="56" fill="#e0f2f1" stroke="#00796b" stroke-width="1.2"/>
+  <text x="866" y="731" font-size="11.5" text-anchor="middle" fill="#00796b" font-weight="600">J2 DIP switch sits beside these terminals</text>
+  <text x="866" y="747" font-size="10.5" text-anchor="middle" fill="#00796b">= built-in 120 Ω terminator. Set ON.</text>
+  <text x="866" y="762" font-size="10.5" text-anchor="middle" fill="#888">28 and 32 unused — no separate shield with this cable</text>
+
+  <rect x="45" y="712" width="300" height="56" fill="#fffde7" stroke="#f9a825" stroke-width="1.2"/>
+  <text x="195" y="731" font-size="11.5" text-anchor="middle" fill="#f57f17" font-weight="600">DI3 optional — local/remote selector</text>
+  <text x="195" y="747" font-size="10.5" text-anchor="middle" fill="#f57f17">par 1102 → EXT1 = Aerolab panel, EXT2 = Modbus</text>
+  <text x="195" y="762" font-size="10.5" text-anchor="middle" fill="#a1887f">keeps manual control working for everyone else</text>
+
+  <line x1="45" y1="796" x2="1055" y2="796" stroke="#ddd" stroke-width="1"/>
+
+  <!-- ============ PANEL 3 ============ -->
+  <text x="45" y="828" font-size="15" font-weight="700" fill="#111">3 — FTDI CABLE LANDING DETAIL</text>
+  <text x="45" y="846" font-size="12" fill="#666">Six conductors out of the cable. Three land, one is taped off, two bridge to engage the terminator.</text>
+
+  <rect x="70" y="880" width="210" height="248" fill="#fff" stroke="#00796b" stroke-width="2"/>
+  <text x="175" y="906" font-size="12.5" text-anchor="middle" font-weight="700" fill="#00796b">FTDI USB-RS485-WE</text>
+  <text x="175" y="922" font-size="10" text-anchor="middle" fill="#666">bare tinned leads</text>
+
+  <rect x="96" y="938" width="168" height="24" fill="#fff3e0" stroke="#e65100"/><text x="180" y="955" font-size="11" text-anchor="middle" fill="#e65100" font-weight="700" font-family="Menlo, monospace">ORANGE  Data+ (B)</text>
+  <rect x="96" y="970" width="168" height="24" fill="#fffde7" stroke="#f9a825"/><text x="180" y="987" font-size="11" text-anchor="middle" fill="#f57f17" font-weight="700" font-family="Menlo, monospace">YELLOW  Data− (A)</text>
+  <rect x="96" y="1002" width="168" height="24" fill="#eeeeee" stroke="#424242"/><text x="180" y="1019" font-size="11" text-anchor="middle" fill="#212121" font-weight="700" font-family="Menlo, monospace">BLACK   GND</text>
+  <rect x="96" y="1034" width="168" height="24" fill="#efebe9" stroke="#5d4037"/><text x="180" y="1051" font-size="11" text-anchor="middle" fill="#4e342e" font-weight="700" font-family="Menlo, monospace">BROWN   Term 1</text>
+  <rect x="96" y="1066" width="168" height="24" fill="#e8f5e9" stroke="#2e7d32"/><text x="180" y="1083" font-size="11" text-anchor="middle" fill="#1b5e20" font-weight="700" font-family="Menlo, monospace">GREEN   Term 2</text>
+  <rect x="96" y="1098" width="168" height="24" fill="#ffebee" stroke="#c62828" stroke-dasharray="4 2"/><text x="180" y="1115" font-size="11" text-anchor="middle" fill="#c62828" font-weight="700" font-family="Menlo, monospace">RED  +5 V — TAPE OFF</text>
+
+  <rect x="830" y="880" width="200" height="248" fill="#fff" stroke="#111" stroke-width="2"/>
+  <text x="930" y="906" font-size="12.5" text-anchor="middle" font-weight="700" fill="#111">ACS550 — X1</text>
+  <text x="930" y="922" font-size="10" text-anchor="middle" fill="#666">J2 termination ON</text>
+
+  <rect x="846" y="950" width="140" height="30" fill="#b2dfdb" stroke="#00796b" stroke-width="1.4"/>
+  <text x="916" y="970" font-size="12" text-anchor="middle" fill="#00796b" font-weight="700" font-family="Menlo, monospace">29   B (+)</text>
+  <rect x="846" y="994" width="140" height="30" fill="#b2dfdb" stroke="#00796b" stroke-width="1.4"/>
+  <text x="916" y="1014" font-size="12" text-anchor="middle" fill="#00796b" font-weight="700" font-family="Menlo, monospace">30   A (−)</text>
+  <rect x="846" y="1038" width="140" height="30" fill="#eeeeee" stroke="#424242" stroke-width="1.4"/>
+  <text x="916" y="1058" font-size="12" text-anchor="middle" fill="#212121" font-weight="700" font-family="Menlo, monospace">31   AGND</text>
+
+  <!-- ferrule junctions -->
+  <ellipse cx="560" cy="953" rx="52" ry="17" fill="#fff8e1" stroke="#e65100" stroke-width="1.4"/>
+  <text x="560" y="957" font-size="10" text-anchor="middle" fill="#e65100" font-weight="600">1 ferrule</text>
+  <ellipse cx="560" cy="1005" rx="52" ry="17" fill="#fff8e1" stroke="#f9a825" stroke-width="1.4"/>
+  <text x="560" y="1009" font-size="10" text-anchor="middle" fill="#f57f17" font-weight="600">1 ferrule</text>
+
+  <path d="M264 950 L508 950" stroke="#e65100" stroke-width="2.2" fill="none"/>
+  <path d="M264 1078 Q400 1078 460 1000 Q490 962 508 956" stroke="#2e7d32" stroke-width="2.2" fill="none"/>
+  <path d="M612 953 L846 963" stroke="#e65100" stroke-width="2.2" fill="none"/>
+
+  <path d="M264 982 L508 1002" stroke="#f9a825" stroke-width="2.2" fill="none"/>
+  <path d="M264 1046 Q400 1046 460 1016 Q490 1006 508 1006" stroke="#5d4037" stroke-width="2.2" fill="none"/>
+  <path d="M612 1005 L846 1007" stroke="#f9a825" stroke-width="2.2" fill="none"/>
+
+  <path d="M264 1014 Q550 1014 846 1051" stroke="#424242" stroke-width="2" fill="none"/>
+
+  <line x1="270" y1="1102" x2="292" y2="1120" stroke="#c62828" stroke-width="2.4"/>
+  <line x1="292" y1="1102" x2="270" y2="1120" stroke="#c62828" stroke-width="2.4"/>
+
+  <text x="560" y="1090" font-size="11" text-anchor="middle" fill="#666">Orange + Green into one ferrule → 29 · Yellow + Brown into one ferrule → 30</text>
+  <text x="560" y="1107" font-size="10.5" text-anchor="middle" fill="#888">bridging Term 1/2 across the pair engages the cable's internal 120 Ω</text>
+
+  <rect x="70" y="1152" width="960" height="40" fill="#fff5f5" stroke="#c62828" stroke-width="1.3"/>
+  <text x="550" y="1169" font-size="11.5" text-anchor="middle" fill="#c62828" font-weight="600">Own knockout in the gland box. Do not tie this cable alongside the motor leads inside the enclosure.</text>
+  <text x="550" y="1185" font-size="10.5" text-anchor="middle" fill="#c62828">Routing is your only noise mitigation with an unshielded 6 ft run — 8 in separation, cross at 90°.</text>
+
+  <line x1="45" y1="1222" x2="1055" y2="1222" stroke="#ddd" stroke-width="1"/>
+
+  <!-- ============ PANEL 4 ============ -->
+  <text x="45" y="1254" font-size="15" font-weight="700" fill="#111">4 — WHAT TRAVELS OVER THAT CABLE</text>
+
+  <rect x="70" y="1272" width="440" height="128" fill="#f8fdfc" stroke="#00796b" stroke-width="1.4"/>
+  <text x="90" y="1294" font-size="12" font-weight="700" fill="#00796b">PI → DRIVE  (writes)</text>
+  <g font-family="Menlo, Consolas, monospace" font-size="11.5" fill="#333">
+    <text x="90" y="1318">40001  addr 0   Control Word</text>
+    <text x="90" y="1340">40002  addr 1   Reference 1</text>
+  </g>
+  <text x="90" y="1364" font-size="11" fill="#666">0x047E = ready/ramp-stop · 0x047F = run</text>
+  <text x="90" y="1382" font-size="11" fill="#666">0…20000 counts maps to 0…par 1105 REF1 MAX</text>
+
+  <rect x="590" y="1272" width="440" height="128" fill="#fafafa" stroke="#777" stroke-width="1.4"/>
+  <text x="610" y="1294" font-size="12" font-weight="700" fill="#333">DRIVE → PI  (reads)</text>
+  <g font-family="Menlo, Consolas, monospace" font-size="11.5" fill="#333">
+    <text x="610" y="1318">40004  addr 3   Status Word</text>
+    <text x="610" y="1340">40005  addr 4   output Hz   (par 5310 = 103)</text>
+    <text x="610" y="1362">40006  addr 5   motor A     (par 5311 = 104)</text>
+  </g>
+  <text x="610" y="1386" font-size="11" fill="#666">Any parameter P is readable at wire address P − 1</text>
+
+  <rect x="70" y="1424" width="960" height="66" fill="#fff5f5" stroke="#c62828" stroke-width="1.6"/>
+  <text x="90" y="1446" font-size="12.5" font-weight="700" fill="#c62828">BEFORE THE COVER COMES OFF</text>
+  <g font-size="11" fill="#c62828">
+    <text x="90" y="1466">Disconnect open, locked, tagged · wait 5 minutes minimum for the DC bus capacitors · verify dead at U1/V1/W1</text>
+    <text x="90" y="1483">Terminals 19–27 can carry external voltage even with the drive fully dead · the ACS550 auto-starts at power-up if a run command is present</text>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+# regenerable
+__pycache__/
+*.py[cod]
+.pytest_cache/
+venv/
+.DS_Store
+
+# Instrument scratch. logs/ IS committed — it holds the experimental record
+# (the gust runs that measured tau, and the reference blade sweep). What is
+# excluded is bulk that would swamp the history.
+logs/*_points.csv.gz
+logs/archive/
+*.bak
+data/tunnel.json.bak

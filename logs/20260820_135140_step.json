@@ -1,0 +1,16 @@
+{
+  "written": "2026-08-20T13:52:31",
+  "run": {
+    "velocity_logged": 0,
+    "velocity_coverage": 0.0,
+    "samples_planned": 600,
+    "samples_played": 426,
+    "complete": false,
+    "requested_duration": 30.0,
+    "actual_duration": 21.40808283397928,
+    "late_samples": 1,
+    "max_lateness_s": 0.0,
+    "update_rate_hz": 20.0,
+    "aborted_reason": "lost comms at sample 426: read failed: [Errno 6] Device not configured"
+  }
+}

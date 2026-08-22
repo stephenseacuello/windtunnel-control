@@ -1,0 +1,19 @@
+# Wind tunnel control — Python dependencies
+#
+# pymodbus is pinned below 3.8 because the unit-id keyword changed name in
+# later releases. acs550.py probes for it and works either way, but pinning
+# keeps behaviour predictable across the lab's machines.
+pymodbus>=3.6,<3.8
+pyserial>=3.5
+numpy>=1.24
+
+# Optional — only needed if you want to plot logs
+# matplotlib>=3.7
+
+# Optional — the Chroma electronic load over USB-TMC.
+# macOS has no kernel usbtmc driver, so VISA is the only route there; on Linux
+# /dev/usbtmc0 works without these, given the udev rule in docs/06_chroma.md.
+# pyusb also needs libusb itself:  brew install libusb
+# pyvisa>=1.14
+# pyvisa-py>=0.7
+# pyusb>=1.2
