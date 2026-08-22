@@ -116,13 +116,35 @@ async function api(path, body) {
 
 /* ===================== canvas plotting primitives ====================== */
 
+/**
+ * Prepare a canvas for drawing, or return null if it is not laid out.
+ *
+ * Returns null for a canvas inside a hidden tab. Callers MUST no-op on null;
+ * the tab-switch handler repaints once the element is visible.
+ *
+ * The previous version tried to be helpful and fell back to `cv.width` when
+ * the element measured 0x0. `cv.width` is the BITMAP size in device pixels —
+ * the same quantity the next line writes — so each call re-multiplied it by
+ * devicePixelRatio. A hidden canvas grew four times in area per frame:
+ * 600, 1200, 2400, 4800, 9600, 19200 px, about 1.5 GB, and the tab died.
+ * twinDraw calls this every animation frame from page load, on whichever tab
+ * is showing, so it killed the dashboard — E-STOP included — before anyone
+ * opened the Turbine tab. Stable only at devicePixelRatio exactly 1.0.
+ *
+ * Never let a written value feed back into a read.
+ */
 function setupCanvas(cv) {
-  // Redraw at device resolution or the lines look muddy on a Pi's HiDPI screen
-  const r = window.devicePixelRatio || 1, b = cv.getBoundingClientRect();
-  cv.width = b.width * r; cv.height = b.height * r;
+  if (!cv || typeof cv.getBoundingClientRect !== 'function') return null;
+  const b = cv.getBoundingClientRect();
+  if (!(b.width > 0) || !(b.height > 0)) return null;   // hidden, not laid out
+  const r = window.devicePixelRatio || 1;
+  const W = Math.round(b.width * r), H = Math.round(b.height * r);
+  // Only resize when it actually changed: assigning cv.width reallocates the
+  // backing store and clears it, every frame, for nothing.
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
   const g = cv.getContext('2d');
   g.setTransform(r, 0, 0, r, 0, 0);
-  return {g, w: b.width, h: b.height};
+  return { g, w: b.width, h: b.height };
 }
 
 function niceTicks(lo, hi, n = 5) {
@@ -140,7 +162,9 @@ function niceTicks(lo, hi, n = 5) {
  * Shared plotting for every chart on the page.
  */
 function drawPlot(cv, series, opts = {}) {
-  const {g, w, h} = setupCanvas(cv);
+  const surf = setupCanvas(cv);
+  if (!surf) return false;              // hidden tab; repainted on tab switch
+  const {g, w, h} = surf;
   const pad = {l: 46, r: 12, t: 10, b: 24};
   g.clearRect(0, 0, w, h);
 
@@ -154,7 +178,7 @@ function drawPlot(cv, series, opts = {}) {
   if (!all.length) {
     g.fillStyle = DIM; g.font = '12px system-ui'; g.textAlign = 'center';
     g.fillText(opts.empty || 'no data', w / 2, h / 2);
-    return;
+    return true;
   }
 
   const fin = arr => arr.filter(Number.isFinite);
@@ -166,7 +190,7 @@ function drawPlot(cv, series, opts = {}) {
       !Number.isFinite(x1) || !Number.isFinite(y1)) {
     g.fillStyle = DIM; g.font = '12px system-ui'; g.textAlign = 'center';
     g.fillText(opts.empty || 'no finite data', w / 2, h / 2);
-    return;
+    return true;
   }
   if (x1 === x0) x1 = x0 + 1;
   const padSpan = (y1 - y0) * 0.12;
@@ -224,6 +248,17 @@ $$('.tab').forEach(t => t.onclick = () => {
   const load = {params: loadParams, calib: loadCalib, logs: loadLogs,
                 commission: pollJob, blades: loadBlades};
   if (load[t.dataset.p]) load[t.dataset.p]();
+  // Canvases drawn while their tab was hidden are zero-sized. Redraw on the
+  // frame after the tab becomes visible, once layout has settled.
+  requestAnimationFrame(() => {
+    if (t.dataset.p === 'blades') drawMesh($('#cv-mesh'));
+    if (t.dataset.p === 'turbine') {
+      if (STATE.interlock) applyTurbine(STATE);
+      TWIN.last = 0;
+      if (!TWIN.raf) TWIN.raf = requestAnimationFrame(twinDraw);
+    }
+    if (STATE.measured) drawLive();
+  });
 });
 
 /* ========================= live state + stream ========================= */
@@ -306,6 +341,7 @@ function applyState(s) {
   LAST_FRAME = Date.now();
   markStale(false);
   try { safetyStrip(s); } catch (e) { console.error('safety strip', e); }
+  try { twinUpdate(s); } catch (e) { /* twin is optional */ }
   try { applyTurbine(s); }
   catch (e) { console.error('turbine render failed', e); }
   const b = s.status_bits || {};
@@ -1027,9 +1063,15 @@ function applyTurbine(s) {
   // PREVIOUS point's curve on screen through the whole settle of the next
   // one, labelled with the new rpm.
   const ramp = sw.ramp || [];
+  // RAMP_RPM must latch only when the clear actually PAINTED. drawPlot now
+  // returns early on a hidden canvas, so latching first meant the one-shot
+  // clear was swallowed and the previous wind speed's curve stayed on screen
+  // labelled with the new rpm — exactly the round-1 bug, reintroduced by the
+  // round-2 null guard.
   if (sw.current_rpm !== RAMP_RPM) {
-    RAMP_RPM = sw.current_rpm;
-    drawPlot($('#cv-ramp'), [], { empty: `settling at ${sw.current_rpm} rpm…` });
+    const painted = drawPlot($('#cv-ramp'), [],
+                             { empty: `settling at ${sw.current_rpm} rpm…` });
+    if (painted !== false) RAMP_RPM = sw.current_rpm;
   }
   $('#sw-ramp-lbl').textContent = sw.current_rpm
     ? `P and V vs load current at ${sw.current_rpm} rpm` : 'idle';
@@ -1172,7 +1214,9 @@ let RAMP_RPM = null;
 let MESH = null, ROT = { x: -1.05, y: 0.6 }, DRAG = null;
 
 function drawMesh(cv) {
-  const { g, w, h } = setupCanvas(cv);
+  const surf = setupCanvas(cv);
+  if (!surf) return;
+  const { g, w, h } = surf;
   g.clearRect(0, 0, w, h);
   if (!MESH || !MESH.tris.length) {
     g.fillStyle = DIM; g.font = '13px system-ui'; g.textAlign = 'center';
@@ -1251,7 +1295,9 @@ async function loadBlades() {
       ${b.protocol ? `<div class="sm dim mono">${b.protocol}</div>` : ''}
     </div>`).join('');
   $$('.blade').forEach(el => el.onclick = () => selectBlade(el.dataset.n));
-  if (r.blades.length) selectBlade(r.blades[0].name);
+  // Open on a real rotor, not the synthetic placeholder.
+  const first = r.blades.find(b => !b.name.startsWith('_')) || r.blades[0];
+  if (first) selectBlade(first.name);
 }
 
 let BLADE_REQ = 0;
@@ -1304,13 +1350,296 @@ function wireBlades() {
     e.preventDefault();
   });
   window.addEventListener('mouseup', () => { DRAG = null; });
+  // Coalesce to one redraw per animation frame. A mousemove burst fires far
+  // faster than 60 Hz, and each redraw transforms, sorts and fills the whole
+  // mesh — 27,056 triangles here — so dragging queued far more work than the
+  // machine could retire. Unusable on a Pi.
+  let dragRaf = null;
   window.addEventListener('mousemove', e => {
     if (!DRAG) return;
     ROT.x = DRAG.x0 + (e.clientY - DRAG.y) * 0.01;
     ROT.y = DRAG.y0 + (e.clientX - DRAG.x) * 0.01;
-    drawMesh(cv);
+    if (dragRaf) return;
+    dragRaf = requestAnimationFrame(() => { dragRaf = null; drawMesh(cv); });
   });
   window.addEventListener('resize', () => drawMesh(cv));
 }
 
 document.addEventListener('DOMContentLoaded', wireBlades);
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   DIGITAL TWIN
+
+   A rotor rendered from the real STL, spinning at the speed the rig is
+   actually producing, coloured by the live electrical state.
+
+   Two honest limits, both surfaced on the display rather than hidden:
+
+   · ROTOR SPEED IS DERIVED, NOT MEASURED. Nothing on this rig reports
+     rotor rpm yet - the DAQ channel is not wired in. What is shown is
+     inferred from terminal voltage through the generator constant, and
+     that constant is itself unmeasured. The figure is therefore an
+     ILLUSTRATION of state, never a measurement, and the panel says so.
+
+   · The mesh is ONE BLADE. blades/turbine_blade.stl is a single blade,
+     not an assembled rotor, so the twin instances it n_blades times about
+     the hub axis. Tip radius is unknown (TODO B3), so the hub offset is a
+     drawing convention, not a dimension.
+
+   A twin earns its name by disagreeing with reality in a visible way. The
+   readouts under the render are the live measurements; the render is the
+   model. When they diverge, that is the interesting part.
+   ══════════════════════════════════════════════════════════════════════ */
+
+// stale:true and rpm:null until a frame proves otherwise — the twin must
+// never open on a confident '0 rpm' standstill it has not measured.
+let TWIN = { mesh: null, angle: 0, blades: 3, last: 0, rpm: null,
+             stale: true, aliased: false, raf: null };
+
+async function twinLoad(name) {
+  try {
+    const res = await fetch(`/api/blades/${encodeURIComponent(name)}/stl`);
+    if (!res.ok) return false;
+    const m = parseSTL(await res.arrayBuffer());
+    // Decimate hard: this redraws every frame, n_blades times over.
+    // Keep the LARGEST triangles, not every Nth. Index-stride decimation on
+    // an STL keeps a uniform sample of triangle *count*, and in a mesh whose
+    // areas span orders of magnitude that retained under a tenth of the
+    // surface — the blade rendered as a sub-pixel stipple rather than a
+    // solid. Sorting by area and keeping the top N covers the form.
+    const area = t => {
+      const u = [t[1][0]-t[0][0], t[1][1]-t[0][1], t[1][2]-t[0][2]];
+      const v = [t[2][0]-t[0][0], t[2][1]-t[0][1], t[2][2]-t[0][2]];
+      return Math.hypot(u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2],
+                        u[0]*v[1]-u[1]*v[0]);
+    };
+    // Largest-first alone leaves holes: the small triangles that stitch the
+    // big ones together get dropped and you can see through the blade. Keep
+    // most of the budget for area coverage and spend the rest on a uniform
+    // sample of everything else, which fills the seams.
+    const BUDGET = 3000;
+    if (m.tris.length > BUDGET) {
+      const ranked = m.tris.map((t, i) => ({ t, i, a: area(t) }))
+                           .sort((x, y) => y.a - x.a);
+      const nBig = Math.floor(BUDGET * 0.7);
+      const big = ranked.slice(0, nBig);
+      const rest = ranked.slice(nBig);
+      const stride = Math.max(1, Math.ceil(rest.length / (BUDGET - nBig)));
+      const filler = rest.filter((_, k) => k % stride === 0);
+      m.tris = big.concat(filler).sort((x, y) => x.i - y.i).map(o => o.t);
+    }
+    let lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+    for (const t of m.tris) for (const p of t) for (let k = 0; k < 3; k++) {
+      if (p[k] < lo[k]) lo[k] = p[k];
+      if (p[k] > hi[k]) hi[k] = p[k];
+    }
+    m.c = lo.map((v, k) => (v + hi[k]) / 2);
+    m.ext = hi.map((v, k) => v - lo[k]);
+    m.span = Math.max(...m.ext);
+    m.axis = m.ext.indexOf(m.span);                        // longest = span
+    TWIN.mesh = m;
+    $('#tw-note').textContent =
+      `${m.tris.length} tri × ${TWIN.blades} blades · geometry ${name}`;
+    return true;
+  } catch (e) { return false; }
+}
+
+/** Rotor speed inferred from terminal volts. Illustrative, not measured. */
+/**
+ * Inferred rotor speed, or null when there is nothing to infer from.
+ *
+ * Returning 0 for a missing measurement was the wrong call: a disconnected
+ * load board rendered as a rotor at a confident, motionless standstill —
+ * indistinguishable from a genuinely stopped rotor. A twin that shows a
+ * plausible state when it has no data is worse than one that shows nothing,
+ * because the operator believes it.
+ */
+function twinRpm(s) {
+  const L = s.load || {};
+  if (!L.connected) return null;
+  if (s.load_age_s == null) return null;      // connected but never reported
+  if (s.load_age_s > 3) return null;          // stale
+  const v = (L.volts || 0) + (L.amps || 0) * 40;   // add back the IR drop
+  return Math.max(0, v * 130);
+}
+
+function twinVisible() {
+  const pg = document.getElementById('p-turbine');
+  return !document.hidden && pg && pg.classList.contains('on');
+}
+
+function twinDraw(ts) {
+  // The loop used to run at 60 Hz from page load on every tab, sorting and
+  // filling thousands of triangles for a canvas nobody was looking at.
+  if (!twinVisible()) { TWIN.raf = null; return; }
+  const cv = $('#cv-twin');
+  const surf = setupCanvas(cv);
+  if (!surf) { TWIN.raf = requestAnimationFrame(twinDraw); return; }
+  const { g, w, h } = surf;
+  // Derived from the same clock the connection watchdog uses. TWIN.stale was
+  // only ever written by twinUpdate, which runs only when a frame ARRIVES —
+  // so a dropped stream left the rotor turning confidently at its last known
+  // speed, in full interlock colour, contradicting the stale banner three
+  // inches above it. The most visually authoritative element on the page was
+  // asserting live motion the app already knew it could not verify.
+  if (Date.now() - LAST_FRAME > 3000) TWIN.stale = true;
+
+  const dt = TWIN.last ? Math.min((ts - TWIN.last) / 1000, 0.1) : 0;
+  TWIN.last = ts;
+  // A 3-blade rotor aliases once blade-passing approaches the frame rate —
+  // around 1200 rpm it renders perfectly motionless, which on this rig is
+  // inside the normal operating range. The animation rate is therefore
+  // capped and the cap is stated on screen; the NUMBER is always the real
+  // inferred value. A believable-but-wrong animation is the failure mode a
+  // twin has to avoid.
+  // Aliasing depends on BLADE-PASSING frequency, not rotor rpm: an n-blade
+  // rotor looks stationary when n*rpm/60 approaches the frame rate. Capping
+  // a flat 240 rpm left a 5-blade rotor aliasing while a 2-blade one was
+  // needlessly slowed. Cap the apparent blade-passing rate instead.
+  const PASS_HZ = 6;                          // apparent blade passes/second
+  const spinCap = PASS_HZ * 60 / Math.max(1, TWIN.blades);
+  TWIN.aliased = TWIN.rpm !== null && TWIN.rpm > spinCap;
+  const shown = TWIN.stale ? 0 : Math.min(TWIN.rpm || 0, spinCap);
+  TWIN.angle += (shown / 60) * 2 * Math.PI * dt;
+
+  g.clearRect(0, 0, w, h);
+  const m = TWIN.mesh;
+  if (!m) {
+    g.fillStyle = DIM; g.font = '13px system-ui'; g.textAlign = 'center';
+    g.fillText('no geometry — put an STL in blades/', w / 2, h / 2);
+    TWIN.raf = requestAnimationFrame(twinDraw);
+    return;
+  }
+
+  const S = STATE || {};
+  const ik = (S.interlock || {}).level;
+  // 'none' means no load is connected. That used to paint the same calm blue
+  // as 'ok' — a rig with no load at all looked safe.
+  const base = TWIN.stale ? [120, 120, 120]
+             : ik === 'danger' ? [200, 60, 60]
+             : ik === 'warn' ? [190, 140, 40]
+             : ik === 'none' ? [130, 110, 150]
+             : [70, 130, 180];
+
+  // Hub offset is a DRAWING CONVENTION: tip radius is unmeasured (TODO B3),
+  // so the blades are drawn starting a tenth of a span out from the axis.
+  const HUB = m.span * 0.10;
+  const k = Math.min(w, h) * 0.42 / ((m.span + HUB) * 1.15);
+  const tilt = -0.45, ct = Math.cos(tilt), st = Math.sin(tilt);
+  // Chord and thickness chosen by EXTENT, not by index order.
+  //
+  // `(ax+1)%3, (ax+2)%3` happened to assign this blade's 24.5 mm thickness
+  // axis to the chord and its 48.0 mm chord to the thickness — exactly
+  // inverted. The rotor rendered permanently feathered: 48 mm of chord laid
+  // down the shaft, 20 mm of thickness in the plane of rotation. Round 1
+  // fixed the CYCLIC pitch error and left a static 90-degree one, which is
+  // harder to see because it never changes.
+  //
+  // This is still a heuristic — the wider of the two remaining axes is
+  // assumed to be chordwise. True for an aerofoil; it would need the facet
+  // normals to be robust.
+  const ax = m.axis;
+  let r1 = (ax + 1) % 3, r2 = (ax + 2) % 3;
+  if (m.ext && m.ext[r2] > m.ext[r1]) { const t = r1; r1 = r2; r2 = t; }
+  const faces = [];
+
+  for (let b = 0; b < TWIN.blades; b++) {
+    const a = TWIN.angle + b * 2 * Math.PI / TWIN.blades;
+    const ca = Math.cos(a), sa = Math.sin(a);
+    for (const t of m.tris) {
+      const p = t.map(v => {
+        // ONE rigid rotation about the shaft, then the viewing tilt.
+        //
+        // This previously rotated the cross-section about the span axis by
+        // `a` AND the (span, chord) pair about the shaft by the same `a`.
+        // The composite R_z(a)*R_x(a) is still rigid, but its axis moves with
+        // `a`, so every blade rolled about its own span once per revolution —
+        // fully feathered at 90 and 270 degrees, chord pointing straight down
+        // the shaft. Blade twist is the one thing this geometry exists to
+        // show, so rendering a cyclic-pitch propeller instead of a
+        // fixed-pitch rotor was the worst possible error to make here.
+        const sp = HUB + (v[ax] - (m.c[ax] - m.span / 2));  // radius from axis
+        const ch = v[r1] - m.c[r1];                          // chordwise
+        const th = v[r2] - m.c[r2];                          // thickness
+        const X = sp * ca - ch * sa;      // radial and tangential, in-plane
+        const Y = sp * sa + ch * ca;
+        const Z = th;                     // along the shaft, unrotated
+        return [X, Y * ct - Z * st, Y * st + Z * ct];
+      });
+      const u = [p[1][0] - p[0][0], p[1][1] - p[0][1], p[1][2] - p[0][2]];
+      const q = [p[2][0] - p[0][0], p[2][1] - p[0][1], p[2][2] - p[0][2]];
+      const nv = [u[1] * q[2] - u[2] * q[1], u[2] * q[0] - u[0] * q[2],
+                  u[0] * q[1] - u[1] * q[0]];
+      const len = Math.hypot(...nv) || 1;
+      const lam = Math.max(0.18, Math.abs(nv[2]) / len);
+      faces.push({ p, z: (p[0][2] + p[1][2] + p[2][2]) / 3, lam });
+    }
+  }
+  faces.sort((a, b) => a.z - b.z);
+  const X = v => w / 2 + v * k, Y = v => h / 2 - v * k;
+  for (const f of faces) {
+    g.fillStyle = `rgb(${Math.round(base[0] * f.lam + 40)},` +
+                  `${Math.round(base[1] * f.lam + 40)},` +
+                  `${Math.round(base[2] * f.lam + 40)})`;
+    g.beginPath();
+    g.moveTo(X(f.p[0][0]), Y(f.p[0][1]));
+    g.lineTo(X(f.p[1][0]), Y(f.p[1][1]));
+    g.lineTo(X(f.p[2][0]), Y(f.p[2][1]));
+    g.closePath(); g.fill();
+  }
+
+  g.fillStyle = TWIN.stale ? '#c62828' : INK;
+  g.font = '600 13px system-ui'; g.textAlign = 'left';
+  g.fillText(TWIN.stale ? 'NO LIVE DATA — rotor frozen, not stopped'
+                        : `~${TWIN.rpm.toFixed(0)} rpm rotor (inferred)`, 10, 20);
+  if (TWIN.aliased && !TWIN.stale) {
+    g.fillStyle = '#8a7038'; g.font = '11px system-ui';
+    g.fillText(`animation slowed to ${spinCap.toFixed(0)} rpm — the number ` +
+               `above is the real inferred speed`, 10, 52);
+  }
+  g.font = '11px system-ui'; g.fillStyle = DIM;
+  g.fillText(`fan ${fmt((S.measured || {}).hz, 0)} rpm · ` +
+             `${fmt((S.load || {}).volts, 2)} V · ` +
+             `${fmt(((S.load || {}).amps || 0) * 1000, 1)} mA · ` +
+             `${fmt((S.load || {}).watts, 3)} W`, 10, 36);
+  TWIN.raf = requestAnimationFrame(twinDraw);
+}
+
+function twinUpdate(s) {
+  TWIN.rpm = twinRpm(s);
+  TWIN.stale = (TWIN.rpm === null) || (s.age_s != null && s.age_s > 3);
+  // Kept in step with what the canvas says. A stale frame used to leave the
+  // DOM figure showing a confident number while the render said NO LIVE DATA.
+  $('#tw-rpm').textContent = (TWIN.rpm === null || TWIN.stale)
+    ? 'no data' : TWIN.rpm.toFixed(0);
+}
+
+async function twinInit() {
+  if (!document.getElementById('cv-twin')) return;
+  const r = await api('/api/blades').catch(() => null);
+  const withStl = r && r.blades ? r.blades.filter(b => b.stl) : [];
+  if (withStl.length) {
+    // Prefer a real rotor over the synthetic placeholder. Defaulting to
+    // `_demo_rotor` meant the twin — and the Blades tab — opened on a shape
+    // nobody in the lab has ever printed, presented exactly like the
+    // measured article.
+    const real = withStl.filter(b => !b.name.startsWith('_'));
+    const pick = (real[0] || withStl[0]).name;
+    const sel = $('#tw-pick');
+    sel.innerHTML = withStl.map(b =>
+      `<option${b.name === pick ? ' selected' : ''}>${b.name}` +
+      `${b.name.startsWith('_') ? ' (synthetic)' : ''}</option>`).join('');
+    sel.onchange = () => twinLoad(sel.value.replace(' (synthetic)', ''));
+    await twinLoad(pick);
+  }
+  bind('#tw-blades', 'change', e => { TWIN.blades = +e.target.value || 3; });
+  // Started only when the Turbine tab is actually showing.
+  if (twinVisible() && !TWIN.raf) TWIN.raf = requestAnimationFrame(twinDraw);
+}
+
+document.addEventListener('DOMContentLoaded', twinInit);
+document.addEventListener('visibilitychange', () => {
+  if (twinVisible() && !TWIN.raf) { TWIN.last = 0;
+    TWIN.raf = requestAnimationFrame(twinDraw); }
+});

@@ -180,6 +180,29 @@
     </div>
 
     <div class="card">
+      <h3>Digital twin <span class="lbl" id="tw-note">loading geometry…</span></h3>
+      <canvas class="plot tall" id="cv-twin" height="300"></canvas>
+      <div class="row" style="margin-top:8px">
+        <label class="f">Geometry <select id="tw-pick"></select></label>
+        <label class="f">Blades
+          <select id="tw-blades">
+            <option>2</option><option selected>3</option><option>4</option>
+            <option>5</option>
+          </select></label>
+        <span class="sm dim">rotor <b id="tw-rpm">no data</b> rpm</span>
+      </div>
+      <div class="note" style="margin-top:8px">
+        <b>The rotor speed here is inferred, not measured.</b> Nothing on this
+        rig reports rotor rpm — the DAQ channel is not wired in — so the
+        animation is driven from terminal voltage through an unmeasured
+        generator constant. Treat it as an illustration of state, never as
+        data. The mesh is <b>one blade</b>, instanced about the hub; tip radius
+        is still unknown, so the hub offset is a drawing convention.
+        Colour follows the interlock: blue safe, amber warning, red danger.
+      </div>
+    </div>
+
+    <div class="card">
       <h3>Electronic load <span class="lbl" id="load-ident">—</span></h3>
       <div class="metrics">
         <div class="metric"><div class="lbl">Terminal volts</div>
@@ -227,14 +250,14 @@
 
     <div class="card">
       <h3>Live ramp <span class="lbl" id="sw-ramp-lbl">P vs I at the current wind speed</span></h3>
-      <canvas id="cv-ramp" height="220"></canvas>
+      <canvas class="plot" id="cv-ramp" height="220"></canvas>
       <div class="sm dim">The ramp climbs, peaks, and rolls off. It stops once
         power has fallen to 80% of that peak — never driven to stall.</div>
     </div>
 
     <div class="card">
       <h3>Blade curve <span class="lbl">peak electrical power vs wind speed</span></h3>
-      <canvas id="cv-curve" height="240"></canvas>
+      <canvas class="plot tall" id="cv-curve" height="240"></canvas>
       <table class="tbl" id="sw-tbl"><thead><tr>
         <th>fan rpm</th><th>m/s</th><th>P_max (W)</th><th>at (A)</th>
         <th>stop</th></tr></thead><tbody></tbody></table>
@@ -260,14 +283,14 @@
       <div style="flex:1 1 400px; display:flex; flex-direction:column; gap:14px">
         <div class="card">
           <h3>Geometry <span class="lbl" id="bl-name">—</span></h3>
-          <canvas id="cv-mesh" height="300" style="cursor:grab"></canvas>
+          <canvas class="plot tall" id="cv-mesh" height="300" style="cursor:grab"></canvas>
           <div class="sm dim">Drag to rotate. STL only — STEP is a boundary
             representation and needs CAD tessellation to draw at all.</div>
         </div>
 
         <div class="card">
           <h3>Measured curve <span class="lbl" id="bl-meta">—</span></h3>
-          <canvas id="cv-blade" height="220"></canvas>
+          <canvas class="plot" id="cv-blade" height="220"></canvas>
           <table class="tbl" id="bl-tbl"><thead><tr>
             <th>fan rpm</th><th>m/s</th><th>P_max (W)</th><th>at (A)</th>
             <th>stop</th></tr></thead><tbody></tbody></table>
