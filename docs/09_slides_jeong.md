@@ -64,12 +64,14 @@ Paste-ready. Figures referenced are in `docs/diagrams/`.
 
 ## Slide 4 — Results: blade v2_Ra20 (PETG, 0.2 mm, Ra 20)
 
-| fan rpm | m/s | P_max | at |
-|---:|---:|---:|---:|
-| 500 | 10.1 | 0.030 W | 0.018 A |
-| 900 | 18.6 | 0.273 W | 0.068 A |
-| 1400 | 29.1 | 1.665 W | 0.240 A |
-| 1800 | 37.5 | **3.793 W** | 0.320 A |
+| fan rpm<br>commanded | measured | m/s | P_max | at |
+|---:|---:|---:|---:|---:|
+| 500 | 496 | 10.1 | 0.030 W | 0.018 A |
+| 900 | 894 | 18.6 | 0.273 W | 0.068 A |
+| 1400 | 1384 | 29.1 | 1.665 W | 0.240 A |
+| 1800 | 1779 | 37.5 | **3.793 W** | 0.320 A |
+
+*Wind speed is derived from **measured** fan rpm, not commanded — the drive settles 4–13 rpm below setpoint, and quoting the command beside a measured velocity would be inconsistent.*
 
 - **14 / 14 points clean**, single continuous run
 - **P ∝ v^3.77, R² = 0.998** across the full 10.1–37.5 m/s range
