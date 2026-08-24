@@ -62,3 +62,36 @@ ramps down. Any change to this firmware invalidates that evidence.
 `PMCTransport` probes for RD at connect and falls back to the 2.0 behaviour
 if it is absent, so an un-flashed PMC keeps working. See
 `src/drive_profile.py` for snapshot / diff / apply.
+
+
+## Capturing an existing configuration
+
+`RD` is what makes a baseline possible. Two ways to take one:
+
+```bash
+# 31 parameters this package reasons about — a second
+python src/drive_profile.py snapshot --name baseline --note "as found"
+
+# every parameter that exists on the drive — ~2,200 round trips, minutes
+python src/drive_profile.py scan --name aerolab_asfound
+python src/drive_profile.py scan --all          # every group, not just ours
+```
+
+A scan asks for each candidate in turn and keeps whatever answers, because a
+drive errors on parameters its build does not have. That is slower than a
+curated list and it is the only way to capture a configuration **you did not
+write** — which is exactly what somebody else's commissioning is.
+
+Then turn it into a reusable profile:
+
+```bash
+python src/drive_profile.py promote --snapshot 20260824_..._aerolab_asfound.json \
+       --name aerolab --description "Aerolab's original configuration"
+python src/drive_profile.py diff --profile aerolab
+```
+
+`promote` drops the parameters the firmware will never write, so a diff
+against the result does not fill with rows that could never be actioned.
+Pass `--include-refused` to keep them for the record.
+
+All of this is in the dashboard too, under **Parameters**.

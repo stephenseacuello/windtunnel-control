@@ -1783,3 +1783,123 @@ function wireParams() {
 }
 
 document.addEventListener('DOMContentLoaded', wireParams);
+
+
+/* ── full parameter scan, and saved configurations ──────────────────── */
+
+let SCAN_TIMER = null;
+
+async function pollScan() {
+  try {
+    const r = await api('/api/params/scan/status');
+    const s = r.scan;
+    if (!s) return;
+    const pct = s.total ? 100 * s.done / s.total : 0;
+    $('#pr-scan-bar').style.width = pct + '%';
+    if (s.state === 'running') {
+      note('#pr-snap-out',
+           `scanning ${s.group || ''} — ${s.found} found, ${pct.toFixed(0)}%`);
+      $('#pr-scan-abort').disabled = false;
+    } else {
+      clearInterval(SCAN_TIMER); SCAN_TIMER = null;
+      $('#pr-scan-abort').disabled = true;
+      $('#pr-scan').disabled = false;
+      note('#pr-snap-out', s.message +
+           (s.file ? ` → ${s.file.split('/').pop()}` : ''), 'ok');
+      loadSnapshots();
+    }
+  } catch (e) { clearInterval(SCAN_TIMER); SCAN_TIMER = null; }
+}
+
+async function loadSnapshots() {
+  try {
+    const r = await api('/api/params/snapshots');
+    $('#pr-snaps').innerHTML = (r.snapshots || []).map(s =>
+      `<option value="${s.file}">${s.file} — ${s.count} params` +
+      `${s.note ? ' · ' + s.note.slice(0, 40) : ''}</option>`).join('')
+      || '<option value="">no snapshots yet</option>';
+  } catch (e) { /* optional */ }
+}
+
+function wireScan() {
+  bind('#pr-scan', 'click', async () => {
+    if (!confirm('Scan every parameter on the drive?\n\n' +
+                 'This is read-only and cannot change anything, but it is a ' +
+                 'few thousand round trips and takes several minutes.')) return;
+    try {
+      await api('/api/params/scan', { all: $('#pr-scan-all').checked,
+                                      note: $('#pr-snap-note').value });
+      $('#pr-scan').disabled = true;
+      if (SCAN_TIMER) clearInterval(SCAN_TIMER);
+      SCAN_TIMER = setInterval(pollScan, 700);
+    } catch (e) { note('#pr-snap-out', e.message, 'bad'); }
+  });
+
+  bind('#pr-scan-abort', 'click', () => api('/api/params/scan/abort', {}));
+
+  bind('#pr-snap-diff', 'click', async () => {
+    const f = $('#pr-snaps').value;
+    if (!f) return;
+    note('#pr-snap-note2', 'reading the drive…');
+    try {
+      const d = await api(`/api/params/snapshot/${encodeURIComponent(f)}`);
+      renderDiff(d, 'diff');
+      const n = d.rows.filter(r => r.match === false).length;
+      note('#pr-snap-note2',
+           n ? `${n} of ${d.rows.length} differ from ${f}`
+             : `the drive matches ${f} exactly`, n ? 'warn' : 'ok');
+    } catch (e) { note('#pr-snap-note2', e.message, 'bad'); }
+  });
+
+  bind('#pr-snap-restore', 'click', async () => {
+    const f = $('#pr-snaps').value;
+    if (!f) return;
+    note('#pr-snap-note2', 'planning the restore…');
+    try {
+      const dry = await api('/api/params/apply', { snapshot: f, commit: false });
+      renderDiff({ would_write: dry.would_write }, 'plan');
+      if (!dry.would_write.length) {
+        note('#pr-snap-note2', 'nothing to restore — the drive already matches',
+             'ok');
+        return;
+      }
+      if (!confirm(`Restore ${dry.would_write.length} parameter(s) from ` +
+                   `${f}?\n\nPersistent, NO UNDO. A snapshot of the current ` +
+                   `values is saved first, and the restore is refused if that ` +
+                   `snapshot cannot be written.\n\n` +
+                   `${dry.refused.length} parameter(s) are refused by firmware ` +
+                   `and will be skipped.`)) {
+        note('#pr-snap-note2', 'dry run only — nothing written', 'ok');
+        return;
+      }
+      if (prompt('Type RESTORE to confirm:') !== 'RESTORE') {
+        note('#pr-snap-note2', 'aborted', 'warn'); return;
+      }
+      const d = await api('/api/params/apply', { snapshot: f, commit: true });
+      note('#pr-snap-note2',
+           `${d.written.length} restored and verified` +
+           (d.failed.length ? `, ${d.failed.length} did not take` : '') +
+           ` · backup ${(d.backup || '').split('/').pop()}`,
+           d.failed.length ? 'warn' : 'ok');
+      loadParams(); loadSnapshots();
+    } catch (e) { note('#pr-snap-note2', e.message, 'bad'); }
+  });
+
+  bind('#pr-promote', 'click', async () => {
+    const f = $('#pr-snaps').value, name = $('#pr-promote-name').value.trim();
+    if (!f || !name) { note('#pr-snap-note2', 'pick a snapshot and give it a name', 'bad'); return; }
+    try {
+      const d = await api('/api/params/promote', {
+        snapshot: f, name, description: $('#pr-promote-desc').value,
+        force: false });
+      note('#pr-snap-note2',
+           `profile '${d.name}' created — ${d.kept} parameters, ` +
+           `${d.excluded} excluded as unwritable`, 'ok');
+      loadParamCapability();
+    } catch (e) { note('#pr-snap-note2', e.message, 'bad'); }
+  });
+
+  loadSnapshots();
+}
+
+document.addEventListener('DOMContentLoaded', wireScan);

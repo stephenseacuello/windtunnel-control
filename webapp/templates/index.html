@@ -406,18 +406,51 @@
     </div>
 
     <div class="card">
-      <h3>Snapshot <span class="lbl">a read-only record of what the drive holds</span></h3>
+      <h3>Capture <span class="lbl">read-only records of what the drive holds</span></h3>
       <div class="row">
         <label class="f">Note
-          <input type="text" id="pr-snap-note" style="width:300px"
+          <input type="text" id="pr-snap-note" style="width:280px"
                  placeholder="e.g. as found before the August session"></label>
-        <button class="pri" id="pr-snap">Take snapshot</button>
-        <span class="sm dim" id="pr-snap-out"></span>
+        <button class="pri" id="pr-snap">Snapshot known</button>
+        <button id="pr-scan">Scan ALL parameters</button>
+        <label class="f sm"><input type="checkbox" id="pr-scan-all">
+          every group</label>
+        <button id="pr-scan-abort" disabled>Abort</button>
+      </div>
+      <div class="bar"><div class="bar-fill" id="pr-scan-bar"></div></div>
+      <div class="sm dim" id="pr-snap-out" style="margin-top:6px"></div>
+      <div class="sm dim" style="margin-top:8px">
+        <b>Snapshot known</b> reads the 31 parameters this package reasons
+        about — a second. <b>Scan</b> discovers every parameter that exists on
+        the drive by asking for each in turn: ~2,200 round trips, a few
+        minutes, and the only way to capture a configuration you did not
+        write. Both are read-only and cannot change anything.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Saved configurations
+        <span class="lbl">compare, restore, or promote to a profile</span></h3>
+      <div class="row">
+        <label class="f">Snapshot <select id="pr-snaps" style="min-width:320px"></select></label>
+        <button class="sm" id="pr-snap-diff">Compare with the drive</button>
+        <button class="sm" id="pr-snap-restore">Restore…</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <label class="f">Save as profile
+          <input type="text" id="pr-promote-name" style="width:150px"
+                 placeholder="e.g. aerolab"></label>
+        <label class="f">Description
+          <input type="text" id="pr-promote-desc" style="width:250px"
+                 placeholder="what this configuration is for"></label>
+        <button class="sm" id="pr-promote">Promote</button>
+        <span class="sm dim" id="pr-snap-note2"></span>
       </div>
       <div class="sm dim" style="margin-top:8px">
-        Reads only — it cannot change the drive. Writes to
-        <code>data/snapshots/</code>. <b>Commit it:</b> a snapshot nobody can
-        diff against is a file, not a record.
+        A snapshot restores exactly like a profile does — same dry run, same
+        backup-first, same read-back. Promoting one gives it a name and drops
+        the parameters the firmware will never write, so a diff against it
+        does not fill with rows that can never be actioned.
       </div>
     </div>
 

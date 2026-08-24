@@ -615,6 +615,52 @@ def api_param_unlock():
         return err(e)
 
 
+@app.route("/api/params/scan", methods=["POST"])
+def api_param_scan():
+    d = request.get_json(force=True, silent=True) or {}
+    try:
+        return ok(scan=ctl.start_param_scan(bool(d.get("all")),
+                                            d.get("note", "")))
+    except Exception as e:
+        return err(e)
+
+
+@app.route("/api/params/scan/status")
+def api_param_scan_status():
+    return ok(scan={k: v for k, v in (ctl.scan or {}).items() if k != "abort"}
+                   if ctl.scan else None)
+
+
+@app.route("/api/params/scan/abort", methods=["POST"])
+def api_param_scan_abort():
+    return ok(aborted=ctl.abort_param_scan())
+
+
+@app.route("/api/params/snapshots")
+def api_param_snapshots():
+    return ok(snapshots=ctl.list_snapshots())
+
+
+@app.route("/api/params/snapshot/<path:name>")
+def api_param_snapshot_diff(name):
+    """Live drive vs a saved snapshot — the restore preview. Read-only."""
+    try:
+        return ok(**ctl.snapshot_diff(name))
+    except Exception as e:
+        return err(e)
+
+
+@app.route("/api/params/promote", methods=["POST"])
+def api_param_promote():
+    d = request.get_json(force=True, silent=True) or {}
+    try:
+        return ok(**ctl.promote_snapshot(d.get("snapshot"), d.get("name", ""),
+                                         d.get("description", ""),
+                                         bool(d.get("force"))))
+    except Exception as e:
+        return err(e)
+
+
 @app.route("/api/params/apply", methods=["POST"])
 def api_param_apply():
     """
@@ -625,8 +671,12 @@ def api_param_apply():
     """
     d = request.get_json(force=True, silent=True) or {}
     name, commit = d.get("profile"), bool(d.get("commit"))
+    snap = d.get("snapshot")
     try:
-        diff = ctl.profile_diff(name)
+        # A saved snapshot is applyable in exactly the same way a profile is
+        # — that IS the restore path, and it is the reason snapshots are
+        # worth taking before anyone touches the drive.
+        diff = ctl.snapshot_diff(snap) if snap else ctl.profile_diff(name)
     except Exception as e:
         return err(e)
 
@@ -642,7 +692,8 @@ def api_param_apply():
         return ok(dry_run=False, written=[], failed=[], refused=blocked,
                   note="nothing to write")
     try:
-        backup = ctl.snapshot_params(f"before applying '{name}' from the dashboard")
+        backup = ctl.snapshot_params(
+            f"before applying '{snap or name}' from the dashboard")
     except Exception as e:
         return err(f"refusing to write — could not save a backup first: {e}")
 

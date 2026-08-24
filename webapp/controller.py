@@ -133,6 +133,8 @@ class TunnelController:
                           "t": 0.0}
         self.load_demand = 0.0
         self.sweep = None                   # live blade-sweep progress
+        self.scan = None                    # live parameter-scan progress
+        self._scan_thread = None
 
         self.connected = False
         self.connect_error = None
@@ -743,6 +745,126 @@ class TunnelController:
         self.log(f"parameter snapshot: {len(vals)} read → {path.name}", "ok")
         return {"file": str(path), "read": len(vals), "failed": failed,
                 "values": vals}
+
+    def start_param_scan(self, all_groups=False, note=""):
+        """
+        Discover every parameter the drive actually has, in the background.
+
+        A curated list captures what THIS package cares about. A scan captures
+        what somebody ELSE commissioned — which is the whole point of a
+        baseline you did not write. It is a few thousand round trips over a
+        19200-baud link, so it runs on a thread with progress rather than
+        holding a request open for minutes.
+        """
+        from drive_profile import DEFAULT_SCAN, GROUPS, scan_groups, write_snapshot
+        if self.scan and self.scan.get("state") == "running":
+            raise RuntimeError("a parameter scan is already running")
+        groups = sorted(GROUPS) if all_groups else list(DEFAULT_SCAN)
+        self.scan = {"state": "running", "done": 0, "total": len(groups) * 99,
+                     "found": 0, "group": None, "file": None, "message": ""}
+
+        def work():
+            sc = self.scan
+            try:
+                def prog(done, total, found, g):
+                    sc.update(done=done, total=total, found=found,
+                              group=f"{g} {GROUPS.get(g, '')}")
+                    if sc.get("abort"):
+                        raise RuntimeError("aborted")
+                with self._lock:
+                    tp = getattr(self.drive, "transport", None) or self.drive
+                    vals, misses = scan_groups(tp, groups, on_progress=prog)
+                path = write_snapshot(vals, "fullscan",
+                                      note or f"dashboard scan, {len(groups)} groups")
+                sc.update(state="done", file=str(path), found=len(vals),
+                          message=f"{len(vals)} parameters exist "
+                                  f"({misses} candidates did not answer)")
+                self.log(f"parameter scan: {len(vals)} found → {path.name}", "ok")
+            except Exception as e:
+                sc.update(state="done", message=f"failed: {e}")
+                self.log(f"parameter scan failed: {e}", "warn")
+
+        self._scan_thread = threading.Thread(target=work, daemon=True,
+                                             name="param-scan")
+        self._scan_thread.start()
+        return self.scan
+
+    def abort_param_scan(self):
+        if self.scan and self.scan.get("state") == "running":
+            self.scan["abort"] = True
+            return True
+        return False
+
+    def list_snapshots(self):
+        from drive_profile import SNAPSHOTS
+        out = []
+        for f in sorted(SNAPSHOTS.glob("*.json"), reverse=True):
+            try:
+                d = json.loads(f.read_text())
+                out.append({"file": f.name, "name": d.get("name", ""),
+                            "note": d.get("note", ""), "when": d.get("when", ""),
+                            "count": len(d.get("parameters", {}))})
+            except Exception:
+                pass
+        return out
+
+    def snapshot_diff(self, filename):
+        """Live drive vs a saved snapshot. Read-only. This is the restore preview."""
+        from drive_profile import SNAPSHOTS, KNOWN
+        f = SNAPSHOTS / Path(filename).name
+        if not f.exists():
+            raise RuntimeError(f"no snapshot '{filename}'")
+        snap = json.loads(f.read_text())
+        saved = snap.get("parameters", {})
+        labels = snap.get("labels", {})
+        rows = []
+        with self._lock:
+            for k in sorted(saved, key=int):
+                par = int(k)
+                try:
+                    live = self.drive.read_param(par)
+                    err = None
+                except Exception as e:
+                    live, err = None, str(e)[:70]
+                rows.append({
+                    "num": par, "name": KNOWN.get(par, labels.get(k, "")),
+                    "live": live, "target": saved[k],
+                    "match": (live == saved[k]) if live is not None else None,
+                    "why": "", "refused": self.param_refusal(par), "error": err})
+        return {"profile": f.name, "description": snap.get("note", ""),
+                "when": snap.get("when", ""), "rows": rows}
+
+    def promote_snapshot(self, filename, name, description="", force=False):
+        """Turn a snapshot into a named, applyable profile."""
+        from drive_profile import PROFILES, SNAPSHOTS, KNOWN, refusal
+        src = SNAPSHOTS / Path(filename).name
+        if not src.exists():
+            raise RuntimeError(f"no snapshot '{filename}'")
+        name = "".join(c for c in name if c.isalnum() or c in "-_").strip()
+        if not name:
+            raise RuntimeError("a profile needs a name")
+        out = PROFILES / f"{name}.json"
+        if out.exists() and not force:
+            raise RuntimeError(f"profile '{name}' already exists")
+        snap = json.loads(src.read_text())
+        labels = snap.get("labels", {})
+        keep = {k: {"value": v,
+                    "why": KNOWN.get(int(k), labels.get(k, ""))}
+                for k, v in sorted(snap["parameters"].items(), key=lambda kv: int(kv[0]))
+                if not refusal(int(k))}
+        PROFILES.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps({
+            "name": name,
+            "description": description or f"captured from {src.name}",
+            "_source": f"snapshot {src.name} taken {snap.get('when','?')}",
+            "_note": "Parameters the firmware refuses to write (group 53, "
+                     "3018/3019, group 99, groups 01-04) are excluded — they "
+                     "would appear in a diff but could never be applied.",
+            "parameters": keep}, indent=2) + "\n")
+        self.log(f"profile '{name}' created from {src.name} "
+                 f"({len(keep)} parameters)", "ok")
+        return {"file": str(out), "name": name, "kept": len(keep),
+                "excluded": len(snap["parameters"]) - len(keep)}
 
     def unlock_param_writes(self):
         tp = getattr(self.drive, "transport", None)

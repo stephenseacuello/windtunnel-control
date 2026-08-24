@@ -85,6 +85,29 @@ KNOWN = {
     9907: "MOTOR NOM FREQ", 9908: "MOTOR NOM SPEED", 9909: "MOTOR NOM POWER",
 }
 
+# ACS550 parameter groups, from the firmware manual. A full scan walks these
+# rather than 0000-9999: most of that space does not exist, and every miss is
+# a round trip over a 19200-baud link.
+GROUPS = {
+    1: "OPERATING DATA", 3: "FB ACTUAL SIGNALS", 4: "FAULT HISTORY",
+    10: "START/STOP/DIR", 11: "REFERENCE SELECT", 12: "CONSTANT SPEEDS",
+    13: "ANALOGUE INPUTS", 14: "RELAY OUTPUTS", 15: "ANALOGUE OUTPUTS",
+    16: "SYSTEM CONTROLS", 20: "LIMITS", 21: "START/STOP",
+    22: "ACCEL/DECEL", 23: "SPEED CTRL", 24: "TORQUE CTRL",
+    25: "CRITICAL SPEEDS", 26: "MOTOR CONTROL", 29: "MAINTENANCE TRIG",
+    30: "FAULT FUNCTIONS", 31: "AUTOMATIC RESET", 32: "SUPERVISION",
+    33: "INFORMATION", 34: "PANEL DISPLAY", 35: "MOTOR TEMP MEAS",
+    40: "PROCESS PID SET 1", 41: "PROCESS PID SET 2", 42: "EXT / TRIM PID",
+    45: "ENERGY SAVING", 50: "ENCODER", 51: "EXT COMM MODULE",
+    52: "PANEL COMM", 53: "EFB PROTOCOL", 64: "LOAD ANALYZER",
+    81: "PFC CONTROL", 98: "OPTION MODULES", 99: "START-UP DATA",
+}
+
+# Groups worth scanning by default: everything this rig's behaviour depends
+# on, without the PID/PFC/encoder space it does not use. `--all` takes the lot.
+DEFAULT_SCAN = [1, 3, 4, 10, 11, 13, 14, 15, 16, 20, 21, 22, 26, 30,
+                32, 33, 34, 51, 52, 53, 98, 99]
+
 # Refused by the firmware. Repeated here only so the tool can say WHY before
 # a round trip, never as the enforcement point.
 FIRMWARE_REFUSES = {
@@ -100,6 +123,32 @@ def refusal(par):
         if test(par):
             return why
     return None
+
+
+def scan_groups(tp, groups, per_group=99, on_progress=None):
+    """
+    Read every parameter that answers, group by group.
+
+    A drive returns an exception for parameters that do not exist in its
+    build, so discovery is simply "ask and see". That is slower than a
+    curated list — a few hundred round trips — but it is the only way to
+    capture a configuration you did not write, which is exactly what a
+    baseline of somebody else's commissioning is.
+    """
+    found, misses = {}, 0
+    total = len(groups) * per_group
+    done = 0
+    for g in groups:
+        for idx in range(1, per_group + 1):
+            par = g * 100 + idx
+            done += 1
+            try:
+                found[str(par)] = tp.read_param(par)
+            except Exception:
+                misses += 1
+            if on_progress and done % 25 == 0:
+                on_progress(done, total, len(found), g)
+    return found, misses
 
 
 def open_drive(a):
@@ -169,6 +218,72 @@ def cmd_snapshot(a):
     print(f"\n  wrote {path.relative_to(REPO)}")
     print(f"  Commit it. A snapshot nobody can diff against is a file, not a "
           f"record.")
+    return 0
+
+
+def cmd_scan(a):
+    tp = open_drive(a)
+    groups = sorted(GROUPS) if a.all else DEFAULT_SCAN
+    print(f"\n  scanning {len(groups)} groups "
+          f"({len(groups) * 99} candidate parameters)")
+    print(f"  this is a round trip each — expect a few minutes\n")
+    t0 = time.time()
+
+    def prog(done, total, found, g):
+        pct = 100 * done / total
+        sys.stdout.write(f"\r    {pct:5.1f}%  group {g:>2} "
+                         f"{GROUPS.get(g,''):<20} {found} found")
+        sys.stdout.flush()
+
+    try:
+        vals, misses = scan_groups(tp, groups, on_progress=prog)
+    finally:
+        tp.close()
+    print(f"\n\n  {len(vals)} parameters exist on this drive "
+          f"({misses} candidates did not answer) in {time.time()-t0:.0f} s")
+    path = write_snapshot(vals, a.name, a.note or f"full scan of {len(groups)} groups")
+    print(f"  wrote {path.relative_to(REPO)}")
+    print(f"\n  Promote it to a reusable profile with:")
+    print(f"    python src/drive_profile.py promote --snapshot "
+          f"{path.name} --name aerolab")
+    return 0
+
+
+def cmd_promote(a):
+    """Turn a snapshot into a named, applyable profile."""
+    src = SNAPSHOTS / a.snapshot
+    if not src.exists():
+        cands = sorted(SNAPSHOTS.glob("*.json"))
+        raise SystemExit(f"no snapshot {a.snapshot}. Available:\n  " +
+                         "\n  ".join(c.name for c in cands[-8:]))
+    snap = json.loads(src.read_text())
+    vals = snap["parameters"]
+
+    keep = {}
+    for k, v in sorted(vals.items(), key=lambda kv: int(kv[0])):
+        par = int(k)
+        if refusal(par) and not a.include_refused:
+            continue                       # read-only or firmware-refused
+        keep[k] = {"value": v,
+                   "why": KNOWN.get(par, snap.get("labels", {}).get(k, ""))}
+
+    PROFILES.mkdir(parents=True, exist_ok=True)
+    out = PROFILES / f"{a.name}.json"
+    if out.exists() and not a.force:
+        raise SystemExit(f"{out} already exists — pass --force to replace it")
+    out.write_text(json.dumps({
+        "name": a.name,
+        "description": a.description or f"captured from {src.name}",
+        "_source": f"snapshot {src.name} taken {snap.get('when','?')}",
+        "_note": "Values are raw register contents. Parameters the firmware "
+                 "refuses to write (group 53, 3018/3019, group 99, groups "
+                 "01-04) are excluded unless --include-refused was used; they "
+                 "would show in a diff but could never be applied.",
+        "parameters": keep}, indent=2) + "\n")
+    print(f"\n  {len(keep)} parameters → {out.relative_to(REPO)}")
+    print(f"  {len(vals) - len(keep)} excluded as read-only or firmware-refused")
+    print(f"\n  Compare against the live drive with:")
+    print(f"    python src/drive_profile.py diff --profile {a.name}")
     return 0
 
 
@@ -314,6 +429,23 @@ def main():
     d = sub.add_parser("diff", help="compare the drive against a profile")
     d.add_argument("--profile", required=True)
     d.set_defaults(fn=cmd_diff)
+
+    sc = sub.add_parser("scan", help="discover EVERY parameter the drive has")
+    sc.add_argument("--all", action="store_true",
+                    help="every group, not just the ones this rig uses")
+    sc.add_argument("--name", default="fullscan")
+    sc.add_argument("--note", default="")
+    sc.set_defaults(fn=cmd_scan)
+
+    pr = sub.add_parser("promote", help="turn a snapshot into a profile")
+    pr.add_argument("--snapshot", required=True, help="filename in data/snapshots/")
+    pr.add_argument("--name", required=True, help="profile name, e.g. aerolab")
+    pr.add_argument("--description", default="")
+    pr.add_argument("--include-refused", action="store_true",
+                    dest="include_refused",
+                    help="keep parameters the firmware will never write")
+    pr.add_argument("--force", action="store_true")
+    pr.set_defaults(fn=cmd_promote)
 
     ap = sub.add_parser("apply", help="write a profile (dry run by default)")
     ap.add_argument("--profile", required=True)
