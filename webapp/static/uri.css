@@ -292,3 +292,6 @@ body.stale .metric .big::after { content:' ?'; color:#c62828; }
 .refusal { position:sticky; top:0; z-index:80; padding:10px 16px;
            background:#fdecea; color:#7f1d1d; border-bottom:2px solid #c62828;
            font-size:13px; font-weight:600; }
+
+.tbl tr.differ td { background:#fff8e6; }
+.tbl tr.differ td.mono { font-weight:600; }

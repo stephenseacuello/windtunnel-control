@@ -583,6 +583,86 @@ def api_param_write():
         return err(e)
 
 
+@app.route("/api/params/capability")
+def api_param_capability():
+    """What this transport can do, so the UI stops offering what it cannot."""
+    return ok(capability=ctl.param_capability(),
+              profiles=ctl.list_profiles())
+
+
+@app.route("/api/params/profile/<name>")
+def api_param_profile(name):
+    try:
+        return ok(**ctl.profile_diff(name))
+    except Exception as e:
+        return err(e)
+
+
+@app.route("/api/params/snapshot", methods=["POST"])
+def api_param_snapshot():
+    d = request.get_json(force=True, silent=True) or {}
+    try:
+        return ok(**ctl.snapshot_params(d.get("note", "")))
+    except Exception as e:
+        return err(e)
+
+
+@app.route("/api/params/unlock", methods=["POST"])
+def api_param_unlock():
+    try:
+        return ok(**ctl.unlock_param_writes())
+    except Exception as e:
+        return err(e)
+
+
+@app.route("/api/params/apply", methods=["POST"])
+def api_param_apply():
+    """
+    Apply a profile. DRY RUN unless commit is true.
+
+    Snapshots the live drive first and refuses to write if that record cannot
+    be saved — an un-backed-out change to a drive is not recoverable.
+    """
+    d = request.get_json(force=True, silent=True) or {}
+    name, commit = d.get("profile"), bool(d.get("commit"))
+    try:
+        diff = ctl.profile_diff(name)
+    except Exception as e:
+        return err(e)
+
+    plan = [r for r in diff["rows"]
+            if r["match"] is False and not r["refused"]]
+    blocked = [r for r in diff["rows"] if r["match"] is False and r["refused"]]
+
+    if not commit:
+        return ok(dry_run=True, profile=diff["profile"],
+                  would_write=plan, refused=blocked)
+
+    if not plan:
+        return ok(dry_run=False, written=[], failed=[], refused=blocked,
+                  note="nothing to write")
+    try:
+        backup = ctl.snapshot_params(f"before applying '{name}' from the dashboard")
+    except Exception as e:
+        return err(f"refusing to write — could not save a backup first: {e}")
+
+    try:
+        ctl.unlock_param_writes()
+    except Exception as e:
+        return err(f"could not unlock writes: {e}")
+
+    written, failed = [], []
+    for r in plan:
+        try:
+            res = ctl.write_param(r["num"], r["target"])
+            (written if res["after"] == r["target"] else failed).append(
+                {**r, "before": res["before"], "after": res["after"]})
+        except Exception as e:
+            failed.append({**r, "error": str(e)[:120]})
+    return ok(dry_run=False, profile=diff["profile"], backup=backup["file"],
+              written=written, failed=failed, refused=blocked)
+
+
 # ── calibration ───────────────────────────────────────────────────────────
 
 @app.route("/api/calibration")

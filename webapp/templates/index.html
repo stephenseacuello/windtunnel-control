@@ -386,15 +386,52 @@
 
   <!-- =========================== PARAMETERS ========================== -->
   <section class="page" id="p-params">
+
+    <div class="card" id="pr-cap-card">
+      <h3>Parameter access <span class="lbl" id="pr-cap-kind">—</span></h3>
+      <div id="pr-cap" class="note">checking what this transport can do…</div>
+    </div>
+
     <div class="card">
-      <h3>Drive parameters
+      <h3>Configuration profile
+        <span class="lbl">compare and apply a known-good parameter set</span></h3>
+      <div class="row">
+        <label class="f">Profile <select id="pr-profile"></select></label>
+        <button class="sm" id="pr-diff">Compare with the drive</button>
+        <button class="sm" id="pr-dry">Dry run</button>
+        <button class="pri" id="pr-apply" disabled>Apply…</button>
+        <span class="sm dim" id="pr-prof-note"></span>
+      </div>
+      <div id="pr-diff-out" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card">
+      <h3>Snapshot <span class="lbl">a read-only record of what the drive holds</span></h3>
+      <div class="row">
+        <label class="f">Note
+          <input type="text" id="pr-snap-note" style="width:300px"
+                 placeholder="e.g. as found before the August session"></label>
+        <button class="pri" id="pr-snap">Take snapshot</button>
+        <span class="sm dim" id="pr-snap-out"></span>
+      </div>
+      <div class="sm dim" style="margin-top:8px">
+        Reads only — it cannot change the drive. Writes to
+        <code>data/snapshots/</code>. <b>Commit it:</b> a snapshot nobody can
+        diff against is a file, not a record.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Live values
         <span class="lbl"><button class="sm" id="pr-refresh">Refresh</button></span></h3>
-      <div class="note warn">Writes are persistent — the same as editing on the
-        keypad. There is no undo. Record the old value before changing
-        anything, and the control-source parameters are refused while the fan
-        is turning.</div>
+      <div class="note warn">Writes are persistent — the same as editing on
+        the keypad, with no undo. Group 53 (the serial config of this very
+        link), 3018/3019 (the comm-loss watchdog), group 99 (the motor model)
+        and groups 01–04 are refused by the PMC firmware at any time. Set
+        those from the keypad, deliberately.</div>
       <div id="pr-groups" style="margin-top:12px"></div>
     </div>
+
   </section>
 
   <!-- ========================== COMMISSIONING ======================== -->

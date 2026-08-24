@@ -12,3 +12,6 @@ logs/*_points.csv.gz
 logs/archive/
 *.bak
 data/tunnel.json.bak
+
+# Snapshots are records worth committing — but not the smoke-test ones.
+data/snapshots/*_dashboard.json

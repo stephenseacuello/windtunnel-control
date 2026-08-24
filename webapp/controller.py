@@ -32,6 +32,7 @@ The UI can be wrong, disconnected, or malicious. The drive still stops.
 
 from __future__ import annotations
 
+import json
 import threading
 import time
 from collections import deque
@@ -653,6 +654,105 @@ class TunnelController:
 
     # ── parameters ───────────────────────────────────────────────────────
 
+    # ══════════════════════════════════════════════════════════════════
+    # DRIVE PARAMETERS — capability, profiles, snapshots
+    # ══════════════════════════════════════════════════════════════════
+
+    def param_capability(self):
+        """
+        What this transport can actually do with parameters, and why.
+
+        The Parameters tab used to offer a Write button on every row whatever
+        the transport underneath could do. Over a 2.0 PMC every one of them
+        failed with a register-level error that pointed at the wrong thing.
+        """
+        tp = getattr(self.drive, "transport", None)
+        if tp is None:
+            return {"read": True, "write": True, "kind": "direct",
+                    "note": "direct Modbus — full parameter access"}
+        rdwr = bool(getattr(tp, "_rdwr", False))
+        return {
+            "read": rdwr, "write": rdwr, "kind": "pmc",
+            "firmware": "3.0+" if rdwr else "2.x",
+            "note": ("PMC firmware 3.0 — RD/WR available" if rdwr else
+                     "This PMC is command-shaped only (HZ/RUN/STAT) and "
+                     "cannot reach a parameter. Flash "
+                     "firmware/acs550_pmc_v3/ to enable RD/WR. The original "
+                     "sketch is untouched at firmware/acs550_pmc/."),
+        }
+
+    def param_refusal(self, par):
+        """Why the firmware would refuse this write, or None."""
+        try:
+            from drive_profile import refusal
+            return refusal(int(par))
+        except Exception:
+            return None
+
+    def list_profiles(self):
+        from drive_profile import PROFILES
+        out = []
+        for f in sorted(PROFILES.glob("*.json")):
+            try:
+                d = json.loads(f.read_text())
+                out.append({"name": d.get("name", f.stem),
+                            "description": d.get("description", ""),
+                            "count": len(d.get("parameters", {}))})
+            except Exception:
+                pass
+        return out
+
+    def profile_diff(self, name):
+        """Live drive vs a stored profile. Read-only."""
+        from drive_profile import PROFILES, KNOWN
+        f = PROFILES / f"{name}.json"
+        if not f.exists():
+            raise RuntimeError(f"no profile '{name}'")
+        prof = json.loads(f.read_text())
+        want = prof.get("parameters", {})
+        rows = []
+        with self._lock:
+            for k, spec in sorted(want.items(), key=lambda kv: int(kv[0])):
+                par = int(k)
+                target = spec["value"] if isinstance(spec, dict) else spec
+                try:
+                    live = self.drive.read_param(par)
+                    err = None
+                except Exception as e:
+                    live, err = None, str(e)[:70]
+                rows.append({
+                    "num": par, "name": KNOWN.get(par, ""),
+                    "live": live, "target": target,
+                    "match": (live == target) if live is not None else None,
+                    "why": spec.get("why", "") if isinstance(spec, dict) else "",
+                    "refused": self.param_refusal(par), "error": err})
+        return {"profile": prof.get("name", name),
+                "description": prof.get("description", ""), "rows": rows}
+
+    def snapshot_params(self, note=""):
+        """Read every known parameter and write a timestamped record."""
+        from drive_profile import KNOWN, write_snapshot
+        vals, failed = {}, []
+        with self._lock:
+            for par in sorted(KNOWN):
+                try:
+                    vals[str(par)] = self.drive.read_param(par)
+                except Exception as e:
+                    failed.append({"num": par, "error": str(e)[:70]})
+        path = write_snapshot(vals, "dashboard", note or "taken from the dashboard")
+        self.log(f"parameter snapshot: {len(vals)} read → {path.name}", "ok")
+        return {"file": str(path), "read": len(vals), "failed": failed,
+                "values": vals}
+
+    def unlock_param_writes(self):
+        tp = getattr(self.drive, "transport", None)
+        if tp is None or not hasattr(tp, "unlock_writes"):
+            return {"unlocked": True, "note": "direct transport needs no unlock"}
+        with self._lock:
+            tp.unlock_writes()
+        self.log("parameter writes unlocked for 120 s", "warn")
+        return {"unlocked": True, "seconds": 120}
+
     def read_params(self, numbers):
         out = {}
         with self._lock:
@@ -672,8 +772,19 @@ class TunnelController:
         surprised.
         """
         n = int(number)
-        if self.running and n in (1001, 1002, 1102, 1103, 1106, 9802):
-            raise RuntimeError(f"refusing to change par {n} while running")
+        # One refusal list, shared with drive_profile and enforced again in
+        # the PMC firmware. The old guard covered control-source parameters
+        # while running and said nothing about the comm-loss watchdog, the
+        # serial config, or the motor model — so on a direct-transport bench
+        # rig the dashboard would happily disable 3018/3019, the mechanism
+        # that makes this whole architecture safe.
+        no = self.param_refusal(n)
+        if no:
+            raise RuntimeError(f"refusing to write par {n}: {no}")
+        if self.running:
+            raise RuntimeError(
+                f"refusing to write par {n} while the fan is turning — "
+                f"stop it first")
         with self._lock:
             before = self.drive.read_param(n)
             self.drive.write_param(n, int(value))

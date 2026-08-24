@@ -617,6 +617,7 @@ $('#pf-abort').onclick = () => api('/api/profile/abort', {});
 /* ============================ parameters ============================== */
 
 async function loadParams() {
+  if (!PCAP) await loadParamCapability();
   const r = await api('/api/params');
   $('#pr-groups').innerHTML = r.groups.map(g => `
     <h3 style="margin:16px 0 6px">${g.name}</h3>
@@ -628,7 +629,7 @@ async function loadParams() {
         ? `<span class="mono">${row.value ?? '—'}</span>`
         : `<input class="num pv" data-p="${row.num}" value="${row.value ?? ''}">`}</td>
       <td class="sm dim">${row.note}</td>
-      <td>${row.readonly ? '' :
+      <td>${row.readonly || !(PCAP && PCAP.write) ? '' :
         `<button class="sm pw" data-p="${row.num}">Write</button>`}</td>
     </tr>`).join('')}</table>`).join('');
 
@@ -1643,3 +1644,142 @@ document.addEventListener('visibilitychange', () => {
   if (twinVisible() && !TWIN.raf) { TWIN.last = 0;
     TWIN.raf = requestAnimationFrame(twinDraw); }
 });
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   PARAMETERS — capability, profiles, snapshots
+
+   The tab used to offer a Write button on every row regardless of what the
+   transport underneath could do. Over a 2.0 PMC every one of them failed
+   with a register-level error pointing at entirely the wrong thing, because
+   that firmware is command-shaped and cannot reach a parameter at all.
+
+   So the first thing this asks is what the link can actually do, and it
+   shows the answer before anything else.
+   ══════════════════════════════════════════════════════════════════════ */
+
+let PCAP = null;
+
+async function loadParamCapability() {
+  try {
+    const r = await api('/api/params/capability');
+    PCAP = r.capability;
+    const able = PCAP.read && PCAP.write;
+    $('#pr-cap-kind').textContent =
+      PCAP.kind === 'pmc' ? `PMC firmware ${PCAP.firmware}` : PCAP.kind;
+    const el = $('#pr-cap');
+    el.className = 'note' + (able ? '' : ' warn');
+    el.innerHTML = (able ? '✓ ' : '⚠ ') + PCAP.note;
+    $('#pr-diff').disabled = !PCAP.read;
+    $('#pr-dry').disabled = !PCAP.read;
+    const sel = $('#pr-profile');
+    sel.innerHTML = (r.profiles || []).map(p =>
+      `<option value="${p.name}">${p.name} — ${p.count} parameters</option>`)
+      .join('') || '<option value="">no profiles found</option>';
+  } catch (e) {
+    $('#pr-cap').innerHTML = 'could not determine capability: ' + e.message;
+  }
+}
+
+function renderDiff(d, mode) {
+  const rows = d.rows || d.would_write || [];
+  if (!rows.length) {
+    $('#pr-diff-out').innerHTML =
+      '<div class="sm dim">nothing to show</div>';
+    return;
+  }
+  const differ = rows.filter(r => r.match === false || mode === 'plan').length;
+  $('#pr-diff-out').innerHTML = `
+    <div class="sm dim" style="margin-bottom:6px">
+      ${mode === 'plan' ? `<b>${rows.length}</b> would be written`
+                        : `<b>${differ}</b> of ${rows.length} differ from the profile`}
+    </div>
+    <table class="tbl"><thead><tr>
+      <th>par</th><th>name</th><th>drive</th><th>profile</th><th>why</th>
+    </tr></thead><tbody>
+    ${rows.map(r => {
+      const cls = r.refused ? 'warn' : (r.match === false ? 'differ' : '');
+      const live = r.error ? `<span class="bad">${r.error}</span>`
+                           : (r.live ?? r.before ?? '—');
+      return `<tr class="${cls}">
+        <td class="mono">${r.num}</td>
+        <td>${r.name || ''}</td>
+        <td class="mono">${live}</td>
+        <td class="mono">${r.target}</td>
+        <td class="sm dim">${r.refused
+          ? '<b>firmware refuses:</b> ' + r.refused : (r.why || '')}</td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function wireParams() {
+  bind('#pr-diff', 'click', async () => {
+    const name = $('#pr-profile').value;
+    if (!name) return;
+    note('#pr-prof-note', 'reading the drive…');
+    try {
+      const d = await api(`/api/params/profile/${encodeURIComponent(name)}`);
+      renderDiff(d, 'diff');
+      const n = d.rows.filter(r => r.match === false).length;
+      note('#pr-prof-note', n ? `${n} differ` : 'the drive matches this profile',
+           n ? 'warn' : 'ok');
+      $('#pr-apply').disabled = !(n && PCAP && PCAP.write);
+    } catch (e) { note('#pr-prof-note', e.message, 'bad'); }
+  });
+
+  bind('#pr-dry', 'click', async () => {
+    const name = $('#pr-profile').value;
+    note('#pr-prof-note', 'planning…');
+    try {
+      const d = await api('/api/params/apply', { profile: name, commit: false });
+      renderDiff({ would_write: d.would_write }, 'plan');
+      const nref = (d.refused || []).length;
+      note('#pr-prof-note',
+           `DRY RUN — ${d.would_write.length} would be written` +
+           (nref ? `, ${nref} refused by firmware` : '') + '. Nothing changed.',
+           'ok');
+      $('#pr-apply').disabled = !(d.would_write.length && PCAP && PCAP.write);
+    } catch (e) { note('#pr-prof-note', e.message, 'bad'); }
+  });
+
+  bind('#pr-apply', 'click', async () => {
+    const name = $('#pr-profile').value;
+    // Two confirmations, and the second requires typing the profile name.
+    // A parameter write is persistent with no undo; a single OK button is
+    // not proportionate to that.
+    if (!confirm(`Apply profile "${name}" to the drive?\n\n` +
+                 `Parameter writes are PERSISTENT and have NO UNDO — the same ` +
+                 `as editing on the keypad.\n\nA snapshot of the current ` +
+                 `values will be saved first, and the write is refused if ` +
+                 `that snapshot cannot be written.`)) return;
+    if (prompt(`Type the profile name to confirm:`) !== name) {
+      note('#pr-prof-note', 'aborted — name did not match', 'warn');
+      return;
+    }
+    note('#pr-prof-note', 'writing…');
+    try {
+      const d = await api('/api/params/apply', { profile: name, commit: true });
+      const w = d.written.length, f = d.failed.length;
+      note('#pr-prof-note',
+           `${w} written and verified` + (f ? `, ${f} did not take` : '') +
+           ` · backup ${(d.backup || '').split('/').pop()}`, f ? 'warn' : 'ok');
+      renderDiff({ rows: d.written.concat(d.failed).map(r =>
+        ({ ...r, live: r.after, match: r.after === r.target })) }, 'diff');
+      loadParams();
+    } catch (e) { note('#pr-prof-note', e.message, 'bad'); }
+  });
+
+  bind('#pr-snap', 'click', async () => {
+    note('#pr-snap-out', 'reading every known parameter…');
+    try {
+      const d = await api('/api/params/snapshot',
+                          { note: $('#pr-snap-note').value });
+      note('#pr-snap-out',
+           `${d.read} read${d.failed.length ? `, ${d.failed.length} unreadable`
+                                            : ''} → ${d.file.split('/').pop()}`,
+           'ok');
+    } catch (e) { note('#pr-snap-out', e.message, 'bad'); }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', wireParams);
