@@ -17,6 +17,7 @@ blade characterisation, and a web dashboard.
 |---|---|
 | **Learn the rig from scratch** | **`TRAINING.md`** — start here if you are new |
 | **Run a blade test today** | **`docs/07_blade_campaign.md`** — the user guide |
+| **Going to the tunnel tomorrow** | **`NEXT_SESSION.md`** — print it |
 | **Know what to do next** | **`TODO.md`** |
 | **Just spin the fan** | `scripts/rpm.py` — one file, type an RPM |
 | **Wire it up for the first time** | **`PLAYBOOK.md`** — wiring → first gust |
@@ -28,6 +29,7 @@ blade characterisation, and a web dashboard.
 | **Wire in the PMC or the load** | `docs/05_integration.md` |
 | **Connect the Chroma load** | `docs/06_chroma.md` |
 | **Identify the DAQ channels** | `docs/08_march_daq.md` |
+| **Read or write drive parameters** | `firmware/acs550_pmc_v3/README.md` |
 | **Present this to somebody** | `docs/09_slides_jeong.md` |
 | **Use the dashboard** | `webapp/README.md` |
 | **See where the calibration came from** | `reference/README.md` |
@@ -146,6 +148,7 @@ each. ~10 minutes of continuous tunnel time. See
 
 ```
 windtunnel-control/
+├── NEXT_SESSION.md          the next visit, in order — print it
 ├── TRAINING.md              new here? start with this
 ├── TODO.md                  what to do next, in dependency order
 ├── PLAYBOOK.md              wiring → first gust, in order
@@ -187,8 +190,16 @@ windtunnel-control/
 │   ├── drive_profile.py     snapshot / diff / apply drive parameters
 │   └── merge_load_facts.py  restore load-side config after an overwrite
 │
+├── firmware/
+│   ├── acs550_pmc/          the original PMC sketch — untouched
+│   └── acs550_pmc_v3/       adds RD/WR parameter access
+│
+├── blades/                  rotor geometry, named to match --blade
+├── data/profiles/           drive parameter sets
+├── data/snapshots/          timestamped records of what the drive held
+│
 ├── webapp/                  Flask dashboard (URI palette)
-├── tests/                   93 tests, no hardware needed
+├── tests/                   108 tests, no hardware needed
 ├── examples/                offline demos, DAQ integration patterns
 ├── docs/                    architecture, code, gusts, load, campaign
 └── reference/               nameplate photos, reports, raw data
@@ -202,7 +213,7 @@ windtunnel-control/
 cd tests && python -m pytest -q
 ```
 
-93 tests, ~45 seconds, entirely against simulators. Weighted toward the
+108 tests, ~45 seconds, entirely against simulators. Weighted toward the
 properties that hurt on real hardware — over-limit profiles refused rather than
 clipped, mid-run faults aborting, every exit path stopping the fan, and no path
 that unloads a spinning rotor. Run them after any change.

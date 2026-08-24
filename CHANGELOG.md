@@ -1,5 +1,73 @@
 # Changelog
 
+## v4.2 — 2026-08-24
+
+Off-rig session. Analysis, tooling and tests; no hardware was touched.
+
+### The March DAQ capture is identified
+
+**ch3/ch4/ch6 are the generator's three phases.** They correlate mutually at
+−0.50, −0.51, −0.51; cos(120°) is −0.5 exactly.
+
+Which means **rotor speed is already in that file.** A Clarke transform gives
+the electrical angle directly, so its derivative is rotation frequency:
+5.75 → 16.07 Hz across the run. The only missing number is the generator's
+pole count, and it converts every past capture retroactively. If those
+channels are still landed, the measurement blocking Cp(λ) needs no new sensor.
+
+- ch5 answered: a half-scale copy of ch4 (r = 0.98, ratio 0.495)
+- **The "factor of 8" anomaly was an artefact.** A fold-change is meaningless
+  when a signal's baseline sits near zero; ch1 has a −0.194 V offset. The
+  offset-free test is the correlation, and ch1 vs rotor frequency gives
+  r = 0.998, R² = 0.997 against a straight line — which also independently
+  supports the linear-output anemometer finding.
+- Two acquisition faults for next session: ch3/4/6 sit at 98% of ADC range
+  and will clip, and ch2 is an unconnected input at mid-rail.
+
+### Drive parameter access
+
+`firmware/acs550_pmc_v3/` — a **new** sketch; the original is untouched.
+`RD` / `WR` / `UNLOCK` / `LOCK`, every write read back and reported as
+`before → after`.
+
+**The refusal list lives in firmware, not the host**, because a host config
+file can be copied, edited in a hurry and applied by somebody who did not read
+it. Group 53, 3018/3019, group 99 and groups 01–04 are refused at any time
+with no override.
+
+- `src/drive_profile.py` — snapshot / scan / diff / promote / apply
+- Full **scan** discovers every parameter that exists, ~2,200 round trips —
+  the only way to capture a configuration you did not write
+- A snapshot is applyable exactly like a profile: that is the restore path
+- Parameters tab rebuilt around it, and it now asks the transport what it can
+  do before offering buttons the link cannot honour
+
+### The digital twin earned its name
+
+`src/twin_residual.py` fits the source model to every measured wind speed and
+reports the gap. The residual was **positive at all 14 wind speeds** —
+one-sided, so structure rather than noise. Testing the alternative: a linear
+Thévenin form beats the aerodynamic √ form at **14 of 14** by a factor of 2–6
+in RMSE.
+
+**This rig's electrical behaviour is dominated by generator winding resistance
+plus wiring, not rotor aerodynamics.** `load_sim.py` now defaults to that
+model, and the peak-finder tests run against both — a detector tested only
+against the curve it was tuned on has not been tested.
+
+### Added
+
+- `src/cp_lambda.py` — P_max(v) → Cp(λ), ready for rotor speed. Refuses to run
+  without it. Reports Cp_elec, not Cp.
+- `tests/test_dashboard.py` — 12 static checks. There were no frontend tests
+  at all, and both dashboard-killing bugs were statically detectable. It found
+  `#cfg-reload` still had no button.
+- `docs/08_march_daq.md`, `docs/09_slides_jeong.md`
+- `docs/diagrams/architecture.svg` regenerated — the old one showed a
+  Raspberry Pi and an FTDI cable, the topology that was rejected
+
+**108 tests passing.**
+
 ## v4.1 — 2026-08-22
 
 Dashboard hardening. Three audit rounds by five independent reviewers each —

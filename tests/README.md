@@ -9,7 +9,7 @@ Two suites:
 
 | File | What it protects |
 |---|---|
-| `test_tunnel.py` | the safety and physics properties — 57 tests |
+| `test_tunnel.py` | the safety and physics properties — 108 tests |
 | `test_docs.py` | the documentation's claims — 13 tests, instant |
 
 Everything runs against the simulator — no hardware, no serial port. About

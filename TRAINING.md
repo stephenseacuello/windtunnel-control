@@ -126,7 +126,7 @@ cd webapp && python app.py --dry-run          # → http://127.0.0.1:5000
 cd tests && python -m pytest -q
 ```
 
-93 tests, ~45 seconds. Read a few in `tests/test_peak_finder.py` — they are
+108 tests, ~45 seconds. Read a few in `tests/test_peak_finder.py` — they are
 written as statements about what must never happen, and they are a faster way
 to learn the rig's failure modes than any prose.
 
@@ -206,6 +206,42 @@ Then look at what came out:
 If any point says `ceiling`, the ramp never reached the peak — raise
 `--max-amps`. If any says `load-cutout`, the load quit before the rotor did;
 the peak power is still good but the threshold is a lower bound.
+
+---
+
+## 5b · The tools you have not met yet
+
+Worth ten minutes each, all runnable now.
+
+**The dashboard's Turbine and Blades tabs.** The interlock indicator, the live
+load, a blade-sweep runner, and a digital twin that spins your actual rotor
+geometry. The twin's rotor speed is **inferred from terminal voltage, not
+measured** — the panel says so, and it shows `no data` rather than a confident
+zero when telemetry stops.
+
+**Drive parameters.** `src/drive_profile.py` and the dashboard's Parameters
+tab. Snapshot what the drive holds, diff it against a profile, restore a
+saved one. Needs PMC firmware 3.0; the refusal list lives in that firmware,
+not the host, because a host config file can be copied and edited in a hurry.
+
+```bash
+python src/drive_profile.py snapshot --name baseline --note "as found"
+python src/drive_profile.py diff --profile windtunnel
+```
+
+**The twin residual.** `src/twin_residual.py` fits the source model to every
+measured wind speed and reports the gap. This is the part that makes a twin a
+twin rather than a render — and it already earned its keep: the residual was
+one-sided at all fourteen wind speeds, which said the model was missing a
+term, and it was.
+
+```bash
+python src/twin_residual.py --sweep logs/sweep_v2_Ra20_points.csv
+```
+
+**Cp(λ).** `src/cp_lambda.py` is ready for the moment rotor speed exists. It
+refuses to run without it, deliberately — without rotor speed you have
+P_max(v), not Cp(λ).
 
 ---
 

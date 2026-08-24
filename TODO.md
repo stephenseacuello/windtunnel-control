@@ -7,6 +7,9 @@ gust work; **Path B** runs in parallel and is independent.
 
 ## AT THE TUNNEL — next session
 
+> **`NEXT_SESSION.md` is the printable version of this**, ordered so
+> nothing waits on something later. Take that one to the rig.
+
 Everything here needs you physically at the rig. Roughly two hours, and the
 first two items block the science.
 
@@ -156,7 +159,7 @@ Analysed off the rig — see **`docs/08_march_daq.md`**.
 ## DONE
 
 - Modbus driver, gust generation, feedforward, closed-loop velocity, dashboard
-- 77 tests, no hardware needed
+- 108 tests, no hardware needed
 - Transport abstraction — direct or PMC, same code above it
 - Chroma driver with USB/serial/VISA/TCP and the turbine interlock
 - Cp(λ) sweep with the stall guard

@@ -148,6 +148,23 @@ unattended — that watchdog is the entire reason it's acceptable to command a
 
 ---
 
+## PARAMETER ACCESS  (PMC firmware 3.0+)
+
+    RD 1105                 read any parameter
+    WR 2202 300             write one — needs UNLOCK first
+    UNLOCK                  enables writes for 120 s, lapses on RUN
+
+    python src/drive_profile.py snapshot --name baseline
+    python src/drive_profile.py diff --profile windtunnel
+
+REFUSED BY FIRMWARE, ALWAYS — set these on the keypad:
+    group 53 (5302-5399)    serial config of the link you are talking over
+    3018 / 3019             the comm-loss watchdog
+    group 99                the motor model
+    groups 01-04            read-only
+
+---
+
 ## EVERY SESSION
 
 ```
