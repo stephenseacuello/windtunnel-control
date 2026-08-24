@@ -214,6 +214,7 @@ class PMCTransport(Transport):
         self._lock = threading.Lock()
         self._last_stat = {}
         self._stat_at = 0.0
+        self._rdwr = False       # set at connect by probing RD
 
     def connect(self):
         import serial
@@ -229,6 +230,11 @@ class PMCTransport(Transport):
         # and turns a simple request/response protocol into a parsing problem.
         self.command("STREAM 0")
         self.command(f"WD {int(self.host_watchdog_ms)}")
+        self._rdwr = self._probe_rdwr()
+        if not self._rdwr:
+            print("  NOTE  this PMC has no RD/WR — parameter access "
+                  "unavailable.\n        Flash firmware/acs550_pmc_v3/ to "
+                  "enable it.")
         return self
 
     def close(self):
@@ -358,7 +364,59 @@ class PMCTransport(Transport):
         self._last_stat, self._stat_at = out, time.monotonic()
         return out
 
+    # Firmware 3.0 added RD/WR. Probed once at connect so a v2 PMC still
+    # works — it simply answers ERR and the emulated path below is used.
+    def _probe_rdwr(self):
+        try:
+            return self.command("RD 1105").startswith("OK")
+        except TransportError:
+            return False
+
+    def read_param(self, pnum):
+        """Read one drive parameter by keypad number. Needs firmware >= 3.0."""
+        r = self.command(f"RD {int(pnum)}")
+        if not r.startswith("OK"):
+            raise TransportError(
+                f"the PMC refused RD {pnum}: {r}. Firmware 3.0 or later is "
+                f"needed for parameter access; older builds are "
+                f"command-shaped only.")
+        return int(r.split()[-1])
+
+    def write_param(self, pnum, value):
+        """
+        Write one drive parameter. Persistent, no undo.
+
+        The refusal list lives in the PMC firmware, not here, so a host-side
+        config file cannot talk its way past it. Group 53, 3018/3019 and
+        group 99 are refused outright; everything else needs UNLOCK.
+        """
+        r = self.command(f"WR {int(pnum)} {int(value)}")
+        if not r.startswith("OK"):
+            raise TransportError(f"the PMC refused WR {pnum}: {r}")
+        # "OK WR 2202 300 -> 250"
+        parts = r.split()
+        return {"param": int(pnum), "before": int(parts[3]),
+                "after": int(parts[-1])}
+
+    def unlock_writes(self):
+        r = self.command("UNLOCK")
+        if not r.startswith("OK"):
+            raise TransportError(f"UNLOCK refused: {r}")
+        return True
+
+    def lock_writes(self):
+        try:
+            self.command("LOCK")
+        except TransportError:
+            pass
+
     def read(self, addr, count=1):
+        # Registers the telemetry can serve are answered from STAT, which is
+        # one round trip for all of them. Anything else goes out as RD.
+        if addr not in (self.ADDR_CW, self.ADDR_REF, self.ADDR_SW,
+                        self.ADDR_ACT1, self.ADDR_ACT2) and self._rdwr:
+            return [self.read_param(addr + 1) for addr in
+                    range(addr, addr + count)]
         s = self.stat()
 
         # The PMC reports a state word rather than the drive's raw status
@@ -398,8 +456,9 @@ class PMCTransport(Transport):
                 # a wrong calibration.
                 raise TransportError(
                     f"the PMC line protocol does not expose register {a}. "
-                    f"Read it from the keypad, or use the direct transport "
-                    f"for commissioning.")
+                    f"Flash acs550-pmc 3.0 (firmware/acs550_pmc_v3/) for "
+                    f"RD/WR, read it from the keypad, or use the direct "
+                    f"transport for commissioning.")
         return vals
 
     def write(self, addr, value):
@@ -410,9 +469,14 @@ class PMCTransport(Transport):
             # The PMC owns the ABB control-word handshake; the host expresses
             # intent and lets it do the sequencing.
             r = self.command("RUN" if value == 0x047F else "STOP")
+        elif self._rdwr:
+            self.write_param(addr + 1, value)
+            return
         else:
-            raise TransportError(f"cannot write register {addr} over the PMC "
-                                 f"line protocol")
+            raise TransportError(
+                f"cannot write register {addr} over this PMC firmware. "
+                f"Parameter access needs acs550-pmc 3.0 or later "
+                f"(firmware/acs550_pmc_v3/).")
         if r.startswith("ERR"):
             raise TransportError(f"PMC rejected the command: {r}")
 

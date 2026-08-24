@@ -5,137 +5,83 @@ gust work; **Path B** runs in parallel and is independent.
 
 ---
 
-## PATH A — get the tunnel under control
+## AT THE TUNNEL — next session
 
-Nothing gust-related works until this is done. Roughly one afternoon.
+Everything here needs you physically at the rig. Roughly two hours, and the
+first two items block the science.
 
-### A1 · Land the PMC  ⚠ decision already made
+### 1 · The two numbers that block Cp  ⚠ do these first
 
-- [ ] **PMC on X1-29/30/31. The FTDI cable does not get landed.**
-      One Modbus master only — two is two things commanding a 15 HP fan with
-      neither aware of the other. Keep the FTDI on the bench for
-      commissioning if the PMC misbehaves, but never both wired.
-- [ ] **RS-485 termination DIP → ON.** Photographed OFF. Red 2-position block
-      immediately left of terminal 28.
-- [ ] X1 was photographed **empty** — confirm that's still true before landing
-      anything. No Aerolab wiring to work around.
-- [ ] Set `5304` = **8E1 (even)** — matches the PMC firmware. A drive
-      parameter is three keypad presses; reflashing in the field is not.
-- [ ] Set `9802`, `5302`, `5303`, `5305`, `5310`, `5311`, `3018`, `3019`
-      per `PLAYBOOK.md` phase 6
-- [ ] **Power-cycle the drive.** Group 53 is read at boot only.
+- [ ] **Rotor tip radius**, measured from the AXIS OF ROTATION — not blade
+      length. `turbine.radius_m` is still null and `hub_radius_m` is 0.0.
+      The blade STL gives 245 mm of SPAN; tip radius is hub + root offset +
+      span, and the hub is not in that file. λ scales linearly with it and Cp
+      as 1/r², so it cannot be guessed. **A ruler and two minutes.**
+- [ ] **Rotor RPM from Jeong's DAQ** — which channel, what sensor, what
+      scaling (V→rpm or pulses/rev), and what sample rate. Ask Taegu about
+      `encoder_disc.stl` (40 × 40 × 8 mm, drawn 31 Jul) first — the sensor may
+      already be designed. Without this you have P_max(v), not Cp(λ), and
+      **every blade tested beforehand must be re-run.**
 
-### A2 · Prove it
+### 2 · One more blade  — the campaign's real test
 
-- [ ] `run.py monitor` — read-only, fan cannot move
-- [ ] `run.py selftest` — **confirm par 1105 against the keypad when it asks.**
-      A wrong guess there makes every commanded speed off by exactly 10×,
-      silently.
-- [ ] Hand over control: `1103` = 8, `1001` = 10
-- [ ] `run.py jog 10` — first motion
-- [ ] **Pull the USB mid-run on purpose.** The drive must fault and stop within
-      ~3 s. If it doesn't, `3018`/`3019` are wrong — fix before anything runs
-      unattended.
+- [ ] Run a second rotor with the identical command. ~10 minutes.
 
-### A3 · The two measurements everything depends on
+          python src/blade_sweep.py --blade <name> --notes "<material, layers, finish>" \
+                 --step-amps 0.02 --dwell 1.0
 
-- [x] ~~`RPM_PER_HZ`~~ — **obsolete.** The drive commands speed, not frequency
-      (par 1105 = 2435 rpm), so there is no Hz→RPM link left to verify. The
-      calibration is rpm→velocity directly, measured Feb 13 at R² = 0.9996.
-- [ ] One anemometer reading at a known rpm would still confirm the
-      rpm→velocity half against a second instrument. `run.py verify` does it.
-- [x] **τ measured: 0.63 ± 0.12 s**, five 1-cosine gust runs, 20 Aug 2026.
-      Corner ≈ 0.25 Hz — about five times faster than the 3 s that planning
-      assumed. `tunnel.json` carries 0.80 / 0.80 s as a conservative value.
-      **Use a gust, not a step**: a step saturates the drive's ramp generator,
-      so what you fit is parameter 2202 rather than the tunnel.
+      Confirm the protocol fingerprint matches `94bed28333f7`. This is the
+      first evidence that the protocol actually **discriminates between
+      rotors**, which is what the whole campaign rests on and has never been
+      shown.
+
+### 3 · Two keypad readings, one minute
+
+- [ ] **Par 9904 MOTOR CTRL MODE.** Decides whether "actual speed" is a
+      slip-compensated estimate or just frequency with a fixed assumption.
+- [ ] **Par 2202 ACCEL TIME.** `run.py` reports *"ramp time unreadable over
+      this transport — the slew check is OFF."* Read it once and pass
+      `--max-slew` to restore the check.
+
+### 4 · The watchdog test — if it has never been done
+
+- [ ] **Pull the USB mid-run, deliberately.** The fan must ramp down within a
+      few seconds. That watchdog is the entire reason a laptop is allowed to
+      command a 15 HP fan, and nothing should run unattended until it has
+      been seen to work.
+
+### 5 · Wiring, while you are in there
+
+- [ ] **VSense leads to the rectifier output**, not the load's own binding
+      posts. Otherwise the wiring and the series sense IC sit inside your
+      measurement and every power figure is low by I²R.
+- [ ] **Trace the D-sub cable** already plugged into the Chroma's back panel.
+      If something drives the load through analog programming, that is a
+      second controller competing with SCPI.
+- [ ] **Drive analog output → DAQ**, so fan rpm and rotor rpm share one time
+      base. Six group-15 parameters, a 249 Ω resistor, two wires to X1-7/9.
+      See `docs/05_integration.md`.
+- [ ] Free and optional: **I Mon. BNC → a spare DAQ channel** for a continuous
+      analog current record alongside the polled SCPI readings.
 
 ---
 
-## PATH B — get the load under control
+## DONE — 19-22 Aug 2026
 
-Independent of Path A. Can be done while waiting on tunnel time.
-
-### B1 · Connect it  ✅ done 2026-08-19
-
-- [x] USB A-to-B cable. USB Type B "Device" is the only digital interface.
-- [x] Instrument on USB, not in Local lockout.
-- [x] It is USB-TMC, reached through VISA (`pip install pyvisa pyvisa-py
-      pyusb`, plus `brew install libusb`). macOS has no kernel usbtmc driver,
-      so nothing appears in `/dev` at all — this is expected, not a fault.
-- [x] All 20 SCPI commands accepted. Ranges measured off the instrument and
-      recorded in `tunnel.json`: **CC 2 / 6 / 60 A**, CR 250 / 1250 / 2500 Ω.
-- [x] Fixed: the resource string `probe_load.py` prints could not be opened.
-      The Chroma pads its serial with NULs, the probe strips them for JSON,
-      and the stripped string matches no device. `VisaTransport._resolve()`
-      now matches on the stripped form. See `docs/06_chroma.md`.
-
-**This proves the load listens. It does not prove it works** — every check
-above ran with LOAD OFF and could not draw a milliamp.
-
-### B1a · Prove it actually sinks current  ← the real one
-
-- [ ] **Bench supply, ~24 V, current limit ≥ 2 A, onto the load terminals.**
-      Then:
-
-      python src/load_ramp.py --peak-amps 1.5 --percent 80 --steps 9 \
-                              --csv logs/load_proof.csv
-
-      Ramps 0 → 80% and checks every step three ways: error queue, setpoint
-      readback, measured current. It refuses to start into an open circuit.
-      Bench only — it starts at 0 A and ends with the load off, both of which
-      are wrong with a turbine attached.
-- [ ] Set `load.proven.sinks_current` in `tunnel.json` once it passes.
-
-### B1c · The stall-threshold protocol  — detector built, unproven on hardware
-
-Built and regression-tested against a modelled rotor (`src/peak_finder.py`,
-`src/load_sim.py`, `tests/test_peak_finder.py`, 16 tests). Never run against
-anything real.
-
-- [ ] **Decide `CONF:VOLT:OFF` before the first run.** At the shipped 3.00 V
-      the simulation under-reads the threshold by **30% at 500 rpm** — the
-      load quits before the rotor does, and the recorded number is the
-      instrument's limit. `--volt-off 0.5` recovers it.
-- [ ] **Find `--dwell` empirically.** The simulator has no rotor inertia, so
-      it cannot tell you this. Too short and every point measures a transient.
-      Start at 5 s, halve it until the threshold moves, then double back.
-- [ ] Run one wind speed on hardware (1800 rpm, highest signal) before
-      attempting the sweep.
-- [ ] **The outer loop is not built.** Fan rpm 500→1800 in 100 rpm steps needs
-      the drive, `TurbineInterlock`, and rotor RPM for λ. That belongs in
-      `turbine.py` with the drive side, not in `load_ramp.py`.
-
-### B1b · No programmable protection — decide what covers it
-
-- [ ] **This model has no OVP/OCP/OPP over SCPI.** Every `:PROT:` mnemonic is
-      rejected with `3,"Command Error"`; twelve variants were tried. The 400 W
-      envelope is enforced only by whatever is driving the load.
-      `load_ramp.py` checks V×I before every step. **`CpSweep` does not yet.**
-- [ ] Add the same envelope check to `CpSweep._hold_point` before it runs
-      unattended, or set `CONF:VOLT:OFF` deliberately for the turbine rather
-      than leaving it at the shipped 3.00 V.
-
-### B2 · Trace what's already connected
-
-- [ ] **A cable is already in the D-sub on the load's back panel.** Find out
-      where it goes. If something is driving the load through analog
-      programming, that's a second controller competing with SCPI.
-- [ ] Land the **VSense** leads at the rectifier output, not on the load's own
-      binding posts. In CR mode the load *regulates* on sense — bad sense means
-      it controls to the wrong resistance, not just reports wrong.
-- [ ] Optional, free: **I Mon. BNC → a spare DAQ channel.** Continuous analog
-      current record alongside the polled SCPI readings.
-
-### B3 · Three numbers I need before the first Cp sweep
-
-- [ ] **Rotor tip radius**, from the axis of rotation — not blade length.
-      λ scales linearly with it and Cp inversely with its square.
-- [ ] **Open-circuit DC voltage at a moderate wind speed** (~15 m/s). Sets the
-      resistance ladder. Measure it *briefly* and at low wind — open circuit is
-      the condition the interlock exists to prevent.
-- [ ] **Where turbine RPM comes from** — which DAQ channel, or a separate
-      sensor, and what the code should call to read it.
+- PMC landed and commissioned; drive commands rpm (par 1105 = 2435)
+- First motion, then jog at 500 / 1200 / 1800 rpm
+- **τ = 0.63 ± 0.12 s** from five 1-cosine gusts (use a gust, not a step —
+  a step saturates the ramp generator and you fit par 2202 instead)
+- Chroma proven to sink current: 25 consecutive setpoints tracking to 0.1 mA
+- Load ranges measured off the instrument: CC 2 / 6 / 60 A, CR 250 / 1250 /
+  2500 Ω. No programmable OVP/OCP/OPP on this firmware.
+- `blade_sweep.py` built — 14 wind speeds unattended in ~10 minutes
+- **Reference sweep: v2_Ra20, 14/14 clean, P ∝ v^3.77, R² = 0.998**
+- Dashboard: PMC transport, turbine control, blade library, digital twin
+- **V_oc measured** at every wind speed, taken from the light-load dwells of
+  the sweep rather than a separate open-circuit run — 5.8 V at 15 m/s,
+  23.9 V at 38 m/s. TODO B3's second item, answered without ever deliberately
+  open-circuiting a spinning rotor.
 
 ---
 

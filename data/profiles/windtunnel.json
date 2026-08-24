@@ -1,0 +1,64 @@
+{
+  "name": "windtunnel",
+  "description": "The configuration this software package requires. Values are raw register contents, so a 30.0 s ramp is 300.",
+  "_source": "PLAYBOOK.md phase 6, plus what the drive was observed running on 2026-08-19 to 08-22.",
+  "_warning": "Group 53, 3018/3019 and group 99 are listed for the record and for `diff`. The PMC firmware REFUSES to write them at any time \u2014 group 53 is the serial config of the link the command arrives on, 3018/3019 is the comm-loss watchdog, group 99 is the motor model. Set those from the keypad, deliberately.",
+  "parameters": {
+    "9802": {
+      "value": 1,
+      "why": "COMM PROT SEL = STD MODBUS"
+    },
+    "5302": {
+      "value": 1,
+      "why": "station id 1 (keypad only)"
+    },
+    "5303": {
+      "value": 3,
+      "why": "19200 baud (keypad only)"
+    },
+    "5304": {
+      "value": 2,
+      "why": "8E1 even parity, matches the PMC (keypad only)"
+    },
+    "5305": {
+      "value": 0,
+      "why": "ABB drives profile (keypad only)"
+    },
+    "5310": {
+      "value": 103,
+      "why": "EFB PAR 10 -> 0103 OUTPUT FREQ"
+    },
+    "5311": {
+      "value": 104,
+      "why": "EFB PAR 11 -> 0104 CURRENT"
+    },
+    "5312": {
+      "value": 106,
+      "why": "EFB PAR 12 -> 0106 POWER"
+    },
+    "1001": {
+      "value": 10,
+      "why": "EXT1 COMMANDS = COMM"
+    },
+    "1103": {
+      "value": 8,
+      "why": "REF1 SELECT = COMM"
+    },
+    "1105": {
+      "value": 2435,
+      "why": "REF1 MAX = 2435 rpm. THE number: misread, every commanded speed is wrong by that ratio"
+    },
+    "2002": {
+      "value": 2435,
+      "why": "MAXIMUM SPEED, agrees with 1105"
+    },
+    "3018": {
+      "value": 1,
+      "why": "COMM FAULT FUNC = FAULT (keypad only)"
+    },
+    "3019": {
+      "value": 30,
+      "why": "COMM FAULT TIME = 3.0 s (keypad only)"
+    }
+  }
+}

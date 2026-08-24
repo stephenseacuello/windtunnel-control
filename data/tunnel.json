@@ -150,6 +150,13 @@
       "_metadata_warning": "This blade ID was run with --notes 'PLA, 0.1mm, Ra 20' and later 'PETG, 0.2mm, Ra 20'. One is wrong. Resolve before comparing anything to it.",
       "notes": "PETG, 0.2mm layers, Ra 20",
       "_notes_note": "Confirmed 2026-08-20: PETG 0.2mm is correct for every test so far. An earlier aborted run was mislabelled 'PLA, 0.1mm'; that run produced no usable points and is not in any curve."
+    },
+    "v_open_circuit": {
+      "_note": "Near-open-circuit terminal volts, taken from the first (lightest) dwell of each wind speed in the v2_Ra20 sweep. Loads of 1-10 mA, so within a percent or so of true V_oc. This answers TODO B3's second item WITHOUT a separate open-circuit run - which is the item the interlock exists to discourage.",
+      "at_15mps_v": 5.8,
+      "at_25mps_v": 12.85,
+      "at_38mps_v": 23.92,
+      "scaling": "V_oc ~ v^1.39, not v^1.0 - runaway tip-speed ratio rises with wind speed"
     }
   },
   "tau": 0.8,
