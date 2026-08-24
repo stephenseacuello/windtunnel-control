@@ -115,20 +115,27 @@ RPM-dependent gain difference between the two sessions remains live.
       logging anemometer voltage and a trusted velocity reference together.
       Ten points, 10–55 Hz. Then `fit_sensor.py logs/<sweep>_points.csv`.
 
-### The March 16 DAQ capture
+### The March 16 DAQ capture  ✅ resolved 2026-08-24
 
-- [ ] **What is each channel?** ch1 looks like the anemometer; ch3/4/6 correlate
-      at −0.5 (three sensors at 120° around something rotating); ch5 ≈ 0.485 ×
-      ch4; ch2 sits at 2.5 V of white noise.
-- [ ] **ch5 — deliberate dual-range, or a wiring duplicate?** 20% unexplained
-      residual says it isn't a pure electrical copy.
-- [ ] **ch3/4/6 are at 98% of ADC range.** They will clip the moment conditions
-      get stronger. Drop the gain before the next session.
-- [ ] **ch2 reads 205% of its range** — either on a different range than the
-      others, or railed.
-- [ ] Unresolved: across the run ch1 rises 16.6× while the rotation frequency
-      rises only 2.08×. For a freewheeling rotor at constant λ, or vortex
-      shedding at constant Strouhal, those should track. Off by a factor of 8.
+Analysed off the rig — see **`docs/08_march_daq.md`**.
+
+- [x] **What is each channel?** ch1 anemometer · ch2 unconnected (2.5 V mid-rail)
+      · **ch3/4/6 are the generator's three phases** (mutual correlation −0.50,
+      = cos 120°) · ch5 is a half-scale copy of ch4 (r = 0.98, ratio 0.495).
+- [x] **ch5 — dual-range or duplicate?** A duplicate. It carries no
+      information ch4 does not.
+- [x] **The "factor of 8" anomaly.** An artefact, not physics. ch1 has a
+      −0.194 V offset, so its max/min ratio is meaningless; the offset-free
+      test is the correlation, and ch1 vs rotor frequency is **r = 0.998,
+      R² = 0.997**. A freewheeling rotor at roughly constant λ, as expected.
+- [ ] **ch3/4/6 sit at 98% of ADC range — drop the gain** before the next
+      session. Clipping corrupts the Clarke angle, which is what makes rotor
+      speed recoverable at all.
+- [ ] **ch2 is an unconnected input.** A free channel — fan rpm from the
+      drive's analog output would be a good use of it.
+- [ ] **Get the generator's pole count.** Nameplate or a magnet count. It is
+      the ONLY thing between these three channels and rotor rpm, and it
+      converts every past capture retroactively.
 
 ---
 
