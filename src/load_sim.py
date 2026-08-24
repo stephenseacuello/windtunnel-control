@@ -14,18 +14,24 @@ This reproduces the *shape* the detector has to cope with. It is not a
 prediction of your rotor, and no number that comes out of it belongs in a
 report.
 
-    V(I) = V_oc · sqrt(1 − I/I_stall)          per wind speed
+    V(I) = V_oc · (1 − I/I_stall)              per wind speed  [default]
     V_oc  ∝ v          (voltage follows rotor speed)
     I_stall ∝ v²       (threshold current follows torque)
 
+The linear form is the default because it is what this rig measurably does —
+see `terminals()`. Pass model="sqrt" for the aerodynamic form; the peak
+detector is tested against both.
+
 which puts electrical power P = V·I at a maximum of
 
-    I_peak = ⅔ · I_stall        V_peak = V_oc/√3       P ∝ v³
+    linear   I_peak = ½ · I_stall     V_peak = V_oc/2     P ∝ v³
+    sqrt     I_peak = ⅔ · I_stall     V_peak = V_oc/√3    P ∝ v³
 
-Two consequences fall out of that and both are real:
+The ratio differs; the two consequences do not, and both are real:
 
-  · **peak power is at ⅔ of the stall current**, so a protocol that hunts for
-    the current peak necessarily goes past the power peak to get there.
+  · **peak power is BELOW the stall current** under either model, so a
+    protocol that hunts for the current peak necessarily goes past the power
+    peak to get there.
   · **80% of the stall threshold is past the power peak**, on the falling
     side. Worth knowing before it is described as an operating point.
 
@@ -62,12 +68,19 @@ class SimulatedTurbine:
     """
 
     def __init__(self, peak_watts=4.0, volts_at_peak=12.0, ref_rpm=1800.0,
-                 seed=1):
+                 seed=1, model="thevenin"):
         self.ref_v = wind_mps(ref_rpm)
-        # P_peak = V_oc · I_stall · (2/3)·√(1/3);  V_peak = V_oc/√3
-        self.v_oc_ref = volts_at_peak * math.sqrt(3.0)
-        self.i_stall_ref = peak_watts / (self.v_oc_ref * (2 / 3) *
-                                         math.sqrt(1 / 3))
+        self.model = model
+        if model == "sqrt":
+            # P_peak = V_oc · I_stall · (2/3)·√(1/3);  V_peak = V_oc/√3
+            self.v_oc_ref = volts_at_peak * math.sqrt(3.0)
+            self.i_stall_ref = peak_watts / (self.v_oc_ref * (2 / 3) *
+                                             math.sqrt(1 / 3))
+        else:
+            # V = V_oc(1 - I/I_stall): P peaks at I_stall/2 where V = V_oc/2,
+            # so P_peak = V_oc·I_stall/4 and V at the peak is half open circuit.
+            self.v_oc_ref = 2.0 * volts_at_peak
+            self.i_stall_ref = 4.0 * peak_watts / self.v_oc_ref
         self.fan_rpm = ref_rpm
         self._rng = random.Random(seed)
 
@@ -92,12 +105,34 @@ class SimulatedTurbine:
         Above the threshold the rotor stalls: speed and voltage collapse and
         the load gets nothing, which is what a real one does — not a graceful
         reduced current.
+
+        ── which model, and why it matters ──
+        `sqrt` is the aerodynamic form: the rotor finds an operating point and
+        voltage falls with the square root of load fraction.
+
+        `thevenin` is V_oc − I·R, a source with internal resistance.
+
+        On THIS rig the aerodynamic form is wrong, and it is not close.
+        `twin_residual.py` fitted both to all fourteen wind speeds of the
+        v2_Ra20 sweep: the sqrt residual is positive at every one — one-sided,
+        so structure rather than noise — and the linear form wins at 14 of 14
+        by a factor of 2–6 in RMSE. Generator winding resistance plus the
+        wiring and series sense IC dominate over rotor aerodynamics here.
+
+        The default is therefore `thevenin`. `sqrt` is kept because the peak
+        DETECTOR must cope with either, and the tests exercise it: a detector
+        that only works against the shape it was tuned on has not been tested.
         """
         if demand_a <= 0:
             return self.v_oc, 0.0
         if demand_a >= self.i_stall:
             return 0.0, 0.0
-        v = self.v_oc * math.sqrt(max(0.0, 1.0 - demand_a / self.i_stall))
+        if self.model == "sqrt":
+            v = self.v_oc * math.sqrt(max(0.0, 1.0 - demand_a / self.i_stall))
+        else:
+            # R chosen so the terminals reach zero at i_stall, keeping the
+            # stall threshold identical between the two models.
+            v = self.v_oc * (1.0 - demand_a / self.i_stall)
         return v, demand_a
 
     def noise(self, value, frac=0.004, floor=2e-4):

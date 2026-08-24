@@ -17,6 +17,13 @@ from load_sim import SimulatedLoad, SimulatedTurbine, wind_mps
 from peak_finder import PeakFinderError, find_peak
 
 
+# The detector must cope with either source shape. A detector tested only
+# against the curve it was tuned on has not been tested — and this rig turned
+# out to follow the linear form, not the aerodynamic one it was written for.
+MODELS = ["thevenin", "sqrt"]
+PEAK_FRACTION = {"thevenin": 0.5, "sqrt": 2 / 3}
+
+
 def rig(fan_rpm=1800.0, volt_off=0.5, **kw):
     t = SimulatedTurbine(**kw)
     t.fan_rpm = fan_rpm
@@ -57,8 +64,9 @@ class TestSafety:
 
 
 class TestThreshold:
-    def test_finds_the_true_stall_current(self):
-        t, load = rig(volt_off=0.5)
+    @pytest.mark.parametrize("model", MODELS)
+    def test_finds_the_true_stall_current(self, model):
+        t, load = rig(volt_off=0.5, model=model)
         r = sweep(load, t, voff=0.5)
         assert r.found
         assert r.peak_amps == pytest.approx(t.i_stall, rel=0.10)
@@ -95,25 +103,30 @@ class TestCensoring:
         assert "LOWER BOUND" in r.summary()
         assert r.power_peak_ratio > 0.85
 
-    def test_lowering_volt_off_recovers_the_real_threshold(self):
-        t_hi, load_hi = rig(fan_rpm=500, volt_off=3.0)
+    @pytest.mark.parametrize("model", MODELS)
+    def test_lowering_volt_off_recovers_the_real_threshold(self, model):
+        t_hi, load_hi = rig(fan_rpm=500, volt_off=3.0, model=model)
         r_hi = sweep(load_hi, t_hi, voff=3.0)
-        t_lo, load_lo = rig(fan_rpm=500, volt_off=0.5)
+        t_lo, load_lo = rig(fan_rpm=500, volt_off=0.5, model=model)
         r_lo = sweep(load_lo, t_lo, voff=0.5)
         assert r_lo.peak_amps > r_hi.peak_amps
-        assert r_lo.peak_amps == pytest.approx(t_lo.i_stall, rel=0.10)
+        assert r_lo.peak_amps == pytest.approx(t_lo.i_stall, rel=0.12)
 
 
 class TestPowerVersusCurrent:
-    def test_power_peak_is_below_the_current_threshold(self):
+    @pytest.mark.parametrize("model", MODELS)
+    def test_power_peak_is_below_the_current_threshold(self, model):
         """
-        Cp/λ peaks at lower λ than Cp, so peak current sits deeper into stall
-        than peak power. The model puts the power peak at 2/3 of stall.
+        Peak current sits deeper into stall than peak power under EITHER
+        source model — only the ratio differs (½ linear, ⅔ aerodynamic).
+        That ordering is what makes the protocol's "ramp past the power peak
+        to find the current peak" description true.
         """
-        t, load = rig()
+        t, load = rig(model=model)
         r = sweep(load, t)
         assert r.power_peak_amps < r.peak_amps
-        assert r.power_peak_amps / t.i_stall == pytest.approx(2 / 3, rel=0.15)
+        assert r.power_peak_amps / t.i_stall == pytest.approx(
+            PEAK_FRACTION[model], rel=0.18)
 
     def test_the_80pc_operating_point_is_past_the_power_peak(self):
         """

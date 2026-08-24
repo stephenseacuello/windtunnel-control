@@ -111,7 +111,11 @@ Cup friction at low speed was tested as an explanation and **ruled out** — the
 curvature is spread across the range, not concentrated at the bottom. An
 RPM-dependent gain difference between the two sessions remains live.
 
-- [ ] **One clean sweep settles it:** single session, one DAQ configuration,
+- [ ] **One clean sweep settles it** — though the March analysis now gives
+      independent support for the linear form: anemometer vs rotor
+      frequency is R² = 0.997 against a straight line, and a
+      pressure-sensor form would put curvature there.
+      Single session, one DAQ configuration,
       logging anemometer voltage and a trusted velocity reference together.
       Ten points, 10–55 Hz. Then `fit_sensor.py logs/<sweep>_points.csv`.
 
@@ -141,9 +145,10 @@ Analysed off the rig — see **`docs/08_march_daq.md`**.
 
 ## SOFTWARE — remaining, none blocking
 
-- [ ] Dashboard: load state, turbine power, live Cp(λ) plot
-- [ ] PMC protocol extension for parameter reads — or accept that commissioning
-      happens over the direct transport
+- [x] Dashboard: load state, turbine power ✅ — the live Cp(λ) plot
+      still needs rotor speed
+- [x] PMC protocol extension for parameter reads ✅ — `RD`/`WR`/`UNLOCK`
+      in `firmware/acs550_pmc_v3/`, with the refusal list in firmware
 - [ ] Decide the resistance ladder endpoints once B3 is known
 
 ---

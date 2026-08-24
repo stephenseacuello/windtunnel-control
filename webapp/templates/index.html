@@ -456,7 +456,12 @@
 
     <div class="card">
       <h3>Live values
-        <span class="lbl"><button class="sm" id="pr-refresh">Refresh</button></span></h3>
+        <span class="lbl">
+          <button class="sm" id="pr-refresh">Refresh</button>
+          <button class="sm" id="cfg-reload"
+                  title="Re-read tunnel.json from disk — use after another tool
+has written it">Reload tunnel.json</button>
+        </span></h3>
       <div class="note warn">Writes are persistent — the same as editing on
         the keypad, with no undo. Group 53 (the serial config of this very
         link), 3018/3019 (the comm-loss watchdog), group 99 (the motor model)
