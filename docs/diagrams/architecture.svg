@@ -1,151 +1,138 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 1360" width="1140" height="1360" font-family="Helvetica, Arial, sans-serif">
-  <rect width="1140" height="1360" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720"
+     font-family="Inter, Helvetica Neue, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2b4a63"/></marker>
+    <marker id="ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8a5a1f"/></marker>
+    <marker id="ad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#5b7288"/></marker>
+    <style>
+      .t{font-size:13.5px;fill:#0d2338;font-weight:600}
+      .s{font-size:10.5px;fill:#5b7288}
+      .lbl{font-size:10px;fill:#2b4a63;font-weight:600}
+      .lblp{font-size:10px;fill:#8a5a1f;font-weight:600}
+      .box{fill:#fff;stroke:#c3d3e0;stroke-width:1.5;rx:7}
+      .safe{fill:#eef7f0;stroke:#1f9d55;stroke-width:2}
+      .warn{fill:#fdf4e7;stroke:#b8860b;stroke-width:1.5}
+      .h{font-size:19px;fill:#0d2338;font-weight:700}
+      .sub{font-size:12px;fill:#5b7288}
+      .note{font-size:10.5px;fill:#3d5a72}
+      .cap{font-size:11px;font-weight:700;fill:#5b7288;letter-spacing:.09em}
+    </style>
+  </defs>
 
-  <text x="45" y="42" font-size="22" font-weight="700" fill="#002147">Wind Tunnel Control — System Architecture</text>
-  <text x="45" y="63" font-size="12.5" fill="#5b7288">Two paths matter: what commands the fan, and what protects you when that path fails.</text>
-  <line x1="45" y1="76" x2="1095" y2="76" stroke="#002147" stroke-width="1.5"/>
+  <rect width="1280" height="720" fill="#fbfcfd"/>
+  <text x="46" y="46" class="h">Aerolab Wind Tunnel — Control &amp; Measurement Architecture</text>
+  <text x="46" y="68" class="sub">University of Rhode Island · Sodhi lab, with Jeong lab on acquisition</text>
 
-  <!-- ============ PHYSICAL ============ -->
-  <text x="45" y="106" font-size="14" font-weight="700" fill="#002147">1 — PHYSICAL</text>
+  <!-- ================= COMMAND CHAIN ================= -->
+  <text x="46" y="112" class="cap">COMMAND</text>
 
-  <rect x="45" y="120" width="150" height="66" fill="#fff" stroke="#0d2338" stroke-width="1.6" rx="3"/>
-  <text x="120" y="146" font-size="13" text-anchor="middle" font-weight="700">Raspberry Pi</text>
-  <text x="120" y="164" font-size="10.5" text-anchor="middle" fill="#5b7288">at the tunnel</text>
-  <text x="120" y="178" font-size="10" text-anchor="middle" fill="#b26a00">no UPS — see note</text>
+  <rect class="box" x="46"  y="126" width="150" height="72"/>
+  <text x="121" y="152" class="t" text-anchor="middle">Host (macOS / Pi)</text>
+  <text x="121" y="170" class="s" text-anchor="middle">Python · logging</text>
+  <text x="121" y="186" class="s" text-anchor="middle" fill="#b03030">not trusted with safety</text>
 
-  <line x1="195" y1="153" x2="232" y2="153" stroke="#2277b3" stroke-width="2"/>
-  <polygon points="240,153 230,148 230,158" fill="#2277b3"/>
-  <text x="216" y="145" font-size="9.5" text-anchor="middle" fill="#5b7288">USB</text>
+  <rect class="safe" x="256" y="126" width="168" height="72" rx="7"/>
+  <text x="340" y="150" class="t" text-anchor="middle">Portenta Machine Ctrl</text>
+  <text x="340" y="168" class="s" text-anchor="middle">owns the Modbus loop</text>
+  <text x="340" y="184" class="s" text-anchor="middle" fill="#1f7a44">and BOTH watchdogs</text>
 
-  <rect x="240" y="120" width="150" height="66" fill="#e0f2f1" stroke="#2277b3" stroke-width="1.6" rx="3"/>
-  <text x="315" y="143" font-size="12" text-anchor="middle" font-weight="700" fill="#2277b3">FTDI USB-RS485</text>
-  <text x="315" y="160" font-size="10" text-anchor="middle" fill="#2277b3">1.8 m, wire-ended</text>
-  <text x="315" y="175" font-size="10" text-anchor="middle" fill="#5b7288">X1-29 / 30 / 31</text>
+  <rect class="box" x="484" y="126" width="168" height="72"/>
+  <text x="568" y="150" class="t" text-anchor="middle">ABB ACS550 VFD</text>
+  <text x="568" y="168" class="s" text-anchor="middle">15 HP · 208–240 V 3φ</text>
+  <text x="568" y="184" class="s" text-anchor="middle">speed ref, 2435 rpm FS</text>
 
-  <line x1="390" y1="153" x2="427" y2="153" stroke="#2277b3" stroke-width="2.4"/>
-  <polygon points="435,153 425,148 425,158" fill="#2277b3"/>
-  <text x="412" y="145" font-size="9.5" text-anchor="middle" fill="#2277b3">Modbus</text>
+  <rect class="box" x="712" y="126" width="132" height="72"/>
+  <text x="778" y="158" class="t" text-anchor="middle">Fan motor</text>
+  <text x="778" y="176" class="s" text-anchor="middle">3φ induction</text>
 
-  <rect x="435" y="110" width="180" height="86" fill="#fff" stroke="#0d2338" stroke-width="2" rx="3"/>
-  <text x="525" y="134" font-size="13.5" text-anchor="middle" font-weight="700">ACS550 VFD</text>
-  <text x="525" y="151" font-size="10.5" text-anchor="middle" fill="#5b7288">15 HP · 208–240 V</text>
-  <rect x="450" y="160" width="150" height="26" fill="#fdf6e9" stroke="#b26a00" stroke-width="1.2" rx="2"/>
-  <text x="525" y="177" font-size="10" text-anchor="middle" fill="#b26a00" font-weight="600">watchdog 3018/3019</text>
+  <rect class="box" x="904" y="126" width="150" height="72"/>
+  <text x="979" y="152" class="t" text-anchor="middle">Test section</text>
+  <text x="979" y="170" class="s" text-anchor="middle">turbine rotor</text>
+  <text x="979" y="186" class="s" text-anchor="middle">10.1 – 37.5 m/s</text>
 
-  <line x1="615" y1="153" x2="652" y2="153" stroke="#b3261e" stroke-width="2"/>
-  <polygon points="660,153 650,148 650,158" fill="#b3261e"/>
+  <line x1="196" y1="162" x2="252" y2="162" stroke="#2b4a63" stroke-width="1.8" marker-end="url(#a)"/>
+  <text x="224" y="154" class="lbl" text-anchor="middle">USB</text>
+  <line x1="424" y1="162" x2="480" y2="162" stroke="#2b4a63" stroke-width="1.8" marker-end="url(#a)"/>
+  <text x="452" y="148" class="lbl" text-anchor="middle">RS-485</text>
+  <text x="452" y="160" class="lbl" text-anchor="middle">Modbus</text>
+  <text x="452" y="176" class="s" text-anchor="middle">X1-29/30/31</text>
+  <line x1="652" y1="162" x2="708" y2="162" stroke="#8a5a1f" stroke-width="3" marker-end="url(#ap)"/>
+  <text x="680" y="152" class="lblp" text-anchor="middle">3φ</text>
+  <line x1="844" y1="162" x2="900" y2="162" stroke="#5b7288" stroke-width="1.8" marker-end="url(#ad)"/>
+  <text x="872" y="152" class="lbl" text-anchor="middle">wind</text>
 
-  <rect x="660" y="120" width="130" height="66" fill="#fff" stroke="#0d2338" stroke-width="1.6" rx="3"/>
-  <text x="725" y="146" font-size="13" text-anchor="middle" font-weight="700">Fan motor</text>
-  <text x="725" y="164" font-size="10.5" text-anchor="middle" fill="#5b7288">3PH induction</text>
+  <!-- ================= POWER CHAIN ================= -->
+  <text x="46" y="292" class="cap">POWER &amp; MEASUREMENT</text>
 
-  <line x1="790" y1="153" x2="827" y2="153" stroke="#0d2338" stroke-width="1.6"/>
-  <polygon points="835,153 825,148 825,158" fill="#0d2338"/>
+  <rect class="box" x="904" y="306" width="150" height="66"/>
+  <text x="979" y="332" class="t" text-anchor="middle">Rectifier</text>
+  <text x="979" y="350" class="s" text-anchor="middle">3φ → DC</text>
 
-  <rect x="835" y="120" width="145" height="66" fill="#fff" stroke="#0d2338" stroke-width="1.6" rx="3"/>
-  <text x="907" y="146" font-size="13" text-anchor="middle" font-weight="700">Test section</text>
-  <text x="907" y="164" font-size="10.5" text-anchor="middle" fill="#5b7288">model + anemometer</text>
+  <rect class="box" x="676" y="306" width="150" height="66"/>
+  <text x="751" y="332" class="t" text-anchor="middle">V / I sense IC</text>
+  <text x="751" y="350" class="s" text-anchor="middle">in series</text>
 
-  <!-- measurement return path -->
-  <path d="M907 186 L907 216 L120 216 L120 194" fill="none" stroke="#1f7a52" stroke-width="1.8" stroke-dasharray="6 3"/>
-  <polygon points="120,186 115,196 125,196" fill="#1f7a52"/>
-  <text x="513" y="231" font-size="10.5" text-anchor="middle" fill="#1f7a52">measured wind speed — DAQ or serial anemometer → velocity_source.py</text>
+  <rect class="box" x="404" y="292" width="196" height="94"/>
+  <text x="502" y="318" class="t" text-anchor="middle">Chroma 63004-150-60</text>
+  <text x="502" y="336" class="s" text-anchor="middle">DC electronic load</text>
+  <text x="502" y="352" class="s" text-anchor="middle">150 V · 60 A · 400 W</text>
+  <text x="502" y="372" class="s" text-anchor="middle" font-style="italic">sets the operating point</text>
 
-  <!-- safety chain -->
-  <rect x="45" y="252" width="935" height="42" fill="#fdeceb" stroke="#b3261e" stroke-width="1.6" rx="3"/>
-  <text x="60" y="270" font-size="11.5" font-weight="700" fill="#b3261e">SAFETY CHAIN — entirely outside the software</text>
-  <text x="60" y="286" font-size="10.5" fill="#b3261e">Hardwired E-stop in the contactor circuit · disconnect · the drive's own comm watchdog. Nothing above is part of this, and nothing above should ever become part of it.</text>
+  <line x1="979" y1="198" x2="979" y2="302" stroke="#8a5a1f" stroke-width="3" marker-end="url(#ap)"/>
+  <text x="1000" y="252" class="lblp">rotor</text>
+  <line x1="900" y1="339" x2="830" y2="339" stroke="#8a5a1f" stroke-width="3" marker-end="url(#ap)"/>
+  <line x1="672" y1="339" x2="604" y2="339" stroke="#8a5a1f" stroke-width="3" marker-end="url(#ap)"/>
+  <text x="638" y="330" class="lblp" text-anchor="middle">DC</text>
 
-  <line x1="45" y1="318" x2="1095" y2="318" stroke="#d3e0eb"/>
+  <path d="M404 320 L200 320 L200 198" fill="none" stroke="#2b4a63"
+        stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#a)"/>
+  <text x="292" y="312" class="lbl" text-anchor="middle">USB-TMC (VISA) — SCPI</text>
 
-  <!-- ============ SOFTWARE LAYERS ============ -->
-  <text x="45" y="348" font-size="14" font-weight="700" fill="#002147">2 — SOFTWARE LAYERS</text>
-  <text x="45" y="366" font-size="11.5" fill="#5b7288">Lower layers encode facts about this drive that are easy to get wrong. Upper layers encode your experiment and should change freely.</text>
+  <!-- ================= DAQ ================= -->
+  <rect class="warn" x="1084" y="292" width="150" height="94" rx="7"/>
+  <text x="1159" y="318" class="t" text-anchor="middle">Jeong lab DAQ</text>
+  <text x="1159" y="336" class="s" text-anchor="middle">6 ch · 300 Hz</text>
+  <text x="1159" y="354" class="s" text-anchor="middle">ch3/4/6 = 3φ</text>
+  <text x="1159" y="372" class="s" text-anchor="middle" fill="#8a6d1f">→ rotor rpm</text>
+  <line x1="1054" y1="339" x2="1080" y2="339" stroke="#5b7288" stroke-width="1.6"
+        stroke-dasharray="5 3" marker-end="url(#ad)"/>
+  <line x1="1054" y1="162" x2="1159" y2="162" stroke="#5b7288" stroke-width="1.6"
+        stroke-dasharray="5 3"/>
+  <line x1="1159" y1="162" x2="1159" y2="288" stroke="#5b7288" stroke-width="1.6"
+        stroke-dasharray="5 3" marker-end="url(#ad)"/>
+  <text x="1120" y="154" class="s" text-anchor="middle">anemometer</text>
 
-  <rect x="45" y="382" width="935" height="52" fill="#eaf1f8" stroke="#30557e" stroke-width="1.4" rx="3"/>
-  <text x="60" y="402" font-size="12" font-weight="700" fill="#002147">Interfaces</text>
-  <text x="60" y="420" font-size="11" fill="#0d2338" font-family="ui-monospace,monospace">scripts/rpm.py · src/run.py · webapp/ (Flask dashboard)</text>
-  <text x="965" y="414" font-size="10" text-anchor="end" fill="#5b7288">edit freely</text>
+  <!-- ================= SAFETY ================= -->
+  <rect x="46" y="434" width="1188" height="86" rx="8" fill="#fdf0f0" stroke="#c62828" stroke-width="2"/>
+  <text x="66" y="462" class="t" fill="#8b1a1a">SAFETY CHAIN — entirely outside the software</text>
+  <text x="66" y="482" class="note">Hardwired <tspan font-weight="700">E-STOP</tspan> in the contactor circuit · disconnect · the drive's own comm watchdog.</text>
+  <text x="66" y="500" class="note">Nothing above is part of this chain, and nothing above should ever become part of it.</text>
 
-  <rect x="45" y="442" width="935" height="66" fill="#f5f8fb" stroke="#30557e" stroke-width="1.4" rx="3"/>
-  <text x="60" y="462" font-size="12" font-weight="700" fill="#002147">Experiment</text>
-  <text x="60" y="480" font-size="11" fill="#0d2338" font-family="ui-monospace,monospace">gusts.py · feedforward.py · characterize.py · preflight.py · analyze.py · fit_sensor.py</text>
-  <text x="60" y="497" font-size="10.5" fill="#5b7288">profile shapes, realizability checks, system identification, log analysis</text>
-  <text x="965" y="476" font-size="10" text-anchor="end" fill="#5b7288">edit freely</text>
+  <!-- ================= INVARIANTS ================= -->
+  <rect x="46" y="546" width="386" height="140" rx="8" fill="#fff" stroke="#c3d3e0" stroke-width="1.5"/>
+  <text x="66" y="572" class="t">Two watchdogs</text>
+  <text x="66" y="594" class="note">Drive par 3018/3019 — the drive stops the fan</text>
+  <text x="66" y="610" class="note">if the <tspan font-weight="700">PMC</tspan> goes quiet.</text>
+  <text x="66" y="634" class="note">PMC host watchdog — the PMC stops the fan</text>
+  <text x="66" y="650" class="note">if the <tspan font-weight="700">host</tspan> goes quiet (5000 ms).</text>
+  <text x="66" y="672" class="s">Do not put the host on a UPS.</text>
 
-  <rect x="45" y="516" width="935" height="66" fill="#f5f8fb" stroke="#30557e" stroke-width="1.4" rx="3"/>
-  <text x="60" y="536" font-size="12" font-weight="700" fill="#002147">Execution</text>
-  <text x="60" y="554" font-size="11" fill="#0d2338" font-family="ui-monospace,monospace">player.py · velocity_loop.py · velocity_source.py · calibration.py · config.py</text>
-  <text x="60" y="571" font-size="10.5" fill="#5b7288">drift-free scheduling, streaming logs, closed loop, unit conversion</text>
-  <text x="965" y="550" font-size="10" text-anchor="end" fill="#b26a00">careful</text>
+  <rect x="448" y="546" width="386" height="140" rx="8" fill="#fff" stroke="#c3d3e0" stroke-width="1.5"/>
+  <text x="468" y="572" class="t">One Modbus master</text>
+  <text x="468" y="594" class="note">RS-485 permits exactly one. The PMC is it.</text>
+  <text x="468" y="616" class="note">A direct host-to-drive cable must never be</text>
+  <text x="468" y="632" class="note">landed at the same time — two processes</text>
+  <text x="468" y="648" class="note">commanding a 15 HP fan, neither aware of</text>
+  <text x="468" y="664" class="note">the other, and neither log showing it.</text>
 
-  <rect x="45" y="590" width="935" height="66" fill="#e0f2f1" stroke="#2277b3" stroke-width="1.6" rx="3"/>
-  <text x="60" y="610" font-size="12" font-weight="700" fill="#2277b3">Drive semantics</text>
-  <text x="60" y="628" font-size="11" fill="#0d2338" font-family="ui-monospace,monospace">acs550.py — control words, status bits, register mapping, keep-alive, transaction lock</text>
-  <text x="60" y="645" font-size="10.5" fill="#5b7288">everything that knows what 0x047F means · simulator.py mirrors this for dry runs</text>
-  <text x="965" y="624" font-size="10" text-anchor="end" fill="#b3261e">don't touch</text>
-
-  <rect x="45" y="664" width="935" height="34" fill="#f5f5f5" stroke="#b9cddf" stroke-width="1.2" rx="3"/>
-  <text x="60" y="686" font-size="11" fill="#5b7288" font-family="ui-monospace,monospace">pymodbus — framing, CRC, serial</text>
-
-  <line x1="45" y1="722" x2="1095" y2="722" stroke="#d3e0eb"/>
-
-  <!-- ============ DATA PATHS ============ -->
-  <text x="45" y="752" font-size="14" font-weight="700" fill="#002147">3 — THE TWO DATA PATHS</text>
-
-  <rect x="45" y="768" width="455" height="196" fill="#fffdf7" stroke="#8a7038" stroke-width="1.5" rx="3"/>
-  <text x="65" y="790" font-size="12.5" font-weight="700" fill="#8a7038">COMMAND  ·  host → drive</text>
-  <g font-family="ui-monospace,monospace" font-size="11" fill="#0d2338">
-    <text x="65" y="814">profile in m/s</text>
-    <text x="65" y="834">  → calibration.hz_profile()   pointwise, not scaled</text>
-    <text x="65" y="854">  → check_realizable()         will the tunnel follow it?</text>
-    <text x="65" y="874">  → feedforward.compensate()   optional pre-distortion</text>
-    <text x="65" y="894">  → player.play()              absolute deadlines</text>
-    <text x="65" y="914">  → 40002 Reference 1          0…20000 counts</text>
-    <text x="65" y="934">  → 40001 Control Word         0x047E ready / 0x047F run</text>
-  </g>
-  <text x="65" y="954" font-size="10" fill="#8a7038">gold throughout the UI = commanded</text>
-
-  <rect x="525" y="768" width="455" height="196" fill="#f7fbfd" stroke="#2277b3" stroke-width="1.5" rx="3"/>
-  <text x="545" y="790" font-size="12.5" font-weight="700" fill="#2277b3">MEASUREMENT  ·  drive → host</text>
-  <g font-family="ui-monospace,monospace" font-size="11" fill="#0d2338">
-    <text x="545" y="814">40004 Status Word     ready/run/fault/REMOTE</text>
-    <text x="545" y="834">40005 Actual 1        output Hz    (par 5310 = 103)</text>
-    <text x="545" y="854">40006 Actual 2        motor A      (par 5311 = 104)</text>
-    <text x="545" y="874">velocity_source       measured m/s, independently</text>
-    <text x="545" y="894">  → CSV: t_s, cmd_hz, meas_hz, meas_a, v_meas</text>
-    <text x="545" y="914">  → analyze.py          fits tau from any run</text>
-  </g>
-  <text x="545" y="940" font-size="10.5" fill="#2277b3">Keaney throughout the UI = measured.</text>
-  <text x="545" y="955" font-size="10.5" fill="#5b7288">The gap between the two is the tunnel's response — data, not error.</text>
-
-  <line x1="45" y1="988" x2="1095" y2="988" stroke="#d3e0eb"/>
-
-  <!-- ============ WHAT PROTECTS YOU ============ -->
-  <text x="45" y="1018" font-size="14" font-weight="700" fill="#002147">4 — WHAT PROTECTS YOU, AND AT WHICH LAYER</text>
-  <text x="45" y="1036" font-size="11.5" fill="#5b7288">Read downward. Each layer holds even if everything above it is wrong, absent, or malicious.</text>
-
-  <rect x="45" y="1052" width="935" height="40" fill="#fdeceb" stroke="#b3261e" stroke-width="1.8" rx="3"/>
-  <text x="62" y="1069" font-size="11.5" font-weight="700" fill="#b3261e">Hardware · hardwired E-stop, fused disconnect</text>
-  <text x="62" y="1085" font-size="10.5" fill="#b3261e">Independent of everything. Test it before you need it. Never route it through software.</text>
-
-  <rect x="45" y="1098" width="935" height="40" fill="#fdf6e9" stroke="#b26a00" stroke-width="1.6" rx="3"/>
-  <text x="62" y="1115" font-size="11.5" font-weight="700" fill="#b26a00">Drive · comm-loss watchdog, par 3018 / 3019</text>
-  <text x="62" y="1131" font-size="10.5" fill="#b26a00">Fan stops if the host dies, sleeps, or the cable is kicked. This is why a Pi or a browser is an acceptable place to command from.</text>
-
-  <rect x="45" y="1144" width="935" height="40" fill="#edf7f2" stroke="#1f7a52" stroke-width="1.4" rx="3"/>
-  <text x="62" y="1161" font-size="11.5" font-weight="700" fill="#1f7a52">Server · soft hz_limit, E-stop latch, one owner of the bus, pre-flight</text>
-  <text x="62" y="1177" font-size="10.5" fill="#1f7a52">Enforced in controller.py, never in the browser. A closed tab or a bad request cannot get past it.</text>
-
-  <rect x="45" y="1190" width="935" height="40" fill="#eaf1f8" stroke="#30557e" stroke-width="1.4" rx="3"/>
-  <text x="62" y="1207" font-size="11.5" font-weight="700" fill="#30557e">Library · context manager always stops, abort on fault or lost comms, refuse over-limit profiles</text>
-  <text x="62" y="1223" font-size="10.5" fill="#30557e">Every exit path from ACS550 ramps down, including exceptions and Ctrl-C.</text>
-
-  <rect x="45" y="1236" width="935" height="40" fill="#f5f8fb" stroke="#b9cddf" stroke-width="1.2" rx="3"/>
-  <text x="62" y="1253" font-size="11.5" font-weight="700" fill="#5b7288">UI · confirmation dialogs, realizability warnings, staleness banners</text>
-  <text x="62" y="1269" font-size="10.5" fill="#5b7288">Convenience only. Nothing here is a guard, and nothing here should ever be the only thing stopping something.</text>
-
-  <rect x="45" y="1294" width="935" height="40" fill="#fff" stroke="#b26a00" stroke-width="1.4" rx="3" stroke-dasharray="5 3"/>
-  <text x="62" y="1311" font-size="11.5" font-weight="700" fill="#b26a00">Why the Pi has no UPS</text>
-  <text x="62" y="1327" font-size="10.5" fill="#b26a00">If it loses power you want it to die hard, so the drive's watchdog stops the fan. Battery-backing the controller defeats layer 2.</text>
+  <rect x="850" y="546" width="384" height="140" rx="8" fill="#eef7f0" stroke="#1f9d55" stroke-width="1.5"/>
+  <text x="870" y="572" class="t">Turbine interlock</text>
+  <text x="870" y="596" class="note" font-weight="700">load ON → wind UP → test → wind DOWN → load OFF</text>
+  <text x="870" y="620" class="note">With the load off the rotor sees an open</text>
+  <text x="870" y="636" class="note">circuit and accelerates until something</text>
+  <text x="870" y="652" class="note">mechanical stops it. If the fan cannot be</text>
+  <text x="870" y="668" class="note">confirmed stopped, <tspan font-weight="700">the load stays on.</tspan></text>
 </svg>

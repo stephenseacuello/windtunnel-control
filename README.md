@@ -27,6 +27,8 @@ blade characterisation, and a web dashboard.
 | **Fix something that's broken** | `docs/04_troubleshooting.md` |
 | **Wire in the PMC or the load** | `docs/05_integration.md` |
 | **Connect the Chroma load** | `docs/06_chroma.md` |
+| **Identify the DAQ channels** | `docs/08_march_daq.md` |
+| **Present this to somebody** | `docs/09_slides_jeong.md` |
 | **Use the dashboard** | `webapp/README.md` |
 | **See where the calibration came from** | `reference/README.md` |
 | **Check I haven't broken anything** | `tests/README.md` |
@@ -180,6 +182,9 @@ windtunnel-control/
 │   ├── blade_sweep.py       the whole campaign, 500 → 1800 rpm
 │   ├── load_sim.py          a modelled rotor, for testing with no rig
 │   ├── turbine.py           Cp(λ) sweep, stall guard
+│   ├── cp_lambda.py         P_max(v) → Cp(λ), once rotor speed exists
+│   ├── twin_residual.py     model vs measurement — the digital twin
+│   ├── drive_profile.py     snapshot / diff / apply drive parameters
 │   └── merge_load_facts.py  restore load-side config after an overwrite
 │
 ├── webapp/                  Flask dashboard (URI palette)
