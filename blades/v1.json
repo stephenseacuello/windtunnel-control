@@ -9,5 +9,8 @@
   "tip_radius_m": null,
   "_tip_radius_note": "STILL UNKNOWN and still blocking. This file gives BLADE SPAN (245 mm), which is not tip radius. Tip radius is measured from the AXIS OF ROTATION, so it is hub radius + the blade root offset + 245 mm. The hub is not in this file. lambda scales linearly with tip radius and Cp as 1/r^2, so guessing it is not an option.",
   "n_blades": 3,
-  "notes": "Rename this file to match a --blade argument (e.g. v1_Ra20.stl) if this is the rotor that was swept - the dashboard joins geometry to results by name."
+  "notes": "Rename this file to match a --blade argument (e.g. v1_Ra20.stl) if this is the rotor that was swept - the dashboard joins geometry to results by name.",
+  "name": "v1",
+  "description": "Blade geometry v1. The mesh only \u2014 surface finish is a separate variable, so the runs are v1_Ra20, v1_Ra80, ... and they all share THIS file.",
+  "runs_share_this_mesh": true
 }

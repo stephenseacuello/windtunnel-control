@@ -1286,12 +1286,16 @@ async function loadBlades() {
   }
   list.innerHTML = r.blades.map(b => `
     <div class="blade" data-n="${b.name}">
-      <div class="blade-n">${b.name}</div>
+      <div class="blade-n">${b.geometry || b.name}${b.finish
+          ? `<span class="finish">${b.finish.replace(/^Ra/i, 'Ra ')} µm</span>` : ''}</div>
       <div class="sm dim">
-        ${b.stl ? `STL ${b.stl_kb} KB` : '<span class="bad">no STL</span>'} ·
+        ${b.stl ? `STL ${b.stl_kb} KB${b.stl_shared
+              ? ` <span title="one mesh per geometry — every finish of ${b.geometry
+                  } shares it">(${b.stl_from})</span>` : ''}`
+                : '<span class="bad">no STL</span>'} ·
         ${b.swept ? `${b.points} pts${b.p_max != null
             ? ', peak ' + b.p_max.toFixed(3) + ' W' : ''}`
-                  : '<span class="bad">never swept</span>'}
+                  : '<span class="dim">not swept yet</span>'}
         ${b.clean === false ? ' · <span class="warn">unclean points</span>' : ''}
       </div>
       ${b.protocol ? `<div class="sm dim mono">${b.protocol}</div>` : ''}

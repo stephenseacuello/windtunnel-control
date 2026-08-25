@@ -295,3 +295,15 @@ body.stale .metric .big::after { content:' ?'; color:#c62828; }
 
 .tbl tr.differ td { background:#fff8e6; }
 .tbl tr.differ td.mono { font-weight:600; }
+
+/* ── surface-finish badge on a blade card ────────────────────────────────
+   The geometry is the rotor's NAME; the finish is a variable of it. Setting
+   the finish apart is what stops "v1_Ra20" and "v1_Ra80" from reading as two
+   different rotors, which is exactly the confusion this pair has to avoid. */
+.finish{
+  display:inline-block;margin-left:.5rem;padding:.05rem .42rem;
+  font-family:var(--mono);font-size:.66em;font-weight:600;letter-spacing:.02em;
+  color:var(--gold-dk);background:var(--wash2);
+  border:1px solid var(--line-2);border-radius:999px;vertical-align:middle;
+}
+.blade-n .finish{text-transform:none}

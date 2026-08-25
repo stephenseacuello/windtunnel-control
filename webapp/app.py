@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -336,29 +337,66 @@ def _sweep_summary(name):
     return meta, rows
 
 
+_FINISH_RE = re.compile(r"^(?P<geom>.+?)_(?P<finish>Ra\d+)$", re.I)
+
+
+def _split_name(name):
+    """'v1_Ra20' -> ('v1', 'Ra20').   '_demo_rotor' -> ('_demo_rotor', None)."""
+    m = _FINISH_RE.match(name)
+    return (m.group("geom"), m.group("finish")) if m else (name, None)
+
+
+def _stl_for(name):
+    """
+    The mesh for a run name — one mesh per GEOMETRY.
+
+    v1_Ra20 and v1_Ra80 are the same printed shape at two surface textures, so
+    both resolve to blades/v1.stl. Keeping a copy per finish would create files
+    that have to stay byte-identical for the comparison to mean anything, and
+    over a campaign they would not. An exact-name file still wins if one exists,
+    so a genuinely different mesh can override.
+    """
+    bdir = _repo() / "blades"
+    geom, _ = _split_name(name)
+    for cand in (bdir / f"{name}.stl", bdir / f"{geom}.stl"):
+        if cand.exists():
+            return cand
+    return None
+
+
 @app.route("/api/blades")
 def api_blades():
     """Every rotor we have geometry for, results for, or both."""
     import json as _json
     bdir, ldir = _repo() / "blades", _repo() / "logs"
-    names = {p.stem for p in bdir.glob("*.stl")}
-    names |= {p.name[len("sweep_"):-len("_summary.csv")]
-              for p in ldir.glob("sweep_*_summary.csv")}
+    runs = {p.name[len("sweep_"):-len("_summary.csv")]
+            for p in ldir.glob("sweep_*_summary.csv")}
+    geoms = {p.stem for p in bdir.glob("*.stl")}
+    # A geometry that has runs is represented BY those runs. Listing a bare
+    # "v1 - never swept" row next to v1_Ra20 and v1_Ra80 is noise: the mesh has
+    # been swept, twice, at two finishes.
+    names = runs | (geoms - {_split_name(n)[0] for n in runs})
     out = []
     for n in sorted(names):
-        stl = bdir / f"{n}.stl"
-        side = bdir / f"{n}.json"
+        geom, finish = _split_name(n)
+        stl = _stl_for(n)
         meta, pts = _sweep_summary(n)
         info = {}
-        if side.exists():
-            try:
-                info = _json.loads(side.read_text())
-            except Exception:
-                pass
+        for side in (bdir / f"{n}.json", bdir / f"{geom}.json"):
+            if side.exists():
+                try:
+                    info = _json.loads(side.read_text())
+                    break
+                except Exception:
+                    pass
         out.append({
             "name": n,
-            "stl": stl.exists(),
-            "stl_kb": round(stl.stat().st_size / 1024) if stl.exists() else 0,
+            "geometry": geom,
+            "finish": finish,
+            "stl": stl is not None,
+            "stl_from": stl.stem if stl else None,
+            "stl_shared": bool(stl and stl.stem != n),
+            "stl_kb": round(stl.stat().st_size / 1024) if stl else 0,
             "info": info,
             "swept": bool(pts),
             "points": len(pts),
@@ -371,8 +409,8 @@ def api_blades():
 
 @app.route("/api/blades/<name>/stl")
 def api_blade_stl(name):
-    f = _repo() / "blades" / f"{Path(name).name}.stl"
-    if not f.exists():
+    f = _stl_for(Path(name).name)
+    if f is None:
         return err("no STL for that blade", 404)
     return Response(f.read_bytes(), mimetype="model/stl")
 

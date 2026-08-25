@@ -1,46 +1,44 @@
-# Blade library
+# blades/
 
-Drop rotor geometry here, named to match the `--blade` argument you sweep with:
+One mesh per **geometry**. Surface finish is a variable *of* a geometry, not a
+different rotor.
 
 ```
-blades/
-  v1_Ra20.stl          ← matches:  blade_sweep.py --blade v1_Ra20
-  v1_Ra20.json         ← optional metadata (see below)
-  v3_smooth.stl
+blades/v1.stl          the printed shape
+blades/v1.json         chord, span, profile notes
+
+logs/sweep_v1_Ra20_*   that shape at Ra 20 um
+logs/sweep_v1_Ra80_*   the same shape at Ra 80 um
 ```
 
-The dashboard's **Blades** tab pairs each file with that rotor's measured
-curve from `logs/sweep_<name>_summary.csv`, so geometry and result sit on one
-page. The name is the join key — a mismatch means the tab shows geometry with
-no curve, or a curve with no geometry, and says which.
+Both runs resolve to `v1.stl`. Keeping a copy per finish would create files
+that must stay byte-identical for the comparison to mean anything — and across
+a campaign they would not.
 
-## STL, not STEP
+## Naming
 
-STL is a triangle soup and the dashboard renders it directly with no
-dependencies. STEP is a boundary-representation format that needs
-OpenCASCADE-class tessellation to display at all — not something worth
-vendoring into a Flask app that currently has none. Keep STEP as your CAD
-master if you like; **export an STL beside it** for the record and the viewer.
+    <geometry>_Ra<roughness>
 
-Binary and ASCII STL both work. Meshes above ~60k triangles are subsampled for
-display only — the file is untouched.
+`v1_Ra20` and `v1_Ra80` are a **controlled pair**: same geometry, one variable.
+`v2_Ra20` asserts a different mesh, so only use it when the mesh really changed.
+The dashboard splits on the `_Ra<N>` suffix, shows the finish as a badge, and
+looks the mesh up by the geometry half.
 
-## Optional metadata
+An exact-name STL still wins if one exists, so a genuinely different mesh can
+override the geometry default.
 
-`<name>.json` beside the STL, any subset of:
+## Adding a rotor
 
-```json
-{
-  "material": "PETG",
-  "layer_height_mm": 0.2,
-  "surface": "Ra 20",
-  "tip_radius_m": null,
-  "n_blades": 3,
-  "printed": "2026-08-18",
-  "notes": "anything you would want to know six months from now"
-}
-```
+Drop `<geometry>.stl` in here, in **metres**. Sweep with
+`--blade <geometry>_Ra<N>`. The dashboard pairs them itself.
 
-`tip_radius_m` is the one that matters most and is still unmeasured — λ scales
-linearly with it and Cp as 1/r². Measure from the axis of rotation, not blade
-length.
+A sweep with no mesh still lists and plots; a mesh with no sweep lists as not
+yet swept. Neither is an error.
+
+## Do NOT bake roughness into the mesh
+
+Ra 20 vs 80 um is a *print* parameter (fuzzy skin, layer height, nozzle), not
+geometry. A mesh with 80 um texture displaced onto it would be hundreds of MB,
+would not render, and would not describe what the printer actually did anyway.
+Record the slicer settings in `<geometry>.json` and in `--notes` instead — those
+are what make the print reproducible.
