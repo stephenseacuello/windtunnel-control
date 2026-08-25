@@ -134,7 +134,7 @@ python src/run.py --port /dev/cu.usbmodem1101 --config data/tunnel.json table
 ### A blade test
 
 ```bash
-python src/blade_sweep.py --blade v2_Ra20 --notes "PETG, 0.2mm, Ra 20" \
+python src/blade_sweep.py --blade v1_Ra20 --notes "PETG, 0.2mm, Ra 20" \
        --step-amps 0.02 --dwell 1.0
 ```
 
@@ -228,7 +228,7 @@ Five of them need `scipy`, which is optional: `pip install scipy`.
 the Chroma sinks current, and `blade_sweep.py` runs a full 14-point blade
 characterisation unattended in about ten minutes.
 
-**Reference result** — blade `v2_Ra20` (PETG, 0.2 mm, Ra 20), 20 Aug 2026:
+**Reference result** — blade `v1_Ra20` (PETG, 0.2 mm, Ra 20), 20 Aug 2026:
 electrical power **P ∝ v^3.754**, R² = 0.998 across 10.2–38.0 m/s, peaking at
 **3.72 W at 38 m/s**. Independent single-point runs reproduce the sweep to
 0.2–0.3%.

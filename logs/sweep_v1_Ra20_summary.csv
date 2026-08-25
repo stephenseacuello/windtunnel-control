@@ -1,0 +1,22 @@
+# blade,v1_Ra20
+# notes,"PETG, 0.2mm, Ra 20"
+# fan_rpm,500
+# wind_mps,10.24
+# instrument,"Chroma,63004-150-60,630041501113,2.01"
+# protocol,94bed28333f7
+# protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+fan_rpm_cmd,fan_rpm_actual,wind_mps,blade,p_max_w,i_at_pmax_a,v_at_pmax_v,i_last_a,limited_by,clean,steps,stopped_by
+500,496,10.14,v1_Ra20,0.0297,0.0180,1.6473,0.0280,power-rolloff,1,15,power fell to 58% of its peak (0.0173 W vs 0.0297 W) at 0.0280 A
+600,593,12.22,v1_Ra20,0.0604,0.0255,2.3687,0.0404,power-rolloff,1,20,power fell to 68% of its peak (0.0412 W vs 0.0604 W) at 0.0404 A
+700,693,14.36,v1_Ra20,0.1047,0.0380,2.7547,0.0613,power-rolloff,1,22,power fell to 70% of its peak (0.0731 W vs 0.1047 W) at 0.0613 A
+800,794,16.50,v1_Ra20,0.1769,0.0538,3.2885,0.0768,power-rolloff,1,21,power fell to 75% of its peak (0.1329 W vs 0.1769 W) at 0.0768 A
+900,894,18.63,v1_Ra20,0.2732,0.0684,3.9942,0.1076,power-rolloff,1,23,power fell to 65% of its peak (0.1787 W vs 0.2732 W) at 0.1076 A
+1000,991,20.71,v1_Ra20,0.4227,0.0788,5.3637,0.1273,power-rolloff,1,22,power fell to 69% of its peak (0.2906 W vs 0.4227 W) at 0.1273 A
+1100,1089,22.78,v1_Ra20,0.6433,0.1104,5.8270,0.1546,power-rolloff,1,22,power fell to 77% of its peak (0.4930 W vs 0.6433 W) at 0.1546 A
+1200,1189,24.92,v1_Ra20,0.9592,0.1582,6.0633,0.2110,power-rolloff,1,25,power fell to 64% of its peak (0.6143 W vs 0.9592 W) at 0.2110 A
+1300,1286,27.00,v1_Ra20,1.3286,0.1862,7.1353,0.2689,power-rolloff,1,27,power fell to 59% of its peak (0.7870 W vs 1.3286 W) at 0.2689 A
+1400,1384,29.07,v1_Ra20,1.6653,0.2404,6.9273,0.3126,power-rolloff,1,27,power fell to 68% of its peak (1.1329 W vs 1.6653 W) at 0.3126 A
+1500,1484,31.21,v1_Ra20,2.0806,0.2627,7.9199,0.3733,power-rolloff,1,28,power fell to 74% of its peak (1.5370 W vs 2.0806 W) at 0.3733 A
+1600,1581,33.29,v1_Ra20,2.5188,0.2994,8.4128,0.4412,power-rolloff,1,29,power fell to 63% of its peak (1.5885 W vs 2.5188 W) at 0.4412 A
+1700,1682,35.43,v1_Ra20,3.0329,0.2494,12.1609,0.4810,power-rolloff,1,28,power fell to 72% of its peak (2.1941 W vs 3.0329 W) at 0.4810 A
+1800,1779,37.50,v1_Ra20,3.7935,0.3200,11.8546,0.5200,power-rolloff,1,27,power fell to 70% of its peak (2.6604 W vs 3.7935 W) at 0.5200 A

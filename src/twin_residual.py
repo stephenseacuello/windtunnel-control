@@ -2,8 +2,8 @@
 """
 twin_residual.py — run the model beside the measurement and plot the gap.
 
-    python src/twin_residual.py --sweep logs/sweep_v2_Ra20_points.csv
-    python src/twin_residual.py --sweep logs/sweep_v2_Ra20_points.csv --svg docs/diagrams/residual.svg
+    python src/twin_residual.py --sweep logs/sweep_v1_Ra20_points.csv
+    python src/twin_residual.py --sweep logs/sweep_v1_Ra20_points.csv --svg docs/diagrams/residual.svg
 
 ═══════════════════════════════════════════════════════════════════════════
 WHAT MAKES A TWIN A TWIN

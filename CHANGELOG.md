@@ -247,7 +247,7 @@ step saturates the drive's ramp generator and what you fit is parameter 2202.
 
 ### Reference result
 
-Blade `v2_Ra20` (PETG, 0.2 mm, Ra 20), protocol `94bed28333f7`, 14/14 clean:
+Blade `v1_Ra20` (PETG, 0.2 mm, Ra 20), protocol `94bed28333f7`, 14/14 clean:
 **P ∝ v^3.754**, R² = 0.998 over 10.2–38.0 m/s, peaking at 3.72 W at 38 m/s.
 Independent single points reproduce it to 0.2–0.3%.
 

@@ -1,6 +1,10 @@
 /*
  * ============================================================================
- *  acs550_pmc.ino   -- v2
+ *  acs550_pmc_v3.ino   -- v3, adds RD/WR parameter access
+ *
+ *  Derived from acs550_pmc.ino v2, which is UNTOUCHED at
+ *  firmware/acs550_pmc/. The Modbus loop, both watchdogs, the
+ *  control-word handshake and the telemetry format are unchanged.
  *
  *  Arduino Portenta Machine Control  ->  ABB ACS550-U1-046A-2 (fw 3.13)
  *  Aerolab wind tunnel fan drive, Modbus RTU over the PMC's onboard RS-485.
@@ -56,7 +60,10 @@
  *  ---------------------------------------------------------------------------
  *  HOST LINE PROTOCOL  (115200 8N1, '\n' terminated, case-insensitive verbs)
  *  ---------------------------------------------------------------------------
- *    ID            -> OK ID acs550-pmc 2.0
+ *    ID            -> OK ID acs550-pmc 3.0 RD/WR
+ *    RD <par>      -> read any drive parameter
+ *    WR <par> <v>  -> write one (needs UNLOCK; see writeRefusal)
+ *    UNLOCK/LOCK   -> arm/disarm writes
  *    HZ <float>    -> OK HZ <clamped>
  *    PCT <float>   -> OK HZ <clamped>
  *    RUN           -> OK RUN            | ERR <reason>
@@ -493,7 +500,7 @@ void setup() {
   }
   ModbusRTUClient.setTimeout(MODBUS_TIMEOUT);
 
-  Serial.println("# acs550-pmc 2.0 ready");
+  Serial.println("# acs550-pmc 3.0 ready (RD/WR)");
   Serial.println("# T,t_ms,state,sp_hz,act_hz,amps,kw,sw,settled,fault,errs");
 
   writeCommand(CW_PREPARE, 0);

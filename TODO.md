@@ -79,7 +79,7 @@ first two items block the science.
 - Load ranges measured off the instrument: CC 2 / 6 / 60 A, CR 250 / 1250 /
   2500 Ω. No programmable OVP/OCP/OPP on this firmware.
 - `blade_sweep.py` built — 14 wind speeds unattended in ~10 minutes
-- **Reference sweep: v2_Ra20, 14/14 clean, P ∝ v^3.77, R² = 0.998**
+- **Reference sweep: v1_Ra20, 14/14 clean, P ∝ v^3.77, R² = 0.998**
 - Dashboard: PMC transport, turbine control, blade library, digital twin
 - **V_oc measured** at every wind speed, taken from the light-load dwells of
   the sweep rather than a separate open-circuit run — 5.8 V at 15 m/s,

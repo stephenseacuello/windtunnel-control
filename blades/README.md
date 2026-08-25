@@ -4,8 +4,8 @@ Drop rotor geometry here, named to match the `--blade` argument you sweep with:
 
 ```
 blades/
-  v2_Ra20.stl          ← matches:  blade_sweep.py --blade v2_Ra20
-  v2_Ra20.json         ← optional metadata (see below)
+  v1_Ra20.stl          ← matches:  blade_sweep.py --blade v1_Ra20
+  v1_Ra20.json         ← optional metadata (see below)
   v3_smooth.stl
 ```
 

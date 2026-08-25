@@ -236,7 +236,7 @@ one-sided at all fourteen wind speeds, which said the model was missing a
 term, and it was.
 
 ```bash
-python src/twin_residual.py --sweep logs/sweep_v2_Ra20_points.csv
+python src/twin_residual.py --sweep logs/sweep_v1_Ra20_points.csv
 ```
 
 **Cp(λ).** `src/cp_lambda.py` is ready for the moment rotor speed exists. It

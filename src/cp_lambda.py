@@ -3,14 +3,14 @@
 cp_lambda.py — turn a blade sweep into Cp(λ), once rotor speed is available.
 
     # rotor speed recovered from the generator's three phases
-    python src/cp_lambda.py --sweep logs/sweep_v2_Ra20_summary.csv \
+    python src/cp_lambda.py --sweep logs/sweep_v1_Ra20_summary.csv \
            --radius 0.30 --poles 12 --daq reference/data/03162026_sec_backup.xlsx
 
     # or from a column already in the points CSV
-    python src/cp_lambda.py --sweep logs/sweep_v2_Ra20_points.csv --radius 0.30
+    python src/cp_lambda.py --sweep logs/sweep_v1_Ra20_points.csv --radius 0.30
 
     # or explore what a radius/pole guess would imply, with no rotor data
-    python src/cp_lambda.py --sweep logs/sweep_v2_Ra20_summary.csv \
+    python src/cp_lambda.py --sweep logs/sweep_v1_Ra20_summary.csv \
            --radius 0.30 --assume-lambda 4.0
 
 ═══════════════════════════════════════════════════════════════════════════

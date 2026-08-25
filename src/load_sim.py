@@ -114,7 +114,7 @@ class SimulatedTurbine:
 
         On THIS rig the aerodynamic form is wrong, and it is not close.
         `twin_residual.py` fitted both to all fourteen wind speeds of the
-        v2_Ra20 sweep: the sqrt residual is positive at every one — one-sided,
+        v1_Ra20 sweep: the sqrt residual is positive at every one — one-sided,
         so structure rather than noise — and the linear form wins at 14 of 14
         by a factor of 2–6 in RMSE. Generator winding resistance plus the
         wiring and series sense IC dominate over rotor aerodynamics here.

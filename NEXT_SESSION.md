@@ -23,7 +23,7 @@ Everything here needs the tunnel. All the desk work is done.
 - **9904 = VECTOR:SPEED**, **2202/2203 = 6.0 s**
 - PMC flashed to **3.0 RD/WR**; watchdog proved itself when the drive tripped
   on `SERIAL 1 ERR` during the reflash
-- Drive captured: `data/profiles/aerolab.json`, 383 params, 0 differ
+- Drive captured: `data/profiles/windturbine_rs485.json`, 383 params, 0 differ
 - **The 10× is fixed** — commanded 10 rpm now reads 10 rpm at par 0102
 
 ---
@@ -46,30 +46,69 @@ Everything here needs the tunnel. All the desk work is done.
 Then, with no further tunnel time:
 
 ```bash
-python src/cp_lambda.py --sweep logs/sweep_v2_Ra20_summary.csv \
+python src/cp_lambda.py --sweep logs/sweep_v1_Ra20_summary.csv \
        --radius 0.1016 --height 0.2451 --poles <N> \
        --daq reference/data/03162026_sec_backup.xlsx
 ```
 
 ---
 
-## 5 · A second blade — the campaign's real test
+## 5 · v1 at Ra 80 — a controlled roughness experiment
 
-☐ Mount the second rotor.
+Same blade, same geometry, same mount. **Only the printed surface texture
+differs**, Ra 20 → 80 µm. That is a far stronger experiment than a second
+blade, because nothing else changes: any difference in the curve is caused by
+roughness, and there is no geometry confound to argue about.
+
+☐ Mount the Ra 80 rotor.
 
 ```bash
-python src/blade_sweep.py --blade <name> --notes "<material, layers, finish>" \
+python src/blade_sweep.py --blade v1_Ra80 --notes "PETG, 0.2mm, Ra 80" \
        --step-amps 0.02 --dwell 1.0
 ```
 
-☐ All 14 points say `power-rolloff`? ☐
-☐ Fingerprint matches **`94bed28333f7`**? ☐
-  → If it differs, the two blades are **not comparable**. Stop and find out why.
+☐ Fingerprint must read **`94bed28333f7`** — identical to Ra 20.
+  → Different fingerprint = not comparable. Stop and find out why.
+☐ All 14 points `power-rolloff`.
 
-**This is the first evidence the protocol discriminates between rotors**,
-which is what the whole campaign rests on and has never been shown.
+### What to expect, and what would be interesting
 
-Reference to beat: `v2_Ra20` — **3.79 W at 37.5 m/s, P ∝ v^3.77, R² = 0.998**.
+Chord is 48 mm, so **Re runs 32,000 at 10 m/s to 121,000 at 38 m/s**. That is
+squarely the regime where a laminar boundary layer separates before it can do
+useful work, and where roughness is known to *help* by tripping it turbulent —
+the same reason golf balls have dimples and low-Re gliders have turbulator
+tape.
+
+Two effects compete, and they pull in opposite directions across your range:
+
+| | mechanism | strongest where |
+|---|---|---|
+| **helps** | trips the boundary layer, delays laminar separation | **low** wind (Re ≈ 32k) |
+| **hurts** | adds skin friction once the roughness stops being hydraulically smooth | **high** wind |
+
+Ra 20 stays hydraulically smooth across the whole range (k⁺ ≲ 2.5). **Ra 80
+crosses into transitionally rough near the top** (k⁺ ≈ 10 at 38 m/s). So the
+sharp prediction is a **crossover**: Ra 80 ahead at low wind, behind at high
+wind — which shows up as a **lower exponent**.
+
+    Ra 20 measured:   P ∝ v^3.75
+    Ra 80 predicted:  P ∝ v^n  with  n < 3.75, toward 3.0
+
+That exponent is one number, it falls straight out of the summary CSV, and it
+is falsifiable. Three outcomes, all publishable:
+
+- **n < 3.75 with a crossover** — roughness trips the boundary layer. The
+  rotor is separation-limited, and surface finish is a design variable.
+- **n ≈ 3.75, curve shifted down** — roughness is pure parasitic drag, no
+  transition effect. Print smooth.
+- **no difference at all** — the rotor is not separation-limited here, and
+  print finish can be chosen for cost and speed. Also worth knowing.
+
+```bash
+python src/blade_sweep.py --compare v1_Ra20 v1_Ra80   # after the run
+```
+
+Reference to beat: `v1_Ra20` — **3.79 W at 37.5 m/s, P ∝ v^3.77, R² = 0.998**.
 
 ---
 

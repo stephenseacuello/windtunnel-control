@@ -2,7 +2,7 @@
 """
 blade_sweep.py — one blade, the whole wind range, in a single run.
 
-    python src/blade_sweep.py --blade v2_Ra20 --notes "PLA, 0.1mm, Ra 20"
+    python src/blade_sweep.py --blade v1_Ra20 --notes "PLA, 0.1mm, Ra 20"
     python src/blade_sweep.py --blade demo --simulate      # no hardware
 
 THE PROTOCOL

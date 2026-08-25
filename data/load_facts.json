@@ -36,9 +36,9 @@
     }
   },
   "turbine": {
-    "blade_under_test": "v2_Ra20",
+    "blade_under_test": "v1_Ra20",
     "measured_p_max": {
-      "_note": "P_max(v) per fan rpm, blade v2_Ra20, from load_ramp.py --mode peak. Electrical power at the Chroma terminals - NOT Cp, which needs rotor RPM.",
+      "_note": "P_max(v) per fan rpm, blade v1_Ra20, from load_ramp.py --mode peak. Electrical power at the Chroma terminals - NOT Cp, which needs rotor RPM.",
       "500": {
         "p_w": 0.028,
         "i_a": 0.015,
@@ -62,9 +62,9 @@
       "_note": "P ~ v^3.73 and V_oc ~ v^1.39 fitted over 600-1100 rpm of the live sweep. Both exceed the constant-Cp expectation (3.0 and 1.0), so Cp is still climbing with Reynolds across the whole test range. A blade ranked at 10 m/s may not rank the same at 38."
     },
     "reference_sweep": {
-      "blade": "v2_Ra20",
+      "blade": "v1_Ra20",
       "date": "2026-08-20",
-      "file": "logs/sweep_v2_Ra20_summary.csv",
+      "file": "logs/sweep_v1_Ra20_summary.csv",
       "protocol": "94bed28333f7",
       "points": 14,
       "all_clean": true,
@@ -78,7 +78,7 @@
       "_notes_note": "Confirmed 2026-08-20: PETG 0.2mm is correct for every test so far. An earlier aborted run was mislabelled 'PLA, 0.1mm'; that run produced no usable points and is not in any curve."
     },
     "v_open_circuit": {
-      "_note": "Near-open-circuit terminal volts, taken from the first (lightest) dwell of each wind speed in the v2_Ra20 sweep. Loads of 1-10 mA, so within a percent or so of true V_oc. This answers TODO B3's second item WITHOUT a separate open-circuit run - which is the item the interlock exists to discourage.",
+      "_note": "Near-open-circuit terminal volts, taken from the first (lightest) dwell of each wind speed in the v1_Ra20 sweep. Loads of 1-10 mA, so within a percent or so of true V_oc. This answers TODO B3's second item WITHOUT a separate open-circuit run - which is the item the interlock exists to discourage.",
       "at_15mps_v": 5.8,
       "at_25mps_v": 12.85,
       "at_38mps_v": 23.92,

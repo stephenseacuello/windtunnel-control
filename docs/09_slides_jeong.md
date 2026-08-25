@@ -62,7 +62,7 @@ Paste-ready. Figures referenced are in `docs/diagrams/`.
 
 ---
 
-## Slide 4 — Results: blade v2_Ra20 (PETG, 0.2 mm, Ra 20)
+## Slide 4 — Results: blade v1_Ra20 (PETG, 0.2 mm, Ra 20)
 
 | fan rpm<br>commanded | measured | m/s | P_max | at |
 |---:|---:|---:|---:|---:|

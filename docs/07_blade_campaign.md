@@ -33,7 +33,7 @@ apart. It is still a real comparison; it is just not the aerodynamic one.
 ## The command
 
 ```bash
-python src/blade_sweep.py --blade v2_Ra20 --notes "PETG, 0.2mm, Ra 20" \
+python src/blade_sweep.py --blade v1_Ra20 --notes "PETG, 0.2mm, Ra 20" \
        --step-amps 0.02 --dwell 1.0
 ```
 
@@ -70,6 +70,16 @@ logs/sweep_<blade>_points.csv     every dwell
 logs/sweep_<blade>_summary.csv    P_max per wind speed
 protocol fingerprint: 94bed28333f7
 ```
+
+---
+
+## Naming: `<geometry>_Ra<roughness>`
+
+`v1_Ra20` and `v1_Ra80` are the same geometry at two surface finishes. Keeping
+the geometry token first makes the controlled pairs obvious in `logs/` and lets
+`--compare` group them. A name like `v2_Ra20` asserts a different geometry, so
+do not use one unless the mesh really did change — the first sweeps in this
+repo were mislabelled `v2` for a week.
 
 ---
 
@@ -169,7 +179,7 @@ drive:
 
 ```bash
 python src/load_ramp.py --mode peak --fan-rpm 1200 --max-amps 0.3 \
-       --blade v2_Ra20 --volt-off 0.5 --wait-for-source 120 \
+       --blade v1_Ra20 --volt-off 0.5 --wait-for-source 120 \
        --csv logs/peak_1200.csv
 ```
 
@@ -212,7 +222,7 @@ Run it after anyone copies a new `tunnel.json` in.
 
 ## The reference result
 
-Blade `v2_Ra20`, PETG 0.2 mm, Ra 20 — 20 Aug 2026, protocol `94bed28333f7`,
+Blade `v1_Ra20`, PETG 0.2 mm, Ra 20 — 20 Aug 2026, protocol `94bed28333f7`,
 14/14 points clean.
 
 | fan rpm | m/s | P_max (fit) | at |
