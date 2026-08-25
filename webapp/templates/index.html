@@ -103,18 +103,17 @@
         <div class="row">
           <label class="f">Units
             <select id="sp-units">
-              <option value="hz">Hz</option>
-              <option value="rpm">RPM</option>
+              <option value="rpm" selected>RPM</option>
               <option value="mps">m/s</option>
               <option value="mph">mph</option>
             </select></label>
           <label class="f">Setpoint
-            <input class="num" type="number" id="sp-val" value="500" step="50"></label>
+            <input class="num" type="number" id="sp-val" value="0" step="50"></label>
           <button class="pri" id="sp-set">Set</button>
         </div>
         <div class="row">
-          <input type="range" id="sp-slider" min="0" max="2400" step="10" value="500">
-          <span class="mono sm" id="sp-echo">500 rpm</span>
+          <input type="range" id="sp-slider" min="0" max="2400" step="10" value="0">
+          <span class="mono sm" id="sp-echo">0 rpm</span>
         </div>
         <div class="row">
           <button class="go" id="btn-go">START</button>
@@ -315,8 +314,7 @@
             </select></label>
           <label class="f">Units
             <select id="pf-units">
-              <option value="hz">Hz</option>
-              <option value="rpm">RPM</option>
+              <option value="rpm" selected>RPM</option>
               <option value="mps">m/s</option>
               <option value="mph">mph</option>
             </select></label>
@@ -357,7 +355,6 @@
           against.</p>
         <div class="row">
           <label class="f">Units <select id="sw-units">
-            <option value="hz">Hz</option><option value="rpm">RPM</option>
             <option value="mps">m/s</option><option value="mph">mph</option>
           </select></label>
           <label class="f">Start <input class="num" type="number" id="sw-start" value="10"></label>

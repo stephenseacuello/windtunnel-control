@@ -129,6 +129,8 @@ class TunnelController:
         self._load_lock = threading.RLock()
         self._authz = threading.RLock()   # check-and-claim for _authorise
         self._abort_evt = threading.Event()
+        self._last_reconnect = 0.0
+        self.reconnect_period = 5.0   # seconds between attempts
         self.load_last = {"volts": 0.0, "amps": 0.0, "watts": 0.0, "on": False,
                           "t": 0.0}
         self.load_demand = 0.0
@@ -196,6 +198,32 @@ class TunnelController:
                                              name="tunnel-poll")
         self._poll_thread.start()
         return True
+
+    def _maybe_reconnect(self, err):
+        """
+        Reopen the port after a re-enumeration, at most every few seconds.
+
+        Deliberately does NOT clear `estopped`, resume a profile, or restart
+        anything. Regaining the link is not permission to move the fan; it
+        only restores the operator's ability to see and to command.
+        """
+        now = time.monotonic()
+        if now - getattr(self, "_last_reconnect", 0) < self.reconnect_period:
+            return
+        self._last_reconnect = now
+        try:
+            with self._lock:
+                try:
+                    self.drive.close()
+                except Exception:
+                    pass
+                self.drive.connect()
+                self.drive.status()          # prove it actually answers
+            self.connected = True
+            self.connect_error = None
+            self.log("link re-established after a disconnect", "ok")
+        except Exception as e:
+            self.connect_error = str(e)
 
     def _init_load(self):
         """
@@ -350,6 +378,13 @@ class TunnelController:
                 if self.connected:
                     self.connected = False
                     self.log(f"lost comms: {e}", "fault")
+                # A USB device that re-enumerates keeps its port NAME but is a
+                # new device, so the open file descriptor is dead and every
+                # call fails forever. That took the dashboard down until
+                # somebody restarted it by hand — including clear_estop, so
+                # the operator could not even release a latch. Reconnect on a
+                # back-off instead.
+                self._maybe_reconnect(e)
             except Exception:
                 pass
             else:
@@ -360,9 +395,17 @@ class TunnelController:
     # ── unit helpers ─────────────────────────────────────────────────────
 
     def to_hz(self, value, unit):
-        """Convert a UI value in hz / rpm / mps / mph into drive Hz."""
+        """
+        Convert a UI value into the drive's reference units.
+
+        The reference is SPEED (par 1105 = 2435 rpm). The 'hz' key is legacy
+        and passes straight through — which is correct, because the value it
+        carries is rpm. The UI no longer OFFERS 'Hz' as a unit: a dropdown
+        that says Hz on a drive commanding rpm is the exact confusion that has
+        already produced a 10x error twice in this project.
+        """
         cal = self.cfg.calibration
-        u = (unit or "hz").lower()
+        u = (unit or "rpm").lower()
         if u == "hz":
             return float(value)
         if not cal:
@@ -774,11 +817,26 @@ class TunnelController:
                 with self._lock:
                     tp = getattr(self.drive, "transport", None) or self.drive
                     vals, misses = scan_groups(tp, groups, on_progress=prog)
-                path = write_snapshot(vals, "fullscan",
-                                      note or f"dashboard scan, {len(groups)} groups")
+                src = "SIMULATED" if self.dry_run else "real drive"
+                path = write_snapshot(
+                    vals, "fullscan" if not self.dry_run else "SIMULATED_fullscan",
+                    f"[{src}] " + (note or f"dashboard scan, {len(groups)} groups"))
+                # A simulated drive answers EVERY register, so a dry-run scan
+                # reports every candidate as existing. That produced a
+                # 2178-parameter "capture" that was promoted to a profile and
+                # would have written 24350 to REF1 MAX — every commanded speed
+                # wrong by exactly ten. Say which source answered, loudly.
+                warn = ""
+                if self.dry_run:
+                    warn = ("  ⚠ SIMULATED — the dashboard is in --dry-run. "
+                            "This is NOT your drive.")
+                elif misses == 0:
+                    warn = ("  ⚠ every candidate answered, which a real drive "
+                            "does not do. Check the link.")
                 sc.update(state="done", file=str(path), found=len(vals),
-                          message=f"{len(vals)} parameters exist "
-                                  f"({misses} candidates did not answer)")
+                          simulated=self.dry_run,
+                          message=f"[{src}] {len(vals)} parameters exist "
+                                  f"({misses} candidates did not answer).{warn}")
                 self.log(f"parameter scan: {len(vals)} found → {path.name}", "ok")
             except Exception as e:
                 sc.update(state="done", message=f"failed: {e}")
@@ -836,7 +894,8 @@ class TunnelController:
 
     def promote_snapshot(self, filename, name, description="", force=False):
         """Turn a snapshot into a named, applyable profile."""
-        from drive_profile import PROFILES, SNAPSHOTS, KNOWN, refusal
+        from drive_profile import (PROFILES, SNAPSHOTS, KNOWN, refusal,
+                                   is_counter)
         src = SNAPSHOTS / Path(filename).name
         if not src.exists():
             raise RuntimeError(f"no snapshot '{filename}'")
@@ -847,11 +906,18 @@ class TunnelController:
         if out.exists() and not force:
             raise RuntimeError(f"profile '{name}' already exists")
         snap = json.loads(src.read_text())
+        note = str(snap.get("note", ""))
+        if "SIMULATED" in note or "SIMULATED" in src.name:
+            raise RuntimeError(
+                f"'{src.name}' was captured from the SIMULATED drive, not "
+                f"yours. Promoting it would build a profile that writes "
+                f"simulator values to real hardware. Re-capture with the "
+                f"dashboard connected to the PMC.")
         labels = snap.get("labels", {})
         keep = {k: {"value": v,
                     "why": KNOWN.get(int(k), labels.get(k, ""))}
                 for k, v in sorted(snap["parameters"].items(), key=lambda kv: int(kv[0]))
-                if not refusal(int(k))}
+                if not refusal(int(k)) and not is_counter(int(k))}
         PROFILES.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps({
             "name": name,

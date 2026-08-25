@@ -118,6 +118,19 @@ FIRMWARE_REFUSES = {
 }
 
 
+# Running counters, not configuration. They tick constantly, so including
+# them in a profile guarantees a diff that never converges and trains the
+# operator to ignore the diff — which is the whole value of having one.
+COUNTERS = {
+    5204: "PANEL OK MESSAGES", 5205: "PANEL CRC ERRORS",
+    5306: "EFB OK MESSAGES", 5307: "EFB CRC ERRORS", 5308: "EFB UART ERRORS",
+}
+
+
+def is_counter(par):
+    return int(par) in COUNTERS
+
+
 def refusal(par):
     for why, test in FIRMWARE_REFUSES.items():
         if test(par):
@@ -262,6 +275,8 @@ def cmd_promote(a):
     keep = {}
     for k, v in sorted(vals.items(), key=lambda kv: int(kv[0])):
         par = int(k)
+        if is_counter(par):
+            continue                       # a running counter, not a setting
         if refusal(par) and not a.include_refused:
             continue                       # read-only or firmware-refused
         keep[k] = {"value": v,

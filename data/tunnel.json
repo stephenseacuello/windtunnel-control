@@ -102,7 +102,7 @@
     }
   },
   "turbine": {
-    "radius_m": null,
+    "radius_m": 0.1016,
     "n_blades": 3,
     "hub_radius_m": 0.0,
     "name": "",
@@ -157,7 +157,13 @@
       "at_25mps_v": 12.85,
       "at_38mps_v": 23.92,
       "scaling": "V_oc ~ v^1.39, not v^1.0 - runaway tip-speed ratio rises with wind speed"
-    }
+    },
+    "type": "VAWT \u2014 vertical axis, H-rotor / Darrieus, 3 straight blades",
+    "_radius_note": "4 inches, shaft centre to where the blade meets the arm. Measured 25 Aug 2026. For an H-rotor this IS the swept radius \u2014 the blades trace a cylinder of this radius.",
+    "blade_height_m": 0.2451,
+    "swept_area_m2": 0.0498,
+    "_area_note": "A = 2*R*H = 0.0498 m2. A VAWT sweeps a CYLINDER, so the frontal area is its rectangular projection, NOT pi*R^2. The disc formula would give 0.0324 m2 and put every Cp out by 1.54x with nothing looking wrong.",
+    "aspect_ratio": 1.21
   },
   "tau": 0.8,
   "tau_down": 0.8,
@@ -178,5 +184,23 @@
   "drive_ramps": {
     "accel_2202_s": 6.0,
     "decel_2203_s": 6.0
+  },
+  "drive_parameters_read": {
+    "when": "2026-08-25, over PMC firmware 3.0 RD",
+    "1105_ref1_max": 2435,
+    "2002_maximum_speed": 2435,
+    "2202_accel_time": 60,
+    "2203_decel_time": 60,
+    "_ramp_note": "60 = 6.0 s to traverse 0 -> 2435 rpm. Pass --max-slew to restore run.py's slew check.",
+    "9904_motor_ctrl_mode": 1,
+    "_9904_note": "1 = VECTOR:SPEED. So par 0102 SPEED is a slip-compensated estimate, not raw frequency scaled - better than scalar, still not an encoder.",
+    "9908_motor_nom_speed": 1770,
+    "3018_comm_fault_func": 1,
+    "3019_comm_fault_time": 30,
+    "1001_ext1_commands": 10,
+    "1103_ref1_select": 8,
+    "5304_efb_parity": 2,
+    "0401_last_fault": 28,
+    "_fault_note": "28 = SERIAL 1 ERR, the comm-loss trip. The drive faulted when the PMC went quiet during the v3 reflash - which is 3018/3019 working exactly as designed, and an accidental pass of the watchdog test."
   }
 }

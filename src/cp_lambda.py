@@ -19,6 +19,13 @@ WHAT IS AND IS NOT COMPUTED
     λ    = ω R / v            tip-speed ratio
     Cp_elec = P / (½ ρ A v³)  ELECTRICAL power coefficient
 
+    A = 2·R·H   for a VERTICAL-axis rotor — it sweeps a cylinder   [default]
+    A = π·R²    for a horizontal-axis propeller — it sweeps a disc
+
+The Aerolab rotor is a three-blade VAWT, so its swept area is a rectangle,
+not a disc. The two differ by 1.54× here. Getting it wrong scales every Cp by
+that factor and nothing in the numbers looks wrong.
+
 **Cp_elec is not Cp.** It is Cp_aero × η_gen × η_rect: everything the rotor
 extracted, minus what the generator and rectifier lost. It is the honest
 quantity to report from this rig because P is measured at the load terminals
@@ -122,9 +129,31 @@ def load_daq_phases(path, cols=(2, 3, 5), fs=None):
 
 # ═══════════════════════════════════════════════════════════════════════════
 
-def swept_area(radius_m, hub_m=0.0):
-    """Annulus if a hub radius is given — the hub extracts nothing."""
-    return math.pi * (radius_m ** 2 - hub_m ** 2)
+def swept_area(radius_m, hub_m=0.0, rotor="vawt", height_m=None):
+    """
+    Swept area — and the formula depends on the ROTOR TYPE, not a detail.
+
+    **VAWT** (vertical axis, H-rotor / Darrieus): the blades sweep a CYLINDER,
+    and the frontal area the wind sees is its rectangular projection:
+
+        A = 2 · R · H
+
+    **HAWT** (horizontal axis, propeller): the blades sweep a DISC:
+
+        A = π · (R² − hub²)
+
+    On this rig the two differ by 1.54×, so using the wrong one puts every
+    Cp out by that factor while every number still looks entirely plausible.
+    The Aerolab rotor is a three-blade VAWT — hence the default.
+    """
+    if rotor == "hawt":
+        return math.pi * (radius_m ** 2 - hub_m ** 2)
+    if not height_m:
+        raise ValueError(
+            "a VAWT sweeps a cylinder, so its area needs BLADE HEIGHT as well "
+            "as radius: A = 2*R*H. Pass --height, or --rotor hawt if this is "
+            "a propeller.")
+    return 2.0 * radius_m * height_m
 
 
 def air_density(temp_c=None, pressure_pa=None):
@@ -133,12 +162,12 @@ def air_density(temp_c=None, pressure_pa=None):
     return pressure_pa / (287.058 * (temp_c + 273.15))
 
 
-def compute(points, radius_m, hub_m=0.0, rho=RHO_DEFAULT):
+def compute(points, radius_m, hub_m=0.0, rho=RHO_DEFAULT, area=None):
     """
     points: iterable of dicts with mps, p_w, and rpm (rotor).
     Returns the same rows with lam and cp_elec added.
     """
-    A = swept_area(radius_m, hub_m)
+    A = area if area is not None else swept_area(radius_m, hub_m, 'hawt')
     out = []
     for p in points:
         v, P, n = p.get("mps"), p.get("p_w"), p.get("rpm")
@@ -188,7 +217,14 @@ def main():
                    help="tip radius in METRES, from the axis of rotation — "
                         "NOT blade length. No default: a 10%% error here is a "
                         "21%% error in Cp.")
-    p.add_argument("--hub", type=float, default=0.0, help="hub radius, m")
+    p.add_argument("--hub", type=float, default=0.0,
+                   help="hub radius, m — HAWT only")
+    p.add_argument("--rotor", choices=["vawt", "hawt"], default="vawt",
+                   help="vawt (default, sweeps a cylinder: A = 2RH) or hawt "
+                        "(sweeps a disc: A = pi R^2). This is not cosmetic — "
+                        "the two differ by 1.54x on this rig.")
+    p.add_argument("--height", type=float, default=None,
+                   help="blade height/span in METRES. Required for a VAWT.")
     p.add_argument("--temp", type=float, default=None, help="air temp °C")
     p.add_argument("--pressure", type=float, default=None, help="Pa")
 
@@ -253,12 +289,16 @@ def main():
             "aerodynamics\n  from generator matching. Without it this is "
             "P_max(v), not Cp(lambda).\n")
 
-    res = compute(rows, a.radius, a.hub, rho)
+    A_ = swept_area(a.radius, a.hub, a.rotor, a.height)
+    res = compute(rows, a.radius, a.hub, rho, A_)
     if not res:
         raise SystemExit("nothing computable")
 
-    A = swept_area(a.radius, a.hub)
-    print(f"\n  R = {a.radius:.4f} m, hub {a.hub:.4f} m → A = {A:.5f} m²"
+    A = swept_area(a.radius, a.hub, a.rotor, a.height)
+    geom = (f"{a.rotor.upper()}  R = {a.radius:.4f} m" +
+            (f", H = {a.height:.4f} m" if a.rotor == 'vawt'
+             else f", hub {a.hub:.4f} m"))
+    print(f"\n  {geom} → A = {A:.5f} m²"
           f"   ρ = {rho:.4f} kg/m³")
     print(f"  rotor speed: {src}\n")
     print(f"  {'m/s':>6} {'rotor rpm':>10} {'lambda':>8} {'P (W)':>9} "
@@ -286,7 +326,8 @@ def main():
         with out.open("w", newline="") as f:
             w = csv.writer(f)
             w.writerow(["# rotor_speed_source", src])
-            w.writerow(["# radius_m", a.radius]); w.writerow(["# hub_m", a.hub])
+            w.writerow(["# rotor_type", a.rotor])
+            w.writerow(["# radius_m", a.radius]); w.writerow(["# height_m", a.height])
             w.writerow(["# rho", rho]); w.writerow(["# area_m2", A])
             w.writerow(["# quantity", "Cp_elec = Cp_aero * eta_gen * eta_rect"])
             w.writerow(["mps", "fan_rpm", "rotor_rpm", "lambda", "p_w",
