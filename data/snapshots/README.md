@@ -4,7 +4,7 @@ Timestamped read-only records of what the ACS550 was actually holding.
 
 ```bash
 python src/drive_profile.py snapshot --name baseline --note "as found"
-python src/drive_profile.py diff --profile aerolab
+python src/drive_profile.py diff --profile windturbine_rs485
 ```
 
 **Commit these.** A snapshot nobody can diff against is a file, not a record.

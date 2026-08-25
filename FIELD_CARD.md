@@ -155,7 +155,7 @@ unattended — that watchdog is the entire reason it's acceptable to command a
     UNLOCK                  enables writes for 120 s, lapses on RUN
 
     python src/drive_profile.py snapshot --name baseline
-    python src/drive_profile.py diff --profile aerolab
+    python src/drive_profile.py diff --profile windturbine_rs485
 
 REFUSED BY FIRMWARE, ALWAYS — set these on the keypad:
     group 53 (5302-5399)    serial config of the link you are talking over

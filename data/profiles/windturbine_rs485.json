@@ -1,13 +1,12 @@
 {
-  "name": "aerolab",
-  "description": "Aerolab's ORIGINAL configuration, before this project changed anything. Panel control: start/stop on digital inputs, speed on AI1, 9600 8N2, no comm watchdog.",
-  "_source": "Reconstructed 25 Aug 2026: the captured RS-485 config with the five parameters that were changed restored to their original values, read off the keypad by Stephen.",
+  "name": "windturbine_rs485",
+  "description": "The configuration that makes the RS-485 / PMC path work. Captured from the drive 25 Aug 2026 and verified 383 match / 0 differ.",
+  "_source": "snapshot 20260825_133134_fullscan.json taken 2026-08-25T13:31:34-0400",
   "_note": "Parameters the firmware refuses to write (group 53, 3018/3019, group 99, groups 01-04) are excluded \u2014 they would appear in a diff but could never be applied.",
   "parameters": {
     "1001": {
-      "value": 2,
-      "why": "EXT1 COMMANDS = DI1,2 \u2014 start/stop from the panel's digital inputs",
-      "_unwritable_from_software": false
+      "value": 10,
+      "why": "EXT1 COMMANDS"
     },
     "1002": {
       "value": 0,
@@ -30,9 +29,8 @@
       "why": "EXT1/EXT2 SEL"
     },
     "1103": {
-      "value": 1,
-      "why": "REF1 SELECT = AI1 \u2014 speed from the analog input, not the fieldbus",
-      "_unwritable_from_software": false
+      "value": 8,
+      "why": "REF1 SELECT"
     },
     "1104": {
       "value": 0,
@@ -1537,25 +1535,8 @@
     "9802": {
       "value": 1,
       "why": "COMM PROT SEL"
-    },
-    "5303": {
-      "value": 96,
-      "why": "EFB BAUD RATE = 9.6 kbaud (raw is kbaud x10; today 192 = 19.2k)",
-      "_unwritable_from_software": true
-    },
-    "5304": {
-      "value": 1,
-      "why": "EFB PARITY = 8 NONE 2 (today 2 = 8 EVEN 1, to match the PMC)",
-      "_unwritable_from_software": true
-    },
-    "3018": {
-      "value": 0,
-      "why": "COMM FAULT FUNC = NOT SEL \u2014 the comm-loss watchdog DISABLED",
-      "_unwritable_from_software": true
     }
   },
   "_verified": "Read over PMC firmware 3.0. With these values the drive commands correctly: 10 rpm requested reads 10 rpm at par 0102.",
-  "_warning": "Counters (5204/5205 panel, 5306-5308 EFB) are excluded \u2014 they tick, so including them makes the diff never converge. Group 53, 3018/3019, group 99 and groups 01-04 are excluded because the firmware refuses to write them; set those on the keypad.",
-  "_5305_note": "Recorded on the phone as '5305: 9.6'. 5305 is EFB CTRL PROFILE and has no 9.6 setting; 5303 is EFB BAUD RATE and reads 192 = 19.2 kbaud today. Taken as 5303 = 96 (9.6 kbaud) \u2014 the keypad row most likely shifted in the photo. CONFIRM against the keypad before relying on it.",
-  "_DANGER": "3018 = 0 DISABLES THE COMM-LOSS WATCHDOG. That watchdog is the reason a laptop is allowed to command a 15 HP fan: without it, a dead host leaves the fan running at whatever it was last told. The PMC firmware REFUSES to write 3018 and 5303/5304 at any time, so applying this profile CANNOT restore panel control on its own \u2014 those four are recorded for provenance and must be set on the keypad, deliberately."
+  "_warning": "Counters (5204/5205 panel, 5306-5308 EFB) are excluded \u2014 they tick, so including them makes the diff never converge. Group 53, 3018/3019, group 99 and groups 01-04 are excluded because the firmware refuses to write them; set those on the keypad."
 }

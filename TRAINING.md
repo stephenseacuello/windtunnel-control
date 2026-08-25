@@ -226,7 +226,7 @@ not the host, because a host config file can be copied and edited in a hurry.
 
 ```bash
 python src/drive_profile.py snapshot --name baseline --note "as found"
-python src/drive_profile.py diff --profile aerolab
+python src/drive_profile.py diff --profile windturbine_rs485
 ```
 
 **The twin residual.** `src/twin_residual.py` fits the source model to every

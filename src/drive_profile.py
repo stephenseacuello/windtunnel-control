@@ -3,9 +3,9 @@
 drive_profile.py — read, record, compare and apply ACS550 parameter sets.
 
     python src/drive_profile.py snapshot --name baseline
-    python src/drive_profile.py diff  --profile aerolab
-    python src/drive_profile.py apply --profile aerolab        # dry run
-    python src/drive_profile.py apply --profile aerolab --commit
+    python src/drive_profile.py diff  --profile windturbine_rs485
+    python src/drive_profile.py apply --profile windturbine_rs485        # dry run
+    python src/drive_profile.py apply --profile windturbine_rs485 --commit
 
 Needs PMC firmware **3.0 or later** (`firmware/acs550_pmc_v3/`), which adds
 the RD/WR verbs. Older builds are command-shaped only and cannot reach a
@@ -41,7 +41,7 @@ PROFILES
 `data/profiles/<name>.json`:
 
     {
-      "name": "aerolab",
+      "name": "windturbine_rs485",
       "description": "what this configuration is for",
       "parameters": { "2202": {"value": 300, "why": "30.0 s accel"} , ... }
     }
