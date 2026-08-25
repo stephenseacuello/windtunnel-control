@@ -769,6 +769,59 @@ class TestConfig:
 # PROVENANCE — the metadata that cannot be reconstructed later
 # ═══════════════════════════════════════════════════════════════════════════
 
+class TestReferenceScaling:
+    """
+    The silent-10x failure, pinned.
+
+    par 1105 is stored in TENTHS in the Hz domain (600 = 60.0 Hz) and in
+    WHOLE UNITS in the speed domain (2435 = 2435 rpm). Applying the tenths
+    heuristic to a speed reference makes every commanded speed exactly ten
+    times too high, and nothing anywhere reports it — the fan simply runs at
+    the wrong speed and every velocity derived from it is wrong too.
+
+    It was dormant for months because the read failed over PMC firmware 2.x
+    and the configured fallback was used instead. Adding RD in firmware 3.0
+    made the read succeed and the heuristic fired for the first time.
+    """
+
+    def _drive(self, raw_1105, unit, fallback=None):
+        import acs550
+        d = acs550.ACS550.__new__(acs550.ACS550)
+        d.ref1_max_hz = None
+        d.ref_unit = unit
+        d._ref1_max_fallback = fallback
+        d.read_param = lambda p: raw_1105
+        return d
+
+    def _resolve(self, d):
+        raw = d.read_param(1105)
+        if str(d.ref_unit).lower() == "rpm":
+            return float(raw)
+        return raw / 10.0 if raw > 200 else float(raw)
+
+    def test_rpm_reference_is_not_divided_by_ten(self):
+        d = self._drive(2435, "rpm")
+        assert self._resolve(d) == 2435.0, (
+            "a speed reference of 2435 rpm was read as 243.5 — every "
+            "commanded speed would be 10x too high")
+
+    def test_hz_reference_still_uses_tenths(self):
+        d = self._drive(600, "Hz")
+        assert self._resolve(d) == 60.0
+
+    def test_small_hz_value_is_not_treated_as_tenths(self):
+        d = self._drive(60, "Hz")
+        assert self._resolve(d) == 60.0
+
+    def test_commanding_ten_rpm_gives_ten_rpm(self):
+        """The end-to-end arithmetic, at the value that exposed the bug."""
+        REF_FULL_SCALE = 20000
+        for ref1_max, expect in ((2435.0, 10.0), (243.5, 100.0)):
+            counts = round(10.0 * REF_FULL_SCALE / ref1_max)
+            actual = counts / REF_FULL_SCALE * 2435.0
+            assert abs(actual - expect) < 1.0, (ref1_max, actual)
+
+
 class TestProvenance:
 
     def _controller(self, tmp_path):

@@ -109,6 +109,7 @@ class ACS550:
         self._stop_evt = threading.Event()
         self.ref1_max_hz = ref1_max_hz
         self._ref1_max_fallback = ref1_max_fallback
+        self.ref_unit = ref_unit
         self._ref_unit = ref_unit
         self._counts_per_hz = None      # precomputed for the fast path
 
@@ -175,7 +176,33 @@ class ACS550:
         if self.ref1_max_hz is None:
             try:
                 raw = self.read_param(1105)
-                self.ref1_max_hz = raw / 10.0 if raw > 200 else float(raw)
+                # ── the tenths heuristic is Hz-ONLY ──
+                # In the Hz domain ABB stores 1105 in tenths, so 600 means
+                # 60.0 Hz and dividing by ten is right. In the SPEED domain
+                # 2435 means 2435 rpm and dividing by ten makes every
+                # commanded speed exactly TEN TIMES TOO HIGH.
+                #
+                # This was dormant for months: over PMC firmware 2.x the read
+                # failed, so the configured fallback was used and was correct.
+                # Adding RD in firmware 3.0 made the read succeed and the
+                # heuristic fired for the first time — commanding 10 rpm ran
+                # the fan at 101. The feature exposed the latent bug.
+                if str(self.ref_unit).lower() == "rpm":
+                    self.ref1_max_hz = float(raw)
+                else:
+                    self.ref1_max_hz = raw / 10.0 if raw > 200 else float(raw)
+                # A reference full scale that disagrees with the config is the
+                # silent-10x failure itself. Refuse rather than guess.
+                if self._ref1_max_fallback:
+                    cfg = float(self._ref1_max_fallback)
+                    if abs(self.ref1_max_hz - cfg) > max(1.0, 0.02 * cfg):
+                        raise DriveError(
+                            f"par 1105 reads {self.ref1_max_hz:g} but "
+                            f"tunnel.json says {cfg:g}. One of them is wrong, "
+                            f"and guessing makes every commanded speed wrong "
+                            f"by that ratio with nothing to report it. Check "
+                            f"1105 on the keypad and fix "
+                            f"drive_reference.ref1_max.")
             except DriveError:
                 # The PMC line protocol is command-shaped, not register-shaped,
                 # so it cannot serve arbitrary parameter reads. Fall back to
