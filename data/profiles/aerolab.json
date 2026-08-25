@@ -1536,5 +1536,7 @@
       "value": 1,
       "why": "COMM PROT SEL"
     }
-  }
+  },
+  "_verified": "Captured from the real drive over PMC firmware 3.0 on 25 Aug 2026 and diffed 383 match / 0 differ against it. With these values the drive commands correctly: 10 rpm requested reads 10 rpm at par 0102.",
+  "_warning": "Counters (5204/5205 panel, 5306-5308 EFB) are excluded \u2014 they tick, so including them makes the diff never converge. Group 53, 3018/3019, group 99 and groups 01-04 are excluded because the firmware refuses to write them; set those on the keypad."
 }

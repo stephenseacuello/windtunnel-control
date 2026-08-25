@@ -80,15 +80,17 @@ def run(drive: ACS550, interactive=True):
         check(FAIL, "parameter mapping", str(e))
 
     # 3 ── the 1105 tenths heuristic --------------------------------------
+    from acs550 import resolve_ref1_max
     raw = drive.read_param(1105)
-    inferred = raw / 10.0 if raw > 200 else float(raw)
+    unit = getattr(drive, "ref_unit", "Hz")
+    inferred = resolve_ref1_max(raw, unit)
     check(INFO, "REF1 MAX (par 1105) scaling",
           f"raw register value = {raw}\n"
-          f"code infers {inferred:.1f} Hz "
-          f"({'tenths' if raw > 200 else 'whole Hz'})")
+          f"reference unit is {unit}, so the code infers {inferred:g} {unit}\n"
+          f"({'whole units — the tenths rule is Hz-only' if str(unit).lower() == 'rpm' else ('tenths' if raw > 200 else 'whole Hz')})")
     if interactive:
         print(f"\n         >>> Check the keypad: PARAMETERS → 1105 REF1 MAX")
-        ans = input(f"         >>> Does it read {inferred:.1f} Hz? [y/N] ").strip().lower()
+        ans = input(f"         >>> Does it read {inferred:g} {unit}? [y/N] ").strip().lower()
         if ans == "y":
             check(PASS, "1105 scaling confirmed against the keypad")
         else:

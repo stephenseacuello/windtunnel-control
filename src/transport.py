@@ -439,7 +439,27 @@ class PMCTransport(Transport):
             if a == self.ADDR_SW:
                 vals.append(int(s.get("sw", 0)))
             elif a == self.ADDR_ACT1:
-                # f2 -> rpm. See feedback_scale in __init__ for the derivation.
+                # Prefer the drive's OWN speed register over deriving it.
+                #
+                # feedback_scale turns the PMC's f2 (output frequency) into
+                # rpm through the motor's nameplate ratio. That is a bench-
+                # fitted constant and it cannot know about slip: measured
+                # against par 0102 at 300 rpm it reads 295, a consistent
+                # -1.7%. In VECTOR:SPEED the drive already compensates slip,
+                # so 0102 is strictly better information than anything
+                # recomputed from frequency.
+                #
+                # Only possible since firmware 3.0 added RD. Falls back to the
+                # derived value on a 2.x PMC, which is why feedback_scale
+                # stays.
+                if self._rdwr:
+                    try:
+                        return [int(round(self.read_param(102) * 10)),
+                                int(round(self.read_param(104)))][:count] \
+                            if count > 1 else \
+                            [int(round(self.read_param(102) * 10))]
+                    except TransportError:
+                        pass
                 vals.append(int(round(s.get("f2", 0.0)
                                       * self.feedback_scale * 10)))
             elif a == self.ADDR_ACT2:

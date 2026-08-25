@@ -264,19 +264,41 @@ def mode_verify(drive, a):
 
 
 def mode_table(drive, a):
-    """Print the Hz → RPM → velocity reference. Reads nothing, moves nothing."""
+    """
+    Print the speed → velocity reference. Reads nothing, moves nothing.
+
+    Was Hz-domain and produced nonsense on this drive: it labelled the first
+    column Hz, multiplied it by the vestigial rpm_per_hz for the RPM column,
+    and then fed the HZ value to an rpm-domain calibration — so "5 Hz" came
+    out as 148 rpm and −0.3 m/s. Three different unit errors in one row.
+    """
     cal = a.cfg.calibration
     if cal is None:
         raise SystemExit("no calibration loaded")
-    print(f"\n  v = {cal.coeffs[0]:.4f}*Hz {cal.coeffs[1]:+.3f}   "
-          f"[{a.cfg.get('calibration_status','')}]")
+    unit = (a.cfg.get("drive_reference") or {}).get("unit", "Hz")
+    rpm_native = str(unit).lower() == "rpm" or getattr(cal, "domain", "") == "rpm"
     lim = a.cfg.hz_limit or cal.hz_max
-    print(f"\n  {'Hz':>4} {'RPM':>6} {'m/s':>7} {'mph':>7}")
-    hz = 5.0
-    while hz <= lim + 0.01:
-        v = float(cal.velocity(hz))
-        print(f"  {hz:4.0f} {hz * cal.rpm_per_hz:6.0f} {v:7.1f} {v / 0.44704:7.1f}")
-        hz += 5.0
+
+    if rpm_native:
+        print(f"\n  v = {cal.coeffs[0]:.5f}*RPM {cal.coeffs[1]:+.3f}   "
+              f"[{a.cfg.get('calibration_status','')}]")
+        print(f"\n  {'RPM':>6} {'m/s':>7} {'mph':>7}")
+        step = 100.0 if lim > 500 else 25.0
+        x = step
+        while x <= lim + 0.01:
+            v = float(cal.velocity(x))
+            print(f"  {x:6.0f} {v:7.1f} {v / 0.44704:7.1f}")
+            x += step
+    else:
+        print(f"\n  v = {cal.coeffs[0]:.4f}*Hz {cal.coeffs[1]:+.3f}   "
+              f"[{a.cfg.get('calibration_status','')}]")
+        print(f"\n  {'Hz':>4} {'RPM':>6} {'m/s':>7} {'mph':>7}")
+        hz = 5.0
+        while hz <= lim + 0.01:
+            v = float(cal.velocity(hz))
+            print(f"  {hz:4.0f} {hz * cal.rpm_per_hz:6.0f} {v:7.1f} "
+                  f"{v / 0.44704:7.1f}")
+            hz += 5.0
 
 
 def mode_selftest(drive, a):
@@ -792,7 +814,11 @@ def build_parser():
     p = argparse.ArgumentParser(
         description="Aerolab wind tunnel control via ABB ACS550",
         epilog="Start with `monitor` — it writes nothing to the drive.")
-    p.add_argument("--port", required=True, help="/dev/ttyVFD, /dev/ttyUSB0, COM3")
+    p.add_argument("--port", default=None,
+                   help="serial port. Defaults to transport.port in "
+                        "tunnel.json, then to whichever /dev/cu.usbmodem* is "
+                        "present — being forced to retype the port every time "
+                        "is how the wrong one eventually gets typed.")
     p.add_argument("--baud", type=int, default=19200, help="match par 5303")
     p.add_argument("--parity", default="N", choices=["N", "E", "O"])
     p.add_argument("--unit", type=int, default=1, help="station ID, par 5302")
@@ -959,6 +985,23 @@ def main():
     # Config first, so tau and the calibration are available without being
     # retyped. A guard that is easy to forget is a guard that does nothing.
     a.cfg = TunnelConfig.load(a.config)
+
+    if not a.port:
+        import glob
+        cand = (a.cfg.get("transport") or {}).get("port")
+        found = sorted(glob.glob("/dev/cu.usbmodem*") or
+                       glob.glob("/dev/ttyACM*") or glob.glob("/dev/ttyUSB*"))
+        if cand and Path(cand).exists():
+            a.port = cand
+        elif len(found) == 1:
+            a.port = found[0]
+        elif found:
+            raise SystemExit(
+                "several serial ports are present — say which:\n  "
+                + "\n  ".join(found))
+        else:
+            raise SystemExit("no serial port found; pass --port")
+        print(f"  port: {a.port}")
     if a.tau is None:
         a.tau = a.cfg.tau
     if a.tau_down is None:

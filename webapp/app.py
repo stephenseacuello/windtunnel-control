@@ -770,14 +770,16 @@ def api_selftest():
         return ok(checks=checks)
 
     p = ctl.read_params([2008, 1105, 5310, 5311, 1001, 1103, 3018, 3019, 1102])
+    from acs550 import resolve_ref1_max
     raw = p.get(1105) or 0
-    inferred = raw / 10.0 if raw > 200 else float(raw)
+    unit = getattr(ctl, "ref_unit", "Hz")
+    inferred = resolve_ref1_max(raw, unit)
 
     checks.append(("pass" if 10 <= (p.get(2008) or 0) <= 5000 else "fail",
                    "parameter mapping (address = P − 1)",
                    f"par 2008 MAX FREQ raw = {p.get(2008)}"))
     checks.append(("warn", "REF1 MAX scaling",
-                   f"raw {raw} → inferred {inferred:.1f} Hz. "
+                   f"raw {raw} → inferred {inferred:g} {unit}. "
                    f"CONFIRM THIS AGAINST THE KEYPAD — a wrong guess makes "
                    f"every commanded speed off by 10x, silently."))
     checks.append(("pass" if p.get(5310) == 103 else "warn",

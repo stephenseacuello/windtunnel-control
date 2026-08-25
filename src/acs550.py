@@ -73,6 +73,26 @@ class DriveError(RuntimeError):
     """Failure to reach the drive, or the drive refusing a request."""
 
 
+def resolve_ref1_max(raw, ref_unit="Hz"):
+    """
+    Par 1105 raw register → reference full scale, in the drive's own units.
+
+    ABB stores 1105 in TENTHS in the Hz domain (600 = 60.0 Hz) and in WHOLE
+    UNITS in the speed domain (2435 = 2435 rpm). Applying the tenths rule to a
+    speed reference makes every commanded speed exactly ten times too high,
+    silently — which is what happened here the moment PMC firmware 3.0 made
+    the read succeed at all.
+
+    Lives in one place because it had drifted into three: this module,
+    selftest.py, and the dashboard's preflight — and the two copies in the
+    tools whose JOB is catching a 10x error would have confirmed the wrong
+    value as correct.
+    """
+    if str(ref_unit).lower() == "rpm":
+        return float(raw)
+    return raw / 10.0 if raw > 200 else float(raw)
+
+
 class ACS550:
     """
     Small wrapper around the drive's embedded fieldbus.
@@ -187,10 +207,7 @@ class ACS550:
                 # Adding RD in firmware 3.0 made the read succeed and the
                 # heuristic fired for the first time — commanding 10 rpm ran
                 # the fan at 101. The feature exposed the latent bug.
-                if str(self.ref_unit).lower() == "rpm":
-                    self.ref1_max_hz = float(raw)
-                else:
-                    self.ref1_max_hz = raw / 10.0 if raw > 200 else float(raw)
+                self.ref1_max_hz = resolve_ref1_max(raw, self.ref_unit)
                 # A reference full scale that disagrees with the config is the
                 # silent-10x failure itself. Refuse rather than guess.
                 if self._ref1_max_fallback:

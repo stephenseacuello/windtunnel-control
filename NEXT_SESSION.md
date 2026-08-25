@@ -16,83 +16,40 @@ Everything here needs the tunnel. All the desk work is done.
 
 ---
 
-## 1 · Three questions, twenty minutes, no tools but a ruler and a phone
+## ✅ Done 25 Aug — do not repeat
 
-These block Cp(λ). Nothing else on this list matters as much.
+- Rotor is a **VAWT** (H-rotor), **R = 4″ = 0.1016 m**, blade height 245 mm,
+  swept area **2·R·H = 0.0498 m²** (a cylinder, not a disc)
+- **9904 = VECTOR:SPEED**, **2202/2203 = 6.0 s**
+- PMC flashed to **3.0 RD/WR**; watchdog proved itself when the drive tripped
+  on `SERIAL 1 ERR` during the reflash
+- Drive captured: `data/profiles/aerolab.json`, 383 params, 0 differ
+- **The 10× is fixed** — commanded 10 rpm now reads 10 rpm at par 0102
 
-☐ **Rotor tip radius** — from the **axis of rotation**, not blade length.
-  The STL gives 245 mm of *span*; tip radius is hub + root offset + span, and
-  the hub is not in that file.
-  → λ scales linearly with it, Cp as 1/R². A 10 % error in R is 21 % in Cp.
-  → write it here: **R = ________ m**   hub = ________ m
+---
+
+## 1 · The two numbers still blocking Cp(λ)
 
 ☐ **Generator pole count** — nameplate, or count the magnets.
-  → This is the ONE number between the DAQ data you already have and rotor
-  rpm. It converts every past capture retroactively.
+  → The ONE number between the DAQ data you already have and rotor rpm. It
+  converts every past capture retroactively.
   → **poles = ________** (magnetic poles, not pole pairs)
 
 ☐ **Are ch3/4/6 still landed on Jeong's DAQ?**
   → In the March capture they are the generator's three phases (mutual
-  correlation −0.50 = cos 120°). If they are still connected, the rotor-speed
-  measurement needs **no new sensor and no new wiring**.
-  → Ask Taegu what `encoder_disc.stl` (40 × 40 × 8 mm, drawn 31 Jul) was for
-  **before** anyone builds it. It may be solving a solved problem.
+  correlation −0.50 = cos 120°). If still connected, rotor speed needs **no
+  new sensor and no new wiring**.
+  → Ask Taegu what `encoder_disc.stl` was for **before** anyone builds it.
 
 *Photograph the generator nameplate while you are there.*
 
----
-
-## 2 · Two keypad readings, one minute
-
-☐ **9904 MOTOR CTRL MODE** = ________
-  → decides whether "actual speed" is a slip-compensated estimate or just
-  frequency with a fixed assumption
-
-☐ **2202 ACCEL TIME** = ________
-  → `run.py` prints *"ramp time unreadable — the slew check is OFF"*. Read it
-  once and pass `--max-slew` to restore the check.
-
----
-
-## 3 · Flash the PMC, then re-earn the trust
-
-☐ **Flash `firmware/acs550_pmc_v3/`.**
-  Arduino IDE → Portenta H7 / Machine Control. Same libraries as 2.0.
-  *The original sketch is untouched at `firmware/acs550_pmc/`.*
-
-☐ Confirm:  `ID` → `OK ID acs550-pmc 3.0 RD/WR`
-            `RD 1105` → `OK RD 1105 2435`
-
-☐ **Re-run the watchdog test. Pull the USB mid-run, deliberately.**
-  The fan must ramp down within a few seconds.
-  → **Any firmware change invalidates the previous evidence.** That watchdog
-  is the entire reason a laptop may command a 15 HP fan.
-  → passed? ☐
-
----
-
-## 4 · Capture the drive before anything writes to it
-
-☐ **Snapshot as-found**, then a full scan:
+Then, with no further tunnel time:
 
 ```bash
-python src/drive_profile.py snapshot --name baseline --note "as found $(date +%F)"
-python src/drive_profile.py scan --name aerolab_asfound
+python src/cp_lambda.py --sweep logs/sweep_v2_Ra20_summary.csv \
+       --radius 0.1016 --height 0.2451 --poles <N> \
+       --daq reference/data/03162026_sec_backup.xlsx
 ```
-
-☐ **Promote the scan to the AeroLab profile:**
-
-```bash
-python src/drive_profile.py promote --snapshot <file>.json \
-       --name aerolab --description "Aerolab's original configuration"
-python src/drive_profile.py diff --profile windtunnel
-```
-
-☐ **`git add data/snapshots data/profiles && git commit`**
-  → A snapshot nobody can diff against is a file, not a record.
-
-*The scan is read-only and cannot change anything. Group 53, 3018/3019 and
-group 99 are refused by the firmware — set those on the keypad if you need to.*
 
 ---
 
