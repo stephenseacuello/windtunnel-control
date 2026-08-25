@@ -1212,6 +1212,7 @@ function parseSTLAscii(txt) {
 }
 
 let RAMP_RPM = null;
+let TWIN_RADIUS = null;
 let MESH = null, ROT = { x: -1.05, y: 0.6 }, DRAG = null;
 
 function drawMesh(cv) {
@@ -1441,7 +1442,8 @@ async function twinLoad(name) {
     m.axis = m.ext.indexOf(m.span);                        // longest = span
     TWIN.mesh = m;
     $('#tw-note').textContent =
-      `${m.tris.length} tri × ${TWIN.blades} blades · geometry ${name}`;
+      `${m.tris.length} tri × ${TWIN.blades} blades · vertical axis, ` +
+      `R = ${((TWIN.radius_m || 0.1016) * 1000).toFixed(0)} mm · ${name}`;
     return true;
   } catch (e) { return false; }
 }
@@ -1523,11 +1525,23 @@ function twinDraw(ts) {
              : ik === 'none' ? [130, 110, 150]
              : [70, 130, 180];
 
-  // Hub offset is a DRAWING CONVENTION: tip radius is unmeasured (TODO B3),
-  // so the blades are drawn starting a tenth of a span out from the axis.
-  const HUB = m.span * 0.10;
-  const k = Math.min(w, h) * 0.42 / ((m.span + HUB) * 1.15);
-  const tilt = -0.45, ct = Math.cos(tilt), st = Math.sin(tilt);
+  // ── VERTICAL-AXIS rotor (H-rotor / Darrieus) ──
+  //
+  // The blades stand UPRIGHT at a fixed radius and sweep a cylinder; they do
+  // not radiate outward from the hub. This was drawn as a horizontal-axis
+  // propeller — span pointing outward — which is a different machine.
+  //
+  // Local blade axes: `ax` is the span, and it is VERTICAL here. The chord
+  // lies roughly tangential, the thickness roughly radial.
+  //
+  // R is measured: 4 inches, shaft centre to the blade mount.
+  const ax = m.axis;
+  let r1 = (ax + 1) % 3, r2 = (ax + 2) % 3;
+  if (m.ext && m.ext[r2] > m.ext[r1]) { const t = r1; r1 = r2; r2 = t; }
+  if (!m.ext) m.ext = [0, 0, 0];
+  const R = TWIN.radius_m || 0.1016;   // metres, shaft centre to blade
+  const k = Math.min(w, h) * 0.44 / Math.max(m.span, 2 * R + m.ext[r2]);
+  const elev = 0.34, ce = Math.cos(elev), se = Math.sin(elev);
   // Chord and thickness chosen by EXTENT, not by index order.
   //
   // `(ax+1)%3, (ax+2)%3` happened to assign this blade's 24.5 mm thickness
@@ -1540,9 +1554,6 @@ function twinDraw(ts) {
   // This is still a heuristic — the wider of the two remaining axes is
   // assumed to be chordwise. True for an aerofoil; it would need the facet
   // normals to be robust.
-  const ax = m.axis;
-  let r1 = (ax + 1) % 3, r2 = (ax + 2) % 3;
-  if (m.ext && m.ext[r2] > m.ext[r1]) { const t = r1; r1 = r2; r2 = t; }
   const faces = [];
 
   for (let b = 0; b < TWIN.blades; b++) {
@@ -1550,7 +1561,7 @@ function twinDraw(ts) {
     const ca = Math.cos(a), sa = Math.sin(a);
     for (const t of m.tris) {
       const p = t.map(v => {
-        // ONE rigid rotation about the shaft, then the viewing tilt.
+        // One rigid rotation about the VERTICAL shaft, then the view.
         //
         // This previously rotated the cross-section about the span axis by
         // `a` AND the (span, chord) pair about the shaft by the same `a`.
@@ -1560,25 +1571,33 @@ function twinDraw(ts) {
         // the shaft. Blade twist is the one thing this geometry exists to
         // show, so rendering a cyclic-pitch propeller instead of a
         // fixed-pitch rotor was the worst possible error to make here.
-        const sp = HUB + (v[ax] - (m.c[ax] - m.span / 2));  // radius from axis
-        const ch = v[r1] - m.c[r1];                          // chordwise
-        const th = v[r2] - m.c[r2];                          // thickness
-        const X = sp * ca - ch * sa;      // radial and tangential, in-plane
-        const Y = sp * sa + ch * ca;
-        const Z = th;                     // along the shaft, unrotated
-        return [X, Y * ct - Z * st, Y * st + Z * ct];
+        const hgt = v[ax] - m.c[ax];        // span → VERTICAL, unrotated
+        const ch = v[r1] - m.c[r1];         // chord → tangential
+        const th = v[r2] - m.c[r2];         // thickness → radial
+        const rad = R + th;
+        const X = rad * ca - ch * sa;       // horizontal plane
+        const Y = rad * sa + ch * ca;
+        // View from slightly above: vertical stays vertical on screen.
+        return [X, hgt * ce - Y * se, hgt * se + Y * ce];
       });
       const u = [p[1][0] - p[0][0], p[1][1] - p[0][1], p[1][2] - p[0][2]];
       const q = [p[2][0] - p[0][0], p[2][1] - p[0][1], p[2][2] - p[0][2]];
       const nv = [u[1] * q[2] - u[2] * q[1], u[2] * q[0] - u[0] * q[2],
                   u[0] * q[1] - u[1] * q[0]];
       const len = Math.hypot(...nv) || 1;
-      const lam = Math.max(0.18, Math.abs(nv[2]) / len);
+      const lam = Math.max(0.20, Math.abs(nv[2]) / len);
       faces.push({ p, z: (p[0][2] + p[1][2] + p[2][2]) / 3, lam });
     }
   }
   faces.sort((a, b) => a.z - b.z);
   const X = v => w / 2 + v * k, Y = v => h / 2 - v * k;
+
+  // The vertical shaft, so the axis of rotation is unmistakable.
+  g.strokeStyle = '#9aa7b2'; g.lineWidth = 3;
+  g.beginPath();
+  g.moveTo(X(0), Y(m.span * 0.62)); g.lineTo(X(0), Y(-m.span * 0.62));
+  g.stroke();
+
   for (const f of faces) {
     g.fillStyle = `rgb(${Math.round(base[0] * f.lam + 40)},` +
                   `${Math.round(base[1] * f.lam + 40)},` +
@@ -1608,6 +1627,16 @@ function twinDraw(ts) {
 }
 
 function twinUpdate(s) {
+  // Geometry from tunnel.json, not a constant in this file. R is measured:
+  // 4 inches, shaft centre to the blade mount.
+  const g = s.turbine || {};
+  if (g.radius_m) TWIN.radius_m = g.radius_m;
+  if (g.n_blades && !TWIN._bladesSet) {
+    TWIN.blades = g.n_blades;
+    const sel = $('#tw-blades');
+    if (sel.value !== undefined) sel.value = String(g.n_blades);
+    TWIN._bladesSet = true;
+  }
   TWIN.rpm = twinRpm(s);
   TWIN.stale = (TWIN.rpm === null) || (s.age_s != null && s.age_s > 3);
   // Kept in step with what the canvas says. A stale frame used to leave the

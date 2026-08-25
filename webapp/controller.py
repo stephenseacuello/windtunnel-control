@@ -1972,6 +1972,11 @@ class TunnelController:
                      if self.load is not None else
                      {"connected": False, "error": self.load_error}),
             "interlock": self.interlock_state(),
+            # Rotor geometry, so the twin draws the machine that exists rather
+            # than a literal baked into the JavaScript.
+            "turbine": {k: (self.cfg.get("turbine") or {}).get(k)
+                        for k in ("type", "radius_m", "blade_height_m",
+                                  "n_blades", "swept_area_m2")},
             # Age of the newest reading. A frozen panel and a live one looked
             # identical: on a dropped stream every indicator held its last
             # value with nothing to say it had stopped updating.
