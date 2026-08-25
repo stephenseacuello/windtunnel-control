@@ -310,8 +310,16 @@ class PMCTransport(Transport):
     # They are named u1..u4 deliberately. A field called `ok_count` that is
     # not one is worse than a field with no name, because code and people
     # both act on it. Identify them from the sketch before relying on them.
+    # Firmware 4.0 APPENDS act_rpm and ao_v. zip() truncates to the shorter
+    # sequence, so naming them here is safe against a v2/v3 PMC that sends
+    # neither — those simply come back absent rather than wrong.
+    #
+    #   act_rpm  par 0102, true shaft rpm, or the string "nan" if the read
+    #            failed. NOT derived from frequency: that cannot know slip.
+    #   ao_v     what the PMC is driving on ANALOG OUT O0 for the DAQ.
+    #            0.000 means INVALID, not zero rpm — see data/tunnel.json.
     TELEMETRY_FIELDS = ["millis", "state", "ref_hz", "f2", "f3", "f4",
-                        "u1", "u2", "u3", "u4"]
+                        "u1", "u2", "u3", "u4", "act_rpm", "ao_v"]
 
     def stat(self, max_age=0.2):
         """

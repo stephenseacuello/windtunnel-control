@@ -4,13 +4,27 @@
   "part": "ONE BLADE, not the assembled rotor",
   "span_mm": 245.1,
   "chord_mm": 48.0,
-  "max_thickness_mm": 24.5,
-  "twist": "strongly twisted - the projected section oscillates about twice over the span",
   "tip_radius_m": null,
   "_tip_radius_note": "STILL UNKNOWN and still blocking. This file gives BLADE SPAN (245 mm), which is not tip radius. Tip radius is measured from the AXIS OF ROTATION, so it is hub radius + the blade root offset + 245 mm. The hub is not in this file. lambda scales linearly with tip radius and Cp as 1/r^2, so guessing it is not an option.",
   "n_blades": 3,
   "notes": "Rename this file to match a --blade argument (e.g. v1_Ra20.stl) if this is the rotor that was swept - the dashboard joins geometry to results by name.",
   "name": "v1",
   "description": "Blade geometry v1. The mesh only \u2014 surface finish is a separate variable, so the runs are v1_Ra20, v1_Ra80, ... and they all share THIS file.",
-  "runs_share_this_mesh": true
+  "runs_share_this_mesh": true,
+  "profile": "thin cambered plate (curved scoop), constant section",
+  "wall_thickness_mm": 1.79,
+  "_wall_measured": "2*Volume/Area over all 27,056 triangles: V = 31,015 mm^3, A = 34,724 mm^2. Confirmed independently at 1.786 and 1.855 mm by section-slicing.",
+  "bbox_mm": {
+    "camber_depth": 24.46,
+    "chord": 48.03,
+    "span": 245.11
+  },
+  "twist_deg": 0.0,
+  "_twist": "ZERO. The section is a prismatic extrusion - perimeter is 140.708-140.734 mm at five spanwise stations (+/-0.02%). An earlier note in this file claimed strong twist; that came from a chord-finder returning the same line with its endpoints swapped (a 180 deg flip read as rotation).",
+  "thickness_ratio": 0.04,
+  "camber_pct_chord": 42,
+  "turning_deg": 183,
+  "leading_edge": "square cut, no radius - both edges are 90 deg corners",
+  "_WHY_THIS_MATTERS": "This is NOT an airfoil. Separation is pinned by the square edges, not by boundary-layer state, so blade surface finish has little leverage on it. Thin cambered plates are the Reynolds-INSENSITIVE class (Laitone, Exp Fluids 23:405, 1997). Any analysis that assumes an airfoil here - XFOIL, a polar lookup, a roughness argument - is answering a question about a different part.",
+  "_corrected": "25 Aug 2026, from the STL itself after a 9-agent audit."
 }

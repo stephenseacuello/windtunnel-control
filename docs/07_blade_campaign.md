@@ -100,8 +100,13 @@ afterwards — the numbers stay perfectly plausible.
 
 ### Use `p_max_fit_w`, not `p_max_raw_w`
 
-Both are in the summary CSV. The raw one is the largest single measurement; the
-fit one is a parabola through the points around the maximum.
+> ⚠️ **`p_max_fit_w` is NOT in `sweep_v1_Ra20_summary.csv`.** That file has
+> `p_max_w` only. This section described an intent, not the file on disk, and
+> `src/cp_lambda.py` silently falls back to the raw column — which differs by
+> **1.9%** at 1800 rpm. Verify the header before trusting either name.
+
+The raw one is the largest single measurement; the fit one is a parabola
+through the points around the maximum.
 
 The top of P(I) is flat. At 1700 rpm on the reference sweep, every point from
 0.21 to 0.30 A sat within 4% of the same power. Over a plateau like that the
@@ -217,6 +222,17 @@ python src/merge_load_facts.py --check    # report drift, change nothing
 ```
 
 Run it after anyone copies a new `tunnel.json` in.
+
+---
+
+## Known discrepancy: two wind speeds for one set point
+
+The summary and points files disagree by **1.1–1.2%** at the same fan set point
+(1700 rpm: 35.43 vs 35.82 m/s). Since P ∝ v³·⁷⁵, 1.2% in v is **4.5% in power**
+— larger than any blade effect this rig has yet resolved.
+
+Which is right is not established. Do not average them, and do not compare a
+number derived from one against a number derived from the other.
 
 ---
 

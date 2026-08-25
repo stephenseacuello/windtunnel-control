@@ -202,5 +202,24 @@
     "5304_efb_parity": 2,
     "0401_last_fault": 28,
     "_fault_note": "28 = SERIAL 1 ERR, the comm-loss trip. The drive faulted when the PMC went quiet during the v3 reflash - which is 3018/3019 working exactly as designed, and an accidental pass of the watchdog test."
+  },
+  "daq_analog_out": {
+    "_what": "Fan rpm published by the PMC on ANALOG OUT O0 for Jeong's DAQ, so fan speed and rotor speed share one time base.",
+    "firmware": "acs550_pmc_v4",
+    "pmc_channel": "O0",
+    "pmc_terminal_gnd": "GND beside the ANALOG OUT block",
+    "volts_zero": 0.5,
+    "rpm_per_volt": 300.0,
+    "formula": "volts = 0.5 + rpm / 300",
+    "inverse": "rpm = (volts - 0.5) * 300",
+    "invalid_below_v": 0.25,
+    "_invalid": "0.000 V means NO VALID SPEED \u2014 comm loss, failed par 0102 read, a pulled wire, or a dead PMC. It is a live zero, so a stopped fan (0.50 V) and a broken signal (0.00 V) are not the same reading. Discard any DAQ segment below 0.25 V.",
+    "check": {
+      "0 rpm": 0.5,
+      "600 rpm": 2.5,
+      "1200 rpm": 4.5,
+      "2435 rpm": 8.62
+    },
+    "_warning": "If this scale is ever changed in firmware it MUST be changed here in the same commit. The DAQ records volts and nothing else; a stale constant here silently rewrites the meaning of every file already captured."
   }
 }
