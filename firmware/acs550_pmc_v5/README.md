@@ -175,6 +175,51 @@ Nothing here turns anything.
    revolution**, and reversals must stay at 0.
 5. Only then start the fan.
 
+## ⚠️ MEASURED 25 Aug: the reed bounces 2–3× per pass
+
+Counter zeroed, rotor turned **exactly 10 revolutions slowly by hand**:
+
+```
+raw counts: 0 3 5 8 10 13 15 18 21 24 27 28
+            increments  3 2 3 2 3 2 3 3 3 3 1
+FINAL 28 counts / 10 revolutions = 2.8 per rev
+```
+
+**The count per pass varies between 2 and 3.** A fixed divisor would be
+correctable; a varying one is not. Rotor rpm would carry roughly ±20% scatter,
+against a blade effect of 13.7% — the noise would be bigger than the signal.
+
+This is not a speed problem. The rotor was turned *slowly by hand* and still
+bounced.
+
+It also explains why sweeping `RPMGAP` from 2 ms to 25 ms never produced a
+plateau: accepted rate wandered 48–89/s with no convergence, while the raw rate
+sat stable at ~148/s.
+
+### Why firmware cannot fix it
+
+`rpmSample()` polls `getRevolutions()` from `loop()`. QEI owns the interrupt,
+and hooking it directly is the double-claim that hung 5.0 and 5.1. So the
+debounce can only gate observed *changes*, never individual edges — and when
+several bounces land between two polls they are added as one increment of
+several counts.
+
+### The fix is one component
+
+**Option A — a capacitor, pennies.** Reed bounce is exactly what an RC filter
+is for. Put **0.1 µF** from `Z0` to `GND` and re-run the 10-revolution test; if
+it still over-counts, try 0.22 µF, then 0.47 µF. Stop increasing when the count
+reads 10. Too large and the edge gets too slow for a rotor at ~60 rev/s, so
+tune it by measurement — the test takes 30 seconds and the counter zeroes with
+`RPMZERO`.
+
+**Option B — a Hall-effect sensor.** Solid state, no contacts, no bounce, and
+happy to several kHz. The VJ12-D10K is a mechanical reed rated by its own
+packaging at **20 Hz**, and this rotor needs 50–70 Hz. It is the wrong part for
+the job and no amount of firmware changes that.
+
+Do A first. If it works you are finished today.
+
 ## Build and flash
 
 ```bash

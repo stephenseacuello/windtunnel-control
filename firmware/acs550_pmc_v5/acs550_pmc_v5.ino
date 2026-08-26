@@ -294,7 +294,19 @@ static uint8_t    rxLen       = 0;
 // so both work. A FLOATING B is the one thing that does not: the count then
 // wanders both ways, which rpmReversals makes visible instead of silent.
 static const int      RPM_ENC_CH   = 0;
-static const uint32_t RPM_MIN_GAP_US = 2000;   // reed debounce -> 30000 rpm
+// Reed debounce, SETTABLE AT RUNTIME via RPMGAP.
+//
+// Fixed at 2000 us this rejected only part of the bounce: at ~66 rev/s the
+// magnet period is ~15 ms, and a reed that rings for 3-5 ms puts some of its
+// contacts OUTSIDE a 2 ms window, so they counted as revolutions. Measured at
+// fan 500 rpm the raw rate was ~200/s against a true rate near 66/s -- about
+// three counts per pass.
+//
+// The right window depends on this reed and this rotor, so it is tuned by
+// measurement rather than guessed in a header, and tuning it must not cost a
+// reflash. The ceiling it implies is 60e6/gap rpm: 5 ms allows 12000 rpm,
+// 8 ms allows 7500.
+static uint32_t rpmMinGapUs = 5000;
 
 static int32_t  rpmRaw       = 0;   // last value read from the encoder
 static uint32_t rpmPulses    = 0;   // accepted changes, monotonic
@@ -309,7 +321,19 @@ static int      rpmLastDir   = 0;
 // timestamps a change to within tens of microseconds -- ample against a
 // magnet that arrives every 13 ms at the top of the range.
 static void rpmSample() {
-  int32_t now_raw = (int32_t)MachineControl_Encoders.getPulses(RPM_ENC_CH);
+  // getRevolutions, NOT getPulses. QEI::setEncoding() attaches the channel-A
+  // interrupt but never assigns encoding_, so it keeps its constructor default
+  // of X2_ENCODING no matter what is asked for. X2 only counts transitions
+  // 0x3<->0x0 and 0x2<->0x1 — both channels moving together, a real quadrature
+  // pair. A single reed with B parked high gives 0x3 -> 0x1 -> 0x3, which
+  // matches neither, so getPulses() can never move however A0 is wired. That
+  // is the entire reason an hour was spent on a wiring fault that did not
+  // exist.
+  //
+  // The index channel has no such logic. QEI::index() is one line —
+  // revolutions_++ — attached unconditionally in the constructor, and it is
+  // exactly the one-pulse-per-revolution case this rig has.
+  int32_t now_raw = (int32_t)MachineControl_Encoders.getRevolutions(RPM_ENC_CH);
   if (now_raw == rpmRaw) return;
 
   int32_t d = now_raw - rpmRaw;
@@ -319,7 +343,7 @@ static void rpmSample() {
   rpmLastDir = dir;
 
   uint32_t now = micros();
-  if (rpmPulses && (uint32_t)(now - rpmLastUs) < RPM_MIN_GAP_US) {
+  if (rpmPulses && (uint32_t)(now - rpmLastUs) < rpmMinGapUs) {
     rpmRejected++;                  // reed bounce, or noise on a floating A
     return;
   }
@@ -599,7 +623,7 @@ static void handleLine(char *line) {
     Serial.println("OK PING");
   }
   else if (!strcmp(line, "ID")) {
-    Serial.println("OK ID acs550-pmc 5.5 RD/WR RPM");
+    Serial.println("OK ID acs550-pmc 5.7 RD/WR RPM");
   }
   else if (!strcmp(line, "HZ") || !strcmp(line, "PCT")) {
     if (!arg) { Serial.println("ERR missing argument"); return; }
@@ -661,6 +685,27 @@ static void handleLine(char *line) {
     Serial.println(rpmReversals > 4 ? "  <-- ENC0-B IS FLOATING, strap it "
                                       "to a rail" : "");
   }
+  else if (!strcmp(line, "RPMGAP")) {
+    if (arg) {
+      long v = atol(arg);
+      // Below 200 us nothing real is being rejected; above 50 ms a genuine
+      // 1200 rpm rotor would start being discarded as bounce.
+      if (v < 200 || v > 50000) {
+        Serial.println("ERR RPMGAP takes 200..50000 microseconds");
+      } else {
+        rpmMinGapUs = (uint32_t)v;
+      }
+    }
+    Serial.print("OK RPMGAP ");   Serial.print(rpmMinGapUs);
+    Serial.print(" us  (ceiling "); Serial.print(60000000UL / rpmMinGapUs);
+    Serial.println(" rpm)");
+  }
+  else if (!strcmp(line, "RPMZERO")) {
+    MachineControl_Encoders.reset(RPM_ENC_CH);
+    rpmRaw = 0; rpmPulses = 0; rpmRejected = 0; rpmReversals = 0;
+    rpmLastUs = rpmPrevUs = 0; rpmLastDir = 0;
+    Serial.println("OK RPMZERO");
+  }
   else if (!strcmp(line, "RD")) { doRead(arg); }
   else if (!strcmp(line, "WR")) { doWrite(arg); }
   else if (!strcmp(line, "UNLOCK")) {
@@ -702,7 +747,8 @@ void setup() {
   // v5: rotor speed. X1 counts one edge per cycle, which is what a single
   // magnet gives. We claim no pins — the library's global EncoderClass owns
   // them already, and claiming them twice is what hung 5.0 and 5.1.
-  MachineControl_Encoders.setEncoding(RPM_ENC_CH, QEI::X1_ENCODING);
+  // setEncoding is NOT called: it is the broken function above, and the only
+  // thing it would do here is attach channel-A interrupts we do not use.
 
   // NO pin_mode() here, and nothing else that touches these pins.
   //
@@ -718,7 +764,7 @@ void setup() {
   MachineControl_Encoders.reset(RPM_ENC_CH);
   rpmRaw = 0;
 
-  Serial.println("# acs550-pmc 5.5 ready (RD/WR, rotor rpm on ENC0-A)");
+  Serial.println("# acs550-pmc 5.7 ready (RD/WR, rotor rpm on ENC0 INDEX / Z0)");
   Serial.println("# T,t_ms,state,sp_hz,act_hz,amps,kw,sw,settled,fault,errs,"
                  "rpm_pulses,rpm_last_us,rotor_rpm");
   Serial.println("# rotor: 1 magnet/rev on PJ_8, INPUT_PULLUP, "
