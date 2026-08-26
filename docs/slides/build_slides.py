@@ -512,92 +512,145 @@ def build_jeong():
 
 
 # ═══════════════════════════════════════════════════════ DECK 2: POSTER ══
+# Built by CLONING 2026_CYPHER_IPT_Poster_Eacuello.pptx and replacing its
+# content, rather than styling a blank deck to look similar. Cloning inherits
+# the theme, the fonts, the navy background and the slide size exactly, so the
+# two posters are the same object with different words - which is what "use my
+# CYPHER poster as the template" has to mean to survive contact with a printer.
+TEMPLATE = OUT / "2026_CYPHER_IPT_Poster_Eacuello.pptx"
+
+GOLD_C   = RGBColor(0xC7, 0x93, 0x16)   # the CYPHER rule colour
+PANEL_LW = Pt(13.3)                     # measured off the template panels
+TITLE_LW = Pt(15.3)
+
+# The grid, measured off the template. The template's left column is 0.2 in
+# out of alignment with the panel below it; that is reproduced as a straight
+# 0.93 here rather than copied faithfully.
+G = {
+    "title":   (0.93,  0.63, 46.30,  6.32),
+    "intro":   (0.93,  7.66, 13.88,  9.25),
+    "arch":    (0.93, 17.43, 13.88, 14.95),
+    "detail":  (15.35, 7.64, 16.72, 24.83),
+    "results": (32.61, 7.64, 14.46, 15.16),
+    "concl":   (32.61,23.43, 14.46,  9.04),
+    "footer":  (0.93, 33.10, 46.15,  2.13),
+}
+
+FUNDING = (
+    "This research was supported by the Office of Naval Research under Grant "
+    "No. N00014-24-1-2129."
+)
+DISCLAIMER = (
+    "The views and conclusions contained in this poster are those of the "
+    "authors and should not be interpreted as representing the official "
+    "policies, either expressed or implied, of the Office of Naval Research "
+    "or the U.S. Government"
+)
+
+
+def _wipe(slide):
+    """Strip every shape, leaving the theme, background and size intact."""
+    for sh in list(slide.shapes):
+        sh._element.getparent().remove(sh._element)
+
+
+def _panel(slide, key, round_=False):
+    l, t, w, h = G[key]
+    sh = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE if round_ else MSO_SHAPE.RECTANGLE,
+        Inches(l), Inches(t), Inches(w), Inches(h))
+    sh.fill.solid()
+    sh.fill.fore_color.rgb = WHITE
+    sh.line.color.rgb = GOLD_C
+    sh.line.width = TITLE_LW if round_ else PANEL_LW
+    sh.shadow.inherit = False
+    return sh
+
+
+def _label(slide, key, text):
+    """72 pt navy section label, seated just inside the panel's top edge."""
+    l, t, w, h = G[key]
+    tf = tb(slide, l + 0.35, t + 0.11, w - 0.7, 1.51)
+    para(tf, text, 72, True, NAVY, first=True, space=0)
+    return t + 1.62
+
+
+def _body(slide, key, y, pad=0.55):
+    l, t, w, h = G[key]
+    return tb(slide, l + pad, y, w - 2 * pad, t + h - y - 0.35)
+
+
+def _fits(key, y, chars, size=32):
+    """
+    Rough overflow check. Better a warning at build time than a surprise at
+    the plotter, where a 48 in sheet costs real money and an afternoon.
+    """
+    l, t, w, h = G[key]
+    per_line = max(1, int((w - 1.1) * 72 / (size * 0.50)))
+    lines = chars / per_line
+    return lines * (size * 1.28 / 72) <= (t + h - y - 0.35)
+
+
 def build_poster():
-    """
-    A 48 x 36 in research poster skeleton, three columns.
-
-    Deliberately a SKELETON. Stephen has a starter poster file coming; this
-    exists so the content, the numbers and the section order are settled
-    before any of it is poured into someone else's template.
-    """
-    prs = Presentation()
-    prs.slide_width, prs.slide_height = Inches(48), Inches(36)
+    if not TEMPLATE.exists():
+        print(f"  ! {TEMPLATE.name} not found — poster skipped")
+        return None, 0, 0
+    prs = Presentation(str(TEMPLATE))
+    s = prs.slides[0]
+    _wipe(s)
     W, H = 48.0, 36.0
-    s = blank(prs)
-    rect(s, 0, 0, W, H, WASH)
+    A = OUT / "assets"
 
-    # ---- title band ----
-    rect(s, 0, 0, W, 5.6, NAVY)
-    rect(s, 0, 5.6, W, 0.22, GOLD)
-    tf = tb(s, 1.6, 0.75, W - 3.2, 1.0)
-    para(tf, "UNIVERSITY OF RHODE ISLAND  ·  SODHI LAB  ×  JEONG LAB",
-         26, True, GOLD, first=True, space=0)
-    tf = tb(s, 1.6, 1.85, W - 3.2, 2.0)
-    para(tf, "Programmable Characterisation of 3D-Printed Wind Turbine Blades",
-         62, True, WHITE, first=True, space=0)
-    tf = tb(s, 1.6, 4.05, W - 3.2, 1.0)
-    para(tf, "Stephen Acuello   ·   seacuello@uri.edu   ·   Aerolab wind "
-             "tunnel, automated load sweeps", 25, False, PALE, first=True, space=0)
+    # ── title ──
+    _panel(s, "title", round_=True)
+    tf = tb(s, G["title"][0] + 11.0, G["title"][1] + 0.75, 24.5, 5.0)
+    para(tf, "Programmable Characterisation of", 66, True, NAVY, first=True, space=6)
+    para(tf, "3D-Printed Wind Turbine Blades", 66, True, NAVY, space=16)
+    para(tf, "Stephen S. Eacuello, ISE Ph.D. Candidate", 44, True, INK, space=6)
+    para(tf, "Department of Mechanical, Industrial and Systems Engineering",
+         32, False, DIM, space=0)
+    for name, box in [("logo_uri_title.png", (1.39, 1.88, 10.05)),
+                      ("logo_cypher.jpg",    (37.90, 2.13, 8.66))]:
+        if (A / name).exists():
+            s.shapes.add_picture(str(A / name), Inches(box[0]), Inches(box[1]),
+                                 width=Inches(box[2]))
 
-    # 1.4 + 3*14.2 + 2*1.2 + 1.4 = 47.8 on a 48 in sheet.
-    COLW, GAP, M = 14.2, 1.2, 1.4
-    top = 6.6
-
-    def col_x(i):
-        return M + i * (COLW + GAP)
-
-    def section(cx, cy, title, cw=COLW):
-        rect(s, cx, cy, cw, 0.78, KEANEY)
-        tf = tb(s, cx + 0.35, cy + 0.14, cw - 0.7, 0.5)
-        para(tf, title.upper(), 24, True, WHITE, first=True, space=0)
-        return cy + 0.78
-
-    def body(cx, cy, cw, h):
-        box = rect(s, cx, cy, cw, h, WHITE, PALE)
-        tf = box.text_frame
-        tf.margin_left = tf.margin_right = Inches(0.45)
-        tf.margin_top = Inches(0.4)
-        return tf, cy + h
-
-    # ═══ COLUMN 1 ═══
-    x, y = col_x(0), top
-    y = section(x, y, "Motivation")
-    tf, y = body(x, y, COLW, 5.4)
+    # ── introduction ──
+    _panel(s, "intro")
+    y = _label(s, "intro", "Introduction")
+    tf = _body(s, "intro", y)
     para(tf, "3D printing makes rotor geometry cheap to iterate. Measuring "
-             "whether a change actually helps does not follow automatically: "
-             "a wind-tunnel campaign that compares a dozen blades has to hold "
-             "its protocol fixed across weeks, or the comparison silently "
-             "becomes a comparison of settings.", 21, False, INK, first=True,
-         space=14)
+             "whether a change actually helped does not follow automatically.",
+         32, False, INK, first=True, space=16)
+    rich(tf, [("A campaign comparing a dozen blades has to hold its protocol "
+               "fixed across weeks, or the comparison silently becomes a "
+               "comparison of ", False, INK),
+              ("settings", True, NAVY), (".", False, INK)], 32, space=16)
     para(tf, "This work builds programmable, reproducible control of the "
-             "Aerolab tunnel and its electronic load, so a rotor can be "
+             "Aerolab tunnel and its electronic load, so a rotor is "
              "characterised unattended in ~10 minutes with a machine-checkable "
-             "record of exactly how.", 21, False, INK, space=0)
+             "record of exactly how.", 32, False, INK, space=18)
+    for t in ["Automated 14-point load sweep, drive and load on one clock",
+              "Two-layer watchdog safety, hardware E-stop untouched",
+              "Protocol fingerprinting so runs are provably comparable",
+              "Live dashboard, digital twin, and a full parameter archive"]:
+        rich(tf, [("▪ ", False, GOLDDK), (t, False, NAVY)], 28, space=9)
 
-    y += 1.1
-    y = section(x, y, "Apparatus")
-    tf, y = body(x, y, COLW, 8.6)
-    for a, b in [("Drive", "ABB ACS550-U1-046A-2, 15 HP, 208–240 V 3φ; "
-                           f"commands speed in rpm, full scale {F['ref1_max']}"),
+    # ── system architecture ──
+    _panel(s, "arch")
+    y = _label(s, "arch", "System Architecture")
+    tf = _body(s, "arch", y)
+    for a, b in [("Drive", f"ABB ACS550-U1-046A-2, 15 HP, 208–240 V 3φ. "
+                           f"Commands speed in rpm, full scale {F['ref1_max']}"),
                  ("Controller", "Portenta Machine Control — sole Modbus RTU "
                                 "master, owns both watchdogs"),
                  ("Load", "Chroma 63004-150-60 DC electronic load, SCPI over "
                           "USB-TMC"),
-                 ("Wind", f"10.1 – {F['v_top']:.1f} m/s, "
-                          f"v = 0.02132·rpm − 0.424, R² = 0.9996"),
-                 ("Rotor", f"Vertical-axis H-rotor, 3 blades, R = 101.6 mm, "
-                           f"span {F['span']:.0f} mm, swept area "
-                           f"2RH = {F['area']:.4f} m²"),
-                 ("Blade", f"PETG, thin cambered plate: {F['wall']:.2f} mm "
-                           f"wall, t/c {F['tc']*100:.0f}%, {F['camber']}% "
-                           f"camber, {F['turning']}° turning")]:
-        rich(tf, [(f"{a}   ", True, NAVY), (b, False, INK)], 20, space=13)
-
-    y += 1.1
-    y = section(x, y, "Safety Architecture")
-    tf, y = body(x, y, COLW, 6.4)
+                 ("Wind", f"10.1 – {F['v_top']:.1f} m/s;  "
+                          f"v = 0.02132·rpm − 0.424,  R² = 0.9996")]:
+        rich(tf, [(f"{a}   ", True, NAVY), (b, False, INK)], 28, space=11)
     para(tf, "The hardwired E-stop is the safety device. No software is in "
-             "that chain.", 21, True, FAULT, first=True, space=14)
+             "that chain.", 28, True, FAULT, space=11)
     for t in ["Two independent watchdogs — the drive stops the fan if the PMC "
               "goes quiet (3.0 s); the PMC stops the fan if the host goes "
               "quiet (5.0 s). Neither depends on the layer above it.",
@@ -605,103 +658,134 @@ def build_poster():
               "neither aware of the other, is the failure this design prevents.",
               "Interlock: load ON → wind UP → test → wind DOWN → load OFF. "
               "An unloaded rotor in moving air accelerates."]:
-        rich(tf, [("• ", False, KEANEY), (t, False, INK)], 20, space=13)
+        rich(tf, [("• ", False, GOLDDK), (t, False, INK)], 28, space=11)
+    figure_slot(s, G["arch"][0] + 0.55, 27.4, 12.78, 4.3,
+                "docs/diagrams/system_overview.png",
+                "Measurement and control chain")
 
-    # ═══ COLUMN 2 ═══
-    x, y = col_x(1), top
-    y = section(x, y, "Method")
-    tf, y = body(x, y, COLW, 6.2)
-    para(tf, f"At each of {F['n_points']} wind speeds (500 → 1800 rpm fan in "
-             f"100 rpm steps):", 21, True, NAVY, first=True, space=14)
+    # ── project details ──
+    _panel(s, "detail")
+    y = _label(s, "detail", "Project Details")
+    tf = _body(s, "detail", y)
+    para(tf, f"At each of {F['n_points']} wind speeds (500 → 1800 rpm fan, "
+             f"100 rpm steps):", 32, True, NAVY, first=True, space=13)
     for t in ["Ramp the electronic load in constant-current steps",
               "Stop once electrical power falls to 80% of its peak — the "
               "rotor is never driven to stall",
               "Record V and I at every step, unload, advance the wind"]:
-        rich(tf, [("• ", False, KEANEY), (t, False, INK)], 20, space=12)
-    para(tf, "Peak located by parabolic fit. Over a flat maximum the largest "
-             "single sample is biased high, and the bias grows with sample "
-             "count — so blades measured with different point counts would be "
-             "compared unfairly.", 19, False, INK, space=0)
+        rich(tf, [("• ", False, GOLDDK), (t, False, INK)], 32, space=11)
+    rich(tf, [("Peak located by parabolic fit. ", True, NAVY),
+              ("Over a flat maximum the largest single sample is biased high, "
+               "and the bias grows with sample count — so blades measured with "
+               "different point counts would be compared unfairly.",
+               False, INK)], 32, space=13)
+    rich(tf, [("Protocol fingerprinting. ", True, NAVY),
+              ("Every run hashes the settings that change what a curve means. "
+               "Runs with different fingerprints are not comparable, and the "
+               "hash makes that visible instead of silent.", False, INK)],
+         32, space=13)
+    rich(tf, [("Rotor   ", True, NAVY),
+              (f"vertical-axis H-rotor, 3 blades, R = 101.6 mm, span "
+               f"{F['span']:.0f} mm. Swept area 2RH = {F['area']:.4f} m² — "
+               f"a cylinder, not a disc.", False, INK)], 30, space=11)
+    rich(tf, [("Blade   ", True, NAVY),
+              (f"PETG thin cambered plate: {F['wall']:.2f} mm wall, t/c "
+               f"{F['tc']*100:.0f}%, {F['camber']}% camber, {F['turning']}° "
+               f"turning, square edges — not an airfoil.", False, INK)],
+         30, space=0)
+    figure_slot(s, G["detail"][0] + 0.55, 19.9, 15.62, 11.9,
+                "docs/diagrams/sweep_protocol.png",
+                "Outer loop = wind speed; inner loop = load current")
 
-    y += 1.1
-    y = section(x, y, "Protocol Fingerprinting")
-    tf, y = body(x, y, COLW, 5.2)
-    para(tf, "Every run hashes the settings that change what a curve MEANS — "
-             "step size, scaling rule, dwell, cut-out voltage, current range, "
-             "floor current, roll-off fraction.", 20, False, INK, first=True,
-         space=14)
-    rich(tf, [("Runs with different fingerprints are not comparable. ", True, NAVY),
-              ("The hash makes that visible instead of silent — across a dozen "
-               "rotors the numbers stay perfectly plausible either way.",
-               False, INK)], 20, space=0)
-
-    y += 1.1
-    y = section(x, y, "Results — blade v1, Ra 20 µm")
-    tf, y = body(x, y, COLW, 9.0)
-    for t, big in [(f"{F['clean']} / {F['n_points']} points clean, single "
-                    f"continuous run", False),
-                   ("P ∝ v^3.77,  R² = 0.998", True),
-                   (f"peak {F['p_top']:.3f} W at {F['v_top']:.1f} m/s", True),
-                   ("independent repeats at 1200 and 1800 rpm match the sweep "
-                    "to 0.3% and 0.2%", False)]:
-        para(tf, t, 26 if big else 20, big, NAVY if big else INK, space=14,
-             font=MONO if big else SANS)
-    para(tf, "FIGURE — P_max(v), log–log, with the fitted power law",
-         19, True, DIM, space=0, align=PP_ALIGN.CENTER, italic=True)
-
-    # ═══ COLUMN 3 ═══
-    x, y = col_x(2), top
-    y = section(x, y, "What the Exponent Actually Measures")
-    tf, y = body(x, y, COLW, 9.8)
-    para(tf, "v^3.77 is a generator characteristic, not an aerodynamic one.",
-         22, True, GOLDDK, first=True, space=14)
-    for t in ["V_oc ∝ v^1.52,  R_int ∝ v^−0.64  (73.6 → 40.1 Ω)",
-              "every peak sits at the Thévenin match, P = V_oc² / 4R_int",
+    # ── results ──
+    _panel(s, "results")
+    y = _label(s, "results", "Results")
+    tf = _body(s, "results", y)
+    para(tf, f"{F['clean']} / {F['n_points']} points clean, single continuous "
+             f"run", 30, False, INK, first=True, space=13)
+    para(tf, "P ∝ v^3.77    R² = 0.998", 40, True, NAVY, space=8)
+    para(tf, f"peak {F['p_top']:.3f} W at {F['v_top']:.1f} m/s", 40, True,
+         NAVY, space=13)
+    para(tf, "Independent repeats at 1200 and 1800 rpm match the sweep to "
+             "0.3% and 0.2%.", 28, False, DIM, space=16)
+    para(tf, "THE EXPONENT IS A GENERATOR CHARACTERISTIC, NOT AN AERODYNAMIC "
+             "ONE", 28, True, GOLDDK, space=11)
+    for t in ["V_oc ∝ v^1.52   and   R_int ∝ v^−0.64   (73.6 → 40.1 Ω)",
+              "every peak sits at the Thévenin match,  P = V_oc² / 4R_int",
               "n = 2a − b = 3.69,  against 3.77 measured"]:
-        para(tf, t, 19, False, NAVY, space=11, font=MONO)
+        para(tf, t, 26, False, NAVY, space=8)
     rich(tf, [("Cp_elec = ", False, INK),
               (f"{F['cp_lo']*100:.2f} – {F['cp_hi']*100:.2f}%", True, FAULT),
-              (", roughly 100× below a working H-rotor, because peak power "
-               "sits at ω/ω_runaway ≈ 0.70 → 0.94 — the far limb of Cp(λ) "
-               "where Cp → 0 by construction.", False, INK)], 20, space=14)
-    rich(tf, [("Consequence: ", True, NAVY),
-              ("a better blade can read as LESS electrical power. Anything "
-               "that raises Cp_max while adding low-α drag lowers λ_runaway, "
-               "lowers V_oc, and lowers measured P as the square.",
-               False, INK)], 20, space=0)
+              (", ~100× below a working H-rotor: peak power sits at "
+               "ω/ω_runaway ≈ 0.70 → 0.94, the far limb of Cp(λ) where "
+               "Cp → 0 by construction.", False, INK)], 28, space=0)
 
-    y += 1.1
-    y = section(x, y, "Limitations")
-    tf, y = body(x, y, COLW, 7.2)
-    for t in ["Electrical power only — not Cp. Rotor speed is required.",
-              f"The blade is a cambered plate, not an airfoil: separation is "
-              f"pinned by square edges, so polar and XFOIL cross-checks do not "
-              f"apply.",
-              f"Re_chord = {F['re_lo']:,.0f} → {F['re_hi']:,.0f}, below "
-              f"Reynolds-independence (~2×10⁵) for a cross-flow turbine.",
-              "Generator R_int is inferred from a fit, never measured.",
-              "Single-mount data — no mount-to-mount error bar yet."]:
-        rich(tf, [("• ", False, GOLDDK), (t, False, INK)], 19, space=12)
+    # The measured curve itself. An empty half-panel on a poster reads as
+    # "we did not have much", which is the opposite of true here.
+    show = [r for r in F["rows"] if r[0] in (500, 900, 1400, 1800)]
+    tl = s.shapes.add_table(len(show) + 1, 4,
+                            Inches(G["results"][0] + 0.55), Inches(17.5),
+                            Inches(13.0), Inches(0.82 * (len(show) + 1))).table
+    for i, w in enumerate([3.3, 3.0, 3.4, 3.3]):
+        tl.columns[i].width = Inches(w)
+    for c, htxt in enumerate(["fan rpm", "m/s", "P_max", "at"]):
+        cell = tl.cell(0, c)
+        cell.text = htxt
+        cell.fill.solid(); cell.fill.fore_color.rgb = NAVY
+        pr = cell.text_frame.paragraphs[0]
+        pr.alignment = PP_ALIGN.RIGHT if c else PP_ALIGN.LEFT
+        pr.runs[0].font.size = Pt(24); pr.runs[0].font.bold = True
+        pr.runs[0].font.color.rgb = WHITE
+    for r, (cmd, act, mps, pw, ia) in enumerate(show, start=1):
+        top = (cmd == 1800)
+        for c, v in enumerate([f"{act}", f"{mps:.1f}", f"{pw:.3f} W",
+                               f"{ia:.3f} A"]):
+            cell = tl.cell(r, c)
+            cell.text = v
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = WASH2 if top else WHITE
+            pr = cell.text_frame.paragraphs[0]
+            pr.alignment = PP_ALIGN.RIGHT if c else PP_ALIGN.LEFT
+            pr.runs[0].font.size = Pt(24); pr.runs[0].font.bold = top
+            pr.runs[0].font.color.rgb = NAVY if top else INK
+    tf2 = tb(s, G["results"][0] + 0.55, 17.5 + 0.82 * (len(show) + 1) + 0.12,
+             13.0, 0.8)
+    para(tf2, "Wind speed from MEASURED fan rpm — the drive settles 4–13 rpm "
+              "below setpoint.", 19, False, DIM, first=True, space=0,
+         italic=True)
 
-    y += 1.1
-    y = section(x, y, "Next")
-    tf, y = body(x, y, COLW, 6.0)
-    para(tf, "One rotor-speed channel converts the entire existing archive "
-             "into Cq(λ) retroactively.", 22, True, OK, first=True, space=14)
-    para(tf, "Every sweep already records a full load ramp at all 14 wind "
-             "speeds. The measurement exists — a proximity sensor on the rig "
-             "already feeds the Jeong lab DAQ. What is needed is its channel "
-             "and pulses-per-revolution, not new hardware.", 20, False, INK,
-         space=14)
-    para(tf, "Then: surface-finish and geometry comparisons under ABBA "
-             "ordering, with the first mount-to-mount error bar this rig has "
-             "had.", 20, False, INK, space=0)
+    # ── conclusion ──
+    _panel(s, "concl")
+    y = _label(s, "concl", "Conclusion")
+    tf = _body(s, "concl", y)
+    rich(tf, [("A better blade can read as LESS electrical power. ", True, FAULT),
+              ("Anything raising Cp_max while adding low-α drag lowers "
+               "λ_runaway, lowers V_oc, and lowers measured P as the square.",
+               False, INK)], 28, first=True, space=13)
+    rich(tf, [("One rotor-speed channel converts the entire existing archive "
+               "into Cq(λ) retroactively", True, OK),
+              (" — every sweep already records a full load ramp at all 14 "
+               "wind speeds, and a proximity sensor on the rig already feeds "
+               "the DAQ. What is needed is its channel and pulses-per-"
+               "revolution, not new hardware.", False, INK)], 28, space=13)
+    para(tf, f"Limits: electrical power only, not Cp · Re_chord "
+             f"{F['re_lo']:,.0f}–{F['re_hi']:,.0f}, below Reynolds-"
+             f"independence (~2×10⁵) · generator R_int inferred, never "
+             f"measured · single-mount data, no mount-to-mount error bar yet.",
+         24, False, DIM, space=0)
 
-    # footer
-    rect(s, 0, H - 1.5, W, 1.5, NAVY)
-    tf = tb(s, 1.6, H - 1.12, W - 3.2, 0.7)
-    para(tf, "Code, data and full protocol: github.com/stephenseacuello/"
-             "windtunnel-control", 21, False, PALE, first=True, space=0)
+    # ── footer ──
+    _panel(s, "footer")
+    tf = tb(s, G["footer"][0] + 7.2, G["footer"][1] + 0.16, 33.0, 1.8)
+    para(tf, "The University of Rhode Island CYPHER Research Center IPT "
+             "Meeting for Power Systems and Manufacturing", 29.33, True,
+         RGBColor(0, 0, 0), first=True, space=2, font="Arial")
+    para(tf, FUNDING, 24, True, RGBColor(0x22, 0x22, 0x22), space=2, font="Arial")
+    para(tf, DISCLAIMER, 15, False, RGBColor(0x22, 0x22, 0x22), space=0,
+         font="Arial")
+    if (A / "logo_uri_footer.png").exists():
+        s.shapes.add_picture(str(A / "logo_uri_footer.png"), Inches(1.12),
+                             Inches(33.39), width=Inches(6.25))
 
     out = OUT / "poster.pptx"
     prs.save(out)

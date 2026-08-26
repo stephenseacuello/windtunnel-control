@@ -7,7 +7,7 @@ python docs/slides/build_slides.py
 | file | what |
 |---|---|
 | `jeong_setup_and_results.pptx` | 7 slides, 16:9 — the setup pair and results pair Dr Jeong asked for, plus three optional |
-| `poster.pptx` | one 48 × 36 in slide, three columns — a skeleton to pour into the real template |
+| `poster.pptx` | one 48 × 36 in slide, built **from your CYPHER poster as the template** |
 
 ## ⚠️ The script generates. It does not maintain.
 
@@ -17,6 +17,35 @@ Re-running **overwrites** hand edits. Rename your working copy
 Every quotable number is read from the repo at build time — `data/tunnel.json`,
 `logs/sweep_v1_Ra20_summary.csv`, `blades/v1.json` — so a stale figure fails
 loudly here rather than quietly on a projector.
+
+## The poster clones your CYPHER file
+
+`build_poster()` opens `2026_CYPHER_IPT_Poster_Eacuello.pptx`, strips its
+shapes, and rebuilds the content in place — it does **not** style a blank deck
+to look similar. Cloning inherits the theme, fonts, navy `#002147` background
+and slide size exactly, so the two posters are the same object with different
+words.
+
+Style measured off your file and reproduced:
+
+| element | |
+|---|---|
+| background | `#002147` URI navy |
+| panels | white fill, `#C79316` gold rule at **13.3 pt** |
+| title bar | rounded rect, gold rule at **15.3 pt** |
+| section labels | **72 pt bold navy**, seated inside the panel's top edge |
+| body | 28–32 pt |
+| footer | Arial 29.33 pt bold |
+
+Logos and the QR are extracted to `assets/` and re-placed at the same
+coordinates. The five-panel grid is the CYPHER grid, with one change: your left
+column is 0.2 in out of alignment with the panel below it, and that is squared
+up rather than copied.
+
+> ⚠️ **Confirm the funding line.** `FUNDING` in the script carries the ONR grant
+> **N00014-24-1-2129** straight across from the CYPHER poster. If this wind
+> tunnel work sits under a different grant, or none, change it — a federal
+> grant number asserted on a poster is not a detail.
 
 ## Figures
 
