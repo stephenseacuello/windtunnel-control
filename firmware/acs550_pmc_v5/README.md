@@ -111,6 +111,51 @@ That is exactly that many whole revolutions over exactly the time they took,
 timed by the PMC rather than the host's scheduler. Both are unsigned and wrap
 correctly through the 71-minute `micros()` rollover.
 
+## ⚠️ 5.0 faulted the drive. 5.1 is the fix — verify it before trusting it.
+
+Flashing 5.0 made the ACS550 trip repeatedly; reflashing v3 cleared it. That
+was this firmware's fault, not the drive's, and there were two causes:
+
+**`mbed::InterruptIn` was a global.** On an mbed core a global peripheral
+object runs its constructor during static init, before the RTOS is up, and
+`InterruptIn` touches GPIO and the NVIC. The board hung, the Modbus loop
+stopped, and the drive's comm watchdog tripped it 3 s later **exactly as
+designed**. The symptom pointed at the drive and had nothing to do with it.
+5.1 constructs it inside `setup()`.
+
+**A floating input next to a VFD is an antenna.** With nothing wired, PJ_8
+sits on a ~40 kΩ internal pull-up beside a 15 HP motor. An edge storm re-enters
+the ISR faster than the main loop can run and starves the Modbus poll — the
+same silence, the same fault, a different cause. 5.1 counts its own edge rate
+and **detaches the interrupt above 500/s** (30,000 rpm — far above anything
+real). `RPM?` then reports `STORM-DETACHED`. Detaching is recoverable and
+visible; a starved Modbus loop is neither.
+
+Also removed: `__disable_irq()` around the counter read. Masking every
+interrupt on a board whose real job is a half-duplex serial link is a bad
+trade for four words of consistency — it can only cost a UART byte, and enough
+CRC failures is a comm fault. The read is now lock-free.
+
+### Verify 5.1 with the fan stopped
+
+Nothing below turns anything.
+
+1. **Wire the reed first.** A connected dry contact holds the pin at a defined
+   level; an unwired pin is the antenna described above.
+2. Flash 5.1, then poll for a couple of minutes with the drive powered but
+   **not running**:
+
+   ```bash
+   python src/wait_for_pmc.py
+   ```
+
+   `ID` must answer `acs550-pmc 5.1 RD/WR RPM` every time. If replies stop, or
+   `RPM?` says `STORM-DETACHED`, the input is still noisy — add the 4.7 kΩ
+   pull-up and the 10 nF, and check the shield is landed at one end only.
+3. Watch the drive keypad for two minutes. **No fault means the Modbus loop is
+   being serviced.** That is the whole test.
+4. Only then start the fan.
+
 ## Build and flash
 
 ```bash
