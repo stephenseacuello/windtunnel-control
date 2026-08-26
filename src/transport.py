@@ -362,8 +362,14 @@ class PMCTransport(Transport):
     #            failed. NOT derived from frequency: that cannot know slip.
     #   ao_v     what the PMC is driving on ANALOG OUT O0 for the DAQ.
     #            0.000 means INVALID, not zero rpm — see data/tunnel.json.
+    #   rpm_pulses   firmware 5.0: monotonic count of accepted magnet passes
+    #   rpm_last_us  micros() at the last accepted edge, on the PMC's clock
+    #   rotor_rpm    the PMC's own single-interval estimate — jittery at one
+    #                pulse per revolution, for humans watching a terminal.
+    #                Anything recorded should difference the first two.
     TELEMETRY_FIELDS = ["millis", "state", "ref_hz", "f2", "f3", "f4",
-                        "u1", "u2", "u3", "u4", "act_rpm", "ao_v"]
+                        "u1", "u2", "u3", "u4",
+                        "rpm_pulses", "rpm_last_us", "rotor_rpm"]
 
     def stat(self, max_age=0.2):
         """

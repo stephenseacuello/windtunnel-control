@@ -107,3 +107,16 @@ older `Arduino_MachineControl` library spells the same calls
 
 Step 5 is the one worth doing. It is the only proof the invalid path works, and
 it is the path that protects every file you capture afterwards.
+
+---
+
+## ⚠️ ABANDONED — superseded by v5
+
+This published **fan** rpm to Jeong's DAQ so the two labs' records shared a
+clock. That problem no longer exists: the DAQ has been removed and the rotor's
+own speed sensor now comes directly into the PMC. See
+`firmware/acs550_pmc_v5/`.
+
+Never flashed. Kept because the analog-out scaling and the live-zero reasoning
+are worth having if a DAQ link is ever wanted again — but **do not flash it**,
+and do not reuse the version number.

@@ -63,6 +63,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 import sys
 import time
 from pathlib import Path
@@ -157,6 +158,40 @@ def open_rig(a):
     return drive, load
 
 
+ROTOR_RADIUS_M = 0.1016      # 4 in, centre of shaft to blade attachment
+
+
+def interp_at(pairs, x):
+    """
+    Linear interpolation of y at x over (x, y) pairs, y possibly None.
+
+    Used to read rotor speed at the FITTED peak current. The peak lies between
+    two dwells, so the honest answer is between their two speeds; taking the
+    nearer dwell would pair a tip-speed ratio with a power measured somewhere
+    else. Returns None rather than guessing when the fitted peak falls outside
+    the measured currents — which happens when a ramp stopped early, and is
+    exactly when a silently extrapolated number would be most misleading.
+    """
+    pts = sorted(((float(a), float(b)) for a, b in pairs if b is not None),
+                 key=lambda t: t[0])
+    if len(pts) < 2 or x is None:
+        return None
+    if x <= pts[0][0] or x >= pts[-1][0]:
+        return None
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        if x0 <= x <= x1:
+            if x1 == x0:
+                return y0
+            return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+    return None
+
+
+# One magnet on one blade. If a rotor is ever built with a magnet per blade
+# this becomes 3, and getting it wrong is a clean integer error in tip-speed
+# ratio that looks entirely plausible.
+RPM_PULSES_PER_REV = 1
+
+
 class DriveWatch:
     """
     Feed the PMC's host watchdog, and log what the drive is actually doing.
@@ -180,6 +215,13 @@ class DriveWatch:
         self.interval = interval
         self.rpm = self.amps = 0.0
         self.ticks = self.errors = 0
+        # Every tick is KEPT, not just the latest. The docstring above always
+        # claimed dwells were logged against the conditions "that were
+        # present", but rows were built after the ramp finished from whatever
+        # self.rpm happened to hold, so every dwell in a wind point carried one
+        # identical end-of-ramp value. A series makes the claim true.
+        self._samples = []
+        self._lock = threading.Lock()
         self._stop = threading.Event()
         self._t = threading.Thread(target=self._loop, daemon=True)
 
@@ -189,9 +231,56 @@ class DriveWatch:
                 if self.tp is not None:
                     self.tp.keepalive_tick()
                 self.rpm, self.amps = self.drive.actuals()
+                pulses = last_us = None
+                try:
+                    # Firmware 5.0 reports a monotonic pulse count and the
+                    # microsecond timestamp of the last accepted edge. v2-v4
+                    # do not; those keys are simply absent and rotor speed
+                    # comes out blank rather than wrong.
+                    st = self.tp.stat() if self.tp is not None else {}
+                    if st.get("rpm_pulses") is not None:
+                        pulses = int(st["rpm_pulses"])
+                        last_us = int(st["rpm_last_us"])
+                except Exception:
+                    pass
+                with self._lock:
+                    self._samples.append((time.time(), self.rpm, self.amps,
+                                          pulses, last_us))
                 self.ticks += 1
             except Exception:
                 self.errors += 1
+
+    def series(self):
+        with self._lock:
+            return list(self._samples)
+
+    def drive_at(self, t):
+        """(fan_rpm, motor_amps) from the tick nearest this instant."""
+        ss = self.series()
+        if not ss:
+            return self.rpm, self.amps
+        s = min(ss, key=lambda x: abs(x[0] - t))
+        return s[1], s[2]
+
+    def rotor_rpm_between(self, t0, t1):
+        """
+        Mean rotor rpm over a window, or None.
+
+        Counts whole revolutions between the first and last accepted pulse
+        inside the window and divides by the time THOSE pulses took, measured
+        by the PMC's own microsecond timer. That is exact: no host scheduling
+        jitter, and no quantisation from where the window edges happen to fall
+        relative to the magnet.
+        """
+        ss = [s for s in self.series()
+              if s[3] is not None and t0 <= s[0] <= t1]
+        if len(ss) < 2:
+            return None
+        d_pulses = (ss[-1][3] - ss[0][3]) & 0xFFFFFFFF
+        d_us = (ss[-1][4] - ss[0][4]) & 0xFFFFFFFF
+        if d_pulses < 1 or d_us < 1:
+            return None            # rotor stopped, or one pulse is not a rate
+        return 60e6 * d_pulses / (d_us * RPM_PULSES_PER_REV)
 
     def __enter__(self):
         self._t.start()
@@ -393,7 +482,12 @@ def run_sweep(a):
                   f"(fit)   raw {r.power_peak_watts:.4f} W at "
                   f"{r.power_peak_amps:.3f} A   [{len(r.trace)} steps, {flag}]")
 
+            dwell_rpm = []
             for st in r.trace:
+                # This dwell's own window, and the drive state during it.
+                w_rpm = watch.rotor_rpm_between(st.t_unix - a.dwell, st.t_unix)
+                f_rpm, m_amps = watch.drive_at(st.t_unix)
+                dwell_rpm.append((st.amps, w_rpm))
                 rows.append([f"{st.t_unix:.3f}",
                              time.strftime("%Y-%m-%dT%H:%M:%S",
                                            time.localtime(st.t_unix)),
@@ -402,7 +496,16 @@ def run_sweep(a):
                              "" if st.held_a is None else f"{st.held_a:.4f}",
                              f"{st.volts:.4f}", f"{st.amps:.4f}",
                              f"{st.watts:.4f}", int(st.tracking), st.note,
-                             f"{watch.rpm:.0f}", f"{watch.amps:.2f}"])
+                             f"{f_rpm:.0f}", f"{m_amps:.2f}",
+                             "" if w_rpm is None else f"{w_rpm:.1f}"])
+            # Rotor speed AT THE PEAK. The peak itself is a parabola fitted
+            # BETWEEN dwells, so taking the nearest dwell's speed would report
+            # a tip-speed ratio from a different operating point than the
+            # power it is paired with. Interpolate to the fitted current.
+            t_rpm = interp_at(dwell_rpm, r.fit_amps)
+            v_mps = wind_from_rpm(rpm_act or rpm)
+            tsr = (None if t_rpm is None or v_mps <= 0 else
+                   (t_rpm * 2 * math.pi / 60.0) * ROTOR_RADIUS_M / v_mps)
             summary.append([rpm, f"{rpm_act:.0f}",
                             f"{wind_from_rpm(rpm_act or rpm):.2f}", a.blade,
                             f"{r.fit_watts:.4f}", f"{r.fit_amps:.4f}",
@@ -410,7 +513,9 @@ def run_sweep(a):
                             f"{r.power_peak_amps:.4f}",
                             f"{r.power_peak_volts:.4f}",
                             f"{r.peak_amps:.4f}", r.limited_by,
-                            int(r.clean), len(r.trace), r.stopped_by])
+                            int(r.clean), len(r.trace), r.stopped_by,
+                            "" if t_rpm is None else f"{t_rpm:.1f}",
+                            "" if tsr is None else f"{tsr:.4f}"])
 
             # Bank this point NOW. See flush_csv.
             try:
@@ -447,10 +552,11 @@ def run_sweep(a):
 SUMMARY_HEADER = ["fan_rpm_cmd", "fan_rpm_actual", "wind_mps", "blade",
                   "p_max_fit_w", "i_at_pmax_fit_a", "p_max_raw_w",
                   "i_at_pmax_raw_a", "v_at_pmax_v", "i_last_a", "limited_by",
-                  "clean", "steps", "stopped_by"]
+                  "clean", "steps", "stopped_by",
+                  "turbine_rpm_at_pmax", "tsr_at_pmax"]
 POINTS_HEADER = ["t_unix", "t_local", "fan_rpm", "wind_mps", "blade",
                  "demand_a", "held_a", "volts", "amps", "watts", "tracking",
-                 "note", "fan_rpm_actual", "motor_amps"]
+                 "note", "fan_rpm_actual", "motor_amps", "turbine_rpm"]
 
 
 def flush_csv(a, rows, summary, meta):
