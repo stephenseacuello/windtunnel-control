@@ -412,12 +412,19 @@ def run_sweep(a):
                             f"{r.peak_amps:.4f}", r.limited_by,
                             int(r.clean), len(r.trace), r.stopped_by])
 
+            # Bank this point NOW. See flush_csv.
+            try:
+                flush_csv(a, rows, summary, protocol_meta(a, load, voff, rng))
+            except Exception as e:
+                print(f"     ⚠ could not write partial results: {e}")
+
             # ── unload before the next wind step ─────────────────────────
             load.set_mode_cc(a.unload_amps, range_=rng, verify=False)
             time.sleep(a.dwell)
 
     except KeyboardInterrupt:
-        print("\n  interrupted — winding down with the load still on")
+        print(f"\n  interrupted — winding down with the load still on")
+        print(f"  {len(summary)} completed point(s) are already on disk")
     finally:
         try:
             _watch.__exit__()
@@ -437,12 +444,61 @@ def run_sweep(a):
     return rows, summary, protocol_meta(a, load, voff, rng)
 
 
+SUMMARY_HEADER = ["fan_rpm_cmd", "fan_rpm_actual", "wind_mps", "blade",
+                  "p_max_fit_w", "i_at_pmax_fit_a", "p_max_raw_w",
+                  "i_at_pmax_raw_a", "v_at_pmax_v", "i_last_a", "limited_by",
+                  "clean", "steps", "stopped_by"]
+POINTS_HEADER = ["t_unix", "t_local", "fan_rpm", "wind_mps", "blade",
+                 "demand_a", "held_a", "volts", "amps", "watts", "tracking",
+                 "note", "fan_rpm_actual", "motor_amps"]
+
+
+def flush_csv(a, rows, summary, meta):
+    """
+    Write both CSVs. Called after EVERY point, not once at the end.
+
+    A sweep is 10-30 minutes of fan and load time. Writing only on completion
+    meant an abort, a Ctrl-C, a load cut-out or a dead USB at point 12 of 14
+    discarded all twelve — and the operator would not know until the terminal
+    came back empty. Rewriting fourteen rows costs nothing; losing a tunnel
+    session costs an afternoon.
+
+    Returns the summary path so the caller can name it.
+    """
+    if not summary:
+        return None
+    stem = Path(a.out) if a.out else Path("logs") / f"sweep_{a.blade}"
+    stem.parent.mkdir(parents=True, exist_ok=True)
+    last = None
+    for path, header, data in (
+            (stem.with_name(stem.name + "_points.csv"), POINTS_HEADER, rows),
+            (stem.with_name(stem.name + "_summary.csv"), SUMMARY_HEADER,
+             summary)):
+        tmp = path.with_suffix(path.suffix + ".part")
+        with tmp.open("w", newline="") as f:
+            w = csv.writer(f)
+            for k, v in meta.items():
+                w.writerow([f"# {k}", v])
+            w.writerow(header)
+            w.writerows(data)
+        # Atomic replace: a reader (the dashboard globs these) never sees a
+        # half-written file, and an interrupt mid-write cannot corrupt the
+        # points already banked.
+        tmp.replace(path)
+        last = path
+    return last
+
+
 def write_out(a, rows, summary, meta):
     if not summary:
         print("\n  no points completed — nothing written")
         return 1
     stem = Path(a.out) if a.out else Path("logs") / f"sweep_{a.blade}"
     stem.parent.mkdir(parents=True, exist_ok=True)
+    flush_csv(a, rows, summary, meta)
+    for path in (stem.with_name(stem.name + "_points.csv"),
+                 stem.with_name(stem.name + "_summary.csv")):
+        print(f"  wrote {path}")
 
     for path, header, data in (
             (stem.with_name(stem.name + "_points.csv"),
@@ -454,13 +510,7 @@ def write_out(a, rows, summary, meta):
               "p_max_fit_w", "i_at_pmax_fit_a", "p_max_raw_w", "i_at_pmax_raw_a",
               "v_at_pmax_v", "i_last_a", "limited_by", "clean", "steps",
               "stopped_by"], summary)):
-        with path.open("w", newline="") as f:
-            w = csv.writer(f)
-            for k, v in meta.items():
-                w.writerow([f"# {k}", v])
-            w.writerow(header)
-            w.writerows(data)
-        print(f"  wrote {path}")
+        pass    # written by flush_csv above, after every point
 
     print(f"\n  {'fan rpm':>8} {'m/s':>7} {'P_fit (W)':>10} {'at A':>8} "
           f"{'P_raw (W)':>10} {'at A':>8}  stop")

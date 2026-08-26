@@ -1,0 +1,25 @@
+# blade,v1_Ra80
+# notes,"PETG, 0.2mm layer, 0.2mm nozzle, Ra 80"
+# fan_rpm,500
+# wind_mps,10.24
+# instrument,"Chroma,63004-150-60,630041501113,2.01"
+# protocol,94bed28333f7
+# protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+# clock,2026-08-26T15:32:09-0400
+# clock_unix,1787772729.932
+# _clock_note,host wall clock at run start. Every row carries t_unix so a DAQ record can be joined to it — check the two machines agree to better than a dwell before trusting the join.
+fan_rpm_cmd,fan_rpm_actual,wind_mps,blade,p_max_fit_w,i_at_pmax_fit_a,p_max_raw_w,i_at_pmax_raw_a,v_at_pmax_v,i_last_a,limited_by,clean,steps,stopped_by
+500,500,10.24,v1_Ra80,0.0316,0.0184,0.0330,0.0180,1.8325,0.0280,power-rolloff,1,15,power fell to 54% of its peak (0.0179 W vs 0.0330 W) at 0.0280 A
+600,600,12.37,v1_Ra80,0.0657,0.0317,0.0660,0.0319,2.0687,0.0425,power-rolloff,1,21,power fell to 71% of its peak (0.0470 W vs 0.0660 W) at 0.0425 A
+700,700,14.50,v1_Ra80,0.1157,0.0411,0.1180,0.0409,2.8847,0.0642,power-rolloff,1,23,power fell to 61% of its peak (0.0718 W vs 0.1180 W) at 0.0642 A
+800,800,16.63,v1_Ra80,0.1877,0.0615,0.1925,0.0615,3.1303,0.0807,power-rolloff,1,22,power fell to 69% of its peak (0.1333 W vs 0.1925 W) at 0.0807 A
+900,900,18.76,v1_Ra80,0.3023,0.0656,0.3079,0.0684,4.5017,0.1027,power-rolloff,1,22,power fell to 79% of its peak (0.2439 W vs 0.3079 W) at 0.1027 A
+1000,1000,20.90,v1_Ra80,0.5248,0.0955,0.5265,0.0909,5.7919,0.1394,power-rolloff,1,24,power fell to 77% of its peak (0.4030 W vs 0.5265 W) at 0.1394 A
+1100,1101,23.05,v1_Ra80,0.7990,0.1247,0.8044,0.1252,6.4252,0.1914,power-rolloff,1,27,power fell to 69% of its peak (0.5520 W vs 0.8044 W) at 0.1914 A
+1200,1200,25.16,v1_Ra80,1.0917,0.1680,1.1009,0.1758,6.2623,0.2285,power-rolloff,1,27,power fell to 73% of its peak (0.8032 W vs 1.1009 W) at 0.2285 A
+1300,1300,27.29,v1_Ra80,1.4395,0.1818,1.4455,0.1758,8.2223,0.2689,power-rolloff,1,27,power fell to 78% of its peak (1.1317 W vs 1.4455 W) at 0.2689 A
+1400,1401,29.45,v1_Ra80,1.8170,0.2231,1.8391,0.2164,8.4985,0.3486,power-rolloff,1,30,power fell to 69% of its peak (1.2663 W vs 1.8391 W) at 0.3486 A
+1500,1500,31.56,v1_Ra80,2.2446,0.2577,2.2569,0.2489,9.0675,0.3872,power-rolloff,1,29,power fell to 76% of its peak (1.7136 W vs 2.2569 W) at 0.3872 A
+1600,1600,33.69,v1_Ra80,2.7845,0.2792,2.8299,0.2837,9.9750,0.4255,power-rolloff,1,28,power fell to 78% of its peak (2.2172 W vs 2.8299 W) at 0.4255 A
+1700,1701,35.84,v1_Ra80,3.5181,0.2727,3.5290,0.2672,13.2074,0.4988,power-rolloff,1,29,power fell to 72% of its peak (2.5248 W vs 3.5290 W) at 0.4988 A
+1800,1800,37.95,v1_Ra80,4.4318,0.3910,4.4981,0.4000,11.2453,0.5400,power-rolloff,1,28,power fell to 74% of its peak (3.3282 W vs 4.4981 W) at 0.5400 A
