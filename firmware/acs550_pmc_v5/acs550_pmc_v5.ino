@@ -121,7 +121,7 @@
  *  HOST LINE PROTOCOL  (115200 8N1, '\n' terminated, case-insensitive verbs)
  *  ---------------------------------------------------------------------------
  *    ID            -> OK ID acs550-pmc 5.0 RD/WR RPM
- *    RPM?          -> OK RPM <pulses> <last_us> <rpm> <pin> <rejected>
+ *    RPM?          -> OK RPM <pulses> <last_us> <rpm> <raw> <rejected> <rev>
  *                     pin is the LIVE input level: pass the magnet past the
  *                     sensor by hand and watch it toggle 1 -> 0. That proves
  *                     the whole signal path with the tunnel switched off.
@@ -166,7 +166,6 @@
  */
 
 #include <Arduino_PortentaMachineControl.h>
-#include <mbed.h>
 #include <ArduinoRS485.h>
 #include <ArduinoModbus.h>
 
@@ -202,9 +201,7 @@ static const int      POST_DELAY_US = 500;
 // gives a hardware edge interrupt. EXTI lines are shared by pin NUMBER, so
 // PJ_8 claims EXTI8; nothing else in this sketch attaches an interrupt, and
 // the only other pin-8 in the PMC map is PA_8, an analog-mux OUTPUT.
-static const PinName  RPM_PIN         = PJ_8;
 static const uint32_t RPM_PPR         = 1;      // one magnet, one blade
-static const uint32_t RPM_MIN_GAP_US  = 2000;   // reed debounce -> 30000 rpm
 static const uint32_t RPM_STALE_MS    = 2000;   // no pulse this long -> 0 rpm
 
 static const uint32_t POLL_MS         = 100;
@@ -270,79 +267,72 @@ static uint32_t   startedAt   = 0;
 static char       rxBuf[80];
 static uint8_t    rxLen       = 0;
 
-// ---- v5 rotor speed. Written in interrupt context, so volatile, and read
-// with interrupts masked so a count can never be paired with a stale
-// timestamp from the other side of an edge.
-static volatile uint32_t rpmPulses   = 0;   // monotonic; never reset
-static volatile uint32_t rpmLastUs   = 0;   // micros() at the last accepted edge
-static volatile uint32_t rpmPrevUs   = 0;   // and at the one before it
-static volatile uint32_t rpmRejected = 0;   // edges inside the debounce window
 
-// Constructed in setup(), NOT at global scope.
+// ── rotor speed via the library's OWN encoder ────────────────────────────
 //
-// v5.0 built this as a global. On an mbed core a global peripheral object
-// runs its constructor during static init, BEFORE the RTOS is up, and
-// InterruptIn configures GPIO and the NVIC. The board hung; the Modbus loop
-// stopped; the drive's own comm watchdog tripped it 3 s later exactly as
-// designed. The symptom was "the VFD keeps faulting", which points at the
-// drive and was nothing to do with it.
-static mbed::InterruptIn *rpmIn = nullptr;
-
-// A floating input is a noise antenna, and this one sits next to a 15 HP
-// motor and a VFD on a ~40k internal pull-up. Left unguarded, an edge storm
-// re-enters this ISR faster than the main loop can run and starves the Modbus
-// poll — the same silence, the same drive fault, a different cause.
+// v5.0 and v5.1 created an mbed::InterruptIn on PJ_8 and hung the board, which
+// stopped the Modbus loop, which tripped the drive's comm watchdog 3 s later.
+// The symptom read as "the VFD keeps faulting" and had nothing to do with the
+// drive: par 3018/3019 were doing exactly their job.
 //
-// So the ISR counts its own rate and detaches itself if the input is clearly
-// not a magnet passing once a revolution. Detaching is recoverable and
-// reported; a starved Modbus loop is neither.
-static const uint32_t RPM_STORM_PER_SEC = 500;   // 30000 rpm, far above real
-static volatile uint32_t rpmWindowStart  = 0;
-static volatile uint32_t rpmWindowCount  = 0;
-static volatile bool     rpmStorm        = false;
+// The cause: Arduino_PortentaMachineControl.h declares
+//
+//     extern EncoderClass MachineControl_Encoders;
+//
+// a GLOBAL whose QEI constructor already claims MC_ENC_0A_PIN (PJ_8),
+// MC_ENC_0B_PIN and MC_ENC_0I_PIN. That object exists in v3 too, which is why
+// v3 is fine — v3 simply never touched those pins. An InterruptIn on PJ_8 was
+// a SECOND claim on a pin mbed already owned.
+//
+// So: use the encoder instead of fighting it. No ISR of ours, no second
+// claim, nothing to storm.
+//
+// X1_ENCODING counts one edge per cycle (QEI.cpp:269-275): with state
+// (A<<1)|B, it increments on 0x3 and decrements on 0x2. So channel B decides
+// the SIGN and must be strapped to a rail — either one. Tied high the count
+// runs up, tied low it runs down; the host uses the magnitude of the change,
+// so both work. A FLOATING B is the one thing that does not: the count then
+// wanders both ways, which rpmReversals makes visible instead of silent.
+static const int      RPM_ENC_CH   = 0;
+static const uint32_t RPM_MIN_GAP_US = 2000;   // reed debounce -> 30000 rpm
 
-static void rpmEdge() {
+static int32_t  rpmRaw       = 0;   // last value read from the encoder
+static uint32_t rpmPulses    = 0;   // accepted changes, monotonic
+static uint32_t rpmLastUs    = 0;   // micros() when the count last changed
+static uint32_t rpmPrevUs    = 0;
+static uint32_t rpmRejected  = 0;   // changes inside the debounce window
+static uint32_t rpmReversals = 0;   // direction flips: B is floating
+static int      rpmLastDir   = 0;
+
+// Called from loop() on every pass, not from an interrupt. loop() returns
+// early until POLL_MS elapses, so this runs thousands of times a second and
+// timestamps a change to within tens of microseconds -- ample against a
+// magnet that arrives every 13 ms at the top of the range.
+static void rpmSample() {
+  int32_t now_raw = (int32_t)MachineControl_Encoders.getPulses(RPM_ENC_CH);
+  if (now_raw == rpmRaw) return;
+
+  int32_t d = now_raw - rpmRaw;
+  rpmRaw = now_raw;
+  int dir = (d > 0) ? 1 : -1;
+  if (rpmLastDir && dir != rpmLastDir) rpmReversals++;
+  rpmLastDir = dir;
+
   uint32_t now = micros();
-
-  // Storm guard first: this must be cheap and must run even for edges the
-  // debounce is about to discard, because a storm is made of exactly those.
-  if ((uint32_t)(now - rpmWindowStart) >= 1000000UL) {
-    rpmWindowStart = now;
-    rpmWindowCount = 0;
-  }
-  if (++rpmWindowCount > RPM_STORM_PER_SEC) {
-    rpmStorm = true;
-    if (rpmIn) rpmIn->fall(nullptr);      // stop the storm, keep the drive
-    return;
-  }
-  // Unsigned subtraction wraps correctly, so the 71-minute micros() rollover
-  // costs at most one interval rather than a spurious enormous one.
   if (rpmPulses && (uint32_t)(now - rpmLastUs) < RPM_MIN_GAP_US) {
-    rpmRejected++;
+    rpmRejected++;                  // reed bounce, or noise on a floating A
     return;
   }
   rpmPrevUs = rpmLastUs;
   rpmLastUs = now;
-  rpmPulses++;
+  rpmPulses += (uint32_t)(d < 0 ? -d : d);
 }
 
-// Snapshot without masking interrupts.
-//
-// The first version wrapped this in __disable_irq()/__enable_irq(). Masking
-// every interrupt on a board whose real job is a half-duplex Modbus link is a
-// bad trade for four words of consistency: it can only ever cost a UART byte,
-// and a lost byte is a CRC failure, and enough of those is a comm fault.
-//
-// Read, re-read the counter, retry if an edge landed in between. Lock-free,
-// bounded, and it masks nothing.
 static void rpmRead(uint32_t *pulses, uint32_t *lastUs, uint32_t *prevUs,
                     uint32_t *rejected) {
-  for (int i = 0; i < 4; i++) {
-    uint32_t p0 = rpmPulses;
-    *lastUs = rpmLastUs; *prevUs = rpmPrevUs; *rejected = rpmRejected;
-    *pulses = rpmPulses;
-    if (*pulses == p0) return;            // no edge during the read
-  }
+  // No interrupt writes these any more, so no lock and no masking.
+  *pulses = rpmPulses; *lastUs = rpmLastUs;
+  *prevUs = rpmPrevUs; *rejected = rpmRejected;
 }
 
 // Instantaneous rotor rpm from the most recent interval. Jittery at one pulse
@@ -609,7 +599,7 @@ static void handleLine(char *line) {
     Serial.println("OK PING");
   }
   else if (!strcmp(line, "ID")) {
-    Serial.println("OK ID acs550-pmc 5.1 RD/WR RPM");
+    Serial.println("OK ID acs550-pmc 5.2 RD/WR RPM");
   }
   else if (!strcmp(line, "HZ") || !strcmp(line, "PCT")) {
     if (!arg) { Serial.println("ERR missing argument"); return; }
@@ -654,9 +644,11 @@ static void handleLine(char *line) {
     Serial.print(' ');         Serial.print(last);
     Serial.print(' ');         Serial.print(rpmInstant(), 1);
     // The live pin level, for proving the wiring by hand with the tunnel off.
-    Serial.print(' ');         Serial.print(rpmIn ? rpmIn->read() : -1);
+    Serial.print(' ');         Serial.print(rpmRaw);
     Serial.print(' ');         Serial.print(rej);
-    Serial.println(rpmStorm ? " STORM-DETACHED" : "");
+    Serial.print(' ');         Serial.print(rpmReversals);
+    Serial.println(rpmReversals > 4 ? "  <-- ENC0-B IS FLOATING, strap it "
+                                      "to a rail" : "");
   }
   else if (!strcmp(line, "RD")) { doRead(arg); }
   else if (!strcmp(line, "WR")) { doWrite(arg); }
@@ -696,15 +688,14 @@ void setup() {
   }
   ModbusRTUClient.setTimeout(MODBUS_TIMEOUT);
 
-  // v5: rotor speed. Constructed HERE, not at global scope — see the note by
-  // the declaration. Falling edge: the reed shorts the pulled-up pin to
-  // ground, so a magnet arriving is a 1 -> 0 transition.
-  static mbed::InterruptIn rpm(RPM_PIN, PullUp);
-  rpmIn = &rpm;
-  rpmWindowStart = micros();
-  rpmIn->fall(&rpmEdge);
+  // v5: rotor speed. X1 counts one edge per cycle, which is what a single
+  // magnet gives. We claim no pins — the library's global EncoderClass owns
+  // them already, and claiming them twice is what hung 5.0 and 5.1.
+  MachineControl_Encoders.setEncoding(RPM_ENC_CH, QEI::X1_ENCODING);
+  MachineControl_Encoders.reset(RPM_ENC_CH);
+  rpmRaw = 0;
 
-  Serial.println("# acs550-pmc 5.1 ready (RD/WR, rotor rpm on ENC0-A)");
+  Serial.println("# acs550-pmc 5.2 ready (RD/WR, rotor rpm on ENC0-A)");
   Serial.println("# T,t_ms,state,sp_hz,act_hz,amps,kw,sw,settled,fault,errs,"
                  "rpm_pulses,rpm_last_us,rotor_rpm");
   Serial.println("# rotor: 1 magnet/rev on PJ_8, INPUT_PULLUP, "
@@ -731,6 +722,11 @@ void loop() {
     Serial.println("# host watchdog expired, ramping down");
     doStop();
   }
+
+  // Sample the encoder on EVERY pass, before the poll gate. The gate makes
+  // loop() return early most of the time, so this runs thousands of times a
+  // second; putting it after the gate would sample at 10 Hz and miss magnets.
+  rpmSample();
 
   if (now - lastPoll < POLL_MS) return;
   lastPoll = now;

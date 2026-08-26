@@ -111,50 +111,69 @@ That is exactly that many whole revolutions over exactly the time they took,
 timed by the PMC rather than the host's scheduler. Both are unsigned and wrap
 correctly through the 71-minute `micros()` rollover.
 
-## ⚠️ 5.0 faulted the drive. 5.1 is the fix — verify it before trusting it.
+## ⚠️ 5.0 and 5.1 faulted the drive. 5.2 removes the cause.
 
-Flashing 5.0 made the ACS550 trip repeatedly; reflashing v3 cleared it. That
-was this firmware's fault, not the drive's, and there were two causes:
+Both hung the board. A hung PMC stops feeding Modbus, and the drive's comm
+watchdog (par 3018/3019, 3.0 s) trips it — **exactly as designed**. The symptom
+read as "the VFD keeps faulting" and had nothing to do with the drive.
 
-**`mbed::InterruptIn` was a global.** On an mbed core a global peripheral
-object runs its constructor during static init, before the RTOS is up, and
-`InterruptIn` touches GPIO and the NVIC. The board hung, the Modbus loop
-stopped, and the drive's comm watchdog tripped it 3 s later **exactly as
-designed**. The symptom pointed at the drive and had nothing to do with it.
-5.1 constructs it inside `setup()`.
+The cause was one line in the library header:
 
-**A floating input next to a VFD is an antenna.** With nothing wired, PJ_8
-sits on a ~40 kΩ internal pull-up beside a 15 HP motor. An edge storm re-enters
-the ISR faster than the main loop can run and starves the Modbus poll — the
-same silence, the same fault, a different cause. 5.1 counts its own edge rate
-and **detaches the interrupt above 500/s** (30,000 rpm — far above anything
-real). `RPM?` then reports `STORM-DETACHED`. Detaching is recoverable and
-visible; a starved Modbus loop is neither.
+```c
+extern EncoderClass MachineControl_Encoders;
+```
 
-Also removed: `__disable_irq()` around the counter read. Masking every
-interrupt on a board whose real job is a half-duplex serial link is a bad
-trade for four words of consistency — it can only cost a UART byte, and enough
-CRC failures is a comm fault. The read is now lock-free.
+A **global** whose QEI constructor already claims `MC_ENC_0A_PIN` (PJ_8),
+`MC_ENC_0B_PIN` and `MC_ENC_0I_PIN`. That object exists in v3 too — which is
+why v3 is fine: v3 never touches those pins. Creating an `mbed::InterruptIn`
+on PJ_8 was a **second claim on a pin mbed already owned**.
 
-### Verify 5.1 with the fan stopped
+5.1 moved the object out of global scope and added a storm guard. Both were
+real improvements and neither addressed this, so it hung the same way.
 
-Nothing below turns anything.
+**5.2 creates no interrupt and claims no pin.** It reads the encoder the
+library already owns.
 
-1. **Wire the reed first.** A connected dry contact holds the pin at a defined
-   level; an unwired pin is the antenna described above.
-2. Flash 5.1, then poll for a couple of minutes with the drive powered but
-   **not running**:
+### What that changes about the wiring
+
+`X1_ENCODING` counts one edge per cycle (`QEI.cpp:269-275`): with state
+`(A<<1)|B` it increments on `0x3` and decrements on `0x2`. **Channel B decides
+the sign, so it must be strapped to a rail — either one.**
+
+```
+reed wire A  ────▶  PMC  ENC0 A   (PJ_8)
+reed wire B  ────▶  PMC  GND
+ENC0 B       ────▶  3V3   or   GND     ← REQUIRED, either rail
+4.7 kΩ from ENC0 A to 3V3              ← REQUIRED, QEI sets no pull-up
+```
+
+Tied high the count runs up, tied low it runs down; the host uses the
+magnitude of the change, so both work. **A floating B is the one thing that
+does not** — the count then wanders both directions. `RPM?` reports a
+reversal counter and says `ENC0-B IS FLOATING` when it climbs, so that failure
+announces itself instead of quietly corrupting rpm.
+
+The 4.7 kΩ pull-up on A is no longer optional either: QEI sets no pin mode, so
+without it A floats between magnet passes next to a 15 HP motor.
+
+### Verify with the fan stopped
+
+Nothing here turns anything.
+
+1. Wire all four connections above.
+2. Flash, then confirm the PMC stays alive for two minutes with the drive
+   powered but **not running**:
 
    ```bash
    python src/wait_for_pmc.py
    ```
 
-   `ID` must answer `acs550-pmc 5.1 RD/WR RPM` every time. If replies stop, or
-   `RPM?` says `STORM-DETACHED`, the input is still noisy — add the 4.7 kΩ
-   pull-up and the 10 nF, and check the shield is landed at one end only.
-3. Watch the drive keypad for two minutes. **No fault means the Modbus loop is
-   being serviced.** That is the whole test.
-4. Only then start the fan.
+   `ID` must answer `acs550-pmc 5.2 RD/WR RPM` every time.
+3. **Watch the drive keypad for two minutes. No fault means the Modbus loop is
+   being serviced.** That is the whole test, and it costs no tunnel time.
+4. Spin the rotor by hand. `RPM?` pulses must advance **exactly one per
+   revolution**, and reversals must stay at 0.
+5. Only then start the fan.
 
 ## Build and flash
 
