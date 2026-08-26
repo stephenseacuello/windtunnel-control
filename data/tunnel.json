@@ -12,7 +12,7 @@
   ],
   "transport": {
     "kind": "pmc",
-    "port": "/dev/cu.usbmodem1101",
+    "port": "/dev/cu.usbmodem14401",
     "baudrate": 115200,
     "host_watchdog_ms": 5000,
     "_note": "PMC owns the Modbus loop and both watchdogs. ONLY ONE device may be landed on X1-29/30/31 \u2014 the FTDI cable does not get wired while the PMC is. Set kind='direct' only if the PMC is physically disconnected.",

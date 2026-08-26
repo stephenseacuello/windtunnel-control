@@ -153,6 +153,50 @@ class DirectTransport(Transport):
 REF_FULL_SCALE = 20000
 
 
+def resolve_port(explicit=None, cfg=None):
+    """
+    The PMC's serial port: explicit flag, then tunnel.json, then autodetect.
+
+    Every CLI here used to carry its own argparse default of
+    /dev/cu.usbmodem1101. macOS assigns that name from the USB topology, so it
+    changes when the board is moved to a different hub or port — and the flag
+    then silently overrode a corrected tunnel.json, which is how a fixed
+    config still failed to fix anything.
+
+    Autodetect is last and deliberately refuses to guess between candidates:
+    picking the wrong device means commanding an unknown machine.
+    """
+    import glob
+    if explicit:
+        return explicit
+    if cfg is None:
+        try:
+            import json
+            cfg = json.loads((Path(__file__).resolve().parents[1] /
+                              "data" / "tunnel.json").read_text())
+        except Exception:
+            cfg = {}
+    port = (cfg.get("transport") or {}).get("port")
+    if port and Path(port).exists():
+        return port
+    found = sorted(glob.glob("/dev/cu.usbmodem*"))
+    if len(found) == 1:
+        if port:
+            print(f"# tunnel.json says {port}, which is not present. "
+                  f"Using the only PMC-shaped port found: {found[0]}")
+        return found[0]
+    if not found:
+        raise SystemExit(
+            f"no /dev/cu.usbmodem* port found"
+            + (f" (tunnel.json says {port})" if port else "")
+            + ".\n  Is the PMC plugged in? Is something else holding it "
+              "(the dashboard owns the port while it runs)?")
+    raise SystemExit(
+        f"several candidate ports: {', '.join(found)}\n"
+        f"  Pass --port explicitly. Guessing would mean commanding an "
+        f"unknown machine.")
+
+
 class PMCTransport(Transport):
     """
     Through an Arduino Portenta Machine Control running `acs550_pmc.ino`.

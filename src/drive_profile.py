@@ -433,7 +433,8 @@ def cmd_apply(a):
 def main():
     p = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     p.add_argument("--config", default=str(REPO / "data" / "tunnel.json"))
-    p.add_argument("--port", default="/dev/cu.usbmodem1101")
+    p.add_argument("--port", default=None,
+                   help="PMC serial port; default comes from tunnel.json, then autodetect")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("snapshot", help="read every known parameter to JSON")

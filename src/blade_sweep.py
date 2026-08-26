@@ -143,12 +143,13 @@ def open_rig(a):
             "this sweep assumes the PMC transport (tunnel.json transport.kind"
             " = 'pmc'). The direct topology needs the FTDI cable landed, and "
             "only one master may be on X1-29/30/31.")
+    port = _tr.resolve_port(a.port, cfg)
     tp = _tr.PMCTransport(
-        a.port, baudrate=int(tspec.get("baudrate", 115200)),
+        port, baudrate=int(tspec.get("baudrate", 115200)),
         host_watchdog_ms=int(tspec.get("host_watchdog_ms", 5000)),
         feedback_scale=float(tspec.get("feedback_scale", 295.0)))
     ref = cfg.get("drive_reference") or {}
-    drive = ACS550(a.port, transport=tp,
+    drive = ACS550(port, transport=tp,
                    ref1_max_fallback=ref.get("ref1_max"),
                    ref_unit=ref.get("unit", "rpm")).connect()
     print(f"  drive: reference full scale {drive.ref1_max_hz:g} "
@@ -485,7 +486,8 @@ def main():
     p.add_argument("--notes", default=None, help="material, finish, anything "
                                                  "that distinguishes it")
     p.add_argument("--config", default="data/tunnel.json")
-    p.add_argument("--port", default="/dev/cu.usbmodem1101")
+    p.add_argument("--port", default=None,
+                   help="PMC serial port; default comes from tunnel.json, then autodetect")
     p.add_argument("--out", default=None, help="path stem for the two CSVs")
 
     w = p.add_argument_group("the wind ladder")
