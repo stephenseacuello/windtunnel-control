@@ -599,7 +599,7 @@ static void handleLine(char *line) {
     Serial.println("OK PING");
   }
   else if (!strcmp(line, "ID")) {
-    Serial.println("OK ID acs550-pmc 5.2 RD/WR RPM");
+    Serial.println("OK ID acs550-pmc 5.5 RD/WR RPM");
   }
   else if (!strcmp(line, "HZ") || !strcmp(line, "PCT")) {
     if (!arg) { Serial.println("ERR missing argument"); return; }
@@ -645,6 +645,17 @@ static void handleLine(char *line) {
     Serial.print(' ');         Serial.print(rpmInstant(), 1);
     // The live pin level, for proving the wiring by hand with the tunnel off.
     Serial.print(' ');         Serial.print(rpmRaw);
+    // QEI's own 2-bit view of the pins, (A<<1)|B. It is a read on the object
+    // that already owns them, so it costs nothing and claims nothing — and it
+    // is the value that distinguishes "no pull-up, so the reed cannot make an
+    // edge" from "wired fine but the magnet is missing the sensor". The first
+    // test without it could only say the count had not moved.
+    //   3 = A high, B high   <- wanted at rest, with both pulled up
+    //   2 = A high, B low    <- A fine, B needs strapping high
+    //   1 = A low,  B high   <- A stuck low: no pull-up, or reed shorted
+    //   0 = A low,  B low    <- neither pulled up; nothing can be detected
+    Serial.print(" st=");      Serial.print(
+        MachineControl_Encoders.getCurrentState(RPM_ENC_CH));
     Serial.print(' ');         Serial.print(rej);
     Serial.print(' ');         Serial.print(rpmReversals);
     Serial.println(rpmReversals > 4 ? "  <-- ENC0-B IS FLOATING, strap it "
@@ -692,10 +703,22 @@ void setup() {
   // magnet gives. We claim no pins — the library's global EncoderClass owns
   // them already, and claiming them twice is what hung 5.0 and 5.1.
   MachineControl_Encoders.setEncoding(RPM_ENC_CH, QEI::X1_ENCODING);
+
+  // NO pin_mode() here, and nothing else that touches these pins.
+  //
+  // 5.3 tried pin_mode(MC_ENC_0A_PIN, PullUp) to spare the user two external
+  // components. It hung the board and tripped the drive, exactly like the
+  // InterruptIn attempts. On this core, ANY access to a QEI-owned pin beyond
+  // reading getPulses() is fatal — even one that only means to write two bits
+  // of GPIOx->PUPDR.
+  //
+  // So the pull-up on A and the strap on B are EXTERNAL, and that is not a
+  // matter of preference. Three firmware revisions have now established it.
+
   MachineControl_Encoders.reset(RPM_ENC_CH);
   rpmRaw = 0;
 
-  Serial.println("# acs550-pmc 5.2 ready (RD/WR, rotor rpm on ENC0-A)");
+  Serial.println("# acs550-pmc 5.5 ready (RD/WR, rotor rpm on ENC0-A)");
   Serial.println("# T,t_ms,state,sp_hz,act_hz,amps,kw,sw,settled,fault,errs,"
                  "rpm_pulses,rpm_last_us,rotor_rpm");
   Serial.println("# rotor: 1 magnet/rev on PJ_8, INPUT_PULLUP, "
