@@ -179,3 +179,48 @@ class TestAnalysis:
         assert r["level"] == pytest.approx(0.05, abs=1e-9)
         assert r["dn"] == pytest.approx(0.0, abs=1e-9), \
             "a uniform change must leave the exponent untouched"
+
+
+class TestRotorRpmWindow:
+    """
+    The sampler is the only source of rotor speed, so its windowing decides
+    whether the column has numbers in it or is silently blank.
+    """
+
+    def _watch(self, samples):
+        import blade_sweep as bs
+        w = bs.DriveWatch.__new__(bs.DriveWatch)
+        w._samples = samples
+        import threading
+        w._lock = threading.Lock()
+        w.rpm = w.amps = 0.0
+        return w
+
+    def test_one_sample_per_dwell_still_yields_a_number(self):
+        """
+        The bug this guards: at a 1 s tick and a 1 s dwell there is usually
+        exactly ONE sample inside the window. Requiring two strictly inside
+        returned None for every dwell, and the run produced a blank column.
+        """
+        # (t, fan_rpm, amps, pulses, last_us) — 60 rpm rotor, 1 pulse/rev
+        ss = [(t, 1800.0, 9.0, t, int(t * 1e6)) for t in range(0, 5)]
+        w = self._watch(ss)
+        got = w.rotor_rpm_between(2.4, 3.4)
+        assert got is not None
+        assert got == pytest.approx(60.0, rel=1e-6)
+
+    def test_stopped_rotor_is_none_not_zero(self):
+        ss = [(t, 1800.0, 9.0, 7, 7_000_000) for t in range(0, 5)]
+        assert self._watch(ss).rotor_rpm_between(1.0, 4.0) is None
+
+    def test_micros_rollover_does_not_invent_a_huge_interval(self):
+        hi = 0xFFFFFFFF - 500_000
+        ss = [(0.0, 1800.0, 9.0, 10, hi),
+              (1.0, 1800.0, 9.0, 11, (hi + 1_000_000) & 0xFFFFFFFF)]
+        got = self._watch(ss).rotor_rpm_between(0.0, 1.0)
+        assert got == pytest.approx(60.0, rel=1e-6)
+
+    def test_firmware_without_rpm_gives_none_not_a_wrong_number(self):
+        """v2/v3 report no pulse fields; the column must be blank, not zero."""
+        ss = [(t, 1800.0, 9.0, None, None) for t in range(0, 5)]
+        assert self._watch(ss).rotor_rpm_between(1.0, 4.0) is None

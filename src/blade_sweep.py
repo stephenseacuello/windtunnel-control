@@ -272,12 +272,22 @@ class DriveWatch:
         jitter, and no quantisation from where the window edges happen to fall
         relative to the magnet.
         """
-        ss = [s for s in self.series()
-              if s[3] is not None and t0 <= s[0] <= t1]
+        ss = [s for s in self.series() if s[3] is not None]
         if len(ss) < 2:
             return None
-        d_pulses = (ss[-1][3] - ss[0][3]) & 0xFFFFFFFF
-        d_us = (ss[-1][4] - ss[0][4]) & 0xFFFFFFFF
+        # BRACKET the window rather than requiring two ticks strictly inside
+        # it. At the old 1.0 s tick against a 1.0 s dwell there was usually
+        # exactly one sample in range, so a strict test returned None and the
+        # column would have come back empty for a whole run — a tunnel session
+        # spent producing a blank.
+        before = [x for x in ss if x[0] <= t0]
+        upto = [x for x in ss if x[0] <= t1]
+        s0 = before[-1] if before else ss[0]
+        s1 = upto[-1] if upto else None
+        if s1 is None or s1[0] <= s0[0]:
+            return None
+        d_pulses = (s1[3] - s0[3]) & 0xFFFFFFFF
+        d_us = (s1[4] - s0[4]) & 0xFFFFFFFF
         if d_pulses < 1 or d_us < 1:
             return None            # rotor stopped, or one pulse is not a rate
         return 60e6 * d_pulses / (d_us * RPM_PULSES_PER_REV)
@@ -665,7 +675,13 @@ def main():
                    help="fan counts as at speed within this fraction")
     w.add_argument("--rpm-tol-abs", type=float, default=10.0,
                    dest="rpm_tol_abs", help="...or this many rpm")
-    w.add_argument("--keepalive", type=float, default=1.0,
+    # 0.25 s, not 1.0. The tick is the ONLY sampler of fan speed, motor
+    # current and rotor pulses, so its period sets how finely a dwell can be
+    # resolved. At 1.0 s against a 1.0 s dwell each dwell saw about one
+    # sample. The dashboard has polled the PMC at 4 Hz for weeks; this is the
+    # same load, and it is not part of the protocol fingerprint, so it does
+    # not affect comparability with runs already banked.
+    w.add_argument("--keepalive", type=float, default=0.25,
                    help="seconds between PMC watchdog ticks. Must stay well "
                         "under tunnel.json transport.host_watchdog_ms, or the "
                         "PMC ramps the fan down mid-ramp.")
