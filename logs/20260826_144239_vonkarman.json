@@ -1,0 +1,91 @@
+{
+  "session": null,
+  "velocity_source": {
+    "name": "manual",
+    "units": "m/s",
+    "average_s": 0.1,
+    "healthy": false,
+    "last_error": "no reading entered yet",
+    "value": null,
+    "age_s": null
+  },
+  "ambient": null,
+  "tau": 0.8,
+  "tau_down": 0.8,
+  "hz_limit": 2400.0,
+  "calibration": {
+    "domain": "rpm",
+    "drive_unit": "rpm",
+    "coeffs": [
+      0.021321246923707956,
+      -0.42407711238720436
+    ],
+    "hz_range": [
+      0.0,
+      2400.0
+    ],
+    "rpm_per_hz": 29.5,
+    "r2": 0.9995933642091527,
+    "residual_std": 0.3343401331469344,
+    "units": "m/s",
+    "source": "Test 1, Feb 13 2026 \u2014 measured wind speed vs RPM",
+    "notes": "Native RPM fit. The drive commands SPEED (par 1105 = 2435 rpm), so there is no Hz stage and none should be reintroduced. Fit gives 50.75 m/s at 2400 rpm against Test 1's measured 51.24 \u2014 agreement to 1%."
+  },
+  "calibration_status": "RPM-native, verified against par 1105 / 2002 / 9908",
+  "simulated": false,
+  "recorded": "2026-08-26T14:43:04",
+  "mode": "profile",
+  "spec": {
+    "kind": "vonkarman",
+    "units": "rpm",
+    "mean": 100,
+    "amp": 5,
+    "length": 20,
+    "freq": 0.05,
+    "sigma": -50,
+    "length_scale": 400,
+    "duration": 120,
+    "seed": 42,
+    "settle": 25,
+    "feedforward": true
+  },
+  "diagnostics": {
+    "max_slew": 73.92821664903394,
+    "peak_to_peak": 231.82241817980045,
+    "mean": 98.97930453332151,
+    "std": 47.99022019838683,
+    "duration": 124.95,
+    "slew_ok": true,
+    "f_corner": 0.1989436788648692,
+    "amplitude_retained": 0.9274535776988756,
+    "predicted_peak_to_peak": 215.0045311316608,
+    "frac_power_above_corner": 0.0014086668715181825,
+    "feedforward": {
+      "f_cutoff": 0.9947183943243458,
+      "tau_eff": 0.8,
+      "clipped_slew": false,
+      "clipped_range": true,
+      "range_overshoot_hz": 61.199581521509856,
+      "overshoot_ratio": 0.8125803413390942,
+      "retained_compensated": 0.7935681217350757,
+      "retained_uncompensated": 0.9274535776988756,
+      "rms_error_compensated": 0.036909224987555216,
+      "rms_error_uncompensated": 0.06434152010428884,
+      "rms_improvement": 1.7432368229347284,
+      "improvement": 0.8556418788140471
+    }
+  },
+  "written": "2026-08-26T14:45:09",
+  "run": {
+    "velocity_logged": 0,
+    "velocity_coverage": 0.0,
+    "samples_planned": 2500,
+    "samples_played": 2500,
+    "complete": true,
+    "requested_duration": 125.0,
+    "actual_duration": 124.95597729086876,
+    "late_samples": 141,
+    "max_lateness_s": 0.0674,
+    "update_rate_hz": 20.0
+  }
+}

@@ -1382,10 +1382,16 @@ document.addEventListener('DOMContentLoaded', wireBlades);
 
    Two honest limits, both surfaced on the display rather than hidden:
 
-   · ROTOR SPEED IS DERIVED, NOT MEASURED. Nothing on this rig reports
-     rotor rpm yet - the DAQ channel is not wired in. What is shown is
-     inferred from terminal voltage through the generator constant, and
-     that constant is itself unmeasured. The figure is therefore an
+   · ROTOR SPEED IS DERIVED, NOT MEASURED. A proximity sensor on the rig
+     already feeds Jeong's DAQ, but nothing reports rotor rpm to THIS host
+     yet. What is shown is terminal voltage with the IR drop added back,
+     scaled by a generator constant.
+
+     The IR term is now real: R_int(v) is fitted from the v1_Ra20 sweep by
+     src/generator_model.py at r² >= 0.986, and runs 88 ohm at 10 m/s to 36
+     ohm at 38. It replaced a flat 40 ohm that was 121% low at the bottom.
+
+     The generator constant is still a guess. So the figure remains an
      ILLUSTRATION of state, never a measurement, and the panel says so.
 
    · The mesh is ONE BLADE. blades/turbine_blade.stl is a single blade,
@@ -1462,13 +1468,39 @@ async function twinLoad(name) {
  * plausible state when it has no data is worse than one that shows nothing,
  * because the operator believes it.
  */
+/* Source impedance at a wind speed — winding, rectifier, wiring and the
+   series sense IC together. Fitted from the v1_Ra20 sweep by
+   src/generator_model.py: R = 595.5·v^-0.791, r² >= 0.986 at all fourteen
+   wind speeds, clamped to the range actually measured.
+
+   This replaced a flat 40 ohm, which was 121% low at the bottom of the range
+   — exactly where the rotor produces least and a bad guess distorts most. */
+const R_SRC = {coeff: 595.5, exp: -0.791, lo: 36.5, hi: 88.4};
+
+function srcOhms(mps) {
+  if (!(mps > 0)) return R_SRC.hi;
+  const r = R_SRC.coeff * Math.pow(mps, R_SRC.exp);
+  return Math.min(R_SRC.hi, Math.max(R_SRC.lo, r));
+}
+
+/* Rotor rpm, INFERRED — never measured. Two steps, one solid and one not:
+
+     back-EMF = V_terminal + I·R_int(v)     <- fitted, r² >= 0.986
+     rpm      = back-EMF · K_GEN            <- K_GEN IS A GUESS
+
+   The generator constant has never been measured. Until the proximity
+   channel on Jeong's DAQ is read alongside a sweep, the rendered speed is an
+   illustration of state and the panel says so. */
+const K_GEN = 130;                            // rpm per volt — UNMEASURED
+
 function twinRpm(s) {
   const L = s.load || {};
   if (!L.connected) return null;
   if (s.load_age_s == null) return null;      // connected but never reported
   if (s.load_age_s > 3) return null;          // stale
-  const v = (L.volts || 0) + (L.amps || 0) * 40;   // add back the IR drop
-  return Math.max(0, v * 130);
+  const mps = (s.measured && s.measured.mps) || 0;
+  const emf = (L.volts || 0) + (L.amps || 0) * srcOhms(mps);
+  return Math.max(0, emf * K_GEN);
 }
 
 function twinVisible() {

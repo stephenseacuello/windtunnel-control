@@ -1,0 +1,77 @@
+{
+  "session": null,
+  "velocity_source": {
+    "name": "manual",
+    "units": "m/s",
+    "average_s": 0.1,
+    "healthy": false,
+    "last_error": "no reading entered yet",
+    "value": null,
+    "age_s": null
+  },
+  "ambient": null,
+  "tau": 0.8,
+  "tau_down": 0.8,
+  "hz_limit": 2400.0,
+  "calibration": {
+    "domain": "rpm",
+    "drive_unit": "rpm",
+    "coeffs": [
+      0.021321246923707956,
+      -0.42407711238720436
+    ],
+    "hz_range": [
+      0.0,
+      2400.0
+    ],
+    "rpm_per_hz": 29.5,
+    "r2": 0.9995933642091527,
+    "residual_std": 0.3343401331469344,
+    "units": "m/s",
+    "source": "Test 1, Feb 13 2026 \u2014 measured wind speed vs RPM",
+    "notes": "Native RPM fit. The drive commands SPEED (par 1105 = 2435 rpm), so there is no Hz stage and none should be reintroduced. Fit gives 50.75 m/s at 2400 rpm against Test 1's measured 51.24 \u2014 agreement to 1%."
+  },
+  "calibration_status": "RPM-native, verified against par 1105 / 2002 / 9908",
+  "simulated": false,
+  "recorded": "2026-08-26T14:46:38",
+  "mode": "profile",
+  "spec": {
+    "kind": "vonkarman",
+    "units": "rpm",
+    "mean": 750,
+    "amp": 5,
+    "length": 20,
+    "freq": 0.05,
+    "sigma": 200,
+    "length_scale": 4000,
+    "duration": 120,
+    "seed": 43,
+    "settle": 30,
+    "feedforward": false
+  },
+  "diagnostics": {
+    "max_slew": 143.65159878483837,
+    "peak_to_peak": 873.5504323235064,
+    "mean": 753.3058477257982,
+    "std": 194.82669337972828,
+    "duration": 124.95,
+    "slew_ok": true,
+    "f_corner": 0.1989436788648692,
+    "amplitude_retained": 0.9505126287432644,
+    "predicted_peak_to_peak": 830.3207177676311,
+    "frac_power_above_corner": 0.00033022745218071854
+  },
+  "written": "2026-08-26T14:48:43",
+  "run": {
+    "velocity_logged": 0,
+    "velocity_coverage": 0.0,
+    "samples_planned": 2500,
+    "samples_played": 2500,
+    "complete": true,
+    "requested_duration": 125.0,
+    "actual_duration": 124.95370324980468,
+    "late_samples": 2,
+    "max_lateness_s": 0.0025,
+    "update_rate_hz": 20.0
+  }
+}

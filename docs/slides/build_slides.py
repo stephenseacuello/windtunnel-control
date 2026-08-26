@@ -93,6 +93,15 @@ def facts():
     f["cp_hi"] = max(p / (0.5 * 1.204 * f["area"] * v ** 3) for _, _, v, p, _ in f["rows"])
     f["re_lo"] = 1.204 * min(r[2] for r in f["rows"]) * f["chord"] / 1000 / 1.81e-5
     f["re_hi"] = 1.204 * f["v_top"] * f["chord"] / 1000 / 1.81e-5
+
+    # Generator model, FITTED from the sweep rather than typed in. An earlier
+    # draft carried an audit's reported pair (73.6 -> 40.1 ohm, v^-0.640);
+    # fitting the CSV directly gives 88.4 -> 36.5 and v^-0.791, and only the
+    # latter reproduces the independently measured power-law exponent.
+    sys.path.insert(0, str(REPO / "src"))
+    import generator_model as gm
+    f["gen"] = gm.model(gm.fit(gm.read_points(
+        REPO / "logs" / "sweep_v1_Ra20_points.csv")))
     return f
 
 
@@ -419,10 +428,12 @@ def build_jeong():
               ("not Cp", True, FAULT), (".", False, INK)], 15, space=10)
     para(tf, "That exponent describes the GENERATOR, not the blade:",
          14, True, GOLDDK, space=8)
-    for t in ["V_oc ∝ v^1.52      R_int ∝ v^−0.64",
-              "R_int falls 73.6 → 40.1 Ω across the range",
+    g = F["gen"]
+    for t in [f"V_oc ∝ v^{g['v_oc_exp']:.2f}      R_int ∝ v^{g['r_int_exp']:.2f}",
+              f"R_int falls {g['r_int_lo']:.0f} → {g['r_int_hi']:.0f} Ω "
+              f"across the range",
               "peaks at the Thévenin match, P = V_oc²/4R_int",
-              "n = 2a − b = 3.69   vs   3.77 measured"]:
+              f"n = 2a − b = {g['n_predicted']:.2f}   vs   3.77 measured"]:
         para(tf, t, 11.5, False, NAVY, space=5, font=MONO, indent=1)
     rich(tf, [("→ ", True, GOLDDK),
               ("Almost nothing is left for the blade to move. Without rotor "
@@ -437,7 +448,8 @@ def build_jeong():
                 "speed — which is the next slide.", W)
     notes(s, "Do NOT present v^3.77 as 'Cp still climbing with Reynolds'. A "
              "9-agent audit on 25 Aug showed the exponent is a generator "
-             "characteristic: V_oc ~ v^1.52, R_int ~ v^-0.64, n = 2a-b = 3.69. "
+             "characteristic. Fitted from the CSV by src/generator_model.py: "
+             "V_oc ~ v^1.50, R_int ~ v^-0.79, n = 2a-b = 3.79 vs 3.77 measured. "
              "The honest version is stronger and it is the argument for slide 6.")
 
     # ---------- 6. the ask ----------
@@ -514,9 +526,10 @@ def build_jeong():
          f"Re_chord = {F['re_lo']:,.0f} → {F['re_hi']:,.0f}. Below "
          f"Reynolds-independence for a cross-flow turbine (~2×10⁵), so "
          f"absolute performance is not transferable to full scale."),
-        ("Generator not characterised",
-         "R_int is inferred from a curve fit and has never been measured "
-         "directly. It gates every derived quantity."),
+        ("Source impedance not separated",
+         f"R_int is fitted at r² ≥ {F['gen']['min_r2']:.3f}, but it is the "
+         f"WHOLE source — winding, rectifier, wiring and sense IC together. "
+         f"Ohm the winding phase-to-phase to separate them."),
         ("Wind speed disagreement",
          "Summary and points files differ by 1.1–1.2% at the same fan set "
          "point. At v^3.77 that is 4.5% in power. Unresolved — flagged, not "
@@ -741,9 +754,12 @@ def build_poster():
     para(tf, "But that exponent describes the GENERATOR,", 30, True, GOLDDK,
          space=2)
     para(tf, "not the blade.", 30, True, GOLDDK, space=11)
-    for t in ["V_oc ∝ v^1.52   and   R_int ∝ v^−0.64   (73.6 → 40.1 Ω)",
+    g = F["gen"]
+    for t in [f"V_oc ∝ v^{g['v_oc_exp']:.2f}   and   "
+              f"R_int ∝ v^{g['r_int_exp']:.2f}   "
+              f"({g['r_int_lo']:.0f} → {g['r_int_hi']:.0f} Ω)",
               "every peak sits at the Thévenin match,  P = V_oc² / 4R_int",
-              "n = 2a − b = 3.69,  against 3.77 measured"]:
+              f"n = 2a − b = {g['n_predicted']:.2f}, against 3.77 measured"]:
         para(tf, t, 26, False, NAVY, space=8)
     rich(tf, [("Efficiency is ", False, INK),
               (f"Cp = {F['cp_lo']*100:.2f} – {F['cp_hi']*100:.2f}%", True, FAULT),
@@ -800,8 +816,8 @@ def build_poster():
                "hardware, no new tunnel time.", False, INK)], 28, space=13)
     para(tf, f"Limits: electrical power only, not Cp · Re_chord "
              f"{F['re_lo']:,.0f}–{F['re_hi']:,.0f}, below Reynolds-"
-             f"independence (~2×10⁵) · generator R_int inferred, never "
-             f"measured · single-mount data, no mount-to-mount error bar yet.",
+             f"independence (~2×10⁵) · R_int fitted but never separated "
+             f"from wiring · single-mount data, no error bar yet.",
          24, False, DIM, space=0)
 
     # ── footer ──
