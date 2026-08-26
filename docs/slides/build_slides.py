@@ -415,24 +415,24 @@ def build_jeong():
     tf = box.text_frame
     tf.margin_left = tf.margin_right = Inches(0.22); tf.margin_top = Inches(0.18)
     para(tf, "WHAT IT DOES NOT YET SHOW", 12.5, True, GOLDDK, first=True, space=10)
-    rich(tf, [("This is electrical power at the load terminals — ", False, INK),
-              ("not Cp", True, FAULT), (".", False, INK)], 14.5, space=10)
-    para(tf, "The v^3.77 exponent decomposes into the generator, not the "
-             "rotor:", 13, False, INK, space=8)
+    rich(tf, [("This is electrical power at the terminals — ", False, INK),
+              ("not Cp", True, FAULT), (".", False, INK)], 15, space=10)
+    para(tf, "That exponent describes the GENERATOR, not the blade:",
+         14, True, GOLDDK, space=8)
     for t in ["V_oc ∝ v^1.52      R_int ∝ v^−0.64",
               "R_int falls 73.6 → 40.1 Ω across the range",
               "peaks at the Thévenin match, P = V_oc²/4R_int",
               "n = 2a − b = 3.69   vs   3.77 measured"]:
         para(tf, t, 11.5, False, NAVY, space=5, font=MONO, indent=1)
     rich(tf, [("→ ", True, GOLDDK),
-              ("Little aerodynamic residual is left for the blade to move. "
-               "Without rotor speed, blade comparisons partly compare the "
-               "generator.", False, INK)], 13, space=10)
-    rich(tf, [("Cp_elec = ", False, INK),
-              (f"{F['cp_lo']*100:.2f}–{F['cp_hi']*100:.2f}%", True, FAULT),
-              (f", roughly 100× below a working H-rotor, because peak power "
-               f"sits at ω/ω_runaway ≈ 0.70→0.94 — the far limb of Cp(λ) "
-               f"where Cp → 0 by construction.", False, INK)], 13, space=0)
+              ("Almost nothing is left for the blade to move. Without rotor "
+               "speed, comparing blades partly means comparing the generator.",
+               False, INK)], 13, space=10)
+    rich(tf, [("Efficiency is ", False, INK),
+              (f"Cp = {F['cp_lo']*100:.2f}–{F['cp_hi']*100:.2f}%", True, FAULT),
+              (", about 100× below a working turbine — the rotor spins far too "
+               "fast for its own good, held there by the generator.",
+               False, INK)], 13, space=0)
     takeaway(s, "The measurement is sound. Its interpretation needs rotor "
                 "speed — which is the next slide.", W)
     notes(s, "Do NOT present v^3.77 as 'Cp still climbing with Reynolds'. A "
@@ -455,13 +455,13 @@ def build_jeong():
              "hardware.", 13.5, False, INK, space=0)
     left = [
         ("WHY IT MATTERS MORE THAN ANY BLADE RUN", [
-            "Without ω there is no λ and no Cp — the rig cannot separate "
-            "rotor aerodynamics from generator matching.",
-            "A better blade can read as LESS power: raising Cp_max while "
-            "adding low-α drag lowers λ_runaway, lowers V_oc, and lowers "
-            "measured P as the SQUARE.",
-            "Two rotors at Cp_max 5% and 25% would rank purely by how freely "
-            "they spin."]),
+            "Without rotor speed there is no λ and no Cp — the rig cannot "
+            "tell blade aerodynamics from generator matching.",
+            "A better blade can measure as LESS power. A blade that grabs "
+            "more energy spins slower, and slower means less voltage, so the "
+            "meter reads lower.",
+            "Two rotors five times apart in efficiency would rank purely by "
+            "how freely they spin."]),
     ]
     for i, (head, items) in enumerate(left):
         card = rect(s, 0.55, y + 1.5, 6.0, 3.28, WHITE, PALE)
@@ -570,16 +570,13 @@ G = {
     "footer":  (0.93, 33.10, 46.15,  2.13),
 }
 
-FUNDING = (
-    "This research was supported by the Office of Naval Research under Grant "
-    "No. N00014-24-1-2129."
-)
-DISCLAIMER = (
-    "The views and conclusions contained in this poster are those of the "
-    "authors and should not be interpreted as representing the official "
-    "policies, either expressed or implied, of the Office of Naval Research "
-    "or the U.S. Government"
-)
+# No funding line. The CYPHER poster's ONR grant belongs to a different
+# project, and a federal grant number asserted on a poster is not a detail.
+# Add one here only if this work is genuinely under an award.
+VENUE = ("The University of Rhode Island CYPHER Research Center IPT Meeting "
+         "for Power Systems and Manufacturing")
+AFFIL = ("Sodhi Lab × Jeong Lab  ·  Department of Mechanical, Industrial and "
+         "Systems Engineering")
 
 
 def _wipe(slide):
@@ -653,17 +650,18 @@ def build_poster():
     _panel(s, "intro")
     y = _label(s, "intro", "Introduction")
     tf = _body(s, "intro", y)
-    para(tf, "3D printing makes rotor geometry cheap to iterate. Measuring "
-             "whether a change actually helped does not follow automatically.",
-         32, False, INK, first=True, space=16)
-    rich(tf, [("A campaign comparing a dozen blades has to hold its protocol "
-               "fixed across weeks, or the comparison silently becomes a "
-               "comparison of ", False, INK),
-              ("settings", True, NAVY), (".", False, INK)], 32, space=16)
-    para(tf, "This work builds programmable, reproducible control of the "
-             "Aerolab tunnel and its electronic load, so a rotor is "
-             "characterised unattended in ~10 minutes with a machine-checkable "
-             "record of exactly how.", 32, False, INK, space=18)
+    para(tf, "3D printing makes new blade shapes cheap.", 34, True, NAVY,
+         first=True, space=8)
+    para(tf, "Measuring whether a shape is actually better does not.",
+         32, False, INK, space=18)
+    rich(tf, [("Compare a dozen blades over a few weeks and the method drifts. "
+               "You end up comparing ", False, INK),
+              ("settings", True, NAVY), (", not blades.", False, INK)],
+         32, space=18)
+    rich(tf, [("So we automated it: ", False, INK),
+              ("one rotor, 10 minutes, unattended", True, NAVY),
+              (" — and a record of exactly how it was measured.", False, INK)],
+         32, space=18)
     for t in ["Automated 14-point load sweep, drive and load on one clock",
               "Two-layer watchdog safety, hardware E-stop untouched",
               "Protocol fingerprinting so runs are provably comparable",
@@ -708,16 +706,14 @@ def build_poster():
               "rotor is never driven to stall",
               "Record V and I at every step, unload, advance the wind"]:
         rich(tf, [("• ", False, GOLDDK), (t, False, INK)], 32, space=11)
-    rich(tf, [("Peak located by parabolic fit. ", True, NAVY),
-              ("Over a flat maximum the largest single sample is biased high, "
-               "and the bias grows with sample count — so blades measured with "
-               "different point counts would be compared unfairly.",
-               False, INK)], 32, space=13)
-    rich(tf, [("Protocol fingerprinting. ", True, NAVY),
-              ("Every run hashes the settings that change what a curve means. "
-               "Runs with different fingerprints are not comparable, and the "
-               "hash makes that visible instead of silent.", False, INK)],
-         32, space=13)
+    rich(tf, [("Fit a parabola; don't take the highest reading. ", True, NAVY),
+              ("The top of the power curve is flat, so the highest single "
+               "reading always sits above the true peak — and the more points "
+               "you take, the higher it sits.", False, INK)], 32, space=13)
+    rich(tf, [("Fingerprint every run. ", True, NAVY),
+              ("Each sweep records a hash of its settings. Different hash = "
+               "not comparable. The alternative is finding out much later, "
+               "from numbers that looked fine.", False, INK)], 32, space=13)
     rich(tf, [("Rotor   ", True, NAVY),
               (f"vertical-axis H-rotor, 3 blades, R = 101.6 mm, span "
                f"{F['span']:.0f} mm. Swept area 2RH = {F['area']:.4f} m² — "
@@ -727,7 +723,7 @@ def build_poster():
                f"{F['tc']*100:.0f}%, {F['camber']}% camber, {F['turning']}° "
                f"turning, square edges — not an airfoil.", False, INK)],
          30, space=0)
-    figure_slot(s, G["detail"][0] + 0.55, 19.9, 15.62, 11.9,
+    figure_slot(s, G["detail"][0] + 0.55, 17.7, 15.62, 14.1,
                 "docs/diagrams/sweep_protocol.png",
                 "Outer loop = wind speed; inner loop = load current")
 
@@ -742,23 +738,24 @@ def build_poster():
          NAVY, space=13)
     para(tf, "Independent repeats at 1200 and 1800 rpm match the sweep to "
              "0.3% and 0.2%.", 28, False, DIM, space=16)
-    para(tf, "THE EXPONENT IS A GENERATOR CHARACTERISTIC, NOT AN AERODYNAMIC "
-             "ONE", 28, True, GOLDDK, space=11)
+    para(tf, "But that exponent describes the GENERATOR,", 30, True, GOLDDK,
+         space=2)
+    para(tf, "not the blade.", 30, True, GOLDDK, space=11)
     for t in ["V_oc ∝ v^1.52   and   R_int ∝ v^−0.64   (73.6 → 40.1 Ω)",
               "every peak sits at the Thévenin match,  P = V_oc² / 4R_int",
               "n = 2a − b = 3.69,  against 3.77 measured"]:
         para(tf, t, 26, False, NAVY, space=8)
-    rich(tf, [("Cp_elec = ", False, INK),
-              (f"{F['cp_lo']*100:.2f} – {F['cp_hi']*100:.2f}%", True, FAULT),
-              (", ~100× below a working H-rotor: peak power sits at "
-               "ω/ω_runaway ≈ 0.70 → 0.94, the far limb of Cp(λ) where "
-               "Cp → 0 by construction.", False, INK)], 28, space=0)
+    rich(tf, [("Efficiency is ", False, INK),
+              (f"Cp = {F['cp_lo']*100:.2f} – {F['cp_hi']*100:.2f}%", True, FAULT),
+              (", about 100× below a working turbine — the rotor is spinning "
+               "far too fast for its own good, held there by the generator.",
+               False, INK)], 28, space=0)
 
     # The measured curve itself. An empty half-panel on a poster reads as
     # "we did not have much", which is the opposite of true here.
     show = [r for r in F["rows"] if r[0] in (500, 900, 1400, 1800)]
     tl = s.shapes.add_table(len(show) + 1, 4,
-                            Inches(G["results"][0] + 0.55), Inches(17.5),
+                            Inches(G["results"][0] + 0.55), Inches(16.1),
                             Inches(13.0), Inches(0.82 * (len(show) + 1))).table
     for i, w in enumerate([3.3, 3.0, 3.4, 3.3]):
         tl.columns[i].width = Inches(w)
@@ -782,7 +779,7 @@ def build_poster():
             pr.alignment = PP_ALIGN.RIGHT if c else PP_ALIGN.LEFT
             pr.runs[0].font.size = Pt(24); pr.runs[0].font.bold = top
             pr.runs[0].font.color.rgb = NAVY if top else INK
-    tf2 = tb(s, G["results"][0] + 0.55, 17.5 + 0.82 * (len(show) + 1) + 0.12,
+    tf2 = tb(s, G["results"][0] + 0.55, 16.1 + 0.82 * (len(show) + 1) + 0.12,
              13.0, 0.8)
     para(tf2, "Wind speed from MEASURED fan rpm — the drive settles 4–13 rpm "
               "below setpoint.", 19, False, DIM, first=True, space=0,
@@ -792,16 +789,15 @@ def build_poster():
     _panel(s, "concl")
     y = _label(s, "concl", "Conclusion")
     tf = _body(s, "concl", y)
-    rich(tf, [("A better blade can read as LESS electrical power. ", True, FAULT),
-              ("Anything raising Cp_max while adding low-α drag lowers "
-               "λ_runaway, lowers V_oc, and lowers measured P as the square.",
-               False, INK)], 28, first=True, space=13)
-    rich(tf, [("One rotor-speed channel converts the entire existing archive "
-               "into Cq(λ) retroactively", True, OK),
-              (" — every sweep already records a full load ramp at all 14 "
-               "wind speeds, and a proximity sensor on the rig already feeds "
-               "the DAQ. What is needed is its channel and pulses-per-"
-               "revolution, not new hardware.", False, INK)], 28, space=13)
+    rich(tf, [("A better blade can measure as less power.", True, FAULT),
+              ("  A blade that grabs more energy spins slower — and slower "
+               "means less voltage, so the meter reads lower. Watts alone "
+               "cannot rank blades.", False, INK)], 28, first=True, space=13)
+    rich(tf, [("The fix is one more channel: rotor speed.", True, OK),
+              ("  Every sweep already records a full load ramp at all 14 wind "
+               "speeds, and a sensor on the rig already feeds the DAQ. Adding "
+               "that one channel turns the whole archive into Cp(λ) — no new "
+               "hardware, no new tunnel time.", False, INK)], 28, space=13)
     para(tf, f"Limits: electrical power only, not Cp · Re_chord "
              f"{F['re_lo']:,.0f}–{F['re_hi']:,.0f}, below Reynolds-"
              f"independence (~2×10⁵) · generator R_int inferred, never "
@@ -810,12 +806,10 @@ def build_poster():
 
     # ── footer ──
     _panel(s, "footer")
-    tf = tb(s, G["footer"][0] + 7.2, G["footer"][1] + 0.16, 33.0, 1.8)
-    para(tf, "The University of Rhode Island CYPHER Research Center IPT "
-             "Meeting for Power Systems and Manufacturing", 29.33, True,
-         RGBColor(0, 0, 0), first=True, space=2, font="Arial")
-    para(tf, FUNDING, 24, True, RGBColor(0x22, 0x22, 0x22), space=2, font="Arial")
-    para(tf, DISCLAIMER, 15, False, RGBColor(0x22, 0x22, 0x22), space=0,
+    tf = tb(s, G["footer"][0] + 7.2, G["footer"][1] + 0.38, 33.0, 1.5)
+    para(tf, VENUE, 29.33, True, RGBColor(0, 0, 0), first=True, space=6,
+         font="Arial")
+    para(tf, AFFIL, 22, False, RGBColor(0x22, 0x22, 0x22), space=0,
          font="Arial")
     if (A / "logo_uri_footer.png").exists():
         s.shapes.add_picture(str(A / "logo_uri_footer.png"), Inches(1.12),

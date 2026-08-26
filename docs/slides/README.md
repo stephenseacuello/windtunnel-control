@@ -42,10 +42,10 @@ coordinates. The five-panel grid is the CYPHER grid, with one change: your left
 column is 0.2 in out of alignment with the panel below it, and that is squared
 up rather than copied.
 
-> ⚠️ **Confirm the funding line.** `FUNDING` in the script carries the ONR grant
-> **N00014-24-1-2129** straight across from the CYPHER poster. If this wind
-> tunnel work sits under a different grant, or none, change it — a federal
-> grant number asserted on a poster is not a detail.
+**No funding line.** The CYPHER poster's ONR grant belongs to a different
+project, so it is not carried across. The footer is the venue plus
+`Sodhi Lab × Jeong Lab`. If this work is genuinely under an award, add it at
+`VENUE` / `AFFIL` in the script.
 
 ## Figures
 
