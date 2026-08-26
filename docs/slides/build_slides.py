@@ -186,6 +186,12 @@ def notes(slide, text):
     slide.notes_slide.notes_text_frame.text = text.strip()
 
 
+def _png_size(path):
+    """(w, h) in pixels from a PNG header — no imaging library in this repo."""
+    b = Path(path).read_bytes()[16:24]
+    return (int.from_bytes(b[:4], "big"), int.from_bytes(b[4:], "big"))
+
+
 def figure_slot(slide, l, t, w, h, path, caption):
     """
     Draw a labelled placeholder, or the real image if it exists.
@@ -195,10 +201,18 @@ def figure_slot(slide, l, t, w, h, path, caption):
     """
     p = REPO / path
     if p.exists():
-        slide.shapes.add_picture(str(p), Inches(l), Inches(t),
-                                 width=Inches(w))
-        tf = tb(slide, l, t + h + 0.05, w, 0.3)
-        para(tf, caption, 10.5, False, DIM, first=True, italic=True)
+        # Fit INSIDE the slot on both axes and centre. Passing width alone
+        # sets height by aspect, which is fine on the 16:9 slots and runs a
+        # 1.57:1 diagram straight off the bottom of the poster's 2.97:1 one.
+        iw, ih = _png_size(p)
+        sc = min(w / iw, (h - 0.34) / ih)
+        pw, ph = iw * sc, ih * sc
+        slide.shapes.add_picture(str(p), Inches(l + (w - pw) / 2),
+                                 Inches(t + (h - 0.34 - ph) / 2),
+                                 width=Inches(pw), height=Inches(ph))
+        tf = tb(slide, l, t + h - 0.28, w, 0.3)
+        para(tf, caption, 10.5, False, DIM, first=True, italic=True,
+             align=PP_ALIGN.CENTER)
         return
     box = rect(slide, l, t, w, h, WASH2, PALE)
     tf = box.text_frame
@@ -679,8 +693,8 @@ def build_poster():
               "Interlock: load ON → wind UP → test → wind DOWN → load OFF. "
               "An unloaded rotor in moving air accelerates."]:
         rich(tf, [("• ", False, GOLDDK), (t, False, INK)], 28, space=11)
-    figure_slot(s, G["arch"][0] + 0.55, 27.4, 12.78, 4.3,
-                "docs/diagrams/system_overview.png",
+    figure_slot(s, G["arch"][0] + 0.55, 27.3, 12.78, 4.85,
+                "docs/diagrams/chain_strip.png",
                 "Measurement and control chain")
 
     # ── project details ──
