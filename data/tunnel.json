@@ -12,12 +12,13 @@
   ],
   "transport": {
     "kind": "pmc",
-    "port": "/dev/cu.usbmodem14401",
+    "port": "/dev/cu.usbmodem1201",
     "baudrate": 115200,
     "host_watchdog_ms": 5000,
     "_note": "PMC owns the Modbus loop and both watchdogs. ONLY ONE device may be landed on X1-29/30/31 \u2014 the FTDI cable does not get wired while the PMC is. Set kind='direct' only if the PMC is physically disconnected.",
     "feedback_scale": 295.0,
-    "_feedback_note": "PMC telemetry field f2 x 295 = rpm. Measured: commanded 500 rpm, f2 settled 1.68 -> 496 rpm (0.9% low, which is slip). Composed of the sketch reporting output_Hz/10 and the 1770/60 nameplate ratio. Would become 1.0 if the sketch read par 0102 SPEED instead of 0103 OUTPUT FREQ."
+    "_feedback_note": "PMC telemetry field f2 x 295 = rpm. Measured: commanded 500 rpm, f2 settled 1.68 -> 496 rpm (0.9% low, which is slip). Composed of the sketch reporting output_Hz/10 and the 1770/60 nameplate ratio. Would become 1.0 if the sketch read par 0102 SPEED instead of 0103 OUTPUT FREQ.",
+    "_port_note": "macOS names this from USB topology, so it changes when the board is moved to a different hub or re-enumerates after a DFU flash. It has been 1101, 14401, 1202 and 1201 in one week. src/transport.py resolve_port() falls back to autodetecting a single /dev/cu.usbmodem*, so this value being stale is no longer fatal \u2014 but arduino-cli still needs the real one."
   },
   "drive_serial": {
     "baudrate": 19200,
