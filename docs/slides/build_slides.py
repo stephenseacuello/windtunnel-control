@@ -151,7 +151,20 @@ def rect(slide, l, t, w, h, fill, line=None, shape=MSO_SHAPE.RECTANGLE):
         s.line.width = Pt(1)
     s.shadow.inherit = False
     s.text_frame.word_wrap = True
+    # Autoshapes anchor text vertically CENTRED by default, which floats every
+    # card's heading into its middle and leaves the top of the card looking
+    # empty. Callers that genuinely want centring set it back afterwards.
+    s.text_frame.vertical_anchor = MSO_ANCHOR.TOP
     return s
+
+
+def takeaway(slide, text, W, top=6.28):
+    """Navy strip across the foot of a slide: the one line to remember."""
+    bar = rect(slide, 0.55, top, W - 1.1, 0.72, NAVY)
+    tf = bar.text_frame
+    tf.margin_left = Inches(0.28)
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    para(tf, text, 15, True, WHITE, first=True, space=0)
 
 
 def blank(prs):
@@ -226,30 +239,30 @@ def build_jeong():
     s = blank(prs)
     y = header(s, "Slide 1 of 2  ·  Experimental setup", "The Rig", W)
     rect(s, 0, y - 0.34 + 0.34, W, H - y, WASH)
-    figure_slot(s, 0.55, y + 0.12, 7.3, 3.9,
+    figure_slot(s, 0.55, y + 0.12, 7.3, 4.9,
                 "docs/diagrams/system_overview.png",
                 "Full measurement and control chain")
-    tf = tb(s, 8.2, y + 0.12, 4.6, 4.6)
+    tf = tb(s, 8.2, y + 0.12, 4.6, 4.9)
     para(tf, "CONTROL CHAIN", 12, True, KEANEY, first=True, space=8)
     for a, b in [("Drive", f"ABB ACS550-U1-046A-2, 15 HP, 208–240 V 3φ. "
                            f"Commands speed in rpm; full scale {F['ref1_max']}"),
-                 ("Path", "Python host → USB → Portenta Machine Control → "
-                          "RS-485 Modbus RTU → drive"),
-                 ("Load", "Chroma 63004-150-60. Sets the rotor's operating "
-                          "point and is the best V/I instrument on the rig"),
+                 ("Path", "Python → USB → Portenta Machine Control → "
+                          "RS-485 Modbus → drive"),
+                 ("Load", "Chroma 63004-150-60 — sets the rotor's operating "
+                          "point and measures it"),
                  ("Wind", f"500–1800 rpm fan = 10.1–{F['v_top']:.1f} m/s, "
                           f"v = 0.02132·rpm − 0.424 (R² = 0.9996)"),
                  ("Bandwidth", "τ = 0.63 ± 0.12 s, from five 1-cosine gusts")]:
         rich(tf, [(f"{a} — ", True, NAVY), (b, False, INK)], 13, space=9)
     para(tf, "ROTOR UNDER TEST", 12, True, KEANEY, space=8)
     rich(tf, [("Vertical-axis H-rotor", True, NAVY),
-              (f", 3 blades, R = 101.6 mm, span {F['span']:.0f} mm. "
-               f"Swept area 2RH = {F['area']:.4f} m² — a cylinder, not a disc.",
+              (f", 3 blades, R = 101.6 mm, span {F['span']:.0f} mm. Swept "
+               f"area 2RH = {F['area']:.4f} m² — a cylinder, not a disc.",
                False, INK)], 13, space=9)
-    rich(tf, [("Blade section: ", True, NAVY),
-              (f"thin cambered plate, {F['wall']:.2f} mm wall, t/c "
+    rich(tf, [("Blade: ", True, NAVY),
+              (f"thin cambered plate — {F['wall']:.2f} mm wall, t/c "
                f"{F['tc']*100:.0f}%, {F['camber']}% camber, {F['turning']}° "
-               f"turning, square edges.", False, INK)], 13, space=0)
+               f"turning. Not an airfoil.", False, INK)], 13, space=0)
     notes(s, "Swept area is 2RH because it is a VAWT. Using pi*R^2 overstates "
              "Cp by 1.54x. The blade is a cambered plate, NOT an airfoil - it "
              "matters for any polar or XFOIL cross-check.")
@@ -274,18 +287,19 @@ def build_jeong():
           ("", "Neither depends on the layer above it being correct")]),
         ("ONE MODBUS MASTER ONLY",
          [("The PMC is the master.", " Modbus RTU permits exactly one"),
-          ("", "A direct host-to-drive cable must never be landed at the same time"),
-          ("", "Two devices commanding a 15 HP fan, neither aware of the other, "
-               "is the failure this design exists to prevent")]),
+          ("", "A direct host-to-drive cable must never be landed as well"),
+          ("", "Two devices commanding a 15 HP fan, neither aware of the "
+               "other, is the failure this prevents")]),
         ("TURBINE INTERLOCK",
          [("load ON → wind UP → test → wind DOWN → load OFF", ""),
           ("", "An unloaded rotor in moving air accelerates until something "
                "mechanical stops it"),
+          ("", "Enforced on every path that can move the fan"),
           ("If the fan cannot be confirmed stopped,", " the load stays on")]),
     ]
     for i, (head, items) in enumerate(cards):
         l = 0.55 + i * 4.12
-        card = rect(s, l, y + 1.32, 3.87, 3.55, WHITE, PALE)
+        card = rect(s, l, y + 1.32, 3.87, 2.95, WHITE, PALE)
         tf = card.text_frame
         tf.margin_left = tf.margin_right = Inches(0.2)
         tf.margin_top = Inches(0.18)
@@ -296,6 +310,8 @@ def build_jeong():
             else:
                 rich(tf, [("• ", False, KEANEY), (bold, True, NAVY),
                           (rest, False, INK)], 12.5, space=9)
+    takeaway(s, "Each layer is watched by the layer below it — so a host "
+                "that is wrong, hung or unplugged cannot run the fan away.", W)
     notes(s, "The two watchdogs are the slide's point: each layer is watched by "
              "the layer BELOW it, so the host being wrong cannot run the fan away.")
 
@@ -307,10 +323,10 @@ def build_jeong():
     rich(tf, [("Automated blade characterisation — ", False, INK),
               (f"~10 minutes per rotor, unattended, {F['n_points']} wind speeds",
                True, NAVY)], 17, first=True, space=0)
-    figure_slot(s, 0.55, y + 0.68, 7.5, 3.9,
+    figure_slot(s, 0.55, y + 0.68, 7.5, 4.4,
                 "docs/diagrams/sweep_protocol.png",
                 "Outer loop = wind speed; inner loop = load current")
-    tf = tb(s, 8.35, y + 0.68, 4.45, 4.3)
+    tf = tb(s, 8.35, y + 0.68, 4.45, 4.9)
     para(tf, "AT EACH WIND SPEED", 12, True, KEANEY, first=True, space=9)
     for txt in ["Ramp the electronic load in constant-current steps",
                 "Stop once electrical power falls to 80% of its peak — the "
@@ -319,9 +335,9 @@ def build_jeong():
         rich(tf, [("• ", False, KEANEY), (txt, False, INK)], 13, space=8)
     para(tf, "WHY A PARABOLIC FIT", 12, True, KEANEY, space=9)
     para(tf, "The top of P(I) is flat. The largest single sample is biased "
-             "high, and the bias grows with the number of samples — so two "
-             "blades measured with different point counts would be compared "
-             "unfairly.", 13, False, INK, space=10)
+             "high, and the bias grows with sample count — so blades with "
+             "different point counts would be compared unfairly.",
+         13, False, INK, space=10)
     para(tf, "PROTOCOL FINGERPRINT", 12, True, KEANEY, space=9)
     rich(tf, [("Every run carries one. ", False, INK),
               ("Runs measured under different settings are not comparable",
@@ -371,7 +387,7 @@ def build_jeong():
              "drive settles 4–13 rpm below setpoint.", 10.5, False, DIM,
          first=True, space=0, italic=True)
 
-    box = rect(s, 0.55, y + 2.75, 6.1, 1.62, WHITE, PALE)
+    box = rect(s, 0.55, y + 2.75, 6.1, 1.72, WHITE, PALE)
     tf = box.text_frame
     tf.margin_left = tf.margin_right = Inches(0.2); tf.margin_top = Inches(0.15)
     para(tf, "WHAT IS SOLID", 12, True, OK, first=True, space=8)
@@ -381,18 +397,19 @@ def build_jeong():
               "Independent repeats at 1200 and 1800 rpm match to 0.3% / 0.2%"]:
         rich(tf, [("• ", False, OK), (t, False, INK)], 12.5, space=7)
 
-    box = rect(s, 6.85, y + 0.15, 5.9, 4.25, WHITE, GOLD)
+    box = rect(s, 6.85, y + 0.15, 5.9, 4.32, WHITE, GOLD)
     tf = box.text_frame
     tf.margin_left = tf.margin_right = Inches(0.22); tf.margin_top = Inches(0.18)
     para(tf, "WHAT IT DOES NOT YET SHOW", 12.5, True, GOLDDK, first=True, space=10)
     rich(tf, [("This is electrical power at the load terminals — ", False, INK),
               ("not Cp", True, FAULT), (".", False, INK)], 14.5, space=10)
-    para(tf, "The v^3.77 exponent decomposes almost entirely into the "
-             "generator, not the rotor:", 13, False, INK, space=8)
-    for t in ["V_oc ∝ v^1.52  and  R_int ∝ v^−0.64  (73.6 → 40.1 Ω)",
-              "every peak sits at the Thévenin match, P = V_oc²/4R_int",
-              "n = 2a − b = 3.69, against 3.77 measured"]:
-        para(tf, t, 12, False, NAVY, space=6, font=MONO, indent=1)
+    para(tf, "The v^3.77 exponent decomposes into the generator, not the "
+             "rotor:", 13, False, INK, space=8)
+    for t in ["V_oc ∝ v^1.52      R_int ∝ v^−0.64",
+              "R_int falls 73.6 → 40.1 Ω across the range",
+              "peaks at the Thévenin match, P = V_oc²/4R_int",
+              "n = 2a − b = 3.69   vs   3.77 measured"]:
+        para(tf, t, 11.5, False, NAVY, space=5, font=MONO, indent=1)
     rich(tf, [("→ ", True, GOLDDK),
               ("Little aerodynamic residual is left for the blade to move. "
                "Without rotor speed, blade comparisons partly compare the "
@@ -402,6 +419,8 @@ def build_jeong():
               (f", roughly 100× below a working H-rotor, because peak power "
                f"sits at ω/ω_runaway ≈ 0.70→0.94 — the far limb of Cp(λ) "
                f"where Cp → 0 by construction.", False, INK)], 13, space=0)
+    takeaway(s, "The measurement is sound. Its interpretation needs rotor "
+                "speed — which is the next slide.", W)
     notes(s, "Do NOT present v^3.77 as 'Cp still climbing with Reynolds'. A "
              "9-agent audit on 25 Aug showed the exponent is a generator "
              "characteristic: V_oc ~ v^1.52, R_int ~ v^-0.64, n = 2a-b = 3.69. "
@@ -422,23 +441,23 @@ def build_jeong():
              "hardware.", 13.5, False, INK, space=0)
     left = [
         ("WHY IT MATTERS MORE THAN ANY BLADE RUN", [
-            "Without ω there is no λ and no Cp, so the rig cannot separate "
+            "Without ω there is no λ and no Cp — the rig cannot separate "
             "rotor aerodynamics from generator matching.",
-            "A better blade can read as LESS power: anything that raises "
-            "Cp_max while adding low-α drag lowers λ_runaway, lowers V_oc, "
-            "and lowers measured P as the SQUARE of the speed change.",
-            "Two rotors with Cp_max of 5% and 25% would rank purely by how "
-            "freely they spin."]),
+            "A better blade can read as LESS power: raising Cp_max while "
+            "adding low-α drag lowers λ_runaway, lowers V_oc, and lowers "
+            "measured P as the SQUARE.",
+            "Two rotors at Cp_max 5% and 25% would rank purely by how freely "
+            "they spin."]),
     ]
     for i, (head, items) in enumerate(left):
-        card = rect(s, 0.55, y + 1.5, 6.0, 3.2, WHITE, PALE)
+        card = rect(s, 0.55, y + 1.5, 6.0, 3.28, WHITE, PALE)
         tf = card.text_frame
         tf.margin_left = tf.margin_right = Inches(0.22)
         tf.margin_top = Inches(0.18)
         para(tf, head, 12, True, KEANEY, first=True, space=10)
         for t in items:
             rich(tf, [("• ", False, KEANEY), (t, False, INK)], 13, space=10)
-    card = rect(s, 6.75, y + 1.5, 6.0, 3.2, WHITE, GOLD)
+    card = rect(s, 6.75, y + 1.5, 6.0, 3.28, WHITE, GOLD)
     tf = card.text_frame
     tf.margin_left = tf.margin_right = Inches(0.22); tf.margin_top = Inches(0.18)
     para(tf, "THE PAYOFF IS RETROACTIVE", 12, True, GOLDDK, first=True, space=10)
@@ -456,6 +475,8 @@ def build_jeong():
               ("), so fan speed and rotor speed share one time base. "
                "0.000 V is a live zero meaning INVALID, not zero rpm.",
                False, INK)], 13, space=0)
+    takeaway(s, "The ask is two numbers: which DAQ channel, and how many "
+                "pulses per revolution.", W)
     notes(s, "This is the ask, aimed at the person who owns the DAQ. Keep it "
              "concrete: channel number and pulses-per-rev, that is all.")
 
@@ -472,10 +493,9 @@ def build_jeong():
                    "channel; every blade tested before that lands must be "
                    "re-run to obtain λ."),
         ("The blade is not an airfoil",
-         f"{F['wall']:.2f} mm constant wall, t/c {F['tc']*100:.0f}%, "
-         f"{F['camber']}% camber, {F['turning']}° turning, square-cut edges. "
-         f"Separation is pinned by geometry, so any XFOIL or polar "
-         f"cross-check is answering a question about a different part."),
+         f"{F['wall']:.2f} mm wall, t/c {F['tc']*100:.0f}%, {F['camber']}% "
+         f"camber, square-cut edges. Separation is pinned by geometry, so "
+         f"XFOIL and polar cross-checks answer a different question."),
         ("Reynolds range",
          f"Re_chord = {F['re_lo']:,.0f} → {F['re_hi']:,.0f}. Below "
          f"Reynolds-independence for a cross-flow turbine (~2×10⁵), so "
@@ -495,8 +515,8 @@ def build_jeong():
     for i, (head, body) in enumerate(items):
         col, row = i % 2, i // 2
         l = 0.55 + col * 6.2
-        t = y + 0.68 + row * 1.42
-        card = rect(s, l, t, 6.0, 1.28, WHITE, PALE)
+        t = y + 0.68 + row * 1.72
+        card = rect(s, l, t, 6.0, 1.56, WHITE, PALE)
         tf = card.text_frame
         tf.margin_left = tf.margin_right = Inches(0.2)
         tf.margin_top = Inches(0.13)
