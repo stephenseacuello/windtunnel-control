@@ -78,7 +78,10 @@ from load_ramp import protocol_meta, wind_from_rpm
 # The protocol lives in ONE place. Both this CLI and the Flask dashboard call
 # these, so a change to the ladder, the ceiling or the settle cannot reach one
 # path and miss the other — which is exactly how the two came to disagree.
-from sweep_core import ceiling_for, step_for, settle_wind, estimate
+from sweep_core import (ceiling_for, step_for, settle_wind, estimate,
+                        interp_at, rotor_rpm_between, summary_row, point_rows,
+                        SUMMARY_HEADER, POINTS_HEADER, ROTOR_RADIUS_M,
+                        RPM_PULSES_PER_REV)
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -162,38 +165,12 @@ def open_rig(a):
     return drive, load
 
 
-ROTOR_RADIUS_M = 0.1016      # 4 in, centre of shaft to blade attachment
 
-
-def interp_at(pairs, x):
-    """
-    Linear interpolation of y at x over (x, y) pairs, y possibly None.
-
-    Used to read rotor speed at the FITTED peak current. The peak lies between
-    two dwells, so the honest answer is between their two speeds; taking the
-    nearer dwell would pair a tip-speed ratio with a power measured somewhere
-    else. Returns None rather than guessing when the fitted peak falls outside
-    the measured currents — which happens when a ramp stopped early, and is
-    exactly when a silently extrapolated number would be most misleading.
-    """
-    pts = sorted(((float(a), float(b)) for a, b in pairs if b is not None),
-                 key=lambda t: t[0])
-    if len(pts) < 2 or x is None:
-        return None
-    if x <= pts[0][0] or x >= pts[-1][0]:
-        return None
-    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
-        if x0 <= x <= x1:
-            if x1 == x0:
-                return y0
-            return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
-    return None
 
 
 # One magnet on one blade. If a rotor is ever built with a magnet per blade
 # this becomes 3, and getting it wrong is a clean integer error in tip-speed
 # ratio that looks entirely plausible.
-RPM_PULSES_PER_REV = 1
 
 
 class DriveWatch:
@@ -278,34 +255,9 @@ class DriveWatch:
         return s[1], s[2]
 
     def rotor_rpm_between(self, t0, t1):
-        """
-        Mean rotor rpm over a window, or None.
-
-        Counts whole revolutions between the first and last accepted pulse
-        inside the window and divides by the time THOSE pulses took, measured
-        by the PMC's own microsecond timer. That is exact: no host scheduling
-        jitter, and no quantisation from where the window edges happen to fall
-        relative to the magnet.
-        """
-        ss = [s for s in self.series() if s[3] is not None]
-        if len(ss) < 2:
-            return None
-        # BRACKET the window rather than requiring two ticks strictly inside
-        # it. At the old 1.0 s tick against a 1.0 s dwell there was usually
-        # exactly one sample in range, so a strict test returned None and the
-        # column would have come back empty for a whole run — a tunnel session
-        # spent producing a blank.
-        before = [x for x in ss if x[0] <= t0]
-        upto = [x for x in ss if x[0] <= t1]
-        s0 = before[-1] if before else ss[0]
-        s1 = upto[-1] if upto else None
-        if s1 is None or s1[0] <= s0[0]:
-            return None
-        d_pulses = (s1[3] - s0[3]) & 0xFFFFFFFF
-        d_us = (s1[4] - s0[4]) & 0xFFFFFFFF
-        if d_pulses < 1 or d_us < 1:
-            return None            # rotor stopped, or one pulse is not a rate
-        return 60e6 * d_pulses / (d_us * RPM_PULSES_PER_REV)
+        """Mean rotor rpm over a window — the core owns the arithmetic."""
+        return rotor_rpm_between([(x[0], x[3], x[4]) for x in self.series()],
+                                 t0, t1)
 
     def __enter__(self):
         self._t.start()
@@ -475,14 +427,6 @@ def run_sweep(a):
     return rows, summary, protocol_meta(a, load, voff, rng)
 
 
-SUMMARY_HEADER = ["fan_rpm_cmd", "fan_rpm_actual", "wind_mps", "blade",
-                  "p_max_fit_w", "i_at_pmax_fit_a", "p_max_raw_w",
-                  "i_at_pmax_raw_a", "v_at_pmax_v", "i_last_a", "limited_by",
-                  "clean", "steps", "stopped_by",
-                  "turbine_rpm_at_pmax", "tsr_at_pmax"]
-POINTS_HEADER = ["t_unix", "t_local", "fan_rpm", "wind_mps", "blade",
-                 "demand_a", "held_a", "volts", "amps", "watts", "tracking",
-                 "note", "fan_rpm_actual", "motor_amps", "turbine_rpm"]
 
 
 def flush_csv(a, rows, summary, meta):

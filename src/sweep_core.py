@@ -262,4 +262,127 @@ def measure_point(rig, a, rpm, rng, voff, log=None, on_step=None):
 
     return SimpleNamespace(rpm=rpm, dead=False, result=r, rpm_act=rpm_act,
                            volts=v, t_start=t_start, step=step,
-                           ceiling=ceiling)
+                           ceiling=ceiling, dwell=a.dwell)
+
+
+# ── rotor speed ───────────────────────────────────────────────────────────
+
+RPM_PULSES_PER_REV = 1      # one magnet on one blade
+
+def rotor_rpm_between(samples, t0, t1):
+    """
+    Mean rotor rpm over a window, from (t, pulses, last_us) samples, or None.
+
+    Counts whole revolutions between the first and last accepted pulse in the
+    window and divides by the time THOSE pulses took, measured by the PMC's own
+    microsecond timer. Exact: no host scheduling jitter, and no quantisation
+    from where the window edges fall relative to the magnet.
+
+    BRACKETS the window rather than requiring two samples strictly inside it.
+    At a 1 s tick against a 1 s dwell there is usually exactly one, so a strict
+    test returns None and the column comes back empty for a whole run — a
+    tunnel session spent producing a blank.
+
+    ⚠️ The reed currently bounces 2-3 times per magnet pass and the count
+    varies, so the number this returns is not yet trustworthy. See
+    docs/11_open_questions.md.
+    """
+    ss = [x for x in samples if x[1] is not None]
+    if len(ss) < 2:
+        return None
+    before = [x for x in ss if x[0] <= t0]
+    upto = [x for x in ss if x[0] <= t1]
+    s0 = before[-1] if before else ss[0]
+    s1 = upto[-1] if upto else None
+    if s1 is None or s1[0] <= s0[0]:
+        return None
+    d_pulses = (s1[1] - s0[1]) & 0xFFFFFFFF
+    d_us = (s1[2] - s0[2]) & 0xFFFFFFFF
+    if d_pulses < 1 or d_us < 1:
+        return None                 # rotor stopped, or one pulse is not a rate
+    return 60e6 * d_pulses / (d_us * RPM_PULSES_PER_REV)
+
+
+def interp_at(pairs, x):
+    """
+    Linear interpolation of y at x over (x, y) pairs, y possibly None.
+
+    Used to read rotor speed at the FITTED peak current. The peak lies between
+    two dwells, so the honest answer is between their two speeds; taking the
+    nearer dwell would pair a tip-speed ratio with a power measured somewhere
+    else. Returns None rather than guessing when the fitted peak falls outside
+    the measured currents — which happens when a ramp stopped early, and is
+    exactly when a silently extrapolated number would mislead most.
+    """
+    pts = sorted(((float(a), float(b)) for a, b in pairs if b is not None),
+                 key=lambda t: t[0])
+    if len(pts) < 2 or x is None:
+        return None
+    if x <= pts[0][0] or x >= pts[-1][0]:
+        return None
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        if x0 <= x <= x1:
+            return y0 if x1 == x0 else y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+    return None
+
+
+# ── the files ─────────────────────────────────────────────────────────────
+#
+# Both front ends write the SAME columns. The dashboard used to write nine
+# where the CLI wrote sixteen, and derived wind speed from COMMANDED rpm where
+# the CLI uses measured — so even at an identical protocol the two produced
+# files that could not be compared. A shared fingerprint over files of
+# different shape is the same false assurance the fingerprint exists to
+# prevent.
+
+ROTOR_RADIUS_M = 0.1016     # 4 in, axis of rotation to blade attachment
+
+SUMMARY_HEADER = ["fan_rpm_cmd", "fan_rpm_actual", "wind_mps", "blade",
+                  "p_max_fit_w", "i_at_pmax_fit_a", "p_max_raw_w",
+                  "i_at_pmax_raw_a", "v_at_pmax_v", "i_last_a", "limited_by",
+                  "clean", "steps", "stopped_by",
+                  "turbine_rpm_at_pmax", "tsr_at_pmax"]
+
+POINTS_HEADER = ["t_unix", "t_local", "fan_rpm", "wind_mps", "blade",
+                 "demand_a", "held_a", "volts", "amps", "watts", "tracking",
+                 "note", "fan_rpm_actual", "motor_amps", "turbine_rpm"]
+
+
+def summary_row(pt, blade, rotor_rpm=None):
+    """One summary row from a measure_point result."""
+    r = pt.result
+    v_mps = wind_from_rpm(pt.rpm_act or pt.rpm)
+    tsr = (None if rotor_rpm is None or v_mps <= 0 else
+           (rotor_rpm * 2 * math.pi / 60.0) * ROTOR_RADIUS_M / v_mps)
+    return [pt.rpm, f"{pt.rpm_act:.0f}", f"{v_mps:.2f}", blade,
+            f"{r.fit_watts:.4f}", f"{r.fit_amps:.4f}",
+            f"{r.power_peak_watts:.4f}", f"{r.power_peak_amps:.4f}",
+            f"{r.power_peak_volts:.4f}", f"{r.peak_amps:.4f}", r.limited_by,
+            int(r.clean), len(r.trace), r.stopped_by,
+            "" if rotor_rpm is None else f"{rotor_rpm:.1f}",
+            "" if tsr is None else f"{tsr:.4f}"]
+
+
+def point_rows(pt, blade, fan_rpm_at, rotor_rpm_at):
+    """
+    Per-dwell rows, with the drive state and rotor speed DURING each dwell.
+
+    `fan_rpm_at(t)` and `rotor_rpm_at(t0, t1)` are supplied by the caller,
+    because the CLI samples on DriveWatch's thread and the dashboard on its
+    own poll thread. Neither may start a second one.
+    """
+    out, dwell_rpm = [], []
+    for st in pt.result.trace:
+        w_rpm = rotor_rpm_at(st.t_unix - pt.dwell, st.t_unix)
+        f_rpm, m_amps = fan_rpm_at(st.t_unix)
+        dwell_rpm.append((st.amps, w_rpm))
+        out.append([f"{st.t_unix:.3f}",
+                    time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(st.t_unix)),
+                    pt.rpm, f"{wind_from_rpm(pt.rpm):.2f}", blade,
+                    f"{st.demand_a:.4f}",
+                    "" if st.held_a is None else f"{st.held_a:.4f}",
+                    f"{st.volts:.4f}", f"{st.amps:.4f}", f"{st.watts:.4f}",
+                    int(st.tracking), st.note,
+                    f"{f_rpm:.0f}", f"{m_amps:.2f}",
+                    "" if w_rpm is None else f"{w_rpm:.1f}"])
+    return out, dwell_rpm

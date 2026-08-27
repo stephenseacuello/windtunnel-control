@@ -319,3 +319,32 @@ def test_the_dashboard_actually_sets_the_cut_out_voltage():
     assert "prepare_load" in CONTROLLER, \
         "the dashboard does not call sweep_core.prepare_load, so it is not " \
         "writing CONF:VOLT:OFF on the real path"
+
+
+def test_both_front_ends_write_the_same_columns():
+    """
+    A shared fingerprint over files of DIFFERENT SHAPE is the same false
+    assurance the fingerprint exists to prevent.
+
+    The dashboard used to write nine summary columns against the CLI's
+    sixteen, and to derive wind speed from COMMANDED fan rpm where the CLI
+    uses measured — so even at an identical protocol, compare_blades could not
+    put the two side by side.
+    """
+    sys.path.insert(0, str(ROOT / "src"))
+    import sweep_core as sc
+
+    for name, text in (("controller.py", CONTROLLER),
+                       ("blade_sweep.py", (ROOT / "src" / "blade_sweep.py").read_text())):
+        assert "SUMMARY_HEADER" in text and "POINTS_HEADER" in text, \
+            f"{name} does not use the shared column definitions"
+        # A literal header list means a second definition that can drift.
+        assert '"fan_rpm_cmd", "wind_mps"' not in text, \
+            f"{name} hand-writes a summary header again"
+
+    # compare_blades keys off these; if a rename lands in one place only, the
+    # comparison silently reaches for a column that is not there.
+    for col in ("p_max_fit_w", "p_max_raw_w", "fan_rpm_actual",
+                "turbine_rpm_at_pmax", "tsr_at_pmax"):
+        assert col in sc.SUMMARY_HEADER, f"{col} vanished from the summary"
+    assert "turbine_rpm" in sc.POINTS_HEADER

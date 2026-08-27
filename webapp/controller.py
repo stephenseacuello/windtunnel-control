@@ -54,6 +54,7 @@ from calibration import TO_MPS
 from config import TunnelConfig
 from player import ProfileAborted, ProfilePlayer
 from simulator import SimulatedACS550
+import sweep_core as _sc   # the protocol — shared with src/blade_sweep.py
 from velocity_loop import VelocityController, suggest_gains
 from velocity_source import (ManualSource, SimulatedSource, StaleReading,
                              build_source)
@@ -338,11 +339,27 @@ class TunnelController:
                             self.cfg.calibration.velocity(hz)), 3)
                     except Exception:
                         pass
+                # Firmware 5.x reports a monotonic magnet count and the
+                # microsecond timestamp of the last accepted edge. Captured
+                # here rather than on a second thread: this poll already owns
+                # the port, and a sweep must never start another reader.
+                # v2-v4 do not report them; the keys are simply absent and
+                # rotor speed comes out blank rather than wrong.
+                pulses = last_us = None
+                try:
+                    tp = getattr(self.drive, "transport", None)
+                    st_t = tp.stat() if tp is not None else {}
+                    if st_t.get("rpm_pulses") is not None:
+                        pulses = int(st_t["rpm_pulses"])
+                        last_us = int(st_t["rpm_last_us"])
+                except Exception:
+                    pass
                 self.trace.append({
                     "t": time.time(), "meas": hz, "amps": amps,
                     "cmd": self.target_hz if self.running else 0.0,
                     "v_meas": round(v_meas, 3) if v_meas is not None else None,
-                    "v_derived": v_derived})
+                    "v_derived": v_derived,
+                    "pulses": pulses, "last_us": last_us})
 
                 # The simulated rotor only knows about wind if we tell it.
                 if self.dry_run and getattr(self, "_sim_turbine", None):
@@ -840,6 +857,21 @@ class TunnelController:
             def motor_amps(self):
                 st = self._c.snapshot() or {}
                 return float((st.get("measured") or {}).get("amps") or 0.0)
+
+            # Same two lookups the CLI's DriveWatch provides, over this
+            # controller's own poll history. sweep_core owns the arithmetic,
+            # so a dwell is windowed identically on both front ends.
+            def drive_at(self, t):
+                tr = list(self._c.trace)
+                if not tr:
+                    return self.fan_rpm, self.motor_amps
+                x = min(tr, key=lambda e: abs(e.get("t", 0) - t))
+                return float(x.get("meas") or 0.0), float(x.get("amps") or 0.0)
+
+            def rotor_rpm_between(self, t0, t1):
+                return _sc.rotor_rpm_between(
+                    [(e.get("t", 0), e.get("pulses"), e.get("last_us"))
+                     for e in list(self._c.trace)], t0, t1)
 
         def work():
             sc = self.scan
@@ -1761,7 +1793,6 @@ class TunnelController:
         # Now both callers build it from sweep_core, so a dashboard sweep
         # legitimately carries the campaign fingerprint because it genuinely
         # is the campaign protocol.
-        import sweep_core as _sc
         cfg = _sc.settings(blade=blade, notes=notes, start_rpm=start_rpm,
                            stop_rpm=stop_rpm, rpm_step=rpm_step,
                            step_amps=step_amps, dwell=dwell,
@@ -1785,6 +1816,7 @@ class TunnelController:
                       "rpms": rpms, "i": 0, "n": len(rpms), "points": [],
                       "ramp": [], "current_rpm": None, "message": "",
                       "protocol": fingerprint, "protocol_detail": shape,
+                      "_summary_rows": [], "_points_rows": [],
                       "summary_csv": str(out) + "_summary.csv",
                       "points_csv": str(out) + "_points.csv"}
 
@@ -1853,10 +1885,25 @@ class TunnelController:
                         "p_raw": round(r.power_peak_watts, 5),
                         "limited_by": r.limited_by, "clean": bool(r.clean),
                         "steps": len(r.trace)})
+                    # Rows built by sweep_core, so the FILES match the CLI's
+                    # and not merely the fingerprint. The dashboard used to
+                    # write nine summary columns against the CLI's sixteen,
+                    # and derive wind speed from COMMANDED rpm where the CLI
+                    # uses measured — a shared hash over files of different
+                    # shape is the same false assurance the hash exists to
+                    # prevent.
+                    _rig_ref = _Rig(self, _Serialised(self.load))
+                    rrpm = _rig_ref.rotor_rpm_between(pt.t_start, time.time())
+                    sw["_summary_rows"].append(
+                        _sc.summary_row(pt, blade, rrpm))
+                    prows, _dw = _sc.point_rows(
+                        pt, blade, _rig_ref.drive_at,
+                        _rig_ref.rotor_rpm_between)
+                    sw["_points_rows"].extend(prows)
                     # Flushed as each point completes, not at the end: a sweep
                     # is 10-30 minutes of fan and load time, and an abort or a
                     # crash at point 9 must not discard points 1-8.
-                    self._write_sweep(sw, r)
+                    self._write_sweep(sw)
                     self.load_demand = cfg.unload_amps
                 else:
                     sw["message"] = "complete"
@@ -1894,7 +1941,7 @@ class TunnelController:
         self._job_thread.start()
         return self.sweep
 
-    def _write_sweep(self, sw, last=None):
+    def _write_sweep(self, sw):
         """Rewrite both CSVs from scratch. Small files; atomicity beats speed."""
         import csv as _csv
         try:
@@ -1912,36 +1959,24 @@ class TunnelController:
                               "normally. The `via` field above records which "
                               "front end drove the run and is NOT part of the "
                               "fingerprint.")]
-            sp = Path(sw["summary_csv"])
-            sp.parent.mkdir(parents=True, exist_ok=True)
-            with sp.open("w", newline="") as f:
-                w = _csv.writer(f)
-                for k, v in head:
-                    w.writerow([f"# {k}", v])
-                w.writerow(["fan_rpm_cmd", "wind_mps", "blade", "p_max_fit_w",
-                            "i_at_pmax_fit_a", "p_max_raw_w", "limited_by",
-                            "clean", "steps"])
-                for p in sw["points"]:
-                    w.writerow([p["rpm"], p["mps"], sw["blade"], p["p_w"],
-                                p["i_a"], p["p_raw"], p["limited_by"],
-                                int(p["clean"]), p["steps"]])
-            if last is not None:
-                pp = Path(sw["points_csv"])
-                new = not pp.exists()
-                with pp.open("a", newline="") as f:
+            for path, header, rows in (
+                    (Path(sw["summary_csv"]), _sc.SUMMARY_HEADER,
+                     sw.get("_summary_rows", [])),
+                    (Path(sw["points_csv"]), _sc.POINTS_HEADER,
+                     sw.get("_points_rows", []))):
+                path.parent.mkdir(parents=True, exist_ok=True)
+                # Written through a .part and replaced atomically, so a reader
+                # globbing logs/ never catches a half-written file and an
+                # interrupt mid-write cannot corrupt the points already banked.
+                tmp = path.with_suffix(path.suffix + ".part")
+                with tmp.open("w", newline="") as f:
                     w = _csv.writer(f)
-                    if new:
-                        for k, v in head:
-                            w.writerow([f"# {k}", v])
-                        w.writerow(["t_unix", "fan_rpm", "wind_mps", "blade",
-                                    "demand_a", "volts", "amps", "watts",
-                                    "tracking", "note"])
-                    for st in last.trace:
-                        w.writerow([f"{st.t_unix:.3f}", sw["current_rpm"],
-                                    sw["points"][-1]["mps"], sw["blade"],
-                                    f"{st.demand_a:.5f}", f"{st.volts:.4f}",
-                                    f"{st.amps:.5f}", f"{st.watts:.5f}",
-                                    int(st.tracking), st.note])
+                    for k, v in head:
+                        w.writerow([f"# {k}", v])
+                    w.writerow(header)
+                    w.writerows(rows)
+                tmp.replace(path)
+            sp = Path(sw["summary_csv"])
             # archive copy, so re-running a blade keeps the earlier curve
             arch = getattr(self, "_sweep_archive", None)
             if arch is not None:
