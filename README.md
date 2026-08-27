@@ -18,6 +18,7 @@ blade characterisation, and a web dashboard.
 | **Learn the rig from scratch** | **`TRAINING.md`** — start here if you are new |
 | **Run a blade test today** | **`docs/07_blade_campaign.md`** — the user guide |
 | **Going to the tunnel** | **`NEXT_SESSION.md`** — print it |
+| **See what the rig has measured** | **`docs/09_results.md`** |
 | **Know what is still unanswered** | `docs/11_open_questions.md` |
 | **Just spin the fan** | `scripts/rpm.py` — one file, type an RPM |
 | **Wire up a NEW rig** | `docs/10_commissioning.md` — done once, in Aug 2026 |
@@ -31,7 +32,7 @@ blade characterisation, and a web dashboard.
 | **Connect the Chroma load** | `docs/06_chroma.md` |
 | **Identify the DAQ channels** | `docs/08_march_daq.md` |
 | **Read or write drive parameters** | `firmware/acs550_pmc_v3/README.md` |
-| **Present this to somebody** | `docs/09_slides_jeong.md` |
+| **Present this to somebody** | `docs/slides/` — `build_slides.py` generates both decks |
 | **Use the dashboard** | `webapp/README.md` |
 | **See where the calibration came from** | `reference/README.md` |
 | **Check I haven't broken anything** | `tests/README.md` |
@@ -94,7 +95,9 @@ drive is rated 46.2 A.
 
 ## Bandwidth — better than originally feared
 
-**τ = 0.63 ± 0.12 s**, measured across five 1-cosine gust runs on 20 Aug 2026.
+**τ = 0.60 ± 0.11 s**, measured across five 1-cosine gust runs on 20 Aug 2026
+(0.80/0.50/0.60/0.50/0.60). Reproduce with
+`python src/analyze.py logs/20260820_14*_1mc.csv --summary`.
 Corner frequency ≈ **0.25 Hz**.
 
 Earlier planning assumed τ ≈ 3 s and a 0.05 Hz corner, and scoped gust work
@@ -107,7 +110,7 @@ Two caveats on that number:
   generator, so what you fit is parameter 2202, not the tunnel. A 1-cosine
   does not.
 - **It is drive-and-fan, not air, and certainly not rotor.** Rotor inertia is
-  downstream of all of it and is not in that 0.63 s at all.
+  downstream of all of it and is not in that 0.60 s at all.
 
 ---
 
@@ -117,7 +120,7 @@ Two caveats on that number:
 
 ```bash
 pip install -r requirements.txt
-python examples/gust_demo.py --tau 0.63
+python examples/gust_demo.py --tau 0.60
 python src/blade_sweep.py --blade demo --simulate      # the full campaign loop
 cd webapp && python app.py --dry-run                   # → http://127.0.0.1:5000
 ```

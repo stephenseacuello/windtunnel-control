@@ -84,3 +84,23 @@ match, and n = 2a − b = 3.69 against 3.77 measured.
 
 The honest version is the stronger one, and it is what makes slide 6 an
 argument rather than a wish.
+
+
+---
+
+## Which slides are for whom
+
+**Slides 1–2 are the setup pair Dr Jeong asked for; 3–4 are the results pair.**
+Slide 5 is optional and makes the case for the DAQ channel directly to the
+person who owns the DAQ.
+
+If Taegu is covering the mechanical rig and rotor fabrication, keep slide 1
+to the control and measurement chain to avoid overlap.
+
+The limitation bullet on slide 4 is the most valuable line in the deck for
+this audience. It is honest, and it is the argument for the next measurement.
+
+*(Moved here from the old slides note, which was deleted. Every quotable
+number in that file was a hand-typed second copy of what `build_slides.py`
+generates from the data — a guaranteed drift source. The judgement about who
+each slide addresses is the part worth keeping.)*

@@ -1,93 +1,110 @@
-# acs550_pmc_v5 — rotor rpm from a magnet and a reed switch
+# acs550_pmc_v5 — rotor rpm from a magnet and a reed
 
-**v5 only adds.** The Modbus loop, both watchdogs, the control-word handshake,
-RD/WR and every existing telemetry field are byte-identical to v3, which is
-untouched at `firmware/acs550_pmc_v3/`.
+**Current version: 5.7.** Adds rotor-speed counting to v3. The Modbus loop,
+both watchdogs, the control-word handshake and RD/WR are unchanged; v2 and v3
+remain byte-identical at `../acs550_pmc/` and `../acs550_pmc_v3/`.
 
-**Numbered 5, not 4.** `acs550_pmc_v4/` published *fan* rpm to a separate DAQ
-and is abandoned now that rotor rpm comes in here instead. It was never
-flashed — but a version number is a promise. If a board ever answers `ID` with
-`4.0`, that must mean exactly one thing forever.
+Numbered 5, not 4 — [`../acs550_pmc_v4/`](../acs550_pmc_v4/) is abandoned and
+its number is retired.
 
-## Wiring — two wires, and there is no wrong way round
+---
 
-Sensor: **DIGITEN VJ12-D10K**, a 2-wire **dry contact** (reed switch). One
-magnet on one blade, so **one pulse per revolution**. No supply, no polarity.
+## ⚠️ Status: counts reliably, but the reed bounces
 
-```
-reed wire A  ────────▶  PMC   ENC0 A   (PJ_8, on the encoder connector)
-reed wire B  ────────▶  PMC   GND
-```
-
-The pin is `INPUT_PULLUP`; the contact just shorts it to ground.
-
-### Not AI0
-
-| rotor rpm | magnet in front of the sensor for |
-|---:|---:|
-| 1200 | 783 µs |
-| 2400 | **392 µs** |
-| 3600 | **261 µs** |
-
-The analog inputs are an **ADC behind SPI** — one `read()` is a blocking
-transaction of order a millisecond. Polling that would drop pulses, worst at
-high speed, which biases rotor rpm **low exactly where the rotor makes most
-power**. And it would fail silently.
-
-`PJ_8` is a real MCU pin (`pins_mc.h`, `MC_ENC_0A_PIN`), so a hardware
-interrupt catches the edge regardless of what the Modbus loop is doing.
-
-The eight "digital inputs" are no good either — `ProgrammableDINClass` extends
-`ArduinoIOExpanderClass`, so they sit behind an I²C expander.
-
-### Worth adding, not required
-
-A **4.7 kΩ pull-up to 3V3** and **10 nF to GND** at the PMC end, with the run
-in shielded twisted pair. The internal pull-up is ~40 kΩ — a high-impedance
-node next to a 15 HP motor and a VFD. The firmware debounces either way; the
-resistor just means fewer rejected edges to explain later.
-
-## Prove the wiring by hand, before the tunnel
+**Measured 26 Aug.** Counter zeroed, rotor turned **exactly 10 revolutions
+slowly by hand**:
 
 ```
-RPM?  →  OK RPM <pulses> <last_us> <rpm> <pin> <rejected>
+raw counts   0  3  5  8  10  13  15  18  21  24  27  28
+increments      3  2  3  2   3   2   3   3   3   3   1
+                          28 counts / 10 revolutions = 2.8
 ```
 
-`pin` is the **live input level**. With the tunnel off, pass the magnet across
-the sensor and watch it read `1` → `0`. That proves the whole path — sensor,
-cable, connector, pin config — with nothing spinning.
+**The count per pass varies between 2 and 3.** A fixed ratio would be
+correctable; a varying one is not. Rotor rpm carries roughly ±20% scatter
+against a blade effect of 13.7% — the noise would exceed the signal.
 
-Then spin the rotor by hand: `pulses` must advance by exactly one per
-revolution. If it jumps by two or three, the reed is bouncing past the 2 ms
-debounce and `rejected` will be climbing.
+It is not a speed problem: the rotor was turned *slowly, by hand*.
 
-## What this sensor may not be able to do
+**Until this is fixed, `turbine_rpm` is not trustworthy.** Everything else on
+this page works.
 
-The ZX-5H counter it ships with is rated **"20 Hz, or 20 times/s"** — at one
-pulse per revolution, **1200 rpm**. We bypass that counter, but the reed's own
-limit is undocumented and 20 Hz is the only number in the box.
+### The fix
 
-The rotor is expected to reach **50–75 Hz** at the top of the wind range. That
-is inside what a healthy reed manages and outside what its packaging claims.
-**It must be validated, not assumed.**
+**A capacitor from `Z0` to `GND`.** Start **0.1 µF**, then 0.22, then 0.47.
+Re-run the ten-revolution test after each and stop when it reads 10.
 
-The validation is free and exact. Open-circuit voltage is proportional to rotor
-speed through the generator constant, so
+⚠️ **1 µF is likely too slow** — if Z0's pull-up is ~10 kΩ that is a 10 ms time
+constant against a 15 ms magnet period at 60 rev/s. Passes would smear.
+
+If no value works, the VJ12-D10K is the wrong part: it is a mechanical reed
+rated **20 Hz by its own packaging**, and this rotor needs 50–70 Hz. A
+Hall-effect sensor has no contacts to bounce.
+
+---
+
+## Wiring — two wires, no polarity
+
+Sensor: **DIGITEN VJ12-D10K**, a 2-wire dry contact. One magnet on one blade,
+so **one pulse per revolution**. No supply. Blue and brown are interchangeable.
 
 ```
-K = rotor_rpm / V_oc
+sensor  ────▶  PMC  ENC0  Z0     (encoder 0 INDEX, on the ENCODERS block)
+sensor  ────▶  PMC  ENC0  GND
 ```
 
-must be **constant** across the wind range. If the reed starts missing pulses
-at speed, K droops at high wind while V_oc keeps climbing. A drooping K is the
-signature of a sensor running out of bandwidth and cannot be mistaken for
-anything aerodynamic.
+**That is the whole wiring.** No pull-up resistor, no strap — verified: `RPM?`
+reports `st=3` at rest, meaning the PMC biases both encoder inputs high
+internally. An earlier version of this page demanded a 4.7 kΩ pull-up and a
+strap on B; the board says otherwise.
 
-Bounce is the opposite failure — a reed rings for a few hundred microseconds
-on closing, which would count several times per pass and read **high**.
-`RPM_MIN_GAP_US` rejects edges closer than 2 ms (a 30,000 rpm ceiling: far
-above anything real, far below the bounce). Rejected edges are counted and
-reported, so a chattering sensor says so instead of inflating the answer.
+### Not `A0`, and not `AI0`
+
+**`A0` cannot work.** `QEI::setEncoding()` attaches the channel-A interrupt but
+never assigns `encoding_`, so it keeps its constructor default of
+`X2_ENCODING`. X2 only counts transitions `0x3↔0x0` and `0x2↔0x1` — both
+channels moving together, a real quadrature pair. A single reed with B high
+gives `0x3 → 0x1 → 0x3`, matching neither, so `getPulses()` can never move
+however A0 is wired. An hour was spent chasing a wiring fault that did not
+exist.
+
+The index channel has no such logic. `QEI::index()` is one line —
+`revolutions_++` — attached unconditionally in the constructor.
+
+**`AI0` cannot work either.** The analog inputs are an ADC behind SPI, one
+blocking read of order a millisecond, and the magnet is in front of the sensor
+for 392 µs at 2400 rpm. Dropped pulses would bias rpm low worst at high speed,
+silently.
+
+---
+
+## Commands
+
+```
+RPM?              OK RPM <pulses> <last_us> <rpm> <raw> st=<n> <rejected> <reversals>
+RPMGAP <us>       debounce window, 200–50000, default 5000 (12,000 rpm ceiling)
+RPMZERO           zero the counter and the encoder
+```
+
+`st` is QEI's 2-bit view of the pins, `(A<<1)|B`:
+
+| st | A | B | |
+|---:|---:|---:|---|
+| **3** | 1 | 1 | ✅ expected at rest |
+| 1 | 0 | 1 | A held low — reed closed, or shorted |
+| 0 | 0 | 0 | neither biased; nothing can be detected |
+
+### Prove the wiring with the tunnel off
+
+```bash
+python src/run.py raw RPMZERO
+#  turn the rotor by hand
+python src/run.py raw RPM?
+```
+
+`pulses` must advance. `reversals` must stay 0.
+
+---
 
 ## Telemetry
 
@@ -107,118 +124,43 @@ Anything recorded differences the other two:
 rotor_rpm = 60e6 × (pulses₂ − pulses₁) / (last_us₂ − last_us₁)
 ```
 
-That is exactly that many whole revolutions over exactly the time they took,
-timed by the PMC rather than the host's scheduler. Both are unsigned and wrap
+Exactly that many whole revolutions over exactly the time they took, on the
+PMC's clock rather than the host's scheduler. Both unsigned, and they wrap
 correctly through the 71-minute `micros()` rollover.
 
-## ⚠️ 5.0 and 5.1 faulted the drive. 5.2 removes the cause.
+---
 
-Both hung the board. A hung PMC stops feeding Modbus, and the drive's comm
-watchdog (par 3018/3019, 3.0 s) trips it — **exactly as designed**. The symptom
-read as "the VFD keeps faulting" and had nothing to do with the drive.
+## Why the debounce cannot be fixed in firmware
 
-The cause was one line in the library header:
+`rpmSample()` polls `getRevolutions()` from `loop()`, because QEI owns the
+interrupt and hooking it directly is the double-claim that hung 5.0 and 5.1. So
+the debounce can only gate observed **changes**, never individual edges — when
+several bounces land between two polls they arrive as one increment of several.
 
-```c
-extern EncoderClass MachineControl_Encoders;
-```
+Sweeping `RPMGAP` from 2 ms to 25 ms confirmed it: accepted rate wandered
+48–89/s with no plateau, while the raw rate sat stable at ~148/s. **That is why
+the fix is a capacitor and not a constant.**
 
-A **global** whose QEI constructor already claims `MC_ENC_0A_PIN` (PJ_8),
-`MC_ENC_0B_PIN` and `MC_ENC_0I_PIN`. That object exists in v3 too — which is
-why v3 is fine: v3 never touches those pins. Creating an `mbed::InterruptIn`
-on PJ_8 was a **second claim on a pin mbed already owned**.
+---
 
-5.1 moved the object out of global scope and added a storm guard. Both were
-real improvements and neither addressed this, so it hung the same way.
+## Version history — three ways to hang this board
 
-**5.2 creates no interrupt and claims no pin.** It reads the encoder the
-library already owns.
+| | |
+|---|---|
+| **5.0** | `mbed::InterruptIn` at **global scope**. On an mbed core that constructor runs during static init, before the RTOS, while touching GPIO and the NVIC. Board hung → Modbus stopped → drive tripped on par 3018/3019 after 3 s. Read as "the VFD keeps faulting" and was nothing to do with the drive. |
+| **5.1** | Moved it into `setup()`, added an edge-storm guard, dropped `__disable_irq`. All real improvements, none of them the cause. Hung identically. |
+| **5.2** | Root cause: `Arduino_PortentaMachineControl.h` declares `extern EncoderClass MachineControl_Encoders`, a **global whose QEI constructor already claims PJ_8, PH_12 and PH_11**. It is present in v3 too — which is why v3 works: v3 never touches those pins. Fixed by using the encoder instead of fighting it. |
+| **5.3** | Tried `pin_mode()` on a QEI-owned pin to spare two external components. Hung the board again. **Any access to those pins beyond `getRevolutions()` is fatal.** |
+| **5.4** | 5.2's logic restored. Verified alive: 15/15 replies over 45 s, `comm_errs=0`. |
+| **5.5** | Added `st=` so the pins can be read without a meter. |
+| **5.6** | Switched `getPulses` → `getRevolutions` after finding the `setEncoding` bug. **Counted immediately.** |
+| **5.7** | `RPMGAP` and `RPMZERO`, so the debounce can be tuned and the counter cleared without a reflash. |
 
-### What that changes about the wiring
+**Every reflash trips the drive.** A DFU reset silences Modbus for longer than
+par 3019, so the comm watchdog fires. Expect it, and clear it at the keypad —
+Modbus cannot clear a fault about the Modbus link.
 
-`X1_ENCODING` counts one edge per cycle (`QEI.cpp:269-275`): with state
-`(A<<1)|B` it increments on `0x3` and decrements on `0x2`. **Channel B decides
-the sign, so it must be strapped to a rail — either one.**
-
-```
-reed wire A  ────▶  PMC  ENC0 A   (PJ_8)
-reed wire B  ────▶  PMC  GND
-ENC0 B       ────▶  3V3   or   GND     ← REQUIRED, either rail
-4.7 kΩ from ENC0 A to 3V3              ← REQUIRED, QEI sets no pull-up
-```
-
-Tied high the count runs up, tied low it runs down; the host uses the
-magnitude of the change, so both work. **A floating B is the one thing that
-does not** — the count then wanders both directions. `RPM?` reports a
-reversal counter and says `ENC0-B IS FLOATING` when it climbs, so that failure
-announces itself instead of quietly corrupting rpm.
-
-The 4.7 kΩ pull-up on A is no longer optional either: QEI sets no pin mode, so
-without it A floats between magnet passes next to a 15 HP motor.
-
-### Verify with the fan stopped
-
-Nothing here turns anything.
-
-1. Wire all four connections above.
-2. Flash, then confirm the PMC stays alive for two minutes with the drive
-   powered but **not running**:
-
-   ```bash
-   python src/wait_for_pmc.py
-   ```
-
-   `ID` must answer `acs550-pmc 5.2 RD/WR RPM` every time.
-3. **Watch the drive keypad for two minutes. No fault means the Modbus loop is
-   being serviced.** That is the whole test, and it costs no tunnel time.
-4. Spin the rotor by hand. `RPM?` pulses must advance **exactly one per
-   revolution**, and reversals must stay at 0.
-5. Only then start the fan.
-
-## ⚠️ MEASURED 25 Aug: the reed bounces 2–3× per pass
-
-Counter zeroed, rotor turned **exactly 10 revolutions slowly by hand**:
-
-```
-raw counts: 0 3 5 8 10 13 15 18 21 24 27 28
-            increments  3 2 3 2 3 2 3 3 3 3 1
-FINAL 28 counts / 10 revolutions = 2.8 per rev
-```
-
-**The count per pass varies between 2 and 3.** A fixed divisor would be
-correctable; a varying one is not. Rotor rpm would carry roughly ±20% scatter,
-against a blade effect of 13.7% — the noise would be bigger than the signal.
-
-This is not a speed problem. The rotor was turned *slowly by hand* and still
-bounced.
-
-It also explains why sweeping `RPMGAP` from 2 ms to 25 ms never produced a
-plateau: accepted rate wandered 48–89/s with no convergence, while the raw rate
-sat stable at ~148/s.
-
-### Why firmware cannot fix it
-
-`rpmSample()` polls `getRevolutions()` from `loop()`. QEI owns the interrupt,
-and hooking it directly is the double-claim that hung 5.0 and 5.1. So the
-debounce can only gate observed *changes*, never individual edges — and when
-several bounces land between two polls they are added as one increment of
-several counts.
-
-### The fix is one component
-
-**Option A — a capacitor, pennies.** Reed bounce is exactly what an RC filter
-is for. Put **0.1 µF** from `Z0` to `GND` and re-run the 10-revolution test; if
-it still over-counts, try 0.22 µF, then 0.47 µF. Stop increasing when the count
-reads 10. Too large and the edge gets too slow for a rotor at ~60 rev/s, so
-tune it by measurement — the test takes 30 seconds and the counter zeroes with
-`RPMZERO`.
-
-**Option B — a Hall-effect sensor.** Solid state, no contacts, no bounce, and
-happy to several kHz. The VJ12-D10K is a mechanical reed rated by its own
-packaging at **20 Hz**, and this rotor needs 50–70 Hz. It is the wrong part for
-the job and no amount of firmware changes that.
-
-Do A first. If it works you are finished today.
+---
 
 ## Build and flash
 
@@ -227,8 +169,20 @@ arduino-cli compile --fqbn arduino:mbed_portenta:envie_m7 firmware/acs550_pmc_v5
 arduino-cli upload  --fqbn arduino:mbed_portenta:envie_m7 -p <port> firmware/acs550_pmc_v5/
 ```
 
-Verified compiling against `Arduino_PortentaMachineControl` 1.0.5 — a 208,932
-byte binary.
+Built against `Arduino_PortentaMachineControl` 1.0.5.
 
-**Stop the dashboard first.** It holds the serial port, and only one process
-can.
+**Stop the dashboard first** — it holds the serial port, and only one process
+can. If upload reports `No DFU capable USB device`, **double-tap the Portenta's
+RESET** (the green LED fades slowly in and out) and run it again; a hung sketch
+cannot perform the 1200-baud touch reset itself.
+
+### After flashing, before running the fan
+
+```bash
+python src/wait_for_pmc.py
+```
+
+`ID` must answer `acs550-pmc 5.7 RD/WR RPM`. Then **watch the drive keypad for
+two minutes.** No fault means the Modbus loop is being serviced. That is the
+whole test, it costs no tunnel time, and three revisions of this firmware would
+have been caught by it.

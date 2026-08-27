@@ -208,7 +208,8 @@ def test_python_files_referenced_in_docs_exist():
         for m in re.finditer(r"`(\w+)\.py`", text):
             name = m.group(1) + ".py"
             if not any((ROOT / d / name).exists()
-                       for d in ("src", "webapp", "tests", "examples", "scripts")):
+                       for d in ("src", "webapp", "tests", "examples",
+                                 "scripts", "docs/slides", "docs/diagrams")):
                 missing.append(f"{f.relative_to(ROOT)} → {name}")
     assert not missing, "referenced modules that do not exist:\n  " + \
                         "\n  ".join(missing)
@@ -293,3 +294,59 @@ def test_readme_points_at_documents_that_exist():
     assert len(targets) >= 8, "the documentation map lost entries"
     for t in targets:
         assert (ROOT / t).exists(), f"README map points at missing {t}"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# RESULTS
+# ═══════════════════════════════════════════════════════════════════════════
+
+def test_results_doc_matches_the_data_files():
+    """
+    docs/09_results.md states the campaign's findings. Prose drifts from data
+    silently — that is how "Cp is still climbing with Reynolds" reached six
+    documents, and how tau was quoted as 0.63, 0.80 and 3.0 in the same repo.
+
+    So the headline numbers are checked against the files they came from. If a
+    CSV changes and the document does not, this fails.
+    """
+    import csv as _csv
+    doc = (ROOT / "docs" / "09_results.md").read_text()
+
+    body = [l for l in (ROOT / "logs" / "sweep_v1_Ra20_summary.csv")
+            .read_text().splitlines(True) if not l.startswith("#")]
+    rows = list(_csv.DictReader(body))
+    peak = max(float(r["p_max_w"]) for r in rows)
+    assert f"{peak:.3f} W" in doc, \
+        f"results doc does not state the measured peak {peak:.3f} W"
+    assert str(len(rows)) in doc, "results doc does not state the point count"
+
+    # The generator fit is computed, never typed.
+    sys.path.insert(0, str(ROOT / "src"))
+    import generator_model as gm
+    g = gm.model(gm.fit(gm.read_points(
+        ROOT / "logs" / "sweep_v1_Ra20_points.csv")))
+    for val, what in ((f"{g['r_int_lo']:.1f}", "R_int at the bottom"),
+                      (f"{g['r_int_hi']:.1f}", "R_int at the top"),
+                      (f"{g['n_predicted']:.2f}", "the 2a-b cross-check")):
+        assert val in doc, f"results doc disagrees with generator_model on {what} ({val})"
+
+
+def test_tau_is_quoted_consistently():
+    """
+    tau was 0.63 in the README, 0.80 in tunnel.json and 3.0 throughout the
+    gusts document — all at once, all presented as fact. The measured value is
+    0.60 +/- 0.11 s over five runs.
+    """
+    import json as _json
+    cfg = _json.loads((ROOT / "data" / "tunnel.json").read_text())
+    assert abs(cfg["tau"] - 0.60) < 0.005, \
+        f"tunnel.json tau is {cfg['tau']}, not the measured 0.60"
+
+    stale = []
+    for f, text in all_docs_text().items():
+        if "CHANGELOG" in str(f):
+            continue          # history records what was believed at the time
+        for bad in ("tau = 3", "τ = 3 s", "τ = 0.63", "tau of 0.63"):
+            if bad in text:
+                stale.append(f"{f.relative_to(ROOT)}: {bad}")
+    assert not stale, "superseded tau values still quoted:\n  " + "\n  ".join(stale)

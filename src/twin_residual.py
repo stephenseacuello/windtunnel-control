@@ -198,9 +198,17 @@ def main():
     print(f"\n  V_oc ∝ v^{n:.2f}  (v^1.0 if runaway tip-speed ratio were "
           f"constant)")
     if n > 1.15:
-        print(f"    Rising faster than v means the rotor spins RELATIVELY "
-              f"faster as wind\n    rises — Cp still climbing with Reynolds "
-              f"across the test range.")
+        # NOT "Cp is still climbing with Reynolds". That reading was wrong and
+        # it propagated into six documents before anyone checked it. V_oc
+        # rising faster than v is a GENERATOR characteristic: the rig is a
+        # Thevenin source whose internal resistance falls with wind speed, and
+        # src/generator_model.py fits both terms directly. At the Thevenin
+        # match P_max = V_oc^2/4R_int, so the power exponent follows from the
+        # two fitted ones and leaves almost nothing for the blade to move.
+        print(f"    V_oc rises faster than v. Before reading that as an "
+              f"aerodynamic\n    result, run src/generator_model.py — on this "
+              f"rig the exponent is\n    almost entirely the generator, not "
+              f"the rotor.")
 
     if args.svg:
         svg(rows, args.svg)

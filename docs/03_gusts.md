@@ -2,11 +2,19 @@
 
 Read this before designing a test matrix. The honest summary up front:
 
-> **This tunnel will produce slow gusts well and fast gusts not at all.**
-> Expect useful content below roughly 0.1–0.3 Hz. The exact number is yours to
-> measure, and `characterize.py` measures it. Everything else in this document
-> is about why that ceiling exists and how to get the most out of the range
-> below it.
+> **Measured: τ = 0.60 ± 0.11 s, corner ≈ 0.27 Hz.**
+>
+> This document was written before that measurement, against an assumed τ of
+> "a few seconds". **The tunnel turned out roughly five times better than it
+> assumed.** Gusts of a few seconds are achievable; the original text implied
+> they were not.
+>
+> Useful content runs to roughly **0.27 Hz**, with amplitude falling above it.
+> Everything else here is about why the ceiling exists and how to get the most
+> from the range below it — that reasoning is unchanged, only the number moved.
+>
+> Reproduce: `python src/analyze.py logs/20260820_14*_1mc.csv --summary`
+> (0.80/0.50/0.60/0.50/0.60 over five 1-cosine runs).
 
 That constraint is not a defect of the Modbus approach. Commanding the drive
 over analog, over a fieldbus card, or by hand turning the pot would all hit
@@ -29,8 +37,11 @@ corner frequency
 
 $$f_c = \frac{1}{2\pi\tau}$$
 
-For τ = 3 s that is 0.053 Hz. Content at 3× the corner passes at roughly a
-third of amplitude; content at 10× is essentially gone.
+For the **measured τ = 0.60 s** that is **0.27 Hz**. Content at 3× the corner
+passes at roughly a third of amplitude; content at 10× is essentially gone.
+
+Do not hardcode either figure. `check_realizable` prints the retention for
+whatever τ is in `data/tunnel.json`, which is where the measured value lives.
 
 **The failure mode is silent.** Command a 2 Hz gust and the drive accepts it,
 the fan does something, the tunnel produces a small ripple, and nothing

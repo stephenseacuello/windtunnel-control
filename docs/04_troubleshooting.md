@@ -5,6 +5,34 @@ standing at the tunnel you know the symptom and not the cause.
 
 ---
 
+
+## Flashing the PMC
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `No DFU capable USB device available` | A hung sketch cannot perform the 1200-baud touch reset itself | **Double-tap the Portenta's RESET** — green LED fades slowly in and out — then upload again |
+| Board vanishes from USB entirely: no serial port, no DFU device | The touch reset fired but `dfu-util` missed the bootloader window | Unplug USB, wait 5 s, replug. Flash is untouched — the transfer never began. `python src/wait_for_pmc.py` reports what is actually on the board |
+| **The drive faults right after a PMC flash** | Expected. A DFU reset silences Modbus for longer than par 3019, so the comm-loss watchdog fires — doing exactly its job | Clear at the ACS550 keypad. **Modbus cannot clear a fault about the Modbus link** |
+| Port name changed after flashing | macOS derives it from USB topology and re-enumeration moves it. It has been 1101, 14401, 1202 and 1201 in one week | Python tools autodetect via `transport.resolve_port()`. `arduino-cli` needs the real name — `ls /dev/cu.usbmodem*` |
+
+## The fan stops mid-run for no reason
+
+The PMC's **host watchdog**. It ramps the fan down if nothing talks to it for
+`watchdogMs` — this is the mechanism that makes commanding a 15 HP fan from a
+laptop acceptable, and it is not optional.
+
+Anything holding the fan at speed must send *something* every couple of
+seconds. `blade_sweep.py` does this with `DriveWatch`; an ad-hoc script must do
+it too, and a bare `time.sleep(3)` in a poll loop is enough to trip it.
+
+## Every point reads 0.000 V
+
+No wind, or the rotor is not turning. **Check the `fan_rpm_actual` column
+before suspecting the load** — 0.000 V is perfectly stable, so a settle
+routine watching voltage will declare a stopped tunnel settled and record
+fourteen empty points without complaint.
+
+
 ## The drive doesn't answer at all
 
 `monitor` times out. No status word, no readback.

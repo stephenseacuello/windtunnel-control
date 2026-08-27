@@ -131,9 +131,10 @@
       }
     },
     "scaling": {
-      "p_exponent": 3.73,
+      "p_exponent": 3.77,
       "v_oc_exponent": 1.39,
-      "_note": "P ~ v^3.73 and V_oc ~ v^1.39 fitted over 600-1100 rpm of the live sweep. Both exceed the constant-Cp expectation (3.0 and 1.0), so Cp is still climbing with Reynolds across the whole test range. A blade ranked at 10 m/s may not rank the same at 38."
+      "_note": "P ~ v^3.77 (R2 = 0.998) and V_oc ~ v^1.50 over the full 14-point sweep. This is a GENERATOR characteristic, not evidence that Cp is climbing with Reynolds. src/generator_model.py fits the rig as a Thevenin source: V_oc = 0.101*v^1.497, R_int = 595.5*v^-0.791 (88.4 ohm at 10.2 m/s to 36.5 at 38.0), r2 >= 0.986 at all fourteen wind speeds. Peak power sits at the Thevenin match, P_max = V_oc^2/4R_int, so n = 2a - b = 3.79 against 3.77 measured -- agreement neither fit was tuned to produce. Almost no aerodynamic residual is left for the blade to move. The blade is a thin cambered plate with square edges, the Reynolds-INSENSITIVE class.",
+      "v_exponent": 1.5
     },
     "reference_sweep": {
       "blade": "v1_Ra20",
@@ -142,11 +143,11 @@
       "protocol": "94bed28333f7",
       "points": 14,
       "all_clean": true,
-      "p_exponent": 3.754,
+      "p_exponent": 3.77,
       "p_exponent_r2": 0.99841,
       "p_max_w_at_1800": 3.7217,
       "i_at_p_max_a_at_1800": 0.328,
-      "_note": "First full 14-point sweep, 500-1800 rpm, all points stopped on the power roll-off. P ~ v^3.754 with R2 0.998 over the whole 10.2-38.0 m/s range. Peak powers use the PARABOLIC FIT, not the raw argmax: over a flat maximum the argmax is biased high (+1.3% mean here, positive in 13 of 14 points) and the bias grows with the number of samples near the peak, so blades sampled differently would be compared unfairly. Reproduces the earlier standalone 1200 and 1800 rpm runs to 0.3% and 0.2%.",
+      "_note": "Blade v1_Ra20, 14/14 clean, protocol 94bed28333f7. Peak 3.793 W at 37.5 m/s. That figure is the RAW ARGMAX: sweep_v1_Ra20_summary.csv carries p_max_w only, verified equal to the largest single dwell in the points file at 14 of 14. Runs after 22 Aug carry p_max_fit_w AND p_max_raw_w; compare like with like -- src/compare_blades.py enforces it.",
       "_caveat": "P_max(v) is electrical power at the Chroma terminals. It is NOT Cp and cannot separate rotor aerodynamics from generator matching. Rotor RPM from Jeong's DAQ is still the missing channel.",
       "_metadata_warning": "This blade ID was run with --notes 'PLA, 0.1mm, Ra 20' and later 'PETG, 0.2mm, Ra 20'. One is wrong. Resolve before comparing anything to it.",
       "notes": "PETG, 0.2mm layers, Ra 20",
@@ -166,10 +167,10 @@
     "_area_note": "A = 2*R*H = 0.0498 m2. A VAWT sweeps a CYLINDER, so the frontal area is its rectangular projection, NOT pi*R^2. The disc formula would give 0.0324 m2 and put every Cp out by 1.54x with nothing looking wrong.",
     "aspect_ratio": 1.21
   },
-  "tau": 0.8,
-  "tau_down": 0.8,
+  "tau": 0.6,
+  "tau_down": 0.6,
   "dead_time": 0.0,
-  "_tau_note": "0.80 s fitted by analyze.py from an 8 s 1-cosine gust (R2 0.997), not from the step response. A step saturates the drive ramp and charges ramp time to the fan; a 1-cosine does not. Prefer gust runs for tau. Still drive-and-fan, not air.",
+  "_tau_note": "0.60 +/- 0.11 s across FIVE 1-cosine gust runs (0.80/0.50/0.60/0.50/0.60), reproducible with `python src/analyze.py logs/20260820_14*_1mc.csv --summary`. The previous 0.8 was a single 8 s fit and is now one of the five. Corner f = 1/(2*pi*tau) ~ 0.27 Hz.",
   "temperature_c": 21.5,
   "pressure_pa": 101325.0,
   "_ambient_note": "Record per session. Air density cannot be reconstructed later.",
