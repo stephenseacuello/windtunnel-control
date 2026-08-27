@@ -61,7 +61,7 @@ which is what phases 8–14 of the playbook are for.
 | Source | Says |
 |---|---|
 | PMC sketch | 19200, **even** parity, 1 stop |
-| This package (`PLAYBOOK.md` phase 6, CLI default) | 19200, **8N1** |
+| This package (`10_commissioning.md` phase 6, CLI default) | 19200, **8N1** |
 
 Follow both and you get silence with `5308` UART errors climbing. Either works.
 They have to agree, and right now the two documents do not.

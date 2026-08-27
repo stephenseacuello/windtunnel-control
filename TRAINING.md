@@ -68,7 +68,8 @@ macOS host cannot promise, and it adds the second watchdog layer.
 
 **Only one device gets the drive's RS-485 terminals.** That is a physical fact
 you enforce with your hands, not a software setting. The terminal numbers and
-the landing procedure live in `PLAYBOOK.md` and `docs/05_integration.md` — and
+the landing procedure live in `docs/10_commissioning.md` and
+`docs/05_integration.md` — and
 only there, so there is one place to correct if it ever changes.
 
 Read: `docs/01_architecture.md`, then `docs/05_integration.md`.

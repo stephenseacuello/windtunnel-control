@@ -808,6 +808,34 @@ def mode_reset(drive, a):
     print("reset sent;", drive.status())
 
 
+def mode_raw(drive, a):
+    """
+    Send one line to the PMC and print what comes back.
+
+    The PMC's line protocol grew commands the CLI has no wrapper for — RPM?,
+    RPMZERO, RPMGAP, UNLOCK — and reaching them meant an ad-hoc python script
+    every time, opening a second connection to a port that permits one owner.
+
+    Deliberately NOT a general escape hatch for motion. Anything that can turn
+    the fan is refused here: those paths exist as real subcommands with real
+    interlocks in front of them, and a passthrough that quietly bypasses them
+    would make every guard in this package optional.
+    """
+    tp = getattr(drive, "transport", None)
+    if tp is None or not hasattr(tp, "command"):
+        raise SystemExit("raw needs the PMC transport (tunnel.json "
+                         "transport.kind = 'pmc')")
+    line = " ".join(a.words).strip()
+    verb = line.split()[0].upper() if line else ""
+    MOVES = {"RUN", "HZ", "PCT", "GO", "START", "COAST", "WR", "STOP"}
+    if verb in MOVES:
+        raise SystemExit(
+            f"refused: '{verb}' can move the fan or change the drive.\n"
+            f"  Use the real subcommand — it has the interlocks in front of "
+            f"it.\n  `run.py --help` lists them.")
+    print(tp.command(line))
+
+
 # ── CLI ───────────────────────────────────────────────────────────────────
 
 def build_parser():
@@ -975,6 +1003,11 @@ def build_parser():
 
     m = sub.add_parser("reset", help="clear a drive fault")
     m.set_defaults(func=mode_reset)
+
+    m = sub.add_parser("raw", help="send one line to the PMC (read-only verbs)")
+    m.add_argument("words", nargs="+",
+                   help='e.g. RPM?  ·  RPMZERO  ·  "RPMGAP 5000"  ·  "RD 1105"')
+    m.set_defaults(func=mode_raw)
 
     return p
 

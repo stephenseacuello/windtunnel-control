@@ -17,10 +17,11 @@ blade characterisation, and a web dashboard.
 |---|---|
 | **Learn the rig from scratch** | **`TRAINING.md`** — start here if you are new |
 | **Run a blade test today** | **`docs/07_blade_campaign.md`** — the user guide |
-| **Going to the tunnel tomorrow** | **`NEXT_SESSION.md`** — print it |
-| **Know what to do next** | **`TODO.md`** |
+| **Going to the tunnel** | **`NEXT_SESSION.md`** — print it |
+| **Know what is still unanswered** | `docs/11_open_questions.md` |
 | **Just spin the fan** | `scripts/rpm.py` — one file, type an RPM |
-| **Wire it up for the first time** | **`PLAYBOOK.md`** — wiring → first gust |
+| **Wire up a NEW rig** | `docs/10_commissioning.md` — done once, in Aug 2026 |
+| **Compare two blades** | `python src/compare_blades.py <a> <b>` |
 | **Take something to the tunnel** | **`FIELD_CARD.md`** — one page, print it |
 | **Understand how it fits together** | `docs/01_architecture.md` |
 | **Modify the code** | `docs/02_code.md` |
@@ -148,12 +149,11 @@ each. ~10 minutes of continuous tunnel time. See
 
 ```
 windtunnel-control/
-├── NEXT_SESSION.md          the next visit, in order — print it
+├── README.md                you are here
 ├── TRAINING.md              new here? start with this
-├── TODO.md                  what to do next, in dependency order
-├── PLAYBOOK.md              wiring → first gust, in order
-├── FIELD_CARD.md            one page, printable
-├── CHANGELOG.md
+├── NEXT_SESSION.md          the next visit, in order — print it
+├── FIELD_CARD.md            one page, printable, lives at the rig
+├── CHANGELOG.md             what changed and why
 │
 ├── scripts/rpm.py           standalone: type an RPM, fan goes there
 │

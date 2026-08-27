@@ -220,12 +220,13 @@ def test_python_files_referenced_in_docs_exist():
 
 def test_parameters_the_playbook_says_to_record_are_in_the_dashboard():
     """
-    Phase 1 of the playbook lists parameters to write down before changing
+    Phase 1 of the commissioning procedure lists parameters to write down
+    before changing
     anything. If the dashboard cannot show one, you have to walk to the keypad
     for it — which is the sort of gap nobody notices until they are standing
     at the drive.
     """
-    playbook = (ROOT / "PLAYBOOK.md").read_text()
+    playbook = (ROOT / "docs" / "10_commissioning.md").read_text()
     phase1 = playbook.split("# PHASE 2")[0]
     cited = {int(x) for x in re.findall(r"`(\d{4})`", phase1)}
 
@@ -263,11 +264,11 @@ def test_no_duplicate_wiring_procedures():
     Only the playbook and the field card should carry the terminal-level
     procedure.
     """
-    allowed = {"PLAYBOOK.md", "FIELD_CARD.md", "CHANGELOG.md",
+    allowed = {"10_commissioning.md", "FIELD_CARD.md", "CHANGELOG.md",
                "04_troubleshooting.md", "README.md", "02_code.md",
                # These cite the terminals to say WHICH device lands there —
                # not to duplicate the procedure for landing it.
-               "05_integration.md", "TODO.md"}
+               "05_integration.md"}
     offenders = [f.relative_to(ROOT) for f, text in all_docs_text().items()
                  if "X1-29" in text and f.name not in allowed]
     assert not offenders, f"wiring procedure duplicated in: {offenders}"

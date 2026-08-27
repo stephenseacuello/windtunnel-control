@@ -64,7 +64,7 @@ retroactively.
 
 ## The "factor of 8" anomaly was an artefact
 
-`TODO.md` carried this open item:
+`docs/11_open_questions.md` carried this open item:
 
 > across the run ch1 rises 16.6× while the rotation frequency rises only
 > 2.08×. For a freewheeling rotor at constant λ, or vortex shedding at

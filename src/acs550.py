@@ -1,7 +1,7 @@
 """
 acs550.py — Modbus RTU driver for the ABB ACS550 on the Aerolab wind tunnel.
 
-See docs/02_code.md for design rationale, PLAYBOOK.md
+See docs/02_code.md for design rationale, docs/10_commissioning.md
 for the physical layer.
 
 ═══════════════════════════════════════════════════════════════════════════

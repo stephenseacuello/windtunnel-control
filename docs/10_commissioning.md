@@ -1,4 +1,13 @@
-# Wind Tunnel Playbook
+# Commissioning the Rig — a completed procedure
+
+> **This was done in August 2026 and does not need doing again.** It is kept
+> because it records *why* each choice was made — which parameters were
+> changed and what they were before, why the RS-485 lands where it does, and
+> which steps are irreversible. If the drive is ever replaced or a second rig
+> is built, start here.
+>
+> For day-to-day work see [`../NEXT_SESSION.md`](../NEXT_SESSION.md) and
+> [`../FIELD_CARD.md`](../FIELD_CARD.md).
 
 Front to back. Do the phases in order — several of them exist specifically to
 catch a failure before it can move a 15 HP fan.
