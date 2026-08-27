@@ -235,3 +235,87 @@ def test_every_nav_tab_has_a_page():
     assert tabs == pages, (
         f"tabs without a page: {sorted(tabs - pages)}; "
         f"pages without a tab: {sorted(pages - tabs)}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PROTOCOL AGREEMENT
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# The CLI and the dashboard both characterise a rotor, and their numbers only
+# mean something if they are the SAME measurement. For weeks they were not:
+#
+#     CLI        94bed28333f7
+#     dashboard  8cfbc0b85199
+#
+# The hashed differences were the visible part. The dangerous ones were not in
+# the hash: the dashboard's settle was a blind sleep with no wait for the fan
+# to reach speed, and CONF:VOLT:OFF was never written while the fingerprint
+# asserted voff=0.500.
+
+CONTROLLER = (WEB / "controller.py").read_text()
+CAMPAIGN_FINGERPRINT = "94bed28333f7"
+
+
+def test_the_campaign_fingerprint_is_what_the_core_produces():
+    """
+    If this fails, every sweep from now on is incomparable with v1_Ra20 and
+    v1_Ra80 — which are the only two blade runs this project has.
+    """
+    sys.path.insert(0, str(ROOT / "src"))
+    import sweep_core as sc
+    a = sc.settings(step_amps=0.02, dwell=1.0)
+    got = sc.protocol(a, 0.5, "low")["protocol"]
+    assert got == CAMPAIGN_FINGERPRINT, (
+        f"sweep_core produces {got}; the banked runs are "
+        f"{CAMPAIGN_FINGERPRINT}. Something changed the protocol.")
+
+
+def test_neither_caller_hand_writes_the_protocol():
+    """
+    A fingerprint hashing settings the code does not actually use is worse
+    than no fingerprint: it certifies agreement that does not exist. The
+    dashboard's literal asserted a cut-out voltage it never applied.
+    """
+    for name, text in (("controller.py", CONTROLLER),
+                       ("blade_sweep.py", (ROOT / "src" / "blade_sweep.py").read_text())):
+        # Strip comments: the history of this bug is worth recording in
+        # prose, and a test that forbids naming it forbids explaining it.
+        code = "\n".join(l for l in text.splitlines()
+                         if not l.lstrip().startswith("#"))
+        assert '"via=dashboard' not in code and "'via=dashboard" not in code, \
+            f"{name} still stamps its protocol as a different one"
+        assert "scaling=v2;step=" not in code, \
+            f"{name} hand-writes the protocol shape; it must come from sweep_core"
+
+
+def test_both_callers_use_the_shared_core():
+    """One ladder, one ceiling, one settle, one per-point body."""
+    assert "sweep_core" in CONTROLLER, "the dashboard does not use sweep_core"
+    bs = (ROOT / "src" / "blade_sweep.py").read_text()
+    assert "from sweep_core import" in bs, "the CLI does not use sweep_core"
+    for fn in ("ceiling_for", "step_for", "settle_wind"):
+        assert f"\ndef {fn}(" not in bs, \
+            f"blade_sweep still defines its own {fn} — the core owns it"
+
+
+def test_the_dashboard_no_longer_settles_by_blind_sleep():
+    """
+    `time.sleep(max(2.0, dwell*2))` with no check that the fan arrived. Since
+    0.000 V is perfectly stable, a still-accelerating tunnel read as settled
+    and the point was recorded empty — the exact failure blade_sweep documents
+    from the first real sweep.
+    """
+    assert "time.sleep(max(2.0, dwell * 2))" not in CONTROLLER, \
+        "the dashboard is settling by blind sleep again"
+
+
+def test_the_dashboard_actually_sets_the_cut_out_voltage():
+    """
+    CONF:VOLT:OFF is instrument-persistent and the Chroma ships at 3.00 V.
+    The dashboard asserted voff=0.500 in its fingerprint and never wrote it,
+    so every dashboard run carried a cut-out three times higher than recorded
+    — which truncates a ramp early and looks like a rotor giving up.
+    """
+    assert "prepare_load" in CONTROLLER, \
+        "the dashboard does not call sweep_core.prepare_load, so it is not " \
+        "writing CONF:VOLT:OFF on the real path"

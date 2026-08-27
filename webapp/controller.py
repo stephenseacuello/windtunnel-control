@@ -806,6 +806,41 @@ class TunnelController:
         self.scan = {"state": "running", "done": 0, "total": len(groups) * 99,
                      "found": 0, "group": None, "file": None, "message": ""}
 
+        class _Rig:
+            """
+            The dashboard, shaped like the `rig` sweep_core expects.
+
+            Exists so ONE settle and ONE per-point body serve both callers.
+            `set_speed` keeps the guards that belong to this path and not to
+            the CLI's: the E-stop is re-checked inside the lock, because it
+            latches asynchronously and a sweep that read it a moment earlier
+            would otherwise restart a 15 HP fan seconds after somebody hit the
+            button.
+            """
+            def __init__(self, ctl, load):
+                self._c, self.load = ctl, load
+
+            def set_speed(self, rpm):
+                c = self._c
+                with c._lock:
+                    if c.estopped:
+                        raise _SweepStopped("E-STOP latched")
+                    c.drive.set_hz(rpm)
+                    if not c.running:
+                        c.drive.start(rpm)
+                        c.running = True
+                c.target_hz = rpm
+
+            @property
+            def fan_rpm(self):
+                st = self._c.snapshot() or {}
+                return float((st.get("measured") or {}).get("rpm") or 0.0)
+
+            @property
+            def motor_amps(self):
+                st = self._c.snapshot() or {}
+                return float((st.get("measured") or {}).get("amps") or 0.0)
+
         def work():
             sc = self.scan
             try:
@@ -1716,19 +1751,25 @@ class TunnelController:
             except Exception:
                 return None
 
-        # ── the protocol fingerprint ────────────────────────────────────
-        # Blades are compared against each other, so a curve only means
-        # something alongside the settings that produced it. The CLI hashes
-        # them; the dashboard used to hash nothing, which made a dashboard
-        # curve incomparable with every CLI curve AND with itself. Built from
-        # the same field list as load_ramp.protocol_meta, with `via` set so a
-        # dashboard run can never be mistaken for a CLI one — its ladder and
-        # settle really are different.
-        import hashlib
-        shape = (f"via=dashboard;scaling=v2;step={step_amps:.5f};frac=0.0000;"
-                 f"dwell={dwell:.2f};voff=0.500;range=low;floor=0.00200;"
-                 f"operate={stop_power_frac * 100:.1f};collapse=0.700;confirm=2")
-        fingerprint = hashlib.sha256(shape.encode()).hexdigest()[:12]
+        # ── the protocol, from the SHARED core ──────────────────────────
+        # This used to be a hand-written string literal that asserted
+        # voff=0.500 while the real path never wrote CONF:VOLT:OFF, and
+        # floor=0.00200 against the CLI's 0.00000. It stamped `via=dashboard`
+        # so the two could never be confused — which was honest, and also
+        # meant the dashboard could not produce a comparable run at all.
+        #
+        # Now both callers build it from sweep_core, so a dashboard sweep
+        # legitimately carries the campaign fingerprint because it genuinely
+        # is the campaign protocol.
+        import sweep_core as _sc
+        cfg = _sc.settings(blade=blade, notes=notes, start_rpm=start_rpm,
+                           stop_rpm=stop_rpm, rpm_step=rpm_step,
+                           step_amps=step_amps, dwell=dwell,
+                           stop_power_frac=stop_power_frac, max_amps=max_amps)
+        with self._load_lock:
+            rng, voff = _sc.prepare_load(self.load, cfg)
+        meta = _sc.protocol(cfg, voff, rng, load=self.load)
+        fingerprint, shape = meta["protocol"], meta["protocol_detail"]
 
         # Canonical name, NOT stamped. `_sweep_summary()` in app.py joins the
         # blade library on exactly `sweep_<blade>_summary.csv`; adding a
@@ -1779,34 +1820,32 @@ class TunnelController:
                     if self.should_stop():
                         sw["message"] = "aborted"
                         break
-                    with self._lock:
-                        if self.estopped:
-                            sw["message"] = "ABORTED — E-STOP latched"
-                            break
-                        self.drive.set_hz(rpm)
-                        if not self.running:
-                            self.drive.start(rpm)
-                            self.running = True
-                    self.target_hz = rpm
-                    time.sleep(max(2.0, dwell * 2))
-
-                    frac = (wind(rpm) or 1) / (wind(stop_rpm) or 1)
-                    step = max(0.002, step_amps * frac ** 2)
-                    ceiling = max(4 * step, max_amps * frac ** 2)
 
                     def _watch(_st, _sw=sw):
                         if self.should_stop() or _sw.get("abort"):
                             raise _SweepStopped(
                                 "E-STOP latched" if self.estopped else "stopped")
+                        _sw["ramp"].append({"a": round(_st.amps, 5),
+                                            "v": round(_st.volts, 4),
+                                            "w": round(_st.watts, 5)})
 
-                    r = find_peak(
-                        _Serialised(self.load), max_amps=ceiling, floor_amps=0.002,
-                        min_step=step, step_frac=0.0, dwell=dwell,
-                        operate_frac=0.0, v_floor=0.5, range_="low",
-                        stop_power_frac=stop_power_frac,
-                        on_step=lambda st: (_watch(st), sw["ramp"].append(
-                            {"a": round(st.amps, 5), "v": round(st.volts, 4),
-                             "w": round(st.watts, 5)})))
+                    # THE measurement — identical code to blade_sweep.py.
+                    # The settle inside it waits for the FAN to reach speed
+                    # before watching voltage. The blind `time.sleep(max(2.0,
+                    # dwell*2))` that used to be here did not, and 0.000 V is
+                    # perfectly stable: a still-accelerating tunnel read as
+                    # settled and the point recorded empty.
+                    pt = _sc.measure_point(
+                        _Rig(self, _Serialised(self.load)), cfg, rpm, rng, voff,
+                        log=lambda m: self.log(f"sweep: {m}", "info"),
+                        on_step=_watch)
+
+                    if pt.dead:
+                        sw["message"] = (f"no terminal voltage at {rpm} rpm — "
+                                         f"is the rotor turning?")
+                        self.log(sw["message"], "warn")
+                        continue
+                    r = pt.result
                     sw["points"].append({
                         "rpm": rpm, "mps": wind(rpm),
                         "p_w": round(r.fit_watts, 5),
@@ -1818,16 +1857,7 @@ class TunnelController:
                     # is 10-30 minutes of fan and load time, and an abort or a
                     # crash at point 9 must not discard points 1-8.
                     self._write_sweep(sw, r)
-                    # NOT 0 A. The CLI protocol unloads to zero between wind
-                    # points, but there the fan is stepped immediately; here
-                    # the rotor sits at the new, HIGHER wind speed for 2+ s
-                    # before find_peak re-loads it. Zero amps in constant
-                    # current is an open circuit, so that is 2 s of runaway at
-                    # every one of 14 points, each faster than the last.
-                    with self._load_lock:
-                        self.load.set_mode_cc(self.LOAD_FLOOR_A, range_="low",
-                                              verify=False)
-                    self.load_demand = self.LOAD_FLOOR_A
+                    self.load_demand = cfg.unload_amps
                 else:
                     sw["message"] = "complete"
             except _SweepStopped as e:
@@ -1874,11 +1904,14 @@ class TunnelController:
                     ("protocol", sw["protocol"]),
                     ("protocol_detail", sw["protocol_detail"]),
                     ("clock", time.strftime("%Y-%m-%dT%H:%M:%S%z")),
-                    ("_note", "Written by the dashboard. The `via=dashboard` "
-                              "field is inside the fingerprint, so these runs "
-                              "are deliberately NOT comparable with CLI "
-                              "blade_sweep.py curves - the ladder and settle "
-                              "differ.")]
+                    ("_note", "Written by the dashboard, which runs the "
+                              "SAME protocol as blade_sweep.py - one ladder, "
+                              "one ceiling, one settle, one per-point body, "
+                              "all in src/sweep_core.py. Compare these curves "
+                              "with CLI curves of the same fingerprint "
+                              "normally. The `via` field above records which "
+                              "front end drove the run and is NOT part of the "
+                              "fingerprint.")]
             sp = Path(sw["summary_csv"])
             sp.parent.mkdir(parents=True, exist_ok=True)
             with sp.open("w", newline="") as f:

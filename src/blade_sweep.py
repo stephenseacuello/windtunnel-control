@@ -75,6 +75,10 @@ from chroma_load import (CC_FULL_SCALE, ChromaLoad, LoadError, TurbineInterlock,
 from config import TunnelConfig
 from peak_finder import find_peak
 from load_ramp import protocol_meta, wind_from_rpm
+# The protocol lives in ONE place. Both this CLI and the Flask dashboard call
+# these, so a change to the ladder, the ceiling or the settle cannot reach one
+# path and miss the other — which is exactly how the two came to disagree.
+from sweep_core import ceiling_for, step_for, settle_wind, estimate
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -250,6 +254,17 @@ class DriveWatch:
             except Exception:
                 self.errors += 1
 
+    # The core's `rig` protocol names these fan_rpm / motor_amps, so that one
+    # settle implementation serves both callers. Aliases rather than renames:
+    # `rpm` and `amps` are used throughout this module and in its tests.
+    @property
+    def fan_rpm(self):
+        return self.rpm
+
+    @property
+    def motor_amps(self):
+        return self.amps
+
     def series(self):
         with self._lock:
             return list(self._samples)
@@ -304,107 +319,7 @@ class DriveWatch:
 
 # ═══════════════════════════════════════════════════════════════════════════
 
-def ceiling_for(rpm, a):
-    """
-    Backstop current for this wind speed.
 
-    Scales as v², because threshold current tracks torque. It is only a
-    backstop — the power roll-off should stop the ramp long before it — but
-    without it a point where the roll-off is never detected would ramp to the
-    top of the range against a rotor that cannot supply it.
-    """
-    frac = (wind_from_rpm(rpm) / wind_from_rpm(a.stop_rpm)) ** 2
-    return max(4 * a.step_amps, a.max_amps * frac)
-
-
-def settle_wind(load, a, watch=None, target_rpm=None):
-    """
-    Wait for the wind to arrive, then for it to stop changing.
-
-    A fixed settle is a guess about the tunnel's time constant, which has
-    never been measured (TODO A3). Too short and every point is measured on
-    the way somewhere — and since power goes as v³, a velocity still 5% low
-    is a power 15% low. Too long and it is fourteen times wasted.
-
-    Watching the terminal voltage instead answers the question directly:
-    voltage follows rotor speed, rotor speed follows wind, so when the voltage
-    stops moving the wind has arrived. Costs nothing and adapts to whatever τ
-    turns out to be.
-
-    Watching voltage ALONE is not enough, and point 1 of the first real sweep
-    proved it: the fan was still accelerating through 440 rpm, the rotor was
-    producing nothing yet, and 0.000 V is perfectly stable. The test happily
-    declared it settled and the point was recorded as empty.
-
-    So it waits on the DRIVE first — the fan has to be at the speed it was
-    asked for — and only then on the voltage. The first point is the slow one,
-    accelerating from rest; the rest are 100 rpm steps.
-
-    Returns (volts, amps, fan_rpm) once stable, or at --settle-max.
-    """
-    t0 = time.monotonic()
-
-    # ── phase 1: is the fan actually at the speed we asked for? ─────────
-    if watch is not None and target_rpm:
-        tol = max(a.rpm_tol_abs, a.rpm_tol_frac * target_rpm)
-        while time.monotonic() - t0 < a.settle_max:
-            if abs(watch.rpm - target_rpm) <= tol:
-                break
-            time.sleep(a.settle_poll)
-        else:
-            print(f"     ⚠ fan reached {watch.rpm:.0f} rpm, asked for "
-                  f"{target_rpm:.0f}, after {a.settle_max:.0f} s")
-
-    # ── phase 2: has the rotor stopped changing? ────────────────────────
-    t1 = time.monotonic()
-    last, stable = None, 0
-    while time.monotonic() - t1 < a.settle_max:
-        time.sleep(a.settle_poll)
-        v, i, _ = load.measure()
-        if last is not None and abs(v - last) <= max(a.settle_tol * max(v, 0.1),
-                                                     0.02):
-            stable += 1
-            if stable >= a.settle_confirm and time.monotonic() - t1 >= a.settle_min:
-                return v, i, (watch.rpm if watch else 0.0)
-        else:
-            stable = 0
-        last = v
-    v, i, _ = load.measure()
-    return v, i, (watch.rpm if watch else 0.0)
-
-
-def step_for(rpm, a):
-    """
-    Ladder increment at this wind speed.
-
-    `fixed` is the protocol as stated: 10 mA everywhere. It works at the top of
-    the range and cannot work at the bottom — peak current goes as v², so the
-    same 10 mA that gives ~35 dwells to the peak at 1800 rpm gives THREE at
-    500 rpm, and a ramp with three points either side of a maximum overshoots
-    into stall before the roll-off can be confirmed. That is not a tuning
-    preference; it showed up as four failed points out of fourteen.
-
-    `v2` keeps 10 mA at --stop-rpm and scales it down as v², so every wind
-    speed gets comparable resolution. It is still one rule applied identically
-    to every blade, so runs stay comparable — and the rule is in the
-    fingerprint, so a run under the other one cannot be mistaken for it.
-    """
-    if a.step_scaling == "fixed":
-        return a.step_amps
-    frac = (wind_from_rpm(rpm) / wind_from_rpm(a.stop_rpm)) ** 2
-    return max(a.min_step_amps, a.step_amps * frac)
-
-
-def estimate(a, rpms):
-    """Seconds of tunnel time, so the plan can be argued with before it runs."""
-    per = a.dwell + 0.35
-    total = 0.0
-    for rpm in rpms:
-        # the roll-off typically lands near 1.4x the peak current, and the
-        # peak near a third of the ceiling — from the 500/1200/1800 runs
-        steps = max(3, int(ceiling_for(rpm, a) * 0.7 / step_for(rpm, a)))
-        total += a.settle_min * 2 + steps * per + 2 * a.dwell
-    return total
 
 
 def run_sweep(a):
@@ -446,7 +361,8 @@ def run_sweep(a):
                 interlock.wind_up(rpm)
             else:
                 interlock.set_hz(rpm)
-            v, i, rpm_act = settle_wind(load, a, watch, rpm)
+            v, i, rpm_act = settle_wind(load, a, watch, rpm,
+                                        log=lambda m: print(f"     ⚠ {m}"))
             print(f"     settled: {v:.3f} V at {i:.4f} A   "
                   f"(fan {rpm_act:.0f} rpm, {watch.amps:.1f} A)")
 
