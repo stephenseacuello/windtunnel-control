@@ -224,3 +224,74 @@ class TestRotorRpmWindow:
         """v2/v3 report no pulse fields; the column must be blank, not zero."""
         ss = [(t, 1800.0, 9.0, None, None) for t in range(0, 5)]
         assert self._watch(ss).rotor_rpm_between(1.0, 4.0) is None
+
+
+class TestArchiveProtectsBankedRuns:
+    """
+    Both front ends wrote to logs/sweep_<blade>_*.csv and both overwrote. The
+    dashboard's "archive copy" ran AFTER the write and copied the file it had
+    just produced — so a re-run destroyed the earlier curve and archived the
+    new one. The CLI had no archive at all.
+
+    v1_Ra20 is one of two blade runs this project has and the baseline for its
+    only result.
+    """
+
+    def _core(self):
+        import sweep_core
+        return sweep_core
+
+    def test_an_existing_run_is_moved_not_overwritten(self, tmp_path):
+        sm = tmp_path / "sweep_v1_Ra20_summary.csv"
+        pt = tmp_path / "sweep_v1_Ra20_points.csv"
+        sm.write_text("ORIGINAL SUMMARY")
+        pt.write_text("ORIGINAL POINTS")
+
+        moved = self._core().archive_existing(tmp_path, "v1_Ra20")
+
+        assert len(moved) == 2, "both files must move together"
+        assert not sm.exists() and not pt.exists(), \
+            "the canonical names must be free for the new run"
+        texts = {(tmp_path / m).read_text() for m in moved}
+        assert texts == {"ORIGINAL SUMMARY", "ORIGINAL POINTS"}, \
+            "the archived copies do not contain the original data"
+
+    def test_the_stamp_comes_from_the_data_not_the_move(self, tmp_path):
+        """
+        An archive stamped with the moment it was displaced tells you nothing.
+        Stamped from the file's mtime it says when the data was taken.
+        """
+        import os, time
+        f = tmp_path / "sweep_x_summary.csv"
+        f.write_text("data")
+        old = time.time() - 86400 * 3          # three days ago
+        os.utime(f, (old, old))
+        moved = self._core().archive_existing(tmp_path, "x")
+        want = time.strftime("%Y%m%d_%H%M%S", time.localtime(old))
+        assert want in moved[0], \
+            f"archive is stamped {moved[0]}, not from the data's date {want}"
+
+    def test_a_second_archive_does_not_clobber_the_first(self, tmp_path):
+        import os, time
+        stamp = time.time() - 86400
+        names = []
+        for _ in range(2):
+            f = tmp_path / "sweep_y_summary.csv"
+            f.write_text("run")
+            os.utime(f, (stamp, stamp))        # identical mtime, on purpose
+            names += self._core().archive_existing(tmp_path, "y")
+        assert len(set(names)) == 2, \
+            f"two archives collapsed onto one name: {names}"
+
+    def test_nothing_to_archive_is_not_an_error(self, tmp_path):
+        assert self._core().archive_existing(tmp_path, "never_run") == []
+
+
+def test_both_front_ends_archive_before_writing():
+    """A fix that lands in one caller and not the other is not a fix."""
+    ctl = (REPO / "webapp" / "controller.py").read_text()
+    cli = (REPO / "src" / "blade_sweep.py").read_text()
+    assert "archive_existing" in ctl, "the dashboard does not archive"
+    assert "archive_existing" in cli, "the CLI does not archive"
+    assert "shutil.copy2(sp" not in ctl, \
+        "the dashboard is copying the file it just wrote again"

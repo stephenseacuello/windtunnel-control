@@ -49,6 +49,7 @@ from __future__ import annotations
 
 import math
 import time
+from pathlib import Path
 from types import SimpleNamespace
 
 from chroma_load import CC_FULL_SCALE, ChromaLoad, LoadError
@@ -386,3 +387,38 @@ def point_rows(pt, blade, fan_rpm_at, rotor_rpm_at):
                     f"{f_rpm:.0f}", f"{m_amps:.2f}",
                     "" if w_rpm is None else f"{w_rpm:.1f}"])
     return out, dwell_rpm
+
+
+def archive_existing(logs_dir, blade):
+    """
+    Move a previous run of this blade name aside. Returns what it moved.
+
+    Both front ends write to logs/sweep_<blade>_*.csv, and both overwrote.
+    The dashboard's "archive copy" ran AFTER the write and copied the file it
+    had just produced, so a re-run destroyed the earlier curve and then
+    archived the new one under a timestamp. The CLI had no archive at all.
+
+    v1_Ra20 is one of two blade runs this project has and the baseline for its
+    only result. Typing that name a second time would have taken it.
+
+    Renamed rather than copied, and stamped from the ORIGINAL file's mtime, so
+    the archive records when the data was TAKEN rather than when it was
+    displaced. Both files move together: a summary without its points is a
+    curve nobody can re-analyse.
+    """
+    import time as _t
+    logs_dir = Path(logs_dir)
+    moved = []
+    for suffix in ("_summary.csv", "_points.csv"):
+        old = logs_dir / f"sweep_{blade}{suffix}"
+        if not old.exists():
+            continue
+        when = _t.strftime("%Y%m%d_%H%M%S", _t.localtime(old.stat().st_mtime))
+        keep = logs_dir / f"sweep_{blade}_{when}{suffix}"
+        i = 1
+        while keep.exists():
+            keep = logs_dir / f"sweep_{blade}_{when}_{i}{suffix}"
+            i += 1
+        old.rename(keep)
+        moved.append(keep.name)
+    return moved

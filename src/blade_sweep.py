@@ -81,6 +81,7 @@ from load_ramp import protocol_meta, wind_from_rpm
 from sweep_core import (ceiling_for, step_for, settle_wind, estimate,
                         interp_at, rotor_rpm_between, summary_row, point_rows,
                         SUMMARY_HEADER, POINTS_HEADER, ROTOR_RADIUS_M,
+                        archive_existing,
                         RPM_PULSES_PER_REV)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -295,6 +296,14 @@ def run_sweep(a):
     voff = load.volt_off(a.volt_off) if a.volt_off is not None else load.volt_off()
     print(f"  CC range {rng} (full scale {CC_FULL_SCALE[rng]:g} A), "
           f"CONF:VOLT:OFF {voff:.2f} V")
+
+    # Move any earlier run of this name aside BEFORE measuring. The CLI
+    # simply overwrote: ten minutes of tunnel time could silently replace a
+    # curve that took ten minutes to get.
+    _moved = archive_existing(Path(a.out).parent if a.out else Path("logs"),
+                              a.blade)
+    if _moved:
+        print(f"  earlier run archived as {', '.join(_moved)}")
 
     rows, summary, dead = [], [], 0
     interlock = TurbineInterlock(drive, load, min_amps=0.0,

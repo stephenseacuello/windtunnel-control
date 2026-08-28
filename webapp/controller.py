@@ -1807,16 +1807,32 @@ class TunnelController:
         # timestamp made every dashboard sweep invisible to the Blades tab —
         # a regression my own round-1 persistence fix introduced. The stamped
         # copy is kept alongside so a re-run does not destroy the previous one.
-        stamp = time.strftime("%Y%m%d_%H%M%S")
         logs = Path(self.cfg.path).resolve().parent.parent / "logs"
         out = logs / f"sweep_{blade}"
-        self._sweep_archive = logs / f"sweep_{blade}_{stamp}"
+
+        # Move any EXISTING run aside before this one starts.
+        #
+        # This used to copy the file it had just written, after writing it —
+        # so a re-run destroyed the earlier curve and then archived the new
+        # one under a timestamp, and the comment above it claimed the
+        # opposite. v1_Ra20 is one of two blade runs this project has and the
+        # baseline for its only result; typing that name again would have
+        # taken it.
+        #
+        # Renamed, not copied, and stamped with the ORIGINAL file's date so
+        # the archive says when the data was taken rather than when it was
+        # displaced.
+        self._archived = _sc.archive_existing(logs, blade)
+        if self._archived:
+            self.log(f"earlier {blade} run archived as "
+                     f"{', '.join(self._archived)}", "warn")
 
         self.sweep = {"blade": blade, "notes": notes, "state": "running",
                       "rpms": rpms, "i": 0, "n": len(rpms), "points": [],
                       "ramp": [], "current_rpm": None, "message": "",
                       "protocol": fingerprint, "protocol_detail": shape,
                       "_summary_rows": [], "_points_rows": [],
+                      "archived": list(getattr(self, "_archived", [])),
                       "summary_csv": str(out) + "_summary.csv",
                       "points_csv": str(out) + "_points.csv"}
 
@@ -1976,12 +1992,9 @@ class TunnelController:
                     w.writerow(header)
                     w.writerows(rows)
                 tmp.replace(path)
-            sp = Path(sw["summary_csv"])
-            # archive copy, so re-running a blade keeps the earlier curve
-            arch = getattr(self, "_sweep_archive", None)
-            if arch is not None:
-                import shutil
-                shutil.copy2(sp, str(arch) + "_summary.csv")
+            # No archive copy here. The previous run was moved aside before
+            # this one began — copying after the write archived the NEW file
+            # and lost the old one.
         except Exception as e:
             self.log(f"could not write the sweep to disk: {e}", "fault")
             sw["write_error"] = str(e)
