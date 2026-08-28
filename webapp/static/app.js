@@ -1305,6 +1305,13 @@ async function loadBlades() {
   // Set once. The library refreshes on a poll, and rebinding every time would
   // leak a handler per tick — the sort of thing that only shows up after an
   // hour on the tab, which is exactly how long a campaign session runs.
+  ['#sw-blade', '#sw-from', '#sw-to', '#sw-step', '#sw-ma', '#sw-dwell']
+    .forEach(id => {
+      const el = $(id);
+      if (el && !el.dataset.pre) { el.dataset.pre = '1'; el.oninput = schedulePreflight; }
+    });
+  if (!window.__preRan) { window.__preRan = 1; sweepPreflight(); }
+
   const go = $('#cmp-go');
   if (go && !go.dataset.bound) { go.dataset.bound = '1'; go.onclick = runCompare; }
   // Open on a real rotor, not the synthetic placeholder.
@@ -1336,6 +1343,52 @@ let BLADE_REQ = 0;
        only because a NON-zero Δn is what distinguishes a real effect from a
        cut-in artefact.
    ══════════════════════════════════════════════════════════════════════ */
+
+/* Pre-flight, shown before the fan turns.
+
+   A sweep is 10-30 minutes of continuous fan and load time. Discovering at
+   minute eighteen that the drive was faulted — or discovering afterwards that
+   the settings produced a curve nothing can be compared against — costs the
+   session, and tunnel time is the scarcest thing here.
+
+   Shown continuously rather than behind a button: a check the operator has to
+   remember to run is a check that gets skipped exactly when it matters. A
+   FAIL blocks the run server-side; a WARN is information and does not, because
+   somebody who cannot proceed past information stops reading it. */
+let PRE_T = null;
+
+function sweepBody() {
+  return {
+    blade: ($('#sw-blade').value || '').trim(),
+    notes: $('#sw-notes').value || '',
+    start_rpm: +$('#sw-from').value, stop_rpm: +$('#sw-to').value,
+    rpm_step: +$('#sw-step').value, step_amps: (+$('#sw-ma').value) / 1000,
+    dwell: +$('#sw-dwell').value,
+  };
+}
+
+async function sweepPreflight() {
+  const el = $('#sw-pre');
+  if (!el) return;
+  const body = sweepBody();
+  if (!body.blade) {
+    el.innerHTML = '<span class="dim">Name the blade to pre-flight. ' +
+                   'An unlabelled curve is not a measurement.</span>';
+    return;
+  }
+  const r = await api('/api/sweep/preflight', body).catch(() => null);
+  if (!r || !r.checks) { el.innerHTML = ''; return; }
+  const icon = { ok: '<span class="ok">✓</span>',
+                 warn: '<span class="warn">▲</span>',
+                 fail: '<span class="bad">✕</span>' };
+  el.innerHTML = r.checks.map(c =>
+    `<div>${icon[c.state] || ''} <b>${c.name}</b> — ${c.detail}</div>`).join('');
+}
+
+function schedulePreflight() {
+  clearTimeout(PRE_T);
+  PRE_T = setTimeout(sweepPreflight, 350);   // typing a name is not 12 requests
+}
 
 function fillCompareSelectors(blades) {
   const swept = blades.filter(b => b.swept).map(b => b.name);

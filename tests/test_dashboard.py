@@ -394,3 +394,58 @@ def test_the_refusal_reaches_the_browser():
     # The level is the headline; the exponent is blind to a uniform change.
     assert body.index("level_pct") < body.index("r.dn"), \
         "Δn is presented before the level"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SWEEP PRE-FLIGHT
+# ═══════════════════════════════════════════════════════════════════════════
+
+def test_the_sweep_has_a_preflight_and_it_is_wired():
+    """
+    start_profile has run pre-flight since the beginning. The blade sweep —
+    the LONGER and more expensive run, ten to thirty minutes of continuous fan
+    and load time — never did. Discovering at minute eighteen that the drive
+    was faulted costs the session, and tunnel time is the scarcest thing here.
+    """
+    assert "/api/sweep/preflight" in APP, "no sweep pre-flight endpoint"
+    assert "def sweep_preflight" in CONTROLLER, "the controller has no check"
+    assert "sweepPreflight" in JS, "the UI never runs it"
+    assert 'id="sw-pre"' in HTML, "nowhere to display it"
+
+
+def test_preflight_warns_when_the_curve_would_not_be_comparable():
+    """
+    The check that matters most, because this mistake is invisible until
+    somebody tries to compare two runs and the tool refuses — by which time
+    the tunnel time is spent.
+    """
+    i = CONTROLLER.index("def sweep_preflight")
+    body = CONTROLLER[i:i + 4000]
+    assert "CAMPAIGN_FINGERPRINT" in body, \
+        "pre-flight does not check the protocol against the campaign"
+    assert "not be comparable" in body.lower() or "NOT the campaign" in body
+
+
+def test_preflight_warns_before_displacing_a_banked_run():
+    i = CONTROLLER.index("def sweep_preflight")
+    body = CONTROLLER[i:i + 4000]
+    assert "already has a run" in body, \
+        "pre-flight does not warn that a name is taken"
+
+
+def test_only_a_hard_failure_blocks_the_run():
+    """
+    A WARN must not block. A protocol that differs on purpose is legitimate,
+    and an operator who cannot proceed past information stops reading it —
+    which is how a warning becomes worse than no warning at all.
+    """
+    i = CONTROLLER.index("def start_blade_sweep")
+    body = CONTROLLER[i:i + 2500]
+    assert 'if not pre["ok"]' in body, "start_blade_sweep ignores pre-flight"
+    assert '"fail"' in body, "it does not distinguish a failure from a warning"
+
+
+def test_preflight_is_debounced():
+    """Typing a blade name is one request, not twelve."""
+    assert "schedulePreflight" in JS and "setTimeout" in JS, \
+        "pre-flight fires on every keystroke"

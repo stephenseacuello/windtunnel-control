@@ -1734,6 +1734,102 @@ class TunnelController:
     # BLADE SWEEP
     # ══════════════════════════════════════════════════════════════════
 
+    CAMPAIGN_FINGERPRINT = "94bed28333f7"
+
+    def sweep_preflight(self, blade, start_rpm=500, stop_rpm=1800,
+                        rpm_step=100, step_amps=0.02, dwell=1.0,
+                        stop_power_frac=0.80, max_amps=0.8):
+        """
+        What a blade sweep needs, checked BEFORE the fan turns.
+
+        A sweep is ten to thirty minutes of continuous fan and load time.
+        Discovering at minute eighteen that the drive was faulted, or
+        afterwards that the settings produced an incomparable curve, costs the
+        session — and tunnel time is the scarcest thing on this project.
+
+        `start_profile` has run pre-flight since the beginning. The blade
+        sweep, which is the longer and more expensive run, never did.
+
+        Returns checks, never raises. The operator decides: a WARN is
+        information, and only a FAIL blocks.
+        """
+        checks = []
+
+        def add(name, state, detail):
+            checks.append({"name": name, "state": state, "detail": detail})
+
+        # ── will this curve be comparable? ────────────────────────────────
+        cfg = _sc.settings(blade=blade, notes="", start_rpm=start_rpm,
+                           stop_rpm=stop_rpm, rpm_step=rpm_step,
+                           step_amps=step_amps, dwell=dwell,
+                           stop_power_frac=stop_power_frac, max_amps=max_amps)
+        fp = _sc.protocol(cfg, cfg.volt_off, cfg.range)["protocol"]
+        if fp == self.CAMPAIGN_FINGERPRINT:
+            add("protocol", "ok",
+                f"{fp} — comparable with every run banked so far")
+        else:
+            add("protocol", "warn",
+                f"{fp}, NOT the campaign {self.CAMPAIGN_FINGERPRINT}. This "
+                f"curve will not be comparable with v1_Ra20 or v1_Ra80. "
+                f"Deliberate protocol changes are fine; accidents are not.")
+
+        # ── would this displace a banked run? ─────────────────────────────
+        logs = Path(self.cfg.path).resolve().parent.parent / "logs"
+        existing = [f"sweep_{blade}{sfx}" for sfx in ("_summary.csv", "_points.csv")
+                    if (logs / f"sweep_{blade}{sfx}").exists()]
+        if existing:
+            add("blade name", "warn",
+                f"{blade} already has a run. It will be MOVED ASIDE to a "
+                f"timestamped archive, not overwritten — but if you meant a "
+                f"new rotor, give it a new name.")
+        else:
+            add("blade name", "ok", f"{blade} is unused")
+
+        # ── the drive ─────────────────────────────────────────────────────
+        try:
+            st = self.drive.status()
+            if self.estopped:
+                add("drive", "fail", "E-STOP is latched")
+            elif getattr(st, "faulted", False) or (isinstance(st, dict)
+                                                   and st.get("faulted")):
+                add("drive", "fail", "the drive is faulted — clear it first")
+            else:
+                add("drive", "ok", "reachable, not faulted")
+        except Exception as e:
+            add("drive", "fail", f"cannot reach the drive: {e}")
+
+        # ── the load ──────────────────────────────────────────────────────
+        if self.load is None:
+            add("load", "fail", self.load_error or "no load connected")
+        else:
+            try:
+                with self._load_lock:
+                    v, i, w = self.load.measure()
+                add("load", "ok",
+                    f"{getattr(self.load, 'identity', '?')} — reads "
+                    f"{v:.3f} V, {i:.4f} A")
+            except Exception as e:
+                add("load", "fail", f"connected but not answering: {e}")
+
+        # ── how long, and is there room ───────────────────────────────────
+        rpms = list(range(int(start_rpm), int(stop_rpm) + 1, int(rpm_step)))
+        mins = _sc.estimate(cfg, rpms) / 60.0
+        add("duration", "warn" if mins > 25 else "ok",
+            f"{len(rpms)} points, about {mins:.0f} min of continuous "
+            f"fan and load time")
+        try:
+            import shutil as _sh
+            free_mb = _sh.disk_usage(str(logs)).free / 1e6
+            add("disk", "ok" if free_mb > 50 else "fail",
+                f"{free_mb:,.0f} MB free")
+        except Exception as e:
+            add("disk", "warn", str(e))
+
+        worst = ("fail" if any(c["state"] == "fail" for c in checks) else
+                 "warn" if any(c["state"] == "warn" for c in checks) else "ok")
+        return {"ok": worst != "fail", "state": worst, "checks": checks,
+                "protocol": fp, "minutes": round(mins, 1)}
+
     def start_blade_sweep(self, blade, notes="", start_rpm=500, stop_rpm=1800,
                           rpm_step=100, step_amps=0.02, dwell=1.0,
                           stop_power_frac=0.80, max_amps=0.8):
@@ -1748,6 +1844,18 @@ class TunnelController:
         if not blade:
             raise RuntimeError("a blade name is required — an unlabelled "
                                "curve is not a measurement")
+
+        # A FAIL here means the run cannot produce data — a faulted drive, a
+        # load that will not answer, no disk. Refusing costs a click; not
+        # refusing costs the session. Warnings do NOT block: a protocol that
+        # differs on purpose is legitimate, and an operator who cannot proceed
+        # past information will stop reading it.
+        pre = self.sweep_preflight(blade, start_rpm, stop_rpm, rpm_step,
+                                   step_amps, dwell, stop_power_frac, max_amps)
+        if not pre["ok"]:
+            bad = "; ".join(f"{c['name']}: {c['detail']}"
+                            for c in pre["checks"] if c["state"] == "fail")
+            raise RuntimeError(f"pre-flight failed — {bad}")
 
         from peak_finder import find_peak
         lock = self._load_lock

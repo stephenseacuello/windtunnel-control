@@ -273,6 +273,30 @@ def api_load_amps():
         return err(str(e))
 
 
+@app.route("/api/sweep/preflight", methods=["POST"])
+def api_sweep_preflight():
+    """
+    What the sweep needs, checked before the fan turns.
+
+    Returns checks rather than a verdict the UI has to re-derive, and never
+    raises: an operator who cannot see WHY something is refused will find a
+    way around it.
+    """
+    d = request.get_json(force=True, silent=True) or {}
+    try:
+        return ok(**ctl.sweep_preflight(
+            blade=(d.get("blade") or "").strip() or "unnamed",
+            start_rpm=float(d.get("start_rpm", 500)),
+            stop_rpm=float(d.get("stop_rpm", 1800)),
+            rpm_step=float(d.get("rpm_step", 100)),
+            step_amps=float(d.get("step_amps", 0.02)),
+            dwell=float(d.get("dwell", 1.0)),
+            stop_power_frac=float(d.get("stop_power_frac", 0.80)),
+            max_amps=float(d.get("max_amps", 0.8))))
+    except Exception as e:
+        return err(str(e))
+
+
 @app.route("/api/sweep/start", methods=["POST"])
 def api_sweep_start():
     d = request.get_json(force=True, silent=True) or {}
