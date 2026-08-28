@@ -56,9 +56,25 @@ runs **5.75 → 16.07 Hz**. Rotor rpm follows once the pole count is known:
 | 8 | 86 | 241 |
 | 12 | 58 | 161 |
 
-**The pole count is the only thing missing.** It is a nameplate reading or a
-magnet count, and it converts every one of these captures into rotor rpm
-retroactively.
+**This is now the route for HISTORICAL data only.** New runs get rotor speed
+directly: a magnet and a reed on the rig feed the PMC's encoder index input,
+and `turbine_rpm` lands in both sweep CSVs. See
+`../firmware/acs550_pmc_v5/README.md`.
+
+What this analysis is still for is the March capture and anything else already
+recorded, which no sensor can retroactively instrument. For those the pole
+count remains the missing constant.
+
+**And the reed will supply it.** Run the rotor with both recording and
+`poles = 120 · f_elec / rotor_rpm` falls out — one measurement, and it converts
+every past capture. That is a better source than a nameplate, because it is
+measured on the machine rather than read off a label that may describe a
+different winding.
+
+The two also check each other: rotor speed from the Clarke angle and rotor
+speed from the magnet are independent paths to the same number, and the reed
+currently bounces 2–3 times per pass, so a disagreement would show which one
+is lying.
 
 ---
 

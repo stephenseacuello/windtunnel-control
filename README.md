@@ -233,9 +233,14 @@ the Chroma sinks current, and `blade_sweep.py` runs a full 14-point blade
 characterisation unattended in about ten minutes.
 
 **Reference result** — blade `v1_Ra20` (PETG, 0.2 mm, Ra 20), 20 Aug 2026:
-electrical power **P ∝ v^3.754**, R² = 0.998 across 10.2–38.0 m/s, peaking at
-**3.72 W at 38 m/s**. Independent single-point runs reproduce the sweep to
+electrical power **P ∝ v^3.77** across 10.1–37.5 m/s, peaking at **3.793 W at
+37.5 m/s** (raw argmax). Independent single-point runs reproduce the sweep to
 0.2–0.3%.
+
+R² is **0.998 in log space, 0.990 in power space** — say which, because the
+log-space figure is flattered by the 3.7× span in v. And the exponent is a
+**generator** characteristic, not evidence about the blade: see
+`docs/09_results.md`.
 
 That exponent is itself a result: 3.75 rather than 3.0 means **Cp is still
 climbing with Reynolds across the entire tunnel range**, so a blade ranked at

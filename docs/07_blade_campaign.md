@@ -241,17 +241,46 @@ number derived from one against a number derived from the other.
 Blade `v1_Ra20`, PETG 0.2 mm, Ra 20 — 20 Aug 2026, protocol `94bed28333f7`,
 14/14 points clean.
 
-| fan rpm | m/s | P_max (fit) | at |
-|---:|---:|---:|---:|
-| 500 | 10.2 | 0.0296 W | 0.017 A |
-| 1000 | 20.9 | 0.4088 W | 0.073 A |
-| 1400 | 29.4 | 1.6225 W | 0.228 A |
-| 1800 | 38.0 | 3.7217 W | 0.328 A |
+| fan rpm<br>commanded | measured | m/s | P_max (raw argmax) | at |
+|---:|---:|---:|---:|---:|
+| 500 | 496 | 10.1 | 0.0297 W | 0.018 A |
+| 1000 | 991 | 20.7 | 0.4227 W | 0.079 A |
+| 1400 | 1384 | 29.1 | 1.6653 W | 0.240 A |
+| 1800 | 1779 | 37.5 | 3.7935 W | 0.320 A |
 
-**P ∝ v^3.754, R² = 0.998** across the whole range. Independent single-point
-runs at 1200 and 1800 rpm reproduce it to 0.3% and 0.2%.
+**Wind speed comes from the MEASURED fan rpm, not the commanded one** — the
+drive settles 4–21 rpm below setpoint, and quoting a command beside a measured
+velocity is exactly the mixing this document warns about two sections up.
 
-The exponent is the finding. Constant Cp would give 3.0; 3.75 means Cp is still
-climbing with Reynolds at 38 m/s, so this rotor has not reached its design
-regime anywhere in this tunnel. Open-circuit voltage tells the same story from
-the electrical side: V_oc ∝ v^1.39 where constant runaway λ would give v^1.0.
+The power column is the **raw argmax**, not the fit. `p_max_w` is the only
+power column this file has, and it equals the largest single dwell in the
+points file at 14 of 14 — verified, not assumed. An earlier version of this
+table labelled it `P_max (fit)`.
+
+Every column above comes from `sweep_v1_Ra20_summary.csv` alone. An earlier
+version of this table mixed summary power with points-file wind speed, which
+breaks this document's own rule two sections up — and the two files disagree
+about wind by 1.1–1.2%.
+
+**P ∝ v^3.77.** R² is **0.998 in log space and 0.990 in power space**; quoting
+0.998 without saying which flatters it, because the log-space figure benefits
+from the 3.7× span in v. Independent single-point runs at 1200 and 1800 rpm
+reproduce the sweep to 0.3% and 0.2%.
+
+Reassuringly, the wind-column disagreement barely reaches the exponent: fitting
+against the points-file wind gives 3.763 against 3.769, a 0.16% difference.
+Whichever file is right, the exponent stands.
+
+**The exponent is a GENERATOR characteristic, not an aerodynamic one.** An
+earlier version of this paragraph read 3.77 as "Cp is still climbing with
+Reynolds"; that was wrong and it propagated into six documents.
+
+`src/generator_model.py` fits the rig as a Thévenin source at every wind speed
+(r² ≥ 0.986 at all fourteen): `V_oc = 0.101·v^1.497` and
+`R_int = 595.5·v^-0.791`. Every peak sits at the Thévenin match, so
+`P_max = V_oc²/4R_int` and the power exponent follows: **n = 2a − b = 3.79
+against 3.77 measured** — agreement neither fit was tuned to produce. Almost no
+aerodynamic residual is left for the blade to move.
+
+The blade is a thin cambered plate with square-cut edges, which is the
+Reynolds-**insensitive** class. See `09_results.md`.

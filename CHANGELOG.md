@@ -1,5 +1,155 @@
 # Changelog
 
+## v4.3 — 2026-08-28
+
+Four days at the rig and at the desk. **A blade comparison with a real result,
+a rotor-speed channel that is wired but not yet trustworthy, and one protocol
+where there were two.**
+
+### The result
+
+**`v1_Ra80` produces 13.73% more electrical power than `v1_Ra20`**, 95% CI
+[+11.21%, +16.26%], higher at all 14 wind speeds, both runs on protocol
+`94bed28333f7`.
+
+The obvious alternative explanation — that the two rotors differ in cut-in
+speed rather than aerodynamics — is excluded by the exponent. A cut-in shift
+large enough to fake +13.7% would drag Δn to about −0.24; measured Δn is
+**+0.024 ± 0.064**, 4.1σ away. Generator warm-up is excluded the same way: it
+predicts a deficit, not a gain.
+
+What survives is a uniform multiplicative gain across a 3.7× wind range, which
+neither artefact produces.
+
+**Still weak: that the cause is surface roughness.** Both runs are a single
+mounting of a single rotor, and there is no mount-to-mount error bar. The
+remount repeat costs ten minutes and is the first item in `NEXT_SESSION.md`.
+
+### The exponent is the generator, not the blade
+
+`src/generator_model.py` fits the rig as a Thévenin source, r² ≥ 0.986 at all
+fourteen wind speeds: `V_oc = 0.101·v^1.497`, `R_int = 595.5·v^-0.791` (88.4 Ω
+at 10.2 m/s to 36.5 at 38.0). Every peak sits at the Thévenin match, so
+`n = 2a − b = 3.79` against **3.77 measured** — agreement neither fit was
+tuned to produce.
+
+So `P ∝ v^3.77` says almost nothing about the blade. The earlier reading of it
+as *"Cp is still climbing with Reynolds"* was wrong and had propagated into six
+documents, `data/tunnel.json` — which is a build-time source for the slide
+deck, one key from a projector — and the printed output of `twin_residual.py`,
+where a tool re-emitted it to anyone who ran it.
+
+A nine-agent adversarial audit also established what the blade actually is,
+from the STL: a **thin cambered plate**, 1.79 mm constant wall, t/c 4%, 42%
+camber, 183° of turning, square-cut edges, **zero twist**. `blades/v1.json`
+had claimed 24.5 mm thickness (that is the bounding-box camber depth) and
+strong twist (a chord-finder returning endpoints swapped). Separation is
+pinned by geometry: XFOIL and polar cross-checks answer a different question.
+
+### Rotor speed: wired, working, not yet trustworthy
+
+The DAQ is out of the loop. A magnet on one blade and a reed switch feed the
+PMC directly, and `turbine_rpm` now lands in both sweep CSVs — per dwell, which
+is ω(I), plus `turbine_rpm_at_pmax` and `tsr_at_pmax` interpolated to the
+fitted peak.
+
+**It counts, but the reed bounces 2–3 times per pass and the number varies** —
+28 raw counts over 10 hand revolutions. A fixed ratio would be correctable; a
+varying one is not, so rotor rpm carries roughly ±20% scatter against a 13.7%
+effect. The fix is a capacitor on `Z0`, or a Hall sensor; the VJ12-D10K is
+rated 20 Hz by its own packaging and this rotor needs 50–70.
+
+Getting there cost three firmware revisions and an hour of rig time, all on a
+wrong diagnosis. `Arduino_PortentaMachineControl.h` declares
+`extern EncoderClass MachineControl_Encoders` — a **global whose QEI
+constructor already claims PJ_8** — so an `mbed::InterruptIn` on that pin was a
+second claim and hung the board. A hung PMC stops feeding Modbus and the
+drive's comm watchdog trips it three seconds later, which reads as *"the VFD
+keeps faulting"* and is nothing to do with the drive.
+
+Then, with the interrupt removed, still zero counts: `QEI::setEncoding()`
+attaches the channel-A interrupt but **never assigns `encoding_`**, so it stays
+at `X2_ENCODING`, which only counts when both channels move together. A single
+reed can never move it. The index channel has no such logic — `QEI::index()` is
+one line — and counted immediately.
+
+### One protocol, two front ends
+
+The dashboard and the CLI both characterised rotors and produced different
+measurements: `8cfbc0b85199` against `94bed28333f7`. The hashed differences
+were the honest part. The dangerous ones were not in the hash at all:
+
+- the dashboard settled by **blind `time.sleep`** with no wait for the fan to
+  reach speed, and 0.000 V is perfectly stable, so a still-accelerating tunnel
+  read as settled;
+- **`CONF:VOLT:OFF` was never written** on its real path while the fingerprint
+  asserted `voff=0.500`. The Chroma ships at 3.00 V and the setting is
+  instrument-persistent, so every dashboard run carried a cut-out three times
+  higher than recorded;
+- the ceiling rule differed, and `collapse_frac`/`confirm` were hashed but
+  never passed.
+
+A fingerprint that hashes settings the code does not use is worse than none.
+
+`src/sweep_core.py` now owns the ladder, ceiling, settle, load preparation,
+fingerprint, row building and column definitions. Extracted as a **pure move
+and proven so**: the simulated CLI sweep's summary CSV is byte-identical to the
+pre-refactor baseline and the points CSV identical across all 392 rows.
+
+### Data loss, found and fixed
+
+**Re-running a blade name destroyed the earlier curve, in both front ends.**
+The dashboard's archive ran *after* the write and copied the file it had just
+produced — with a comment above claiming the opposite. The CLI had no archive
+at all. `v1_Ra20` is one of two blade runs this project has.
+`sweep_core.archive_existing()` now moves the previous run aside first,
+renamed rather than copied, stamped from the original's mtime.
+
+### Measurement corrections
+
+- **τ = 0.60 ± 0.14 s**, not 0.63, 0.80 or the 3.0 the gusts document assumed
+  throughout. One of the five runs behind it **exceeded the drive's ramp limit
+  by 138%** — the drive clips that, so the response is not first order, and it
+  produced the worst fit of the set while still counting as a "good fit"
+  because R² cannot distinguish a bad fit from a bad model. `analyze.py` now
+  flags and excludes clipped runs. The mean is unchanged.
+- **The tunnel is five times better than documented.** At the measured τ a
+  3-second gust retains 62%, not 16%. `docs/03_gusts.md` had been advising
+  against experiments this rig can run.
+- The reference table in `docs/07` was wrong in its numbers (1000 rpm read
+  0.4088 W against the file's 0.4227) and mislabelled its power column as a
+  fit when it is the raw argmax.
+- `R² = 0.998` is the **log-space** figure; in power space it is 0.990. Both
+  are now stated, because the log-space one is flattered by the 3.7× span.
+
+### Dashboard
+
+Blade comparison, with the refusals that make an answer mean something: a
+protocol mismatch is refused rather than annotated, a fit is never compared
+against an argmax, and the headline is the level with a confidence interval
+rather than the exponent — which a uniform change moves by exactly zero.
+
+Sweep pre-flight, shown continuously rather than behind a button, answering the
+question a generic pre-flight cannot: **will this curve be comparable?**
+
+### Documentation
+
+Eight top-level files down to five, each with one job. `PLAYBOOK.md` became
+`docs/10_commissioning.md` and is framed as the completed procedure it is.
+`docs/09_results.md` is new and fills the biggest gap in the repo — a reader
+could go through README, TRAINING and `docs/07` end to end and never find what
+the project had measured.
+
+`firmware/acs550_pmc_v4/README.md` carried its ABANDONED banner at line 113,
+under 110 lines that read as live instructions including a working
+`arduino-cli upload`.
+
+Two new test suites keep prose and data in step: one checks `09_results.md`
+against the CSVs and the live generator fit, the other pins τ and fails on any
+superseded value. **155 tests.**
+
+---
+
 ## v4.2 — 2026-08-24
 
 Off-rig session. Analysis, tooling and tests; no hardware was touched.

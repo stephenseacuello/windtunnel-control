@@ -50,9 +50,14 @@ seconds with a meter, and it separates the generator from everything else.
 ## 4 · The two files disagree about wind speed
 
 `sweep_v1_Ra20_summary.csv` and `..._points.csv` differ by **1.1–1.2%** at the
-same fan set point (1700 rpm: 35.43 vs 35.82 m/s). At P ∝ v^3.77 that is
-**4.5% in power** — larger than most effects being chased. Which is right is
-not established. Do not average them.
+same fan set point (1700 rpm: 35.43 vs 35.82 m/s). At P ∝ v^3.77 that is **4.5% in power**
+— larger than most effects being chased. Which is right is not established.
+Do not average them.
+
+**But it is bounded where it matters.** Fitting the power law against each in
+turn gives an exponent of 3.769 or 3.763 — a 0.16% difference. Whichever file
+is right, the exponent stands; it is absolute power at a stated wind speed
+that carries the 4.5%.
 
 ---
 
