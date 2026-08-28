@@ -415,6 +415,78 @@ def api_blade_stl(name):
     return Response(f.read_bytes(), mimetype="model/stl")
 
 
+@app.route("/api/blades/compare")
+def api_blades_compare():
+    """
+    Two rotors, side by side, with the refusals that make the answer mean
+    something.
+
+    The campaign exists to compare blades, and until now that could only be
+    done from a terminal — so the judgement calls encoded in
+    `compare_blades.py` were reachable only by someone who knew to run it:
+
+      · a protocol mismatch REFUSES rather than producing a plausible number;
+      · a fit is never compared against an argmax, because the argmax is
+        biased high by ~1.3% over a flat maximum and that is the same size as
+        the effects being hunted;
+      · the headline is the LEVEL with a confidence interval, not the
+        exponent — a uniform power change moves the exponent by exactly zero.
+
+    All three now reach the browser.
+    """
+    import compare_blades as cb
+    a_name = (request.args.get("a") or "").strip()
+    b_name = (request.args.get("b") or "").strip()
+    if not a_name or not b_name:
+        return err("pass ?a=<blade>&b=<blade>", 400)
+    if a_name == b_name:
+        return err("those are the same run", 400)
+    try:
+        A, B = cb.load(a_name), cb.load(b_name)
+    except SystemExit as e:
+        # compare_blades is a CLI first; its "no such sweep" exits as a
+        # SystemExit, which would otherwise take the worker down with it.
+        return err(str(e), 404)
+
+    fa = A["meta"].get("protocol", "?")
+    fb = B["meta"].get("protocol", "?")
+    out = {"a": a_name, "b": b_name,
+           "protocol_a": fa, "protocol_b": fb,
+           "comparable": fa == fb,
+           "notes_a": A["meta"].get("notes", ""),
+           "notes_b": B["meta"].get("notes", "")}
+    if fa != fb:
+        out["refused"] = ("Different protocols — these are not two data "
+                          "points. Re-run one of them.")
+        out["detail_a"] = A["meta"].get("protocol_detail", "")
+        out["detail_b"] = B["meta"].get("protocol_detail", "")
+        return jsonify({"ok": True, **out})
+
+    try:
+        col_a, col_b, why = cb.pick_column(A, B)
+    except SystemExit as e:
+        return err(str(e), 409)
+    pts = cb.paired(A, B, col_a, col_b)
+    if len(pts) < 4:
+        return err(f"only {len(pts)} matched wind speeds — nothing to say", 409)
+
+    r = cb.analyse(pts)
+    lo = 100 * (r["level"] - 1.96 * r["se_level"])
+    hi = 100 * (r["level"] + 1.96 * r["se_level"])
+    out.update({
+        "column": f"{col_a} vs {col_b}", "column_why": why,
+        "n": r["n"], "level_pct": 100 * r["level"],
+        "ci_lo": lo, "ci_hi": hi, "resolved": bool(lo > 0 or hi < 0),
+        "dn": r["dn"], "dn_ci": 1.96 * r["se_dn"],
+        "scatter_pct": r["resid_pct"],
+        "points": [{"rpm": p["rpm"], "mps": round(p["v"], 2),
+                    "pa": p["pa"], "pb": p["pb"],
+                    "change_pct": 100 * (p["ratio"] - 1),
+                    "clean": bool(p["clean"])} for p in pts],
+    })
+    return jsonify({"ok": True, **out})
+
+
 @app.route("/api/blades/<name>/curve")
 def api_blade_curve(name):
     meta, pts = _sweep_summary(Path(name).name)

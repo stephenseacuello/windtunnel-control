@@ -123,7 +123,10 @@ def test_every_api_path_the_script_calls_is_routed():
     # A template literal must be matched WHOLE — its static tail carries
     # segments too. `/api/blades/${n}/stl` is four segments, not two.
     for m in re.finditer(r"`(/api/[^`]*)`", src):
-        called.add(re.sub(r"\$\{[^}]*\}", "X", m.group(1)))
+        # A query string is not part of the route. `/api/x?a=1` is `/api/x`,
+        # and a check that cannot see that rejects every parameterised call.
+        path = re.sub(r"\$\{[^}]*\}", "X", m.group(1)).split("?")[0]
+        called.add(path.rstrip("&"))
     # Flask <converters> match any single segment.
     patterns = [re.compile("^" + re.sub(r"<[^>]+>", r"[^/]+", r) + "$")
                 for r in routes]
@@ -348,3 +351,46 @@ def test_both_front_ends_write_the_same_columns():
                 "turbine_rpm_at_pmax", "tsr_at_pmax"):
         assert col in sc.SUMMARY_HEADER, f"{col} vanished from the summary"
     assert "turbine_rpm" in sc.POINTS_HEADER
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BLADE COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════
+
+def test_compare_endpoint_exists_and_is_wired():
+    """
+    The campaign exists to compare blades. Doing it only from a terminal meant
+    the refusals in compare_blades.py — the ones that stop a plausible wrong
+    number being produced — were reachable only by someone who knew to run it.
+    """
+    assert '/api/blades/compare' in APP, "no comparison endpoint"
+    assert 'runCompare' in JS, "the frontend never calls it"
+    for el in ("cmp-a", "cmp-b", "cmp-go", "cv-cmp", "cmp-out", "cmp-tbl"):
+        assert f'id="{el}"' in HTML, f"#{el} is missing from the template"
+
+
+def test_compare_endpoint_survives_a_missing_blade():
+    """
+    compare_blades is a CLI first and raises SystemExit for an unknown run.
+    Unhandled in a request that takes the Flask worker down with it — a
+    mistyped blade name should be a 404, not an outage.
+    """
+    i = APP.index('/api/blades/compare')
+    body = APP[i:i + 3000]
+    assert "SystemExit" in body, \
+        "the endpoint does not catch compare_blades' CLI-style exits"
+
+
+def test_the_refusal_reaches_the_browser():
+    """
+    A protocol mismatch must be refused in the UI too. Showing a number and a
+    warning is not the same thing: the number gets quoted and the warning does
+    not travel with it.
+    """
+    i = JS.index("async function runCompare")
+    body = JS[i:i + 4000]
+    assert "comparable" in body, "the UI ignores the comparability flag"
+    assert "Refused" in body, "a mismatch is not refused in the UI"
+    # The level is the headline; the exponent is blind to a uniform change.
+    assert body.index("level_pct") < body.index("r.dn"), \
+        "Δn is presented before the level"

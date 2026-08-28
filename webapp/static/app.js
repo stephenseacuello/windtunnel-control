@@ -1301,12 +1301,105 @@ async function loadBlades() {
       ${b.protocol ? `<div class="sm dim mono">${b.protocol}</div>` : ''}
     </div>`).join('');
   $$('.blade').forEach(el => el.onclick = () => selectBlade(el.dataset.n));
+  fillCompareSelectors(r.blades);
+  // Set once. The library refreshes on a poll, and rebinding every time would
+  // leak a handler per tick — the sort of thing that only shows up after an
+  // hour on the tab, which is exactly how long a campaign session runs.
+  const go = $('#cmp-go');
+  if (go && !go.dataset.bound) { go.dataset.bound = '1'; go.onclick = runCompare; }
   // Open on a real rotor, not the synthetic placeholder.
   const first = r.blades.find(b => !b.name.startsWith('_')) || r.blades[0];
   if (first) selectBlade(first.name);
 }
 
 let BLADE_REQ = 0;
+
+/* ══════════════════════════════════════════════════════════════════════
+   COMPARING TWO ROTORS
+
+   The campaign exists to compare blades, and until now that could only be
+   done from a terminal — so the judgement calls in compare_blades.py were
+   reachable only by someone who knew to run it. The three that matter:
+
+     · a PROTOCOL MISMATCH is refused, not answered. Two blades measured
+       under different settings are not two data points, and across a dozen
+       rotors that is very easy to do by accident and nearly impossible to
+       spot afterwards, because the numbers stay perfectly plausible.
+
+     · a fit is never compared against an argmax. The argmax is biased high
+       by ~1.3% over a flat maximum, which is the same size as the effects
+       being hunted, so the server picks like for like and says which.
+
+     · the headline is the LEVEL with a confidence interval, not the
+       exponent. A uniform power change moves the exponent by exactly zero,
+       so Δn is blind to the most likely outcome — it is shown second, and
+       only because a NON-zero Δn is what distinguishes a real effect from a
+       cut-in artefact.
+   ══════════════════════════════════════════════════════════════════════ */
+
+function fillCompareSelectors(blades) {
+  const swept = blades.filter(b => b.swept).map(b => b.name);
+  for (const id of ['#cmp-a', '#cmp-b']) {
+    const sel = $(id);
+    if (!sel || sel.dataset.n === String(swept.length)) continue;
+    const keep = sel.value;
+    sel.innerHTML = swept.map(n => `<option>${n}</option>`).join('');
+    sel.dataset.n = String(swept.length);
+    if (swept.includes(keep)) sel.value = keep;
+    else if (id === '#cmp-b' && swept.length > 1) sel.value = swept[1];
+  }
+}
+
+async function runCompare() {
+  const a = $('#cmp-a').value, b = $('#cmp-b').value;
+  const out = $('#cmp-out'), plot = $('#cv-cmp'), tbl = $('#cmp-tbl');
+  out.innerHTML = 'comparing…';
+  plot.style.display = 'none'; tbl.style.display = 'none';
+
+  const r = await api(`/api/blades/compare?a=${encodeURIComponent(a)}` +
+                      `&b=${encodeURIComponent(b)}`).catch(e => ({ ok: false, error: String(e) }));
+  if (!r.ok) { out.innerHTML = `<span class="bad">${r.error || 'failed'}</span>`; return; }
+
+  if (!r.comparable) {
+    out.innerHTML =
+      `<div class="bad" style="font-size:1.05em"><b>Refused — different protocols.</b></div>` +
+      `<div style="margin-top:6px">${a}: <span class="mono">${r.protocol_a}</span><br>` +
+      `${b}: <span class="mono">${r.protocol_b}</span></div>` +
+      `<div style="margin-top:6px">Two blades measured under different ` +
+      `settings are not two data points. Re-run one of them.</div>`;
+    return;
+  }
+
+  const sign = r.level_pct >= 0 ? '+' : '';
+  const cls = r.resolved ? 'ok' : 'warn';
+  out.innerHTML =
+    `<div style="font-size:1.35em; font-weight:700" class="${cls}">` +
+    `${sign}${r.level_pct.toFixed(2)}%</div>` +
+    `<div>95% CI [${r.ci_lo >= 0 ? '+' : ''}${r.ci_lo.toFixed(2)}%, ` +
+    `${r.ci_hi >= 0 ? '+' : ''}${r.ci_hi.toFixed(2)}%] · ` +
+    `<b>${r.resolved ? 'resolved' : 'NOT resolved'}</b> · ${r.n} matched points</div>` +
+    `<div style="margin-top:6px">Δn ${r.dn >= 0 ? '+' : ''}${r.dn.toFixed(3)} ` +
+    `± ${r.dn_ci.toFixed(3)} · scatter ${r.scatter_pct.toFixed(2)}%</div>` +
+    `<div class="dim" style="margin-top:6px">${r.column} — ${r.column_why}</div>` +
+    (r.resolved ? '' :
+      `<div class="dim" style="margin-top:6px">No resolvable difference is a ` +
+      `real result: it bounds the effect at ±` +
+      `${Math.max(Math.abs(r.ci_lo), Math.abs(r.ci_hi)).toFixed(1)}% on this rig.</div>`) +
+    `<div class="dim" style="margin-top:6px">Electrical power, not Cp — a ` +
+    `blade that captures more energy but spins slower reads LOWER.</div>`;
+
+  plot.style.display = ''; tbl.style.display = '';
+  drawPlot(plot, [
+    { color: '#5b7288', width: 2.0, x: r.points.map(p => p.mps), y: r.points.map(p => p.pa) },
+    { color: '#00a3a1', width: 2.4, x: r.points.map(p => p.mps), y: r.points.map(p => p.pb) },
+  ], { y0: 0, empty: 'no matched points' });
+  tbl.querySelector('tbody').innerHTML = r.points.map(p =>
+    `<tr class="${p.clean ? '' : 'warn'}"><td>${p.rpm}</td>` +
+    `<td>${p.mps.toFixed(1)}</td><td class="mono">${p.pa.toFixed(4)}</td>` +
+    `<td class="mono">${p.pb.toFixed(4)}</td>` +
+    `<td class="mono ${p.change_pct >= 0 ? 'ok' : 'bad'}">` +
+    `${p.change_pct >= 0 ? '+' : ''}${p.change_pct.toFixed(1)}%</td></tr>`).join('');
+}
 
 async function selectBlade(name) {
   // Clicking B while A's 1.3 MB STL is still downloading used to render A's

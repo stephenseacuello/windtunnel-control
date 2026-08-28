@@ -294,6 +294,25 @@
             <th>fan rpm</th><th>m/s</th><th>P_max (W)</th><th>at (A)</th>
             <th>stop</th></tr></thead><tbody></tbody></table>
         </div>
+
+        <div class="card">
+          <h3>Compare two rotors</h3>
+          <div class="row" style="gap:10px; align-items:flex-end">
+            <label>baseline<select id="cmp-a"></select></label>
+            <label>candidate<select id="cmp-b"></select></label>
+            <button id="cmp-go" class="go">Compare</button>
+          </div>
+          <div id="cmp-out" class="sm dim" style="margin-top:12px">
+            Pick two runs. A protocol mismatch is refused rather than
+            answered — two blades measured under different settings are not
+            two data points.
+          </div>
+          <canvas class="plot" id="cv-cmp" height="200"
+                  style="display:none; margin-top:12px"></canvas>
+          <table class="tbl" id="cmp-tbl" style="display:none"><thead><tr>
+            <th>fan rpm</th><th>m/s</th><th>baseline</th><th>candidate</th>
+            <th>change</th></tr></thead><tbody></tbody></table>
+        </div>
       </div>
     </div>
   </section>
