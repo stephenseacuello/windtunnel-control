@@ -55,6 +55,65 @@ from config import TunnelConfig
 from player import ProfileAborted, ProfilePlayer
 from simulator import SimulatedACS550
 import sweep_core as _sc   # the protocol — shared with src/blade_sweep.py
+
+
+class _Rig:
+    """
+    The dashboard, shaped like the `rig` sweep_core expects.
+
+    Exists so ONE settle and ONE per-point body serve both callers.
+    `set_speed` keeps the guards that belong to this path and not to
+    the CLI's: the E-stop is re-checked inside the lock, because it
+    latches asynchronously and a sweep that read it a moment earlier
+    would otherwise restart a 15 HP fan seconds after somebody hit the
+    button.
+    """
+    def __init__(self, ctl, load):
+        self._c, self.load = ctl, load
+
+    def set_speed(self, rpm):
+        c = self._c
+        with c._lock:
+            if c.estopped:
+                raise _SweepStopped("E-STOP latched")
+            c.drive.set_hz(rpm)
+            if not c.running:
+                c.drive.start(rpm)
+                c.running = True
+        c.target_hz = rpm
+
+    @property
+    def fan_rpm(self):
+        st = self._c.snapshot() or {}
+        return float((st.get("measured") or {}).get("rpm") or 0.0)
+
+    @property
+    def motor_amps(self):
+        st = self._c.snapshot() or {}
+        return float((st.get("measured") or {}).get("amps") or 0.0)
+
+    # Same two lookups the CLI's DriveWatch provides, over this
+    # controller's own poll history. sweep_core owns the arithmetic,
+    # so a dwell is windowed identically on both front ends.
+    def drive_at(self, t):
+        tr = list(self._c.trace)
+        if not tr:
+            return self.fan_rpm, self.motor_amps
+        x = min(tr, key=lambda e: abs(e.get("t", 0) - t))
+        return float(x.get("meas") or 0.0), float(x.get("amps") or 0.0)
+
+    def rotor_rpm_between(self, t0, t1):
+        return _sc.rotor_rpm_between(
+            [(e.get("t", 0), e.get("pulses"), e.get("last_us"))
+             for e in list(self._c.trace)], t0, t1)
+
+    # `_Rig` lives at MODULE scope deliberately. It was first defined inside
+    # start_blade_sweep, next to the `def work():` that uses it — except the
+    # insertion anchored on the FIRST `def work():` in the file, which belongs
+    # to another method entirely. The class landed there, the sweep raised
+    # NameError on its second point, and 155 tests passed because none of them
+    # ran a sweep. Module scope cannot land in the wrong method.
+
 from velocity_loop import VelocityController, suggest_gains
 from velocity_source import (ManualSource, SimulatedSource, StaleReading,
                              build_source)
@@ -822,56 +881,6 @@ class TunnelController:
         groups = sorted(GROUPS) if all_groups else list(DEFAULT_SCAN)
         self.scan = {"state": "running", "done": 0, "total": len(groups) * 99,
                      "found": 0, "group": None, "file": None, "message": ""}
-
-        class _Rig:
-            """
-            The dashboard, shaped like the `rig` sweep_core expects.
-
-            Exists so ONE settle and ONE per-point body serve both callers.
-            `set_speed` keeps the guards that belong to this path and not to
-            the CLI's: the E-stop is re-checked inside the lock, because it
-            latches asynchronously and a sweep that read it a moment earlier
-            would otherwise restart a 15 HP fan seconds after somebody hit the
-            button.
-            """
-            def __init__(self, ctl, load):
-                self._c, self.load = ctl, load
-
-            def set_speed(self, rpm):
-                c = self._c
-                with c._lock:
-                    if c.estopped:
-                        raise _SweepStopped("E-STOP latched")
-                    c.drive.set_hz(rpm)
-                    if not c.running:
-                        c.drive.start(rpm)
-                        c.running = True
-                c.target_hz = rpm
-
-            @property
-            def fan_rpm(self):
-                st = self._c.snapshot() or {}
-                return float((st.get("measured") or {}).get("rpm") or 0.0)
-
-            @property
-            def motor_amps(self):
-                st = self._c.snapshot() or {}
-                return float((st.get("measured") or {}).get("amps") or 0.0)
-
-            # Same two lookups the CLI's DriveWatch provides, over this
-            # controller's own poll history. sweep_core owns the arithmetic,
-            # so a dwell is windowed identically on both front ends.
-            def drive_at(self, t):
-                tr = list(self._c.trace)
-                if not tr:
-                    return self.fan_rpm, self.motor_amps
-                x = min(tr, key=lambda e: abs(e.get("t", 0) - t))
-                return float(x.get("meas") or 0.0), float(x.get("amps") or 0.0)
-
-            def rotor_rpm_between(self, t0, t1):
-                return _sc.rotor_rpm_between(
-                    [(e.get("t", 0), e.get("pulses"), e.get("last_us"))
-                     for e in list(self._c.trace)], t0, t1)
 
         def work():
             sc = self.scan
