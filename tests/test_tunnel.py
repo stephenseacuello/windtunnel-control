@@ -32,6 +32,7 @@ import numpy as np
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+ROOT = Path(__file__).resolve().parent.parent
 
 import feedforward as ff
 import gusts
@@ -930,3 +931,55 @@ class TestEndToEnd:
                 w.writerow([f"{t[i]:.4f}", f"{u[i]:.3f}", f"{meas[i]:.2f}", "14.0"])
         res = analyze.analyze(str(log), verbose=False)
         assert res["tau_s"] == pytest.approx(TRUE, rel=0.05)
+
+
+class TestGustAchievabilityIsDocumentedFromMeasurement:
+    """
+    docs/03_gusts.md was written against an ASSUMED tau of 3 s. The measured
+    value is 0.60 s, so the tunnel is roughly five times better than the
+    document claimed — and the document was advising against experiments this
+    rig can actually run.
+    """
+
+    def _retained(self, period_s, tau):
+        import math
+        fc = 1.0 / (2 * math.pi * tau)
+        f = 1.0 / period_s
+        return 1.0 / math.sqrt(1.0 + (f / fc) ** 2)
+
+    def test_three_second_gusts_are_usable_at_the_measured_tau(self):
+        """
+        62% at tau = 0.60 against 16% at the assumed 3 s. The difference
+        between an experiment worth running and one that is pointless.
+        """
+        assert self._retained(3.0, 0.60) > 0.60
+        assert self._retained(3.0, 3.00) < 0.20
+
+    def test_the_document_quotes_the_measured_figures(self):
+        doc = (ROOT / "docs" / "03_gusts.md").read_text()
+        assert "0.265 Hz" in doc, "the corner frequency is not the measured one"
+        assert "62%" in doc, "the 3 s retention is not stated"
+        assert "8.65 m/s" in doc, "the slew limit is not stated"
+
+    def test_the_slew_limit_is_recorded_so_the_check_can_run(self):
+        """
+        check_realizable's own docstring calls an exceeded slew a SILENT
+        failure: the drive clips and you run a different experiment than the
+        one you designed. Without a slew figure the check does not run at all.
+        """
+        import json
+        cfg = json.loads((ROOT / "data" / "tunnel.json").read_text())
+        assert cfg.get("max_slew_rpm_s"), \
+            "no slew limit recorded, so a fallback check cannot run"
+        assert cfg.get("accel_s") == 6.0, "par 2202 is not recorded"
+
+    def test_the_dashboard_says_when_the_slew_check_is_off(self):
+        """
+        run.py has always announced it. The dashboard silently left max_slew
+        as None, which disables the check without telling anyone — the worst
+        of both: no protection and no warning.
+        """
+        ctl = (ROOT / "webapp" / "controller.py").read_text()
+        i = ctl.index("def profile_preview") if "def profile_preview" in ctl else 0
+        assert "slew_note" in ctl, "the dashboard cannot report a disabled check"
+        assert "SLEW CHECK IS OFF" in ctl, "it does not say so plainly"

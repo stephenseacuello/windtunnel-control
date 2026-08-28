@@ -1084,14 +1084,41 @@ class TunnelController:
         if unit != "hz":
             u = np.array([self.to_hz(x, unit) for x in u])
 
-        with self._lock:
-            accel, _ = self.drive.get_ramp_times()
-        max_slew = self.drive.ref1_max_hz / accel if accel > 0 else None
+        # Par 2202 read LIVE, because a ramp time somebody changed at the
+        # keypad this morning is the one that will clip the profile.
+        #
+        # run.py has always said so when it could not read it. This path did
+        # not: an unreadable ramp left max_slew None and the slew check simply
+        # did not run, which is the failure check_realizable's own docstring
+        # calls silent — the drive clips and you run a different experiment
+        # than the one you designed, with nothing anywhere saying so.
+        slew_note = None
+        try:
+            with self._lock:
+                accel, _ = self.drive.get_ramp_times()
+            max_slew = self.drive.ref1_max_hz / accel if accel > 0 else None
+        except Exception as e:
+            accel, max_slew = 0.0, None
+            slew_note = f"ramp time unreadable ({e})"
+        if max_slew is None:
+            fallback = self.cfg.get("max_slew_rpm_s")
+            if fallback:
+                max_slew = float(fallback)
+                slew_note = ((slew_note or "ramp time unavailable") +
+                             f" — using {max_slew:g} rpm/s recorded in "
+                             f"tunnel.json, which may be stale")
+            else:
+                slew_note = ((slew_note or "ramp time unavailable") +
+                             " — THE SLEW CHECK IS OFF. Read par 2202 on the "
+                             "keypad and record it as max_slew_rpm_s.")
 
         diag = gusts.check_realizable(
             t, u, tau=self.cfg.tau, max_slew_hz_s=max_slew, verbose=False,
             tau_down=self.cfg.get("tau_down"),
             dead_time=self.cfg.get("dead_time", 0.0))
+        if slew_note:
+            diag["slew_note"] = slew_note
+            self.log(f"profile check: {slew_note}", "warn")
 
         desc = f"{kind} · {len(u)} samples · {t[-1]:.0f} s"
         predicted = None

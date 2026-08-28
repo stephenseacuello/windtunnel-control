@@ -218,5 +218,10 @@
       "value": 101325.0,
       "note": null
     }
-  ]
+  ],
+  "accel_s": 6.0,
+  "decel_s": 6.0,
+  "max_slew_mps_s": 8.65,
+  "_ramp_note": "Par 2202 ACCEL TIME and 2203 DECEL TIME, both 6.0 s, read from the keypad 25 Aug 2026. They are the time to traverse the FULL reference range, so the slew limit is ref1_max_rpm/accel_s = 406 rpm/s = 8.65 m/s per second. Both run.py and the dashboard read par 2202 LIVE from the drive and only fall back to this; it is a fallback and a record, not the authority. max_slew_rpm_s is the form check_realizable wants - reference units per second - and max_slew_mps_s is for reading.",
+  "max_slew_rpm_s": 405.8
 }

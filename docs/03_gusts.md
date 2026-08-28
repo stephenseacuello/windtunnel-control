@@ -114,6 +114,47 @@ the hardware answer — worth pricing before promising anything to Jeong's lab.
 
 ## 4. Designing profiles that work
 
+### What is actually achievable — measured, not assumed
+
+Two limits, and the one people worry about is not the binding one.
+
+**Bandwidth.** A first-order tunnel retains `1/√(1+(f/f_c)²)` of a commanded
+amplitude. At the **measured τ = 0.60 s**, f_c = 0.265 Hz:
+
+| gust period | frequency | retained | |
+|---:|---:|---:|---|
+| 30 s | 0.033 Hz | **99%** | |
+| 10 s | 0.100 Hz | **94%** | |
+| 5 s | 0.200 Hz | **80%** | |
+| 3 s | 0.333 Hz | **62%** | usable |
+| 2 s | 0.500 Hz | 47% | marginal |
+| 1 s | 1.000 Hz | 26% | no |
+
+**Gusts down to about three seconds are real.** This document was written
+against an assumed τ of 3 s, where a 10 s gust retained 47% and a 3 s gust
+16% — so it advised against experiments this tunnel can actually run. If you
+have been avoiding short gusts on that advice, stop.
+
+**Slew.** Par 2202/2203 are 6.0 s over the full reference range, so the drive
+can move **8.65 m/s per second**. A 1-cosine gust of amplitude A over period T
+demands a peak of `πA/T`:
+
+| period | A = 1 | A = 2 | A = 3 | A = 5 |
+|---:|---:|---:|---:|---:|
+| 10 s | 0.3 | 0.6 | 0.9 | 1.6 |
+| 5 s | 0.6 | 1.3 | 1.9 | 3.1 |
+| 3 s | 1.0 | 2.1 | 3.1 | 5.2 |
+| 2 s | 1.6 | 3.1 | 4.7 | 7.9 |
+| 1 s | 3.1 | 6.3 | **9.4** | **15.7** |
+
+Only the 1-second row crosses 8.65, and only above about 2 m/s of amplitude.
+**Bandwidth binds first almost everywhere** — shortening the ramps buys
+you very little until you are already past what the lag will pass.
+
+Both numbers come from `data/tunnel.json` (`tau`, `max_slew_mps_s`), so
+`check_realizable` computes them for whatever profile you actually wrote
+rather than leaving you to read them off a table.
+
 ### Use 1-cosine, not steps
 
 ```python
