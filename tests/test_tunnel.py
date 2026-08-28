@@ -983,3 +983,47 @@ class TestGustAchievabilityIsDocumentedFromMeasurement:
         i = ctl.index("def profile_preview") if "def profile_preview" in ctl else 0
         assert "slew_note" in ctl, "the dashboard cannot report a disabled check"
         assert "SLEW CHECK IS OFF" in ctl, "it does not say so plainly"
+
+
+class TestSlewClippedRunsAreExcludedFromTau:
+    """
+    R² alone cannot distinguish a bad FIT from a bad MODEL. One of the five
+    1-cosine runs on this rig commanded 238% of the drive's ramp limit — the
+    drive clipped it, so the response is not first order — and it produced
+    the worst fit of the set (0.926 against 0.989+) while still being counted
+    as a "good fit".
+    """
+
+    def _summary(self):
+        import subprocess, sys as _s
+        return subprocess.run(
+            [_s.executable, str(ROOT / "src" / "analyze.py"),
+             *[str(p) for p in sorted((ROOT / "logs").glob("20260820_14*_1mc.csv"))],
+             "--summary"], capture_output=True, text=True).stdout
+
+    def test_the_clipped_run_is_flagged(self):
+        out = self._summary()
+        assert "CLIPPED" in out, "analyze.py does not flag a slew-clipped run"
+        assert "144715" in out.split("CLIPPED")[0].splitlines()[-1], \
+            "the wrong run is flagged"
+
+    def test_it_is_excluded_from_the_average(self):
+        out = self._summary()
+        assert "EXCLUDED" in out
+        assert "4 unclipped fits" in out, \
+            "the clipped run is still in the tau average"
+
+    def test_the_headline_value_is_unchanged(self):
+        """
+        Reassuring rather than convenient: excluding a bad-model run left the
+        mean at 0.60. Had it moved, every gust figure downstream would have
+        needed revisiting.
+        """
+        out = self._summary()
+        assert "0.60 ±" in out, f"tau moved: {out[-200:]}"
+
+    def test_a_run_under_the_limit_is_not_excluded(self):
+        out = self._summary()
+        body = [l for l in out.splitlines() if "144426" in l]
+        assert body and "CLIPPED" not in body[0], \
+            "a run at 20% of the limit was wrongly excluded"

@@ -2,7 +2,7 @@
 
 Read this before designing a test matrix. The honest summary up front:
 
-> **Measured: τ = 0.60 ± 0.11 s, corner ≈ 0.27 Hz.**
+> **Measured: τ = 0.60 ± 0.14 s, corner ≈ 0.265 Hz.**
 >
 > This document was written before that measurement, against an assumed τ of
 > "a few seconds". **The tunnel turned out roughly five times better than it
@@ -14,7 +14,9 @@ Read this before designing a test matrix. The honest summary up front:
 > from the range below it — that reasoning is unchanged, only the number moved.
 >
 > Reproduce: `python src/analyze.py logs/20260820_14*_1mc.csv --summary`
-> (0.80/0.50/0.60/0.50/0.60 over five 1-cosine runs).
+> (0.80/0.50/0.60/0.50 over four unclipped 1-cosine runs — a fifth
+> commanded 238% of the ramp limit and is excluded, because a clipped
+> response is not first order and a τ fitted to it describes the ramp).
 
 That constraint is not a defect of the Modbus approach. Commanding the drive
 over analog, over a fieldbus card, or by hand turning the pot would all hit
@@ -73,6 +75,18 @@ levers are mechanical (see §5).
 ---
 
 ## 3. Shortening the ramps — carefully
+
+> **Read section 4 first.** At the measured τ = 0.60 s the drive's ramp is not
+> what limits you. Par 2202/2203 at 6.0 s allow 8.65 m/s per second, and a
+> 1-cosine gust only demands more than that below about a 1-second period.
+> **Bandwidth binds first almost everywhere**, so shortening the ramps buys
+> very little until you are already past what the lag will pass.
+>
+> This section was written when τ was assumed to be a few seconds and the ramp
+> looked like the obvious lever. It is kept because the decel asymmetry below
+> is real, is not obvious, and will bite anyone who does decide to shorten
+> them — but it is no longer where to start.
+
 
 Parameters `2202` (accel) and `2203` (decel) are the time to traverse
 0 → `2008` MAX FREQ, **not** the time to reach your setpoint. Misreading this

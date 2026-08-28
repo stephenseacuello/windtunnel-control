@@ -335,7 +335,7 @@ def test_tau_is_quoted_consistently():
     """
     tau was 0.63 in the README, 0.80 in tunnel.json and 3.0 throughout the
     gusts document — all at once, all presented as fact. The measured value is
-    0.60 +/- 0.11 s over five runs.
+    0.60 +/- 0.14 s over four unclipped runs.
     """
     import json as _json
     cfg = _json.loads((ROOT / "data" / "tunnel.json").read_text())

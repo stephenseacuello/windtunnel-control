@@ -91,7 +91,7 @@ python examples/gust_demo.py --tau 0.60
 ```
 
 τ is the tunnel's time constant — how fast wind speed follows a change in fan
-speed. Measured at **0.60 ± 0.11 s**. Try `--tau 3.0` and watch the same gust
+speed. Measured at **0.60 ± 0.14 s**. Try `--tau 3.0` and watch the same gust
 get rounded off: that is what a slower tunnel would do to your profile, and it
 is why `docs/03_gusts.md` exists.
 

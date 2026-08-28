@@ -95,9 +95,10 @@ drive is rated 46.2 A.
 
 ## Bandwidth — better than originally feared
 
-**τ = 0.60 ± 0.11 s**, measured across five 1-cosine gust runs on 20 Aug 2026
-(0.80/0.50/0.60/0.50/0.60). Reproduce with
-`python src/analyze.py logs/20260820_14*_1mc.csv --summary`.
+**τ = 0.60 ± 0.14 s**, from four unclipped 1-cosine gust runs on 20 Aug 2026
+(0.80/0.50/0.60/0.50). A fifth is excluded — it commanded 238% of the drive's
+ramp limit, so the drive clipped it and the response is not first order.
+Reproduce with `python src/analyze.py logs/20260820_14*_1mc.csv --summary`.
 Corner frequency ≈ **0.25 Hz**.
 
 Earlier planning assumed τ ≈ 3 s and a 0.05 Hz corner, and scoped gust work

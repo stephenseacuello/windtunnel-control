@@ -79,6 +79,34 @@ def estimate_tau(t, cmd, meas, tau_grid=None):
     return best
 
 
+def peak_slew(t, cmd):
+    """Largest commanded rate of change, in reference units per second."""
+    if len(t) < 3:
+        return float("nan")
+    return float(np.abs(np.gradient(np.asarray(cmd, float),
+                                    np.asarray(t, float))).max())
+
+
+def slew_limit_from_config():
+    """
+    The drive's ramp limit, from tunnel.json. None if it was never recorded.
+
+    Par 2202 is the time to traverse the FULL reference range, so the limit is
+    ref1_max / accel_s.
+    """
+    try:
+        import json as _j
+        cfg = _j.loads((Path(__file__).resolve().parents[1] /
+                        "data" / "tunnel.json").read_text())
+    except Exception:
+        return None
+    v = cfg.get("max_slew_rpm_s")
+    if v:
+        return float(v)
+    full, acc = cfg.get("ref1_max_rpm"), cfg.get("accel_s")
+    return float(full) / float(acc) if full and acc else None
+
+
 def analyze(path, verbose=True):
     """
     Fit the tunnel's response from a run log.
@@ -92,7 +120,10 @@ def analyze(path, verbose=True):
     good = ~np.isnan(meas)
 
     out = {"file": str(path), "samples": len(t),
-           "duration_s": float(t[-1]) if len(t) else 0.0}
+           "duration_s": float(t[-1]) if len(t) else 0.0,
+           # Recorded for every run, because a fit cannot tell a bad FIT from
+           # a bad MODEL — and a slew-clipped response is the wrong model.
+           "peak_slew": peak_slew(t, cmd)}
     if meta:
         out["mode"] = meta.get("mode")
         out["complete"] = meta.get("run", {}).get("complete")
@@ -253,16 +284,41 @@ def main():
         return
 
     if a.summary:
-        print(f"{'file':<38} {'τ':>7} {'R²':>6} {'retained':>9}")
-        print("─" * 64)
+        # A SLEW-CLIPPED run is not a first-order response, so fitting tau to
+        # it fits the wrong model. One of the five 1-cosine runs on this rig
+        # demanded 238% of the drive's ramp limit; it produced the worst fit
+        # of the set (R2 0.926 against 0.989+) and was still counted as a
+        # "good fit" because R2 alone cannot tell a bad fit from a bad model.
+        limit = slew_limit_from_config()
+        clipped = set()
+        if limit:
+            for r in results:
+                sl = r.get("peak_slew")
+                if sl and sl == sl and sl > limit:
+                    clipped.add(r["file"])
+
+        print(f"{'file':<38} {'τ':>7} {'R²':>6} {'retained':>9}  {'slew':>6}")
+        print("─" * 72)
         for r in results:
+            sl = r.get("peak_slew")
+            pct = (f"{100*sl/limit:.0f}%" if limit and sl and sl == sl else "—")
+            mark = "  CLIPPED" if r["file"] in clipped else ""
             print(f"{Path(r['file']).name:<38} {r['tau_s']:>7.2f} "
-                  f"{r['fit_r2']:>6.3f} {r['amplitude_retained']:>8.0%}")
-        taus = [r["tau_s"] for r in results
-                if r["tau_s"] == r["tau_s"] and r["fit_r2"] > 0.7]
+                  f"{r['fit_r2']:>6.3f} {r['amplitude_retained']:>8.0%}  "
+                  f"{pct:>6}{mark}")
+
+        good = [r for r in results
+                if r["tau_s"] == r["tau_s"] and r["fit_r2"] > 0.7
+                and r["file"] not in clipped]
+        taus = [r["tau_s"] for r in good]
+        if clipped:
+            print(f"\n  {len(clipped)} run(s) EXCLUDED — commanded slew above "
+                  f"the drive's {limit:.0f}/s ramp limit.\n  The drive clips "
+                  f"those, so the response is not first order and a τ fitted "
+                  f"to it\n  describes the ramp, not the tunnel.")
         if len(taus) > 1:
-            print(f"\n  τ across {len(taus)} good fits: "
-                  f"{np.mean(taus):.2f} ± {np.std(taus):.2f} s")
+            print(f"\n  τ across {len(taus)} unclipped fits: "
+                  f"{np.mean(taus):.2f} ± {np.std(taus, ddof=1):.2f} s")
             if np.std(taus) > 0.25 * np.mean(taus):
                 print("  spread is wide — τ may vary with operating point, "
                       "which a single first-order model cannot capture. Worth "

@@ -170,7 +170,7 @@
   "tau": 0.6,
   "tau_down": 0.6,
   "dead_time": 0.0,
-  "_tau_note": "0.60 +/- 0.11 s across FIVE 1-cosine gust runs (0.80/0.50/0.60/0.50/0.60), reproducible with `python src/analyze.py logs/20260820_14*_1mc.csv --summary`. The previous 0.8 was a single 8 s fit and is now one of the five. Corner f = 1/(2*pi*tau) ~ 0.27 Hz.",
+  "_tau_note": "0.60 +/- 0.14 s across FOUR unclipped 1-cosine gust runs (0.80/0.50/0.60/0.50), reproducible with `python src/analyze.py logs/20260820_14*_1mc.csv --summary`. A FIFTH run is EXCLUDED: it commanded 238% of the drive's 406 rpm/s ramp limit, so the drive clipped it and the response is not first order. It produced the worst fit of the set (R2 0.926 against 0.989+) and was counted as a good fit anyway, because R2 alone cannot distinguish a bad fit from a bad MODEL. analyze.py now flags and excludes it. The mean is unchanged at 0.60; only the provenance is honest now. Corner f = 1/(2*pi*tau) ~ 0.265 Hz.",
   "temperature_c": 21.5,
   "pressure_pa": 101325.0,
   "_ambient_note": "Record per session. Air density cannot be reconstructed later.",

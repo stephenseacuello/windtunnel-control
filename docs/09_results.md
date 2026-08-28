@@ -142,7 +142,7 @@ cross-checks answer a question about a different part.
 |---|---|
 | Wind speed | v = 0.02132 × fan rpm − 0.424, R² = 0.9996 |
 | Range | 10.1 – 37.5 m/s over 500 – 1800 rpm |
-| Bandwidth | **τ = 0.60 ± 0.11 s**, five 1-cosine gust runs |
+| Bandwidth | **τ = 0.60 ± 0.14 s**, four unclipped 1-cosine gust runs |
 | Corner | f = 1/(2πτ) ≈ 0.27 Hz |
 
 τ reproduces with

@@ -275,7 +275,7 @@ def build_jeong():
                           "point and measures it"),
                  ("Wind", f"500–1800 rpm fan = 10.1–{F['v_top']:.1f} m/s, "
                           f"v = 0.02132·rpm − 0.424 (R² = 0.9996)"),
-                 ("Bandwidth", "τ = 0.63 ± 0.12 s, from five 1-cosine gusts")]:
+                 ("Bandwidth", "τ = 0.60 ± 0.14 s, four unclipped 1-cosine gusts")]:
         rich(tf, [(f"{a} — ", True, NAVY), (b, False, INK)], 13, space=9)
     para(tf, "ROTOR UNDER TEST", 12, True, KEANEY, space=8)
     rich(tf, [("Vertical-axis H-rotor", True, NAVY),
