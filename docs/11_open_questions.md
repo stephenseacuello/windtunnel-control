@@ -61,7 +61,7 @@ that carries the 4.5%.
 
 ---
 
-## 5 · ### The anemometer calibration form
+## 5 · The anemometer calibration form
 
 Fitting says the sensor is **linear-output (cup or vane)**, beating the
 pressure-sensor form by ΔAIC 17 — decisive. So the March report's §3 "hot-wire"
