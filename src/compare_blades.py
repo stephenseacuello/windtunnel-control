@@ -157,6 +157,25 @@ def main():
         print(f"  --force given: continuing, and the result is NOT a blade "
               f"comparison.\n")
 
+    # A matching `protocol` with a DIFFERING `protocol_full` means the two runs
+    # agreed on everything the original hash covers and still walked different
+    # ladders — stop_rpm is the v² normalisation reference, and min_step_amps
+    # sets the floor, and neither is in the original shape. Warn rather than
+    # refuse: the banked runs predate the field and carry it empty, and
+    # refusing on an absent field would reject the campaign's own baseline.
+    fla = A["meta"].get("protocol_full")
+    flb = B["meta"].get("protocol_full")
+    if fla and flb and fla != flb:
+        print(f"\n  ⚠ SAME protocol, DIFFERENT ladder.")
+        print(f"      {A['name']}: {A['meta'].get('protocol_extra','?')}")
+        print(f"      {B['name']}: {B['meta'].get('protocol_extra','?')}")
+        print(f"    The original fingerprint does not cover min_step_amps or "
+              f"stop_rpm, and\n    stop_rpm normalises the whole v² ladder. "
+              f"Treat this as NOT comparable.")
+    elif not (fla and flb):
+        print(f"  note: one run predates protocol_full, so a ladder difference "
+              f"could not be checked")
+
     col_a, col_b, why = pick_column(A, B)
     print(f"  power column: {col_a} vs {col_b}  —  {why}")
 

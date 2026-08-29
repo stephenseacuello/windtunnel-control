@@ -79,6 +79,7 @@ from load_ramp import protocol_meta, wind_from_rpm
 # these, so a change to the ladder, the ceiling or the settle cannot reach one
 # path and miss the other — which is exactly how the two came to disagree.
 from sweep_core import (ceiling_for, step_for, settle_wind, estimate,
+                        protocol as protocol_meta_shared,
                         interp_at, rotor_rpm_between, summary_row, point_rows,
                         SUMMARY_HEADER, POINTS_HEADER, ROTOR_RADIUS_M,
                         archive_existing,
@@ -300,8 +301,9 @@ def run_sweep(a):
     # Move any earlier run of this name aside BEFORE measuring. The CLI
     # simply overwrote: ten minutes of tunnel time could silently replace a
     # curve that took ten minutes to get.
-    _moved = archive_existing(Path(a.out).parent if a.out else Path("logs"),
-                              a.blade)
+    # The SAME stem flush_csv writes to — see archive_existing.
+    _moved = archive_existing(Path(a.out) if a.out
+                              else Path("logs") / f"sweep_{a.blade}")
     if _moved:
         print(f"  earlier run archived as {', '.join(_moved)}")
 
@@ -406,7 +408,7 @@ def run_sweep(a):
 
             # Bank this point NOW. See flush_csv.
             try:
-                flush_csv(a, rows, summary, protocol_meta(a, load, voff, rng))
+                flush_csv(a, rows, summary, protocol_meta_shared(a, voff, rng, load=load))
             except Exception as e:
                 print(f"     ⚠ could not write partial results: {e}")
 
@@ -433,7 +435,7 @@ def run_sweep(a):
             pass
         load.close()
 
-    return rows, summary, protocol_meta(a, load, voff, rng)
+    return rows, summary, protocol_meta_shared(a, voff, rng, load=load)
 
 
 

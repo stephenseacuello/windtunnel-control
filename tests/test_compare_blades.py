@@ -247,7 +247,7 @@ class TestArchiveProtectsBankedRuns:
         sm.write_text("ORIGINAL SUMMARY")
         pt.write_text("ORIGINAL POINTS")
 
-        moved = self._core().archive_existing(tmp_path, "v1_Ra20")
+        moved = self._core().archive_existing(tmp_path / "sweep_v1_Ra20")
 
         assert len(moved) == 2, "both files must move together"
         assert not sm.exists() and not pt.exists(), \
@@ -266,7 +266,7 @@ class TestArchiveProtectsBankedRuns:
         f.write_text("data")
         old = time.time() - 86400 * 3          # three days ago
         os.utime(f, (old, old))
-        moved = self._core().archive_existing(tmp_path, "x")
+        moved = self._core().archive_existing(tmp_path / "sweep_x")
         want = time.strftime("%Y%m%d_%H%M%S", time.localtime(old))
         assert want in moved[0], \
             f"archive is stamped {moved[0]}, not from the data's date {want}"
@@ -279,12 +279,12 @@ class TestArchiveProtectsBankedRuns:
             f = tmp_path / "sweep_y_summary.csv"
             f.write_text("run")
             os.utime(f, (stamp, stamp))        # identical mtime, on purpose
-            names += self._core().archive_existing(tmp_path, "y")
+            names += self._core().archive_existing(tmp_path / "sweep_y")
         assert len(set(names)) == 2, \
             f"two archives collapsed onto one name: {names}"
 
     def test_nothing_to_archive_is_not_an_error(self, tmp_path):
-        assert self._core().archive_existing(tmp_path, "never_run") == []
+        assert self._core().archive_existing(tmp_path / "sweep_never_run") == []
 
 
 def test_both_front_ends_archive_before_writing():
@@ -295,3 +295,30 @@ def test_both_front_ends_archive_before_writing():
     assert "archive_existing" in cli, "the CLI does not archive"
     assert "shutil.copy2(sp" not in ctl, \
         "the dashboard is copying the file it just wrote again"
+
+
+def test_archive_follows_the_out_stem_not_a_guessed_name(tmp_path):
+    """
+    archive_existing took a DIRECTORY and rebuilt `sweep_<blade>` from it,
+    which is right only when the caller writes to exactly that name.
+    `blade_sweep.py --out logs/myrun` writes `myrun_summary.csv`, so the guard
+    looked for a file the run never creates, found nothing, printed nothing,
+    and the real output was overwritten in place — at the FIRST completed
+    point, because flush_csv runs inside the loop.
+
+    It could also misfire the other way: `--out logs/anything --blade v1_Ra20`
+    resolved the directory to logs/, where the banked run lives, and renamed
+    THAT aside.
+    """
+    import sweep_core as sc
+    (tmp_path / "myrun_summary.csv").write_text("FIRST RUN")
+    (tmp_path / "myrun_points.csv").write_text("FIRST POINTS")
+    # a decoy under the name the old code would have guessed
+    (tmp_path / "sweep_blade_summary.csv").write_text("SOMEBODY ELSE'S DATA")
+
+    moved = sc.archive_existing(tmp_path / "myrun")
+
+    assert len(moved) == 2, "the --out run was not archived"
+    assert not (tmp_path / "myrun_summary.csv").exists()
+    assert (tmp_path / "sweep_blade_summary.csv").read_text() == \
+        "SOMEBODY ELSE'S DATA", "it moved a file belonging to another run"

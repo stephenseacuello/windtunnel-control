@@ -109,3 +109,61 @@ def test_the_run_is_readable_by_the_comparison_tool(swept):
     loaded = cb.load(sw["summary_csv"])
     assert loaded["meta"].get("protocol"), "no fingerprint in the header"
     assert loaded["rows"], "compare_blades read no rows"
+
+
+def test_campaign_settings_reproduce_the_banked_ladder():
+    """
+    sweep_core.CAMPAIGN carried min_step_amps = 0.001 for two days. The banked
+    runs used 0.002 — provable from the data: the first demands at fan 500 are
+    0.0010, 0.0020, 0.0040, 0.0060, a 2.000 mA step.
+
+    min_step_amps is NOT in the hashed shape, so settings() produced a 1.455 mA
+    ladder and stamped it 94bed28333f7, the fingerprint of a 2.000 mA one. The
+    dashboard would have run a different measurement while the hash swore it
+    had not.
+    """
+    import csv
+    from collections import defaultdict
+    import sweep_core as sc
+
+    by = defaultdict(list)
+    body = [l for l in (ROOT / "logs" / "sweep_v1_Ra20_points.csv")
+            .read_text().splitlines(True) if not l.startswith("#")]
+    for r in csv.DictReader(body):
+        try:
+            by[int(float(r["fan_rpm"]))].append(float(r["demand_a"]))
+        except (KeyError, TypeError, ValueError):
+            pass
+    lo = min(by)
+    demands = sorted(set(by[lo]))
+    observed = round(demands[2] - demands[1], 6)      # past the floor
+
+    a = sc.settings(step_amps=0.02, dwell=1.0)
+    assert abs(sc.step_for(lo, a) - observed) < 1e-6, (
+        f"CAMPAIGN walks {sc.step_for(lo, a)*1000:.3f} mA at {lo} rpm; the "
+        f"banked runs walked {observed*1000:.3f}")
+
+
+def test_the_full_hash_sees_what_the_original_cannot():
+    """
+    stop_rpm is the v² ladder's NORMALISATION reference, not a stopping point.
+    Shortening a sweep to save tunnel time reads like "how far the run got"
+    and is actually a different ladder at every wind speed — under one
+    fingerprint.
+    """
+    import sweep_core as sc
+    a = sc.settings(step_amps=0.02, dwell=1.0)
+    b = sc.settings(step_amps=0.02, dwell=1.0, stop_rpm=1200)
+    ma, mb = sc.protocol(a, 0.5, "low"), sc.protocol(b, 0.5, "low")
+    assert ma["protocol"] == mb["protocol"], \
+        "the original hash changed; the banked runs are orphaned"
+    assert ma["protocol_full"] != mb["protocol_full"], \
+        "protocol_full does not see a stop_rpm change either"
+    assert sc.step_for(1000, a) != sc.step_for(1000, b), \
+        "stop_rpm no longer moves the ladder — check step_for"
+
+
+def test_the_campaign_fingerprint_is_still_the_banked_one():
+    import sweep_core as sc
+    a = sc.settings(step_amps=0.02, dwell=1.0)
+    assert sc.protocol(a, 0.5, "low")["protocol"] == "94bed28333f7"

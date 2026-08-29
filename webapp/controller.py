@@ -57,6 +57,40 @@ from simulator import SimulatedACS550
 import sweep_core as _sc   # the protocol — shared with src/blade_sweep.py
 
 
+class _ThreadTee:
+    """
+    stdout that captures ONE thread and passes everything else through.
+
+    `contextlib.redirect_stdout` swaps sys.stdout process-wide. Used from a
+    background job thread — as this file did — it swallows the output of every
+    OTHER thread for the job's duration: werkzeug's request log, any library
+    print, anything a concurrent operation said. Demonstrated with a print
+    from the main thread during a 1 s job, which produced nothing at all.
+
+    The job's own output is a real feature (the dashboard shows it at
+    `#jb-out`), so the capture stays — scoped to the thread that asked for it.
+    """
+
+    def __init__(self, real, owner, buf):
+        self._real, self._owner, self._buf = real, owner, buf
+
+    def _target(self):
+        import threading as _t
+        return self._buf if _t.current_thread() is self._owner else self._real
+
+    def write(self, s):
+        return self._target().write(s)
+
+    def flush(self):
+        try:
+            self._target().flush()
+        except Exception:
+            pass
+
+    def __getattr__(self, name):
+        return getattr(self._real, name)
+
+
 class _Rig:
     """
     The dashboard, shaped like the `rig` sweep_core expects.
@@ -1281,19 +1315,34 @@ class TunnelController:
                      "output": "", "desc": kind}
 
         def wrap():
+            import sys as _sys
+            import threading as _t
             buf = io.StringIO()
+            # Thread-scoped, not process-wide — see _ThreadTee.
+            prev = _sys.stdout
+            _sys.stdout = _ThreadTee(prev, _t.current_thread(), buf)
             try:
-                with contextlib.redirect_stdout(buf):
-                    result = fn()
+                result = fn()
                 self._job["result"] = result
-                self._job["state"] = "done"
+                # Do NOT overwrite a terminal state. `_halt_all` sets
+                # "aborted" when the E-stop fires, and this used to stamp
+                # "done" over it the moment fn() returned — so the UI reported
+                # a clean successful characterization of an E-stopped tunnel,
+                # which is what made the bad tau look trustworthy.
+                if self._job.get("state") not in ("aborted", "error"):
+                    self._job["state"] = "done"
+                    self.log(f"{kind} complete", "ok")
+                else:
+                    self.log(f"{kind} ended {self._job['state']}", "warn")
                 self._job["progress"] = 1.0
-                self.log(f"{kind} complete", "ok")
             except Exception as e:
                 self._job["state"] = "error"
                 self._job["error"] = str(e)
                 self.log(f"{kind} failed: {e}", "fault")
             finally:
+                # Restore FIRST. Anything below that raises must not leave the
+                # process writing into a dead job's buffer.
+                _sys.stdout = prev
                 self._job["output"] = buf.getvalue()
                 try:
                     with self._lock:
@@ -1342,6 +1391,21 @@ class TunnelController:
                                       settle=settle, record=record,
                                       log_path=log)
             tau = res.get("tau_s")
+            # An E-STOPPED run still returns a tau, and it is the COAST-DOWN.
+            # Measured: an E-stop 4 s into a characterize wrote tau = 4.756 s
+            # over the measured 0.60 — an 8x error that then fed the band
+            # limit, realizability, feedforward, the loop gain and the
+            # simulator. Nothing errored, and the job reported "complete".
+            #
+            # A calibration is a claim about the tunnel. A run that was
+            # interrupted did not make that claim.
+            if self.estopped or (self._job or {}).get("state") == "aborted":
+                res["saved_as"] = None
+                res["not_saved"] = ("run was interrupted — tau NOT written. "
+                                    "An aborted step fits the coast-down, not "
+                                    "the tunnel.")
+                self.log("characterize interrupted — tau not saved", "warn")
+                return res
             if tau and tau == tau:
                 key = "tau_down" if falling else "tau"
                 self.cfg.set(key, round(float(tau), 3),
@@ -1966,7 +2030,7 @@ class TunnelController:
         # Renamed, not copied, and stamped with the ORIGINAL file's date so
         # the archive says when the data was taken rather than when it was
         # displaced.
-        self._archived = _sc.archive_existing(logs, blade)
+        self._archived = _sc.archive_existing(out)
         if self._archived:
             self.log(f"earlier {blade} run archived as "
                      f"{', '.join(self._archived)}", "warn")
@@ -1975,6 +2039,8 @@ class TunnelController:
                       "rpms": rpms, "i": 0, "n": len(rpms), "points": [],
                       "ramp": [], "current_rpm": None, "message": "",
                       "protocol": fingerprint, "protocol_detail": shape,
+                      "protocol_full": meta.get("protocol_full", ""),
+                      "protocol_extra": meta.get("protocol_extra", ""),
                       "_summary_rows": [], "_points_rows": [],
                       "archived": list(getattr(self, "_archived", [])),
                       "summary_csv": str(out) + "_summary.csv",
@@ -2110,6 +2176,8 @@ class TunnelController:
                     ("instrument", getattr(self.load, "identity", "?")),
                     ("protocol", sw["protocol"]),
                     ("protocol_detail", sw["protocol_detail"]),
+                    ("protocol_full", sw.get("protocol_full", "")),
+                    ("protocol_extra", sw.get("protocol_extra", "")),
                     ("clock", time.strftime("%Y-%m-%dT%H:%M:%S%z")),
                     ("_note", "Written by the dashboard, which runs the "
                               "SAME protocol as blade_sweep.py - one ladder, "

@@ -59,14 +59,43 @@ from peak_finder import find_peak
 # The campaign protocol. Changing any of these changes the fingerprint, which
 # is the point: a run under different settings must not be mistaken for one of
 # these. `94bed28333f7` is the hash of these values at step 0.02 / dwell 1.0.
+# ⚠️ THESE ARE NOT PREFERENCES. They are what v1_Ra20 and v1_Ra80 were
+# measured with, read off blade_sweep.py's argparse defaults, and verified
+# against the ladder the banked runs actually walked: the first demands at
+# fan 500 are 0.0010, 0.0020, 0.0040, 0.0060 — a 2.000 mA step, which is
+# min_step_amps 0.002 and NOT the 0.001 this table carried for two days.
+#
+# That divergence was invisible: min_step_amps is not in the hashed shape, so
+# `sweep_core.settings()` produced a 1.455 mA ladder at 500 rpm and stamped it
+# `94bed28333f7` — the fingerprint of a 2.000 mA one. The dashboard would have
+# run a different measurement while the hash swore it had not.
+#
+# Change nothing here without re-reading `_UNHASHED` below.
 CAMPAIGN = dict(
-    step_amps=0.02, step_scaling="v2", min_step_amps=0.001, dwell=1.0,
+    step_amps=0.02, step_scaling="v2", min_step_amps=0.002, dwell=1.0,
     stop_power_frac=0.80, unload_amps=0.0, max_amps=0.8, volt_off=0.5,
     range="low", collapse_frac=0.70, confirm=2, step_frac=0.0,
-    settle_min=2.0, settle_max=30.0, settle_poll=0.25, settle_tol=0.02,
-    settle_confirm=3, rpm_tol_abs=15.0, rpm_tol_frac=0.03,
+    settle_min=2.0, settle_max=20.0, settle_poll=0.5, settle_tol=0.01,
+    settle_confirm=3, rpm_tol_abs=10.0, rpm_tol_frac=0.02,
     start_rpm=500, stop_rpm=1800, rpm_step=100,
 )
+
+# Settings that change the measurement but are NOT in the hashed shape.
+#
+# `stop_rpm` is the worst of them: it is the v² ladder's NORMALISATION
+# reference (see step_for and ceiling_for), not a stopping point. Shortening a
+# sweep to save tunnel time reads like "how far the run got" and is actually a
+# different ladder at every wind speed — 6.06 mA at 1000 rpm with stop_rpm
+# 1800, 13.80 mA with 1200 — under one fingerprint.
+#
+# The hash is NOT extended here, because the two banked runs carry
+# 94bed28333f7 and re-hashing orphans them. Instead these are RECORDED in the
+# CSV header so an archived run can be checked, and `protocol_full` below
+# hashes them separately so a mismatch is visible without breaking the old
+# comparison.
+_UNHASHED = ("min_step_amps", "stop_rpm", "start_rpm", "rpm_step",
+             "settle_min", "settle_max", "settle_poll", "settle_tol",
+             "settle_confirm", "rpm_tol_abs", "rpm_tol_frac", "unload_amps")
 
 
 def settings(**over):
@@ -146,7 +175,16 @@ def protocol(a, voff, rng, load=None):
     hash. The dashboard used to hand-write this string, which is how it came
     to assert a cut-out voltage it never applied.
     """
-    return protocol_meta(a, load, voff, rng)
+    import hashlib as _h
+    meta = protocol_meta(a, load, voff, rng)
+    extra = ";".join(f"{k}={getattr(a, k, '')}" for k in _UNHASHED)
+    meta["protocol_extra"] = extra
+    # A second hash over shape + the settings the first one cannot see. Two
+    # runs agreeing on `protocol` but differing on `protocol_full` walked
+    # different ladders, and compare_blades says so.
+    meta["protocol_full"] = _h.sha256(
+        (meta["protocol_detail"] + ";" + extra).encode()).hexdigest()[:12]
+    return meta
 
 
 def prepare_load(load, a):
@@ -389,35 +427,40 @@ def point_rows(pt, blade, fan_rpm_at, rotor_rpm_at):
     return out, dwell_rpm
 
 
-def archive_existing(logs_dir, blade):
+def archive_existing(stem):
     """
-    Move a previous run of this blade name aside. Returns what it moved.
+    Move a previous run aside. `stem` is the OUTPUT STEM, not a directory.
 
-    Both front ends write to logs/sweep_<blade>_*.csv, and both overwrote.
-    The dashboard's "archive copy" ran AFTER the write and copied the file it
-    had just produced, so a re-run destroyed the earlier curve and then
-    archived the new one under a timestamp. The CLI had no archive at all.
+    Returns what it moved.
 
-    v1_Ra20 is one of two blade runs this project has and the baseline for its
-    only result. Typing that name a second time would have taken it.
+    It took a directory and a blade name and rebuilt `sweep_<blade>` from
+    them, which is right only when the caller writes to exactly that name.
+    `blade_sweep.py --out logs/myrun` writes `myrun_summary.csv`, so the guard
+    looked for a file the run never creates, found nothing, printed nothing,
+    and the real output was overwritten in place — at the FIRST completed
+    point, because flush_csv runs inside the loop. It could also misfire the
+    other way: `--out logs/anything --blade v1_Ra20` resolved the directory to
+    logs/, where the banked run lives, and renamed THAT aside.
 
-    Renamed rather than copied, and stamped from the ORIGINAL file's mtime, so
-    the archive records when the data was TAKEN rather than when it was
-    displaced. Both files move together: a summary without its points is a
-    curve nobody can re-analyse.
+    A stem cannot be wrong about where the caller writes, because it is the
+    same value the caller writes to.
+
+    Renamed rather than copied, and stamped from the ORIGINAL file's mtime so
+    the archive records when the data was TAKEN. Both files move together: a
+    summary without its points is a curve nobody can re-analyse.
     """
     import time as _t
-    logs_dir = Path(logs_dir)
+    stem = Path(stem)
     moved = []
     for suffix in ("_summary.csv", "_points.csv"):
-        old = logs_dir / f"sweep_{blade}{suffix}"
+        old = Path(str(stem) + suffix)
         if not old.exists():
             continue
         when = _t.strftime("%Y%m%d_%H%M%S", _t.localtime(old.stat().st_mtime))
-        keep = logs_dir / f"sweep_{blade}_{when}{suffix}"
+        keep = Path(f"{stem}_{when}{suffix}")
         i = 1
         while keep.exists():
-            keep = logs_dir / f"sweep_{blade}_{when}_{i}{suffix}"
+            keep = Path(f"{stem}_{when}_{i}{suffix}")
             i += 1
         old.rename(keep)
         moved.append(keep.name)
