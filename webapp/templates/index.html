@@ -48,13 +48,21 @@
 
 <div class="shell">
   <nav class="rail" id="rail">
+    <!-- Grouped, not reordered. Ten flat tabs read as one undifferentiated
+         list; the same ten in four clusters say what kind of thing each is,
+         and nothing moves position so muscle memory survives. -->
+    <span class="tab-group">run</span>
     <div class="tab on" data-p="control">Control</div>
+    <div class="tab" data-p="profiles">Profiles</div>
+    <span class="tab-group">rotor</span>
     <div class="tab" data-p="turbine">Turbine</div>
     <div class="tab" data-p="blades">Blades</div>
-    <div class="tab" data-p="profiles">Profiles</div>
+    <div class="tab" data-p="analysis">Analysis</div>
+    <span class="tab-group">set up</span>
     <div class="tab" data-p="params">Parameters</div>
     <div class="tab" data-p="commission">Commissioning</div>
     <div class="tab" data-p="calib">Calibration</div>
+    <span class="tab-group">check</span>
     <div class="tab" data-p="diag">Diagnostics</div>
     <div class="tab" data-p="logs">Logs</div>
     <div class="rail-foot" id="foot">—</div>
@@ -268,6 +276,53 @@
   </section>
 
   <!-- ============================= BLADES ============================= -->
+
+  <section class="page" id="p-analysis">
+    <div class="card">
+      <h3>What the campaign has measured <span class="lbl" id="an-sub">—</span></h3>
+      <div id="an-head" class="sm dim">loading…</div>
+    </div>
+
+    <div class="split">
+      <div class="card" style="flex:1 1 420px">
+        <h3>Power law <span class="lbl">log–log</span></h3>
+        <canvas class="plot" id="cv-law" height="240"></canvas>
+        <div class="sm dim">A power law is a straight line only in log–log,
+          so that is where it is drawn. Dots are measured peaks; the line is
+          the fit. <b>The exponent is a generator characteristic</b>, not
+          evidence about the blade — see <code>docs/09_results.md</code>.</div>
+      </div>
+
+      <div class="card" style="flex:1 1 420px">
+        <h3>Efficiency <span class="lbl">Cp, electrical</span></h3>
+        <canvas class="plot" id="cv-cp" height="240"></canvas>
+        <div class="sm dim">Cp = P / (½ρAv³) with <b>A = 2RH</b>, a cylinder,
+          not πR². This is electrical power, so it carries the generator and
+          the rectifier: a working H-rotor is 0.20–0.35.</div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="card" style="flex:1 1 420px">
+        <h3>Generator <span class="lbl" id="an-gen">—</span></h3>
+        <canvas class="plot" id="cv-gen" height="240"></canvas>
+        <div class="sm dim">The rig as a Thévenin source, fitted per wind
+          speed. Peak power sits at the match, so P = V_oc²/4R_int and the
+          power exponent follows from these two — which is why v^3.77 says
+          little about the rotor.</div>
+      </div>
+
+      <div class="card" style="flex:1 1 420px">
+        <h3>Load ramps
+          <select id="an-ramp-blade" style="margin-left:8px"></select></h3>
+        <canvas class="plot" id="cv-ramps" height="240"></canvas>
+        <div class="sm dim">The raw measurement, P against I at every wind
+          speed. <b>The top is flat</b> — which is why the peak is fitted
+          rather than taken, and the only view where a censored point looks
+          censored.</div>
+      </div>
+    </div>
+  </section>
 
   <section class="page" id="p-blades">
     <div class="split">

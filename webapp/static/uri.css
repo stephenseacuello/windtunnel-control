@@ -307,3 +307,15 @@ body.stale .metric .big::after { content:' ?'; color:#c62828; }
   border:1px solid var(--line-2);border-radius:999px;vertical-align:middle;
 }
 .blade-n .finish{text-transform:none}
+
+/* ── tab group labels ─────────────────────────────────────────────────────
+   Ten flat tabs read as one undifferentiated list. These four labels say
+   what kind of thing follows without moving any tab, so anyone who already
+   knows where Calibration lives still finds it in the same place. */
+.tab-group{
+  align-self:center; margin:0 2px 0 12px; padding-right:10px;
+  border-right:1px solid var(--line-2);
+  font-size:.62rem; font-weight:700; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--dim); user-select:none;
+}
+.tab-group:first-child{margin-left:0}

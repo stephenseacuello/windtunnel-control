@@ -161,11 +161,34 @@ function niceTicks(lo, hi, n = 5) {
  * series: [{x:[], y:[], color, width, dash}]
  * Shared plotting for every chart on the page.
  */
+/**
+ * Line/scatter plot with optional log axes.
+ *
+ * Extended for the Analysis tab, and everything added is OPT-IN so the six
+ * existing call sites keep their exact behaviour:
+ *
+ *   opts.logX / opts.logY   log-space axes. The power law P ∝ v^3.77 is a
+ *                           straight line only in log-log, and a curve that
+ *                           has to be straight to be believed should be drawn
+ *                           where straightness is visible.
+ *   opts.xlabel / ylabel    axis titles. Every plot here has units, and a
+ *                           number without its unit is how a 10x error hides.
+ *   series[].dots           draw markers. Measured points and a fitted line
+ *                           must be distinguishable, or the fit looks like
+ *                           data.
+ *   series[].label          legend entry.
+ */
 function drawPlot(cv, series, opts = {}) {
   const surf = setupCanvas(cv);
   if (!surf) return false;              // hidden tab; repainted on tab switch
   const {g, w, h} = surf;
-  const pad = {l: 46, r: 12, t: 10, b: 24};
+  const pad = {l: opts.ylabel ? 58 : 46, r: 12,
+               t: opts.legend ? 24 : 10, b: opts.xlabel ? 38 : 24};
+  const lx = !!opts.logX, ly = !!opts.logY;
+  const fwdX = v => (lx ? (v > 0 ? Math.log10(v) : NaN) : v);
+  const fwdY = v => (ly ? (v > 0 ? Math.log10(v) : NaN) : v);
+  const invX = v => (lx ? Math.pow(10, v) : v);
+  const invY = v => (ly ? Math.pow(10, v) : v);
   g.clearRect(0, 0, w, h);
 
   // Range over FINITE values only. One NaN — which the default manual
@@ -181,11 +204,16 @@ function drawPlot(cv, series, opts = {}) {
     return true;
   }
 
-  const fin = arr => arr.filter(Number.isFinite);
-  let x0 = opts.x0 ?? Math.min(...all.map(s => Math.min(...fin(s.x))));
-  let x1 = opts.x1 ?? Math.max(...all.map(s => Math.max(...fin(s.x))));
-  let y0 = opts.y0 ?? Math.min(...all.map(s => Math.min(...fin(s.y))));
-  let y1 = opts.y1 ?? Math.max(...all.map(s => Math.max(...fin(s.y))));
+  const fin = arr => arr.map(Number).filter(Number.isFinite);
+  const finX = s => fin(s.x.map(fwdX)), finY = s => fin(s.y.map(fwdY));
+  let x0 = opts.x0 !== undefined ? fwdX(opts.x0)
+                                 : Math.min(...all.map(s => Math.min(...finX(s))));
+  let x1 = opts.x1 !== undefined ? fwdX(opts.x1)
+                                 : Math.max(...all.map(s => Math.max(...finX(s))));
+  let y0 = opts.y0 !== undefined ? fwdY(opts.y0)
+                                 : Math.min(...all.map(s => Math.min(...finY(s))));
+  let y1 = opts.y1 !== undefined ? fwdY(opts.y1)
+                                 : Math.max(...all.map(s => Math.max(...finY(s))));
   if (!Number.isFinite(x0) || !Number.isFinite(y0) ||
       !Number.isFinite(x1) || !Number.isFinite(y1)) {
     g.fillStyle = DIM; g.font = '12px system-ui'; g.textAlign = 'center';
@@ -204,16 +232,30 @@ function drawPlot(cv, series, opts = {}) {
   g.strokeStyle = LINE; g.lineWidth = 1;
   g.fillStyle = DIM; g.font = '10px ui-monospace,monospace';
   g.textAlign = 'right'; g.textBaseline = 'middle';
-  niceTicks(y0, y1).forEach(v => {
+  const fmt = (v, log) => {
+    const a = Math.abs(v);
+    if (log) return a >= 100 ? v.toFixed(0) : a >= 1 ? v.toFixed(1)
+           : a >= 0.01 ? v.toFixed(2) : v.toExponential(0);
+    return a < 10 ? v.toFixed(1) : v.toFixed(0);
+  };
+  (ly ? logTicks(y0, y1) : niceTicks(y0, y1)).forEach(v => {
     const y = Y(v);
     g.beginPath(); g.moveTo(pad.l, y); g.lineTo(w - pad.r, y); g.stroke();
-    g.fillText(v.toFixed(Math.abs(v) < 10 ? 1 : 0), pad.l - 6, y);
+    g.fillText(fmt(invY(v), ly), pad.l - 6, y);
   });
   g.textAlign = 'center'; g.textBaseline = 'top';
-  niceTicks(x0, x1, 6).forEach(v => {
-    const x = X(v);
-    g.fillText(v.toFixed(0), x, h - pad.b + 5);
+  (lx ? logTicks(x0, x1) : niceTicks(x0, x1, 6)).forEach(v => {
+    g.fillText(fmt(invX(v), lx), X(v), h - pad.b + 5);
   });
+  if (opts.xlabel) {
+    g.fillStyle = DIM; g.font = '11px system-ui';
+    g.fillText(opts.xlabel, pad.l + (w - pad.l - pad.r) / 2, h - 14);
+  }
+  if (opts.ylabel) {
+    g.save(); g.translate(13, pad.t + (h - pad.t - pad.b) / 2);
+    g.rotate(-Math.PI / 2); g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = '11px system-ui'; g.fillText(opts.ylabel, 0, 0); g.restore();
+  }
 
   // series, clipped to the plot box
   g.save();
@@ -224,18 +266,53 @@ function drawPlot(cv, series, opts = {}) {
     if (!s.x.length) return;
     g.strokeStyle = s.color; g.lineWidth = s.width || 1.6;
     g.setLineDash(s.dash || []);
-    g.beginPath();
-    let started = false;
-    for (let i = 0; i < s.x.length; i++) {
-      if (!isFinite(s.y[i])) { started = false; continue; }
-      const px = X(s.x[i]), py = Y(s.y[i]);
-      started ? g.lineTo(px, py) : g.moveTo(px, py);
-      started = true;
+    if (s.width !== 0) {
+      g.beginPath();
+      let started = false;
+      for (let i = 0; i < s.x.length; i++) {
+        const px = X(fwdX(s.x[i])), py = Y(fwdY(s.y[i]));
+        if (!isFinite(px) || !isFinite(py)) { started = false; continue; }
+        started ? g.lineTo(px, py) : g.moveTo(px, py);
+        started = true;
+      }
+      g.stroke();
     }
-    g.stroke();
+    if (s.dots) {
+      g.setLineDash([]); g.fillStyle = s.color;
+      for (let i = 0; i < s.x.length; i++) {
+        const px = X(fwdX(s.x[i])), py = Y(fwdY(s.y[i]));
+        if (!isFinite(px) || !isFinite(py)) continue;
+        g.beginPath(); g.arc(px, py, s.dots, 0, 6.284); g.fill();
+      }
+    }
   });
   g.restore();
   g.setLineDash([]);
+
+  if (opts.legend) {
+    let lxp = pad.l + 4;
+    g.font = '11px system-ui'; g.textAlign = 'left'; g.textBaseline = 'middle';
+    series.filter(s => s.label).forEach(s => {
+      g.strokeStyle = s.color; g.lineWidth = 2.4; g.setLineDash(s.dash || []);
+      g.beginPath(); g.moveTo(lxp, 12); g.lineTo(lxp + 16, 12); g.stroke();
+      g.setLineDash([]);
+      g.fillStyle = INK; g.fillText(s.label, lxp + 21, 12);
+      lxp += 27 + g.measureText(s.label).width;
+    });
+  }
+  return true;
+}
+
+/** Decade and 1-2-5 ticks for a log axis, in log space. */
+function logTicks(lo, hi) {
+  const out = [];
+  for (let d = Math.floor(lo); d <= Math.ceil(hi); d++) {
+    for (const m of [1, 2, 5]) {
+      const v = Math.log10(m) + d;
+      if (v >= lo && v <= hi) out.push(v);
+    }
+  }
+  return out.length > 1 ? out : [lo, hi];
 }
 
 /* ============================== tabs ================================== */
@@ -246,7 +323,8 @@ $$('.tab').forEach(t => t.onclick = () => {
   t.classList.add('on');
   $('#p-' + t.dataset.p).classList.add('on');
   const load = {params: loadParams, calib: loadCalib, logs: loadLogs,
-                commission: pollJob, blades: loadBlades};
+                commission: pollJob, blades: loadBlades,
+                analysis: loadAnalysis};
   if (load[t.dataset.p]) load[t.dataset.p]();
   // Canvases drawn while their tab was hidden are zero-sized. Redraw on the
   // frame after the tab becomes visible, once layout has settled.
@@ -1320,6 +1398,107 @@ async function loadBlades() {
 }
 
 let BLADE_REQ = 0;
+
+/* ══════════════════════════════════════════════════════════════════════
+   ANALYSIS
+
+   Four views of data the rig already has and had never drawn. Every number
+   here is computed server-side from the CSVs on each request — nothing is
+   cached and nothing is re-derived in the browser, because every figure this
+   project has got wrong got wrong by being typed a second time somewhere.
+   ══════════════════════════════════════════════════════════════════════ */
+
+const AN_COLORS = ['#00a3a1', '#b5985a', '#7a4fa3', '#b03030', '#2e7d32'];
+let AN = null;
+
+async function loadAnalysis() {
+  const r = await api('/api/analysis').catch(() => null);
+  if (!r || !r.ok) { $('#an-head').textContent = 'no sweeps on record'; return; }
+  AN = r;
+  const names = Object.keys(r.blades);
+  $('#an-sub').textContent = `${names.length} run${names.length === 1 ? '' : 's'}`;
+
+  $('#an-head').innerHTML = names.map((k, i) => {
+    const b = r.blades[k];
+    return `<div style="margin-bottom:4px">` +
+      `<span style="color:${AN_COLORS[i % AN_COLORS.length]}">●</span> ` +
+      `<b>${k}</b> — peak <b>${b.peak_w.toFixed(3)} W</b> at ` +
+      `${b.peak_v.toFixed(1)} m/s · P ∝ v^${b.exponent.toFixed(2)} · ` +
+      `R² <span class="mono">${b.r2_log.toFixed(4)}</span> log, ` +
+      `<span class="mono">${b.r2_power.toFixed(4)}</span> power · ` +
+      `protocol <span class="mono">${b.protocol}</span>` +
+      (b.notes ? ` · ${b.notes}` : '') + `</div>`;
+  }).join('') +
+    `<div class="dim" style="margin-top:6px">Swept area ` +
+    `<b>${r.swept_area_m2.toFixed(4)} m²</b> = 2·R·H with R = ` +
+    `${(r.radius_m * 1000).toFixed(1)} mm, H = ${(r.span_m * 1000).toFixed(0)} mm ` +
+    `— a cylinder. Using πR² would overstate Cp by 1.54×.</div>`;
+
+  // ── power law, log-log: dots measured, line fitted ──
+  const law = [];
+  names.forEach((k, i) => {
+    const b = r.blades[k], c = AN_COLORS[i % AN_COLORS.length];
+    const vs = b.points.map(p => p.v);
+    const lo = Math.min(...vs), hi = Math.max(...vs);
+    const fx = []; for (let j = 0; j <= 40; j++) fx.push(lo + (hi - lo) * j / 40);
+    law.push({color: c, width: 1.4, dash: [5, 4],
+              x: fx, y: fx.map(v => b.coeff * Math.pow(v, b.exponent))});
+    law.push({color: c, width: 0, dots: 3, label: k,
+              x: vs, y: b.points.map(p => p.p)});
+  });
+  drawPlot($('#cv-law'), law, {logX: true, logY: true, legend: true,
+    xlabel: 'wind speed  (m/s)', ylabel: 'peak electrical power  (W)',
+    empty: 'no sweeps'});
+
+  // ── Cp: the number that says how far from a working turbine this is ──
+  drawPlot($('#cv-cp'), names.map((k, i) => ({
+    color: AN_COLORS[i % AN_COLORS.length], width: 1.8, dots: 2.5, label: k,
+    x: r.blades[k].points.map(p => p.v),
+    y: r.blades[k].points.map(p => 100 * p.cp)})),
+    {y0: 0, legend: true, xlabel: 'wind speed  (m/s)',
+     ylabel: 'Cp electrical  (%)', empty: 'no sweeps'});
+
+  // ── the generator, on twin axes scaled to share a frame ──
+  const g = r.generator;
+  if (g && g.rows && g.rows.length) {
+    const v = g.rows.map(x => x.mps);
+    const voc = g.rows.map(x => x.v_oc), rint = g.rows.map(x => x.r_int);
+    const rmax = Math.max(...rint), vmax = Math.max(...voc);
+    $('#an-gen').textContent =
+      `V_oc ∝ v^${g.v_oc_exp.toFixed(2)} · R_int ∝ v^${g.r_int_exp.toFixed(2)}`;
+    drawPlot($('#cv-gen'), [
+      {color: '#0b6fb4', width: 2, dots: 2.5, label: 'V_oc (V)', x: v, y: voc},
+      {color: '#b03030', width: 2, dots: 2.5, label: `R_int (Ω ÷${(rmax/vmax).toFixed(0)})`,
+       x: v, y: rint.map(z => z * vmax / rmax)},
+    ], {y0: 0, legend: true, xlabel: 'wind speed  (m/s)',
+        ylabel: 'V_oc  (V)', empty: 'no fit'});
+  }
+
+  // ── ramps ──
+  const sel = $('#an-ramp-blade');
+  if (sel && sel.dataset.n !== String(names.length)) {
+    sel.innerHTML = names.map(n => `<option>${n}</option>`).join('');
+    sel.dataset.n = String(names.length);
+    sel.onchange = loadRamps;
+  }
+  loadRamps();
+}
+
+async function loadRamps() {
+  const name = $('#an-ramp-blade').value;
+  if (!name) return;
+  const r = await api(`/api/blades/${encodeURIComponent(name)}/ramps`)
+    .catch(() => null);
+  if (!r || !r.ok) { drawPlot($('#cv-ramps'), [], {empty: 'no points file'}); return; }
+  // One line per wind speed, darkening with speed so the family reads as an
+  // ordered set rather than a tangle.
+  const n = r.ramps.length;
+  drawPlot($('#cv-ramps'), r.ramps.map((s, i) => ({
+    color: `hsl(184, ${30 + 45 * i / n}%, ${72 - 40 * i / n}%)`,
+    width: 1.5, x: s.i.map(a => a * 1000), y: s.w})),
+    {y0: 0, xlabel: 'load current  (mA)', ylabel: 'electrical power  (W)',
+     empty: 'no ramps'});
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    COMPARING TWO ROTORS

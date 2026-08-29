@@ -439,6 +439,126 @@ def api_blade_stl(name):
     return Response(f.read_bytes(), mimetype="model/stl")
 
 
+@app.route("/api/analysis")
+def api_analysis():
+    """
+    Everything the Analysis tab plots, computed from the CSVs on each request.
+
+    Computed, never cached and never duplicated in the frontend. Every number
+    this project has got wrong got wrong by being typed a second time
+    somewhere — an exponent of 3.754, a tau of 0.63, a resistance of 73.6 ohm,
+    each of them a copy that stopped tracking its source.
+    """
+    import csv as _csv
+    import math as _m
+    import numpy as _np
+    import generator_model as gm
+    import sweep_core as sc
+
+    logs = _repo() / "logs"
+    blades = {}
+    for f in sorted(logs.glob("sweep_*_summary.csv")):
+        name = f.name[len("sweep_"):-len("_summary.csv")]
+        meta, rows = {}, []
+        for line in f.read_text().splitlines(True):
+            if line.startswith("# "):
+                k, _, v = line[2:].strip().partition(",")
+                meta[k.strip()] = v.strip().strip('"')
+        body = [l for l in f.read_text().splitlines(True) if not l.startswith("#")]
+        for r in _csv.DictReader(body):
+            try:
+                p_raw = float(r.get("p_max_raw_w") or r.get("p_max_w"))
+                rows.append({"v": float(r["wind_mps"]),
+                             "rpm": int(float(r["fan_rpm_cmd"])),
+                             "p": p_raw,
+                             "p_fit": float(r["p_max_fit_w"]) if r.get("p_max_fit_w") else None,
+                             "i": float(r.get("i_at_pmax_raw_a") or r.get("i_at_pmax_a")),
+                             "clean": (r.get("clean") or "1") in ("1", "True")})
+            except (KeyError, TypeError, ValueError):
+                continue
+        if len(rows) < 4:
+            continue
+        v = _np.array([x["v"] for x in rows]); pw = _np.array([x["p"] for x in rows])
+        n_, a_ = _np.polyfit(_np.log(v), _np.log(pw), 1)
+        pred = _np.exp(a_) * v ** n_
+        # BOTH R-squareds. The log-space one is what gets quoted and it is
+        # flattered by the 3.7x span in v; saying which is the whole point.
+        r2_pow = 1 - ((pw - pred) ** 2).sum() / ((pw - pw.mean()) ** 2).sum()
+        lp = _np.log(pw)
+        r2_log = 1 - ((lp - (a_ + n_ * _np.log(v))) ** 2).sum() / \
+                     ((lp - lp.mean()) ** 2).sum()
+        blades[name] = {
+            "points": rows, "exponent": float(n_), "coeff": float(_np.exp(a_)),
+            "r2_power": float(r2_pow), "r2_log": float(r2_log),
+            "protocol": meta.get("protocol", "?"), "notes": meta.get("notes", ""),
+            "peak_w": float(pw.max()), "peak_v": float(v[pw.argmax()]),
+        }
+
+    # Swept area is 2*R*H — a cylinder. pi*R^2 overstates Cp by 1.54x.
+    import json as _json
+    try:
+        geo = _json.loads((_repo() / "blades" / "v1.json").read_text())
+        span = float(geo.get("span_mm", 245.1)) / 1000.0
+    except Exception:
+        span = 0.2451
+    area = 2 * sc.ROTOR_RADIUS_M * span
+    for b in blades.values():
+        for pt in b["points"]:
+            pt["cp"] = pt["p"] / (0.5 * 1.204 * area * pt["v"] ** 3)
+
+    # The generator, fitted from whichever run has a points file.
+    gen = None
+    for name in blades:
+        pf = logs / f"sweep_{name}_points.csv"
+        if not pf.exists():
+            continue
+        try:
+            fit = gm.fit(gm.read_points(pf))
+            m = gm.model(fit)
+            gen = {"blade": name, "rows": fit, **{k: v for k, v in m.items()}}
+            break
+        except Exception:
+            continue
+
+    return jsonify({"ok": True, "blades": blades, "generator": gen,
+                    "swept_area_m2": area, "radius_m": sc.ROTOR_RADIUS_M,
+                    "span_m": span})
+
+
+@app.route("/api/blades/<name>/ramps")
+def api_blade_ramps(name):
+    """
+    The load ramps themselves — P against I at every wind speed.
+
+    This is the raw measurement the whole campaign rests on and nothing has
+    ever drawn it. A summary row says the peak was 3.79 W at 0.32 A; the ramp
+    shows how flat the top is, which is why the peak is fitted rather than
+    taken, and it is the only view in which a censored point looks censored.
+    """
+    import csv as _csv
+    from collections import defaultdict
+    f = _repo() / "logs" / f"sweep_{Path(name).name}_points.csv"
+    if not f.exists():
+        return err("no points file for that blade", 404)
+    by = defaultdict(list)
+    body = [l for l in f.read_text().splitlines(True) if not l.startswith("#")]
+    for r in _csv.DictReader(body):
+        try:
+            if r.get("tracking") not in (None, "", "1", "True", "true"):
+                continue
+            by[int(float(r["fan_rpm"]))].append(
+                (float(r["amps"]), float(r["watts"]), float(r["volts"])))
+        except (KeyError, TypeError, ValueError):
+            continue
+    out = []
+    for rpm in sorted(by):
+        pts = by[rpm]
+        out.append({"rpm": rpm,
+                    "i": [p[0] for p in pts], "w": [p[1] for p in pts],
+                    "v": [p[2] for p in pts]})
+    return jsonify({"ok": True, "blade": name, "ramps": out})
+
+
 @app.route("/api/blades/compare")
 def api_blades_compare():
     """

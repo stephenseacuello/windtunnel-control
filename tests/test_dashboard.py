@@ -449,3 +449,71 @@ def test_preflight_is_debounced():
     """Typing a blade name is one request, not twelve."""
     assert "schedulePreflight" in JS and "setTimeout" in JS, \
         "pre-flight fires on every keystroke"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ANALYSIS TAB
+# ═══════════════════════════════════════════════════════════════════════════
+
+def test_the_analysis_tab_exists_and_is_wired():
+    assert 'data-p="analysis"' in HTML and 'id="p-analysis"' in HTML
+    assert "loadAnalysis" in JS, "the tab never fetches anything"
+    assert "analysis: loadAnalysis" in JS, "the tab switch does not load it"
+    for cv in ("cv-law", "cv-cp", "cv-gen", "cv-ramps"):
+        assert f'id="{cv}"' in HTML, f"#{cv} missing"
+    assert "/api/analysis" in APP and "/ramps" in APP
+
+
+def test_analysis_numbers_are_computed_server_side():
+    """
+    Every figure this project has got wrong got wrong by being typed a second
+    time — an exponent of 3.754, a τ of 0.63, a resistance of 73.6 Ω. The
+    frontend must not re-derive any of them.
+    """
+    i = JS.index("async function loadAnalysis")
+    body = JS[i:i + 4000]
+    for banned in ("polyfit", "Math.log(", "0.5 * 1.204", "1.204 *"):
+        assert banned not in body, \
+            f"the frontend is recomputing analysis ({banned})"
+
+
+def test_the_power_law_is_drawn_in_log_space():
+    """A power law is a straight line only in log–log. Drawn linear, a bad
+    fit and a good one look identical."""
+    i = JS.index("async function loadAnalysis")
+    body = JS[i:i + 4000]
+    assert "logX: true, logY: true" in body, \
+        "the power law is not drawn on log axes"
+
+
+def test_swept_area_is_the_cylinder_not_the_disc():
+    """πR² overstates Cp by 1.54× on a vertical-axis rotor."""
+    i = APP.index("def api_analysis")
+    body = APP[i:i + 4000]
+    assert "2 * sc.ROTOR_RADIUS_M * span" in body, \
+        "swept area is not 2RH"
+    assert "math.pi" not in body.lower() or "pi * " not in body
+
+
+def test_both_r_squareds_are_reported():
+    """
+    0.998 is the log-space figure and 0.990 the power-space one. Quoting one
+    without saying which is how the flattering number travelled.
+    """
+    i = APP.index("def api_analysis")
+    body = APP[i:i + 4000]
+    assert "r2_power" in body and "r2_log" in body
+    assert "r2_log" in JS and "r2_power" in JS, \
+        "the UI shows only one of the two R² values"
+
+
+def test_tabs_are_grouped_without_being_reordered():
+    """
+    Grouping aids orientation; reordering breaks muscle memory. Control must
+    still be first and still be the one marked on.
+    """
+    assert 'class="tab-group"' in HTML, "tabs are not grouped"
+    assert ".tab-group" in CSS, "the group label has no styling"
+    first = HTML.index('data-p="control"')
+    assert 'class="tab on"' in HTML[first - 40:first], \
+        "Control is no longer the default tab"
