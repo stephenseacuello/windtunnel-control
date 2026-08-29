@@ -15,3 +15,10 @@ data/tunnel.json.bak
 
 # Snapshots are records worth committing — but not the smoke-test ones.
 data/snapshots/*_dashboard.json
+
+# Parameter snapshots taken in dry-run. A simulated drive answers EVERY
+# register plausibly, so one of these looks exactly like a real capture and
+# has been mistaken for one before — see data/snapshots/simulated/README.md.
+# Anything genuinely worth keeping goes in data/snapshots/simulated/ on
+# purpose, not by accident.
+data/snapshots/*SIMULATED*.json
