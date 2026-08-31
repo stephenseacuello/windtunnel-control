@@ -82,7 +82,7 @@ from sweep_core import (ceiling_for, step_for, settle_wind, estimate,
                         protocol as protocol_meta_shared,
                         interp_at, rotor_rpm_between, summary_row, point_rows,
                         SUMMARY_HEADER, POINTS_HEADER, ROTOR_RADIUS_M,
-                        archive_existing,
+                        archive_existing, ambient_meta,
                         RPM_PULSES_PER_REV)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -304,9 +304,21 @@ def run_sweep(a):
     # The SAME stem flush_csv writes to — see archive_existing.
     _moved = archive_existing(Path(a.out) if a.out
                               else Path("logs") / f"sweep_{a.blade}")
+
+    # The tunnel node, if it is plugged in. Optional by design: a sweep must
+    # not fail because an ambient sensor is missing.
+    node = None
+    if not getattr(a, "no_node", False):
+        try:
+            from tunnel_node import TunnelNode
+            node = TunnelNode(getattr(a, "node_port", None)).connect()
+            print(f"  node    : {node.identity}")
+        except Exception as e:
+            print(f"  node    : not recorded — {str(e).splitlines()[0][:66]}")
     if _moved:
         print(f"  earlier run archived as {', '.join(_moved)}")
 
+    air_start = ambient_meta(node)
     rows, summary, dead = [], [], 0
     interlock = TurbineInterlock(drive, load, min_amps=0.0,
                                  spindown_timeout=a.spindown_timeout)
@@ -435,7 +447,19 @@ def run_sweep(a):
             pass
         load.close()
 
-    return rows, summary, protocol_meta_shared(a, voff, rng, load=load)
+    meta = protocol_meta_shared(a, voff, rng, load=load)
+    meta.update(air_start)
+    # Air again at the END. A 10-minute run in a closed room warms, and a
+    # density that moved during the sweep is a systematic tilt across the
+    # wind range that would otherwise read as an aerodynamic trend.
+    if node is not None:
+        end = ambient_meta(node)
+        if "air_temp_c" in end and "air_temp_c" in air_start:
+            d = float(end["air_temp_c"]) - float(air_start["air_temp_c"])
+            meta["air_temp_drift_c"] = f"{d:+.2f}"
+            meta["air_density_end"] = end.get("air_density_kg_m3", "")
+        node.close()
+    return rows, summary, meta
 
 
 
@@ -552,6 +576,10 @@ def main():
     # sample. The dashboard has polled the PMC at 4 Hz for weeks; this is the
     # same load, and it is not part of the protocol fingerprint, so it does
     # not affect comparability with runs already banked.
+    w.add_argument("--no-node", action="store_true",
+                   help="skip the ambient node even if it is connected")
+    w.add_argument("--node-port", default=None,
+                   help="serial port of the tunnel node; autodetected if absent")
     w.add_argument("--keepalive", type=float, default=0.25,
                    help="seconds between PMC watchdog ticks. Must stay well "
                         "under tunnel.json transport.host_watchdog_ms, or the "

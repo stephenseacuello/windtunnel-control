@@ -57,6 +57,10 @@ from simulator import SimulatedACS550
 import sweep_core as _sc   # the protocol — shared with src/blade_sweep.py
 
 
+class _NodeBusy(Exception):
+    """The node is mid-burst; skip this ambient sample rather than queue."""
+
+
 class _ThreadTee:
     """
     stdout that captures ONE thread and passes everything else through.
@@ -241,6 +245,21 @@ class TunnelController:
         # Telemetry ring buffer. 4 Hz x 900 = 15 minutes of history, which is
         # longer than any single profile and cheap to hold.
         self.trace = deque(maxlen=900)
+        # The ambient node. Separate board, separate port, entirely optional:
+        # it must never be able to stop a run. Sampled slowly because the
+        # LPS22HB is slow and air does not change fast; 1800 samples at one
+        # every 2 s is an hour of history, which covers a session.
+        self.node = None
+        self.node_error = None
+        # One port, one speaker. The poll thread reads ambient every 2 s and a
+        # burst is a several-second request-thread operation on the SAME
+        # serial object; unlocked, the two interleave and pyserial reports
+        # "device reports readiness to read but returned no data", which reads
+        # like a disconnected board and is not. Exactly what _load_lock exists
+        # for on the Chroma.
+        self._node_lock = threading.Lock()
+        self.node_trace = deque(maxlen=1800)
+        self._node_next = 0.0
         self.events = deque(maxlen=200)
 
         self._lock = threading.RLock()      # guards drive access
@@ -413,6 +432,62 @@ class TunnelController:
 
     # ── the poll loop: also what feeds the drive's watchdog ──────────────
 
+    def connect_node(self, port=None):
+        """
+        Attach the tunnel node. Returns a message; never raises.
+
+        Optional by design. Ambient air and tower vibration are valuable —
+        Cp goes as 1/rho and this rig has been assuming 1.204 — but a missing
+        sensor board must not be able to stop a sweep.
+        """
+        try:
+            from tunnel_node import TunnelNode
+            if self.node:
+                self.node.close()
+            self.node = TunnelNode(port).connect()
+            self.node_error = None
+            self.log(f"tunnel node: {self.node.identity}", "ok")
+            return self.node.identity
+        except Exception as e:
+            self.node, self.node_error = None, str(e).splitlines()[0]
+            self.log(f"tunnel node not connected: {self.node_error}", "warn")
+            return None
+
+    def node_snapshot(self):
+        last = self.node_trace[-1] if self.node_trace else None
+        return {
+            "connected": self.node is not None,
+            "identity": getattr(self.node, "identity", None),
+            "error": self.node_error,
+            "last": last,
+            "n": len(self.node_trace),
+        }
+
+    def node_burst(self, n=2000, axis="mag"):
+        """One burst, with its spectrum. Blocks for a couple of seconds."""
+        if self.node is None:
+            raise RuntimeError(self.node_error or "no tunnel node connected")
+        import tunnel_node as tn
+        # Held across the whole burst: the board captures, then dumps several
+        # thousand CSV lines over 115200, and a poll-thread READ landing in
+        # the middle takes rows out of the dump.
+        with self._node_lock:
+            hz, rows = self.node.burst(int(n))
+        freqs, amp, fs, note = tn.spectrum(rows, axis=axis)
+        # Decimate for transport: 4000 samples is a 400 kB JSON and a browser
+        # cannot draw more points than the canvas has pixels anyway.
+        step = max(1, len(rows) // 1500)
+        fstep = max(1, len(freqs) // 1200)
+        return {
+            "rate_hz": hz, "samples": len(rows), "fs": fs, "note": note,
+            "t": [rows[i][0] * 1e-6 - rows[0][0] * 1e-6
+                  for i in range(0, len(rows), step)],
+            "ax": [rows[i][1] for i in range(0, len(rows), step)],
+            "ay": [rows[i][2] for i in range(0, len(rows), step)],
+            "az": [rows[i][3] for i in range(0, len(rows), step)],
+            "f": freqs[::fstep], "amp": amp[::fstep],
+        }
+
     def _poll_loop(self):
         while not self._stop_evt.wait(self.poll_period):
             try:
@@ -457,6 +532,28 @@ class TunnelController:
                 # The simulated rotor only knows about wind if we tell it.
                 if self.dry_run and getattr(self, "_sim_turbine", None):
                     self._sim_turbine.fan_rpm = max(1.0, hz)
+
+                # Ambient, slowly and never fatally.
+                if self.node is not None and time.time() >= self._node_next:
+                    self._node_next = time.time() + 2.0
+                    try:
+                        # Skip rather than block: a burst is in progress and
+                        # ambient is a 2 s cadence. Waiting behind it would
+                        # stall the drive poll, which feeds the watchdog.
+                        if not self._node_lock.acquire(blocking=False):
+                            raise _NodeBusy()
+                        try:
+                            t_c, pa, rho = self.node.ambient()
+                        finally:
+                            self._node_lock.release()
+                        self.node_trace.append(
+                            {"t": time.time(), "temp_c": round(t_c, 2),
+                             "pressure_pa": round(pa, 0),
+                             "density": round(rho, 4)})
+                    except _NodeBusy:
+                        pass
+                    except Exception as e:
+                        self.node_error = str(e)[:80]
 
                 if self.load is not None:
                     try:

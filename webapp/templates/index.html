@@ -63,12 +63,67 @@
     <div class="tab" data-p="commission">Commissioning</div>
     <div class="tab" data-p="calib">Calibration</div>
     <span class="tab-group">check</span>
+    <div class="tab" data-p="node">Node</div>
     <div class="tab" data-p="diag">Diagnostics</div>
     <div class="tab" data-p="logs">Logs</div>
     <div class="rail-foot" id="foot">—</div>
   </nav>
 
   <main class="main">
+
+  <!-- ============================= NODE ============================== -->
+  <section class="page" id="p-node">
+    <div class="card">
+      <h3>Tunnel node <span class="lbl" id="nd-id">—</span></h3>
+      <div class="readouts">
+        <div class="ro meas"><div class="lbl">air temperature</div>
+          <div class="big" id="nd-t">—<span class="unit">°C</span></div></div>
+        <div class="ro"><div class="lbl">pressure</div>
+          <div class="big" id="nd-p">—<span class="unit">hPa</span></div></div>
+        <div class="ro"><div class="lbl">air density</div>
+          <div class="big" id="nd-rho">—<span class="unit">kg/m³</span></div></div>
+        <div class="ro"><div class="lbl">vs standard 1.204</div>
+          <div class="big" id="nd-dev">—<span class="unit">%</span></div></div>
+      </div>
+      <div class="sm" id="nd-warn" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h3>Air through the session <span class="lbl" id="nd-span">—</span></h3>
+      <canvas class="plot" id="cv-nd-amb" height="190"></canvas>
+      <div class="sm dim">Temperature and density against session time. A run
+        that warms drifts its own density, which tilts every Cp across the
+        wind range — and reads as an aerodynamic trend if nobody looks.</div>
+    </div>
+
+    <div class="split">
+      <div class="card" style="flex:1 1 420px">
+        <h3>Vibration burst</h3>
+        <div class="row" style="gap:10px; align-items:flex-end">
+          <label class="f">samples <input class="num" type="number" id="nd-n"
+                 value="2000" min="64" max="4000" step="500"></label>
+          <label class="f">axis <select id="nd-axis">
+            <option value="mag">magnitude</option>
+            <option value="x">x</option><option value="y">y</option>
+            <option value="z">z</option></select></label>
+          <button class="go" id="nd-go">Capture</button>
+          <span class="sm dim" id="nd-stat"></span>
+        </div>
+        <canvas class="plot" id="cv-nd-t" height="200" style="margin-top:10px"></canvas>
+        <div class="sm dim">Accelerometer only — the LSM9DS1 gyro saturates at
+          2000 dps and a blade passing at 333 rpm exceeds it, so that channel
+          is meaningless here. Capture is unpaced and timestamped.</div>
+      </div>
+
+      <div class="card" style="flex:1 1 420px">
+        <h3>Spectrum <span class="lbl" id="nd-fs">—</span></h3>
+        <canvas class="plot" id="cv-nd-fft" height="200"></canvas>
+        <table class="tbl" id="nd-peaks"><thead><tr>
+          <th>frequency</th><th>amplitude</th><th>likely</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </section>
 
   <!-- ============================ CONTROL ============================ -->
   <section class="page on" id="p-control">

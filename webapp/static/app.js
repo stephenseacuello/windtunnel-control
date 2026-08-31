@@ -324,7 +324,7 @@ $$('.tab').forEach(t => t.onclick = () => {
   $('#p-' + t.dataset.p).classList.add('on');
   const load = {params: loadParams, calib: loadCalib, logs: loadLogs,
                 commission: pollJob, blades: loadBlades,
-                analysis: loadAnalysis};
+                analysis: loadAnalysis, node: loadNode};
   if (load[t.dataset.p]) load[t.dataset.p]();
   // Canvases drawn while their tab was hidden are zero-sized. Redraw on the
   // frame after the tab becomes visible, once layout has settled.
@@ -1398,6 +1398,131 @@ async function loadBlades() {
 }
 
 let BLADE_REQ = 0;
+
+/* ══════════════════════════════════════════════════════════════════════
+   TUNNEL NODE — ambient air, and tower vibration
+
+   Air density is not decoration here. Cp goes as 1/ρ and this rig has been
+   computing it from an assumed 1.204 kg/m³ for standard sea-level air. The
+   node's LPS22HB also SELF-HEATS — it reads about 42 °C on a bench at room
+   temperature, which is a density 6.5% low and a Cp 6.5% high, half the size
+   of the entire Ra20-vs-Ra80 result. So the deviation from standard is a KPI
+   in its own right, and an uncorrected sensor says so on the card.
+   ══════════════════════════════════════════════════════════════════════ */
+
+let NODE_BURST = null;
+
+async function loadNode() {
+  const r = await api('/api/node/state').catch(() => null);
+  if (!r || !r.ok) return;
+
+  $('#nd-id').textContent = r.connected
+    ? (r.identity || '').replace('OK ID ', '')
+    : (r.error || 'not connected');
+
+  const last = r.last;
+  if (last) {
+    $('#nd-t').innerHTML = `${last.temp_c.toFixed(1)}<span class="unit">°C</span>`;
+    $('#nd-p').innerHTML =
+      `${(last.pressure_pa / 100).toFixed(1)}<span class="unit">hPa</span>`;
+    $('#nd-rho').innerHTML = `${last.density.toFixed(4)}<span class="unit">kg/m³</span>`;
+    const dev = 100 * (last.density / 1.204 - 1);
+    $('#nd-dev').innerHTML =
+      `${dev >= 0 ? '+' : ''}${dev.toFixed(1)}<span class="unit">%</span>`;
+    $('#nd-dev').className = 'big ' + (Math.abs(dev) > 3 ? 'warn' : '');
+
+    // The self-heating warning is the point of this card, not a footnote.
+    $('#nd-warn').innerHTML = last.temp_c > 32
+      ? `<span class="warn">▲ ${last.temp_c.toFixed(1)} °C is almost ` +
+        `certainly SELF-HEATING, not the room.</span> The LPS22HB sits on a ` +
+        `powered board. Density is ${Math.abs(dev).toFixed(1)}% off standard ` +
+        `and Cp goes as 1/ρ, so this is a ${Math.abs(dev).toFixed(1)}% error ` +
+        `in every Cp on the Analysis tab. Measure the room with a reference ` +
+        `thermometer and set the firmware's <code>OFFSET</code>.`
+      : `<span class="dim">Dry-air density — the Lite board has no humidity ` +
+        `sensor, so this reads ~1% high on a humid day.</span>`;
+  }
+
+  const tr = r.trace || [];
+  $('#nd-span').textContent = tr.length
+    ? `${tr.length} samples over ${((tr[tr.length - 1].t - tr[0].t) / 60).toFixed(1)} min`
+    : 'no samples yet';
+  if (tr.length > 1) {
+    const t0 = tr[0].t;
+    const mins = tr.map(x => (x.t - t0) / 60);
+    // Density is scaled onto the temperature axis so one frame carries both;
+    // the shapes are what matter and the numbers are on the cards.
+    const tC = tr.map(x => x.temp_c);
+    const rho = tr.map(x => x.density);
+    const lo = Math.min(...tC), hi = Math.max(...tC);
+    const rlo = Math.min(...rho), rhi = Math.max(...rho);
+    const scale = v => (rhi === rlo) ? (lo + hi) / 2
+                     : lo + (v - rlo) / (rhi - rlo) * (hi - lo || 1);
+    drawPlot($('#cv-nd-amb'), [
+      {color: '#b03030', width: 2, x: mins, y: tC, label: 'temperature °C'},
+      {color: '#0b6fb4', width: 2, dash: [5, 4], x: mins, y: rho.map(scale),
+       label: `density ${rlo.toFixed(4)}–${rhi.toFixed(4)}`},
+    ], {legend: true, xlabel: 'session time  (min)', ylabel: 'temperature  (°C)',
+        empty: 'no ambient history'});
+  }
+}
+
+async function runBurst() {
+  const btn = $('#nd-go'), stat = $('#nd-stat');
+  btn.disabled = true; stat.textContent = 'capturing…';
+  try {
+    const r = await api('/api/node/burst',
+      {n: +$('#nd-n').value, axis: $('#nd-axis').value});
+    NODE_BURST = r;
+    stat.textContent = `${r.samples} samples at ${r.rate_hz.toFixed(0)} Hz`;
+    $('#nd-fs').textContent = `fs ${r.fs.toFixed(0)} Hz · Nyquist ${(r.fs / 2).toFixed(0)} Hz`;
+
+    drawPlot($('#cv-nd-t'), [
+      {color: '#b03030', width: 1, x: r.t, y: r.ax, label: 'x'},
+      {color: '#2e7d32', width: 1, x: r.t, y: r.ay, label: 'y'},
+      {color: '#0b6fb4', width: 1, x: r.t, y: r.az, label: 'z'},
+    ], {legend: true, xlabel: 'time  (s)', ylabel: 'acceleration  (g)'});
+
+    // Log frequency: structural content spans 1 Hz to a few hundred, and on a
+    // linear axis everything below 20 Hz — which is where blade passing and
+    // imbalance live — is squeezed into the first tenth of the plot.
+    const keep = r.f.map((f, i) => [f, r.amp[i]]).filter(([f]) => f >= 1);
+    drawPlot($('#cv-nd-fft'), [{
+      color: '#00a3a1', width: 1.4,
+      x: keep.map(k => k[0]), y: keep.map(k => k[1] * 1000)}],
+      {logX: true, xlabel: 'frequency  (Hz)', ylabel: 'amplitude  (mg)',
+       y0: 0, empty: 'no spectrum'});
+
+    // Name the peaks. A line at rotor rpm/60 is imbalance and one at that
+    // times the blade count is blade passing — different faults, different
+    // fixes, and indistinguishable unless somebody labels them.
+    // STATE is the live snapshot the SSE stream keeps; `measured.rpm` is the
+    // FAN, which is what the tower feels. Rotor rpm would be the better
+    // reference and is not trustworthy yet — see docs/11.
+    const rpm = (STATE.measured && STATE.measured.rpm) || 0;
+    const rot = rpm / 60, bp = rot * 3;
+    const top = keep.slice().sort((a, b) => b[1] - a[1]).slice(0, 6);
+    $('#nd-peaks').querySelector('tbody').innerHTML = top.map(([f, a]) => {
+      let why = '';
+      if (rot > 0.5 && Math.abs(f - rot) / rot < 0.08) why = 'fan 1× — imbalance';
+      else if (rot > 0.5 && Math.abs(f - bp) / bp < 0.08) why = 'fan blade pass';
+      else if (f < 3) why = 'drift or tower sway';
+      return `<tr><td class="mono">${f.toFixed(1)} Hz</td>` +
+             `<td class="mono">${(a * 1000).toFixed(2)} mg</td>` +
+             `<td class="dim">${why}</td></tr>`;
+    }).join('');
+    if (!rpm) {
+      $('#nd-peaks').querySelector('tbody').innerHTML +=
+        `<tr><td colspan="3" class="dim">Fan is stopped, so nothing can be ` +
+        `attributed to rotation. Capture again with the tunnel running to ` +
+        `label these.</td></tr>`;
+    }
+  } catch (e) {
+    stat.innerHTML = `<span class="bad">${e.message || e}</span>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    ANALYSIS

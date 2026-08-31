@@ -187,6 +187,43 @@ def protocol(a, voff, rng, load=None):
     return meta
 
 
+def ambient_meta(node):
+    """
+    Air conditions for a run's header, or an explanation of their absence.
+
+    NOT decoration. Cp goes as 1/rho, and this rig's density has been assumed
+    rather than measured: `data/tunnel.json` carries `ambient: null` and every
+    Cp figure so far uses 1.204 kg/m3 for standard sea-level air.
+
+    The node's LPS22HB self-heats. It reads about 42 C on a bench at room
+    temperature, which is a density 6.5% low and therefore a Cp 6.5% high —
+    half the size of the entire Ra20-vs-Ra80 result. So the OFFSET the
+    firmware applies is recorded alongside, and a run with no offset set says
+    so in its own header rather than looking calibrated.
+
+    Never raises. A missing ambient reading costs a line in a CSV; refusing to
+    sweep over it costs the session.
+    """
+    if node is None:
+        return {"air": "not recorded — no tunnel node connected"}
+    try:
+        t, pa, rho = node.ambient()
+        return {
+            "air_temp_c": f"{t:.2f}",
+            "air_pressure_pa": f"{pa:.0f}",
+            "air_density_kg_m3": f"{rho:.4f}",
+            "_air_note": (
+                "Measured by the tunnel node (LPS22HB), dry-air formula — the "
+                "Lite board has no humidity sensor, so density reads ~1% high "
+                "on a humid day. The sensor SELF-HEATS: verify the OFFSET "
+                "against a reference thermometer before trusting this, "
+                "because Cp goes as 1/rho and 20 C of self-heating is 6.5% "
+                "of Cp."),
+        }
+    except Exception as e:
+        return {"air": f"not recorded — {str(e)[:80]}"}
+
+
 def prepare_load(load, a):
     """
     Range and cut-out voltage, applied and read back.

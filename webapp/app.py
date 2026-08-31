@@ -439,6 +439,35 @@ def api_blade_stl(name):
     return Response(f.read_bytes(), mimetype="model/stl")
 
 
+@app.route("/api/node/state")
+def api_node_state():
+    """Node status plus the ambient history, for the KPI cards and plots."""
+    snap = ctl.node_snapshot()
+    snap["trace"] = list(ctl.node_trace)
+    return jsonify({"ok": True, **snap})
+
+
+@app.route("/api/node/connect", methods=["POST"])
+def api_node_connect():
+    d = request.get_json(force=True, silent=True) or {}
+    ident = ctl.connect_node(d.get("port") or None)
+    return ok(identity=ident, **ctl.node_snapshot())
+
+
+@app.route("/api/node/burst", methods=["POST"])
+def api_node_burst():
+    """
+    Capture and transform. Blocks for a couple of seconds — the board runs the
+    loop flat out, then dumps the CSV over 115200.
+    """
+    d = request.get_json(force=True, silent=True) or {}
+    try:
+        n = max(64, min(4000, int(d.get("n", 2000))))
+        return ok(**ctl.node_burst(n, axis=(d.get("axis") or "mag")))
+    except Exception as e:
+        return err(str(e))
+
+
 @app.route("/api/analysis")
 def api_analysis():
     """
@@ -1108,6 +1137,10 @@ def main():
     global ctl
     p = argparse.ArgumentParser(description="wind tunnel dashboard")
     p.add_argument("--port", default="/dev/ttyVFD")
+    p.add_argument("--node-port", default=None,
+                   help="tunnel node serial port; autodetected if omitted")
+    p.add_argument("--no-node", action="store_true",
+                   help="do not look for the ambient node")
     p.add_argument("--baud", type=int, default=19200)
     p.add_argument("--parity", default="N")
     p.add_argument("--unit", type=int, default=1)
@@ -1147,6 +1180,14 @@ def main():
     if not ctl.start():
         print(f"\n  could not reach the drive: {ctl.connect_error}")
         print("  the dashboard will start anyway so you can see diagnostics\n")
+
+    # The node is optional and its absence is never fatal — but say which,
+    # because a silently missing ambient sensor means every Cp on the
+    # dashboard is computed from an assumed 1.204 kg/m3.
+    if not a.no_node:
+        ident = ctl.connect_node(a.node_port)
+        print(f"  node: {ident}" if ident
+              else f"  node: not connected — {ctl.node_error}")
 
     print(f"\n  dashboard → http://{a.host}:{a.http_port}")
     if a.dry_run:
