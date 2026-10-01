@@ -1,0 +1,5 @@
+baseline,candidate,power_col,n,level_pct_geomean,ci95_t_lo_pct,ci95_t_hi_pct,compare_blades_level_pct,compare_blades_ci_lo_pct,compare_blades_ci_hi_pct,compare_blades_dn,compare_blades_dn_halfwidth95,n_setpoints_candidate_higher,sign_test_p,wilcoxon_p
+Ra20,Ra40,raw,14,8.411,6.052,10.822,8.411,6.335,10.487,0.0030,0.0525,14,0.000122,0.000122
+Ra20,Ra80,raw,14,13.735,10.671,16.883,13.735,11.214,16.256,0.0242,0.0638,14,0.000122,0.000122
+Ra40,Ra80,raw,14,4.911,2.436,7.446,4.911,2.707,7.116,0.0212,0.0557,13,0.00183,0.00061
+Ra40,Ra80,fit,14,4.520,2.052,7.048,4.520,2.330,6.710,0.0243,0.0554,12,0.0129,0.00171

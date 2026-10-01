@@ -1,0 +1,35 @@
+path,bytes,data_rows,sha256,description
+1_rig_sweeps/v1_Ra20_2026-08-20/sweep_v1_Ra20_points.csv,22914,336,977e7777ef6d5b1803dcba0fa92c8c4e5d220e7768b2bc0076f00ab99ea2ff95,"Every load step (dwell) of the sweep — v1_Ra20, tested 2026-08-20. VERBATIM from the rig."
+1_rig_sweeps/v1_Ra20_2026-08-20/sweep_v1_Ra20_summary.csv,2303,14,953165fddaa826cf51392f87c9b376299e474628d1e00de3b1148bd4190458d5,"Peak power per wind speed (one row per fan set point) — v1_Ra20, tested 2026-08-20. VERBATIM from the rig."
+1_rig_sweeps/v1_Ra40_2026-09-01/sweep_v1_Ra40_points.csv,40449,352,05a1cdeed17ed28e54e31e5ac78b145879feabdb7ff622154462ba2f021b2258,"Every load step (dwell) of the sweep — v1_Ra40, tested 2026-09-01. VERBATIM from the rig."
+1_rig_sweeps/v1_Ra40_2026-09-01/sweep_v1_Ra40_summary.csv,3970,14,d393ff300902af1aedf4672556f025dfcc1d44f1cc004d0035c5b597b86f4548,"Peak power per wind speed (one row per fan set point) — v1_Ra40, tested 2026-09-01. VERBATIM from the rig."
+1_rig_sweeps/v1_Ra40_2026-09-01/sweep_v1_Ra40_trace.csv,496994,9426,a0b2ceb3ba162695a351078ec960a9566d7745824552c1dc414c7761a7366c31,"Fan speed and rotor-pulse telemetry at ~16 Hz through the run — v1_Ra40, tested 2026-09-01. VERBATIM from the rig."
+1_rig_sweeps/v1_Ra80_2026-08-26/sweep_v1_Ra80_points.csv,36997,352,5efd4285e11525db318b69b70857e35bdba4a963303d99f61943e96829ed7d00,"Every load step (dwell) of the sweep — v1_Ra80, tested 2026-08-26. VERBATIM from the rig."
+1_rig_sweeps/v1_Ra80_2026-08-26/sweep_v1_Ra80_summary.csv,2829,14,6ef39ddded8a106721fe73794ac33aa7c2c3eb54ae476645bfd7009187e4ecdd,"Peak power per wind speed (one row per fan set point) — v1_Ra80, tested 2026-08-26. VERBATIM from the rig."
+2_jeong_lab/2026-06-05_initial_reference/Graph2_WS_vs_MaxPower.jpg,88885,,4009f49a4a9b71aec8b94c112d60c0fc676653fe8cd4652601cb72d0513034f3,VERBATIM as e-mailed by T. Kang (2026-06-05).
+2_jeong_lab/2026-06-05_initial_reference/Graph3_Power_vs_Current_MaxEnvelope_Fixed.jpg,163263,,1762d0157081a0b1d689057d98226026d6c2bf30978de65c068375da8539cabd,VERBATIM as e-mailed by T. Kang (2026-06-05).
+2_jeong_lab/2026-06-05_initial_reference/Graph4_Power_vs_Current_MaxEnvelope_Combined_Fixed.jpg,121723,,c90a1b0c8352471aded33a764fb46bc5469c9302d7b1a3bc3c2c4a660ad186a9,VERBATIM as e-mailed by T. Kang (2026-06-05).
+2_jeong_lab/2026-06-05_initial_reference/Summary_Table_Part1_MAX.csv,1063,13,cc02a211ef635ed8203d201338b14977ee16f69e5893be85411034af601b2c9d,VERBATIM as e-mailed by T. Kang (2026-06-05).
+2_jeong_lab/2026-07-27_no_texture_baseline/0727windturbine.csv,12175257,127208,6f61a81e2690629a13d77f547ba14b0b8dc7495b02860edf280fbbec52e44597,"Raw DAQ export, 360 Hz, 5 channels (see DATA_DICTIONARY for the inferred channel map). VERBATIM as e-mailed by T. Kang (2026-07-27)."
+2_jeong_lab/2026-07-27_no_texture_baseline/Power_vs_RPM_0727_WindTurbine.jpg,87212,,4d8f98b68fb12464963b9bdce22e657be64fd5f3384cedd16bc040fca918f05b,VERBATIM as e-mailed by T. Kang (2026-07-27).
+2_jeong_lab/2026-07-27_no_texture_baseline/Summary_Table.csv,1195,16,1f25363a8ba7dcca13243e1464cc371b752e5cd8be078f16f760c1e1abf2155b,VERBATIM as e-mailed by T. Kang (2026-07-27).
+3_derived/jeong_0727_reprocessed_by_setting.csv,3962,16,76cebccf6f3e98224c47763fe7b54e84b58b360c34f875eed1113af3340ec108,"July no-texture run reprocessed from the raw DAQ export (Section 6 of the report). DERIVED, not the lab's own numbers."
+3_derived/paired_comparisons.csv,660,6,82f7b9ade8a4a403e366d45a8679db4a014e98644419214612b0d5e4af2ba51a,Paired comparisons at matched fan set points (Table 4 of the report).
+3_derived/peak_power_all_rotors.csv,5146,42,0f02edde0c358eca7b7a59230c412fc762b37fcca544ca180ee17fceaee08f8e,"Peak power per rotor and fan set point, both estimators, recomputed from the points files with the rig's own rule. One row per (rotor, set point)."
+3_derived/power_law_fits.csv,500,6,e467fb4fc3220f2b26f2837e419f708df011b512076093daac8870fc34dc4f8d,P_max = a * v^n per rotor (Table 5 of the report).
+3_derived/thevenin_by_setpoint.csv,2422,42,4beae72e5ea1ca38442c1cac0813a90a70b46579b981cb07a17d0c065c715428,Per rotor and set point: V = V_oc - I*R_int fitted over the load ladder.
+4_reference/blade_v1.json,2324,,a9a9673f58cbef469e1f22d375d0d81096ea7da0498dc42d0d0824118ddef890,Blade geometry notes (one blade).
+4_reference/blade_v1.stl,1352884,,f51518aa05717b5979a617485ba7289a245835bed3abfeadcb964e0fc8abcae6,"Blade mesh, one blade, metres."
+5_figures/fig_jeong.png,117016,,e7b05953e3a7dd31db643711ee99a4679def302d635a841d9b340af9aa8e9ac1,Report figure (PNG).
+5_figures/fig_pi.png,119028,,e0d4311c287b96a809475b1603539eadcb3c4219618fc5c4ea28f8da43df42f4,Report figure (PNG).
+5_figures/fig_pmax.png,114507,,1fb9959ff12f51e1a403af43e946137e3fbb55df988392b8bb7b8a8085e417c1,Report figure (PNG).
+5_figures/fig_ratio.png,84409,,56e026273dc5e1b21190d59c9e965cf363d302c00c4636e32e12c196c05bf0b7,Report figure (PNG).
+5_figures/fig_thevenin.png,104974,,e6308b4eee0b7b22066df9fac8c26d92b686603b60f6509de8dd63bebb2e0d6a,Report figure (PNG).
+5_figures/fig_trend.png,85610,,09d06a62cffe57d0ceab4a16145e1f97c378f56626718808b6c34f5b9f1f84f5,Report figure (PNG).
+6_code/analyze_july.py,25285,,5313a6a7d7207d7447123237e7f5dd451d8c1a04690351a1c37ba0251e6f5d1b,"Exploratory analysis of the 27 Jul export (channel identification, fan-step segmentation, tach check). Paths assume the project layout; not needed to reproduce the report's tables."
+6_code/build_package.py,8858,,12c775f32fc2e9cfa3d2c4026da46a1efbd1904cd049a89eeda6bf6e76d8af41,Assembles this package. Paths assume the project repository layout.
+6_code/build_report.py,27053,,6c23ae0d212557a4790ece46fbe69d36b2de1d11c57a5b0e35f8be4a2b79565b,"Regenerates every number, table and figure in the report (run: python3 6_code/build_report.py)."
+6_code/figures.py,10146,,ff2c6fda2310d2c246dbd9aea46a8e74d4829a394186ae45a9c56e1f61c39966,"Figure code, called by build_report.py."
+6_code/style.py,3527,,08cc5c4de96f06054a38dce13bbd7013ce2552b9e6a0ba9e42d8b9394f470fcd,"Figure style (palette, markers)."
+DATA_DICTIONARY.md,7737,,30a9676c17f68b1fc283a6be9c139a54d4e160cc4080cc7d683c1ff7320142c1,
+README.md,4537,,d040eba1390537d70f472422482e73b16108794b4179a9c03938067e4b69f6b7,

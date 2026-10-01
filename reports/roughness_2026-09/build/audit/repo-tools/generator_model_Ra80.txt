@@ -1,0 +1,45 @@
+
+  V(I) = V_oc − I·R_int, fitted per wind speed — logs/sweep_v1_Ra80_points.csv
+
+     m/s    n     V_oc   R_int Ω       r²
+  ------ ---- -------- --------- --------
+    10.2   15     3.33      88.8   0.9754
+    12.4   21     4.72      85.2   0.9953
+    14.5   23     5.79      72.8   0.9957
+    16.6   22     7.01      64.7   0.9946
+    18.8   22     8.45      60.3   0.9952
+    20.9   24    10.31      52.2   0.9938
+    23.0   27    12.06      46.8   0.9963
+    25.2   27    13.80      44.3   0.9985
+    27.3   27    15.31      41.6   0.9983
+    29.4   30    16.79      38.5   0.9946
+    31.6   29    18.78      38.4   0.9944
+    33.7   28    20.76      37.9   0.9947
+    35.8   29    22.85      37.1   0.9960
+    38.0   28    25.68      36.9   0.9933
+
+  R_int = 542.3 · v^-0.762     88.8 Ω at 10.2 m/s → 36.9 Ω at 38.0 m/s
+  V_oc  = 0.097 · v^1.528
+
+  worst r² across 14 wind speeds: 0.9754
+
+  CROSS-CHECK — P_max = V_oc²/4R_int at the Thévenin match,
+  so n = 2a − b = 3.819, against 3.77 measured
+  directly from P_max(v). Neither fit was tuned to produce that.
+
+  R_int is the WHOLE source impedance — winding, rectifier,
+  wiring and the sense IC together. Ohm the winding to separate.
+exit=0
+{
+  "r_int_coeff": 542.2569467955325,
+  "r_int_exp": -0.7620179390785055,
+  "v_oc_coeff": 0.09739313080201996,
+  "v_oc_exp": 1.5283985686367048,
+  "r_int_lo": 88.76980602659512,
+  "r_int_hi": 36.94702646956029,
+  "mps_lo": 10.24,
+  "mps_hi": 37.95,
+  "n_predicted": 3.818815076351915,
+  "min_r2": 0.9753889281053078,
+  "points": 14
+}

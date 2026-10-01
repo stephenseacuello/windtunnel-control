@@ -1,0 +1,68 @@
+== discrepancy vs logged summary ==
+Ra20
+   p_raw          max|d|=0.000000 (at 500), max rel=0.0000%
+   i_raw          max|d|=0.000000 (at 500), max rel=0.0000%
+   v_raw          max|d|=0.000000 (at 500), max rel=0.0000%
+   p_fit          n/a (not logged)
+   i_fit          n/a (not logged)
+   n_steps        max|d|=0.000000 (at 500), max rel=0.0000%
+   i_last_points  max|d|=0.000000 (at 500), max rel=0.0000%
+   fit status: {'fit': 13, 'fallback': 1}
+   mirror vs numpy max|dP| = 6.40e-04
+   stop-rule replay: stops on last row 14/14, stopped_by text reproduced 14/14
+Ra40
+   p_raw          max|d|=0.000000 (at 500), max rel=0.0000%
+   i_raw          max|d|=0.000000 (at 500), max rel=0.0000%
+   v_raw          max|d|=0.000000 (at 500), max rel=0.0000%
+   p_fit          max|d|=0.000060 (at 1500), max rel=0.1365%
+   i_fit          max|d|=0.000200 (at 500), max rel=1.2821%
+   n_steps        max|d|=0.000000 (at 500), max rel=0.0000%
+   i_last_points  max|d|=0.000000 (at 500), max rel=0.0000%
+   fit status: {'fit': 13, 'fallback': 1}
+   mirror vs numpy max|dP| = 2.96e-03
+   stop-rule replay: stops on last row 14/14, stopped_by text reproduced 14/14
+Ra80
+   p_raw          max|d|=0.000000 (at 500), max rel=0.0000%
+   i_raw          max|d|=0.000000 (at 500), max rel=0.0000%
+   v_raw          max|d|=0.000000 (at 500), max rel=0.0000%
+   p_fit          max|d|=0.000060 (at 1800), max rel=0.0633%
+   i_fit          max|d|=0.000070 (at 500), max rel=0.3804%
+   n_steps        max|d|=0.000000 (at 500), max rel=0.0000%
+   i_last_points  max|d|=0.000000 (at 500), max rel=0.0000%
+   fit status: {'fit': 14}
+   mirror vs numpy max|dP| = 0.00e+00
+   stop-rule replay: stops on last row 14/14, stopped_by text reproduced 14/14
+
+== demand ladders identical (common prefix) across runs: yes
+
+== pairwise LEVEL: geometric-mean ratio over 14 set points matched on fan_rpm_cmd, t(13) 95% CI ==
+ num  den                                   basis  level_pct  ci_lo  ci_hi  n  n_num_higher  sd_log_pct
+Ra40 Ra20               raw (recomputed = logged)      8.411  6.052 10.822 14            14       3.810
+Ra40 Ra20  fit (recomputed from points, all runs)      8.742  6.107 11.442 14            13       4.248
+Ra40 Ra20 fit (logged Ra40/Ra80; Ra20 recomputed)      8.750  6.131 11.433 14            13       4.221
+Ra80 Ra20               raw (recomputed = logged)     13.735 10.671 16.883 14            14       4.729
+Ra80 Ra20  fit (recomputed from points, all runs)     13.669  9.946 17.519 14            14       5.768
+Ra80 Ra20 fit (logged Ra40/Ra80; Ra20 recomputed)     13.665  9.943 17.514 14            14       5.768
+Ra80 Ra40               raw (recomputed = logged)      4.911  2.436  7.446 14            13       4.135
+Ra80 Ra40  fit (recomputed from points, all runs)      4.531  2.061  7.061 14            12       4.142
+Ra80 Ra40 fit (logged Ra40/Ra80; Ra20 recomputed)      4.520  2.052  7.048 14            12       4.139
+ fan_rpm_cmd  Ra40/Ra20_p_raw_pct  Ra40/Ra20_p_fit_pct  Ra80/Ra20_p_raw_pct  Ra80/Ra20_p_fit_pct  Ra80/Ra40_p_raw_pct  Ra80/Ra40_p_fit_pct
+         500                 0.34                -1.28                11.11                 6.55                10.74                 7.93
+         600                 8.94                11.41                 9.27                11.28                 0.30                -0.12
+         700                15.57                13.24                12.70                10.55                -2.48                -2.37
+         800                 8.54                 5.08                 8.82                 6.58                 0.26                 1.43
+         900                 8.86                 8.07                12.70                10.21                 3.53                 1.98
+        1000                 9.82                10.87                24.56                28.38                13.42                15.79
+        1100                16.74                18.67                25.04                26.42                 7.11                 6.53
+        1200                 8.50                 8.73                14.77                14.41                 5.78                 5.23
+        1300                 5.43                 4.63                 8.80                 8.98                 3.20                 4.15
+        1400                 6.53                 9.15                10.44                11.99                 3.67                 2.60
+        1500                 5.45                 7.33                 8.47                 9.74                 2.87                 2.25
+        1600                 5.40                 6.58                12.35                12.30                 6.60                 5.37
+        1700                10.71                10.95                16.36                17.40                 5.10                 5.82
+        1800                 7.98                10.21                18.57                19.08                 9.81                 8.04
+
+== p_fit / p_raw per run (recomputed) ==
+  Ra20: mean -1.250%  min -3.288%  max +0.410%
+  Ra40: mean -0.948%  min -3.594%  max +0.139%
+  Ra80: mean -1.307%  min -4.303%  max -0.309%

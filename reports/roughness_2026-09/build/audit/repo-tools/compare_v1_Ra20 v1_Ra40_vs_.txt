@@ -1,0 +1,3 @@
+usage: compare_blades.py [-h] [--force] baseline candidate
+compare_blades.py: error: the following arguments are required: candidate
+exit=2

@@ -1,0 +1,29 @@
+\contentsline {section}{\numberline {1}Objective and scope}{3}{section.1}%
+\contentsline {section}{\numberline {2}Test articles}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Rotor}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}The texture specimens, and what is known about each}{3}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Facility, instrumentation and protocol}{4}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Rig}{5}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Sweep protocol}{5}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Peak power: two estimators}{5}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Statistics}{6}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Data inventory and quality}{6}{section.4}%
+\contentsline {section}{\numberline {5}Results}{7}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Power curves}{7}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Paired comparison}{7}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Trend with texture}{8}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Where the extra power comes from}{8}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Scaling with wind speed}{9}{subsection.5.5}%
+\contentsline {section}{\numberline {6}Relation to the Jeong-lab tests}{10}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Comparison with the initial test}{10}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}The 27 July no-texture test}{11}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}A joint session would settle this}{11}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Discussion}{11}{section.7}%
+\contentsline {section}{\numberline {8}Limitations}{12}{section.8}%
+\contentsline {section}{\numberline {9}Recommended next steps}{12}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Toward the fault-testing plan}{13}{subsection.9.1}%
+\contentsline {section}{References}{14}{subsection.9.1}%
+\contentsline {section}{\numberline {A}Per-set-point data}{14}{appendix.A}%
+\contentsline {section}{\numberline {B}Methods detail}{14}{appendix.B}%
+\contentsline {section}{\numberline {C}Reprocessing of the 27 July export}{15}{appendix.C}%
+\contentsline {section}{\numberline {D}Data package and reproducibility}{16}{appendix.D}%

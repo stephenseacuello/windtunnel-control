@@ -1,0 +1,294 @@
+{
+ "summary": "I audited the three rig runs independently from the raw points files and reproduced the logged numbers. My standalone copy of the rig's P_max rule gives the logged raw argmax exactly for all 42 set points: power, current, voltage, step count, last current and the stopped_by text. It gives the logged parabolic fit to within 0.00006 W (0.14%) for Ra40 and Ra80, and it produces the Ra20 fit that was never logged. On the fit basis, the pairwise LEVELs (geometric mean over 14 set points, t-based 95% CI) are: Ra40/Ra20 +8.74% [+6.11, +11.44], Ra80/Ra20 +13.67% [+9.95, +17.52], Ra80/Ra40 +4.53% [+2.06, +7.06]. On the raw basis they are +8.41%, +13.73% and +4.91%. The 4-21 rpm \"slip\" in Ra20 does not come from the fan running slow. Ra20's fan_rpm_actual is the drive's output frequency multiplied by 29.5 rpm/Hz. All 14 values sit on that 2.95-rpm grid; the chance of that happening at random is 2.6e-7. Ra80 and Ra40 read the drive's own SPEED parameter (0102), which the code has used since commit 465f286 on 25 Aug. Parameter 5310 was 103 both before and after that change. Motor current is the same across runs to within 0.1 A, which also argues against a real slowdown. My recommendation is to use v = 0.02132*fan_rpm_cmd - 0.424 for every run, in plots and in tables. Most of the rougher blades' extra power shows up as higher light-load voltage and Voc: Voc is +4.1% (Ra40) and +6.4% (Ra80) higher than Ra20 at all 14 set points. Apparent internal resistance shows no resolvable change (-0.7% [-2.7, +1.4] and -0.4% [-2.2, +1.5]). Since 2*dlnVoc accounts for 92-97% of dlnP, the rougher rotors were turning faster at light load. That fits an aerodynamic cause, but a stronger wind on the later test days cannot be excluded, because no run measured wind independently. The power ordering follows Ra (13/14 set points), not test date (1/14). Ra20, however, is also the first run and the only one taken before the software and firmware changes of 22-26 Aug. Ra40's reed-switch turbine_rpm cannot be used for anything.",
+ "key_findings": [
+  "P_max rule (src/peak_finder.py, unchanged since commit 7d4dba4; called by sweep_core.measure_point). RAW: the argmax of V*I over ramp dwells, excluding the first (floor) dwell and any 'bad' dwell; a later sample must be strictly greater to replace the peak. FIT (PeakResult.refine, span=2): take the tracking dwells with I>0 (floor dwell included), find the first max-watts index k, and fit a least-squares quadratic W(I) in measured current (Cramer's rule) through pts[k-2..k+2]. It falls back to raw if there are fewer than 5 points, the window has fewer than 3, the determinant is below 1e-18, a2>=0 (not concave), or the vertex lies outside [window[0].I, window[-1].I].",
+  "My standalone re-implementation gives the logged raw p/i/v with 0 discrepancy at 42/42 set points. Steps and i_last also match 42/42, and the power-rolloff stop replay reproduces every stopped_by string (14/14 per run). Logged fit vs my recompute: Ra40 max |dP| 0.00006 W (0.137%, at 1500), Ra80 0.00006 W (0.063%, at 1800). That is 4-dp rounding in the points files; by Monte Carlo, rounding moves the Ra20 fit by at most a 0.13% half-width.",
+  "The fit falls back to raw at two set points: Ra20 at 700 (vertex outside the window), which is new, and Ra40 at 600 (not concave), which matches the logged value. All other fits use 5 points.",
+  "Fit-basis LEVELs with Ra20's fit recomputed (t(13) 95% CI): Ra40/Ra20 +8.74% [+6.11, +11.44] (13/14 higher; the exception is 500 rpm at -1.28%); Ra80/Ra20 +13.67% [+9.95, +17.52] (14/14); Ra80/Ra40 +4.53% [+2.06, +7.06] (12/14). Raw on the same method: +8.41% [+6.05, +10.82], +13.73% [+10.67, +16.88], +4.91% [+2.44, +7.45]. Dropping 600 and 700, where a fit fell back, gives fit levels of +8.16%, +14.13% and +5.53% (Ra80/Ra40 then 12/12).",
+  "Fan speed: Ra20's summary fan_rpm_actual is 4-21 rpm below command (10 distinct values). All 14 values equal round(k*2.95), i.e. PMC f2 (output Hz/10) * 295: output frequency in 0.1 Hz steps times 29.5 rpm/Hz. At a 4-pole motor's 30 rpm/Hz, that frequency puts synchronous speed 3.1-10.5 rpm above the command, which is ordinary slip with the shaft at the set point. The 29.5 factor bakes rated slip (sync/60) into every reading. Ra40 and Ra80 read drive parameter 0102 SPEED over RD (commit 465f286, 25 Aug 14:01): 0/+1 rpm in the summaries, -2..+1 rpm in the Ra40 trace.",
+  "Parameter 5310 = 103 in the 25 Aug 13:31 drive snapshot (before Ra80) and in the Ra40 header. The register mapping never changed. The Ra40 header's drive_actual_signals describes register 40005, but the fan_rpm_actual column bypasses that register.",
+  "Motor current at the same commanded speed agrees across runs to within +/-0.1 A at every set point. If Ra20's fan had really been 16-21 rpm slow at 1600-1800, the within-run slope predicts 0.16-0.19 A less current. Ra20 reads 11.9/12.7/13.6 A against Ra80's 11.8/12.7/13.6 A.",
+  "Wind columns: summary wind_mps = f(actual rpm at the end of settle); points wind_mps = f(commanded rpm); the header wind_mps is the first set point only. Ra20's summary wind is 0.71-1.20% (mean 1.03%) below commanded-rpm wind, which is 2.7-4.7% in power at n=3.77 (mean 3.96%). Ra40 and Ra80 summary wind is within -0.02..+0.10% of it. Plotting Ra20 on its summary wind shrinks the matched-wind Ra40/Ra20 gap from +8.44% to +4.51%, and Ra80/Ra20 from +13.37% to +9.26% (13 common set points).",
+  "Recommendation: use one wind definition everywhere, v = 0.02132*fan_rpm_cmd - 0.424 (the points files' wind_mps). The calibration (Test 1, 13 Feb 2026) was fitted against round set-point rpm, and the 0102 readback equals the set point to within about 1 rpm.",
+  "Thevenin analysis (my mirror matches the repo's generator_model.py at 42/42 set points). Rougher blades show higher light-load voltage at an identical 1-10 mA floor current: Ra40/Ra20 +3.92% [+2.88, +4.96], Ra80/Ra20 +6.29% [+4.46, +8.15] (14/14 each), Ra80/Ra40 +2.29% [+0.71, +3.88] (11/14). Voc: +4.08%, +6.40%, +2.23%. Apparent R_int: -0.66% [-2.66, +1.38], -0.35% [-2.16, +1.49], +0.31% [-1.44, +2.09], all indistinguishable from zero. Mean dlnP_fit = 2dlnVoc + (-dlnR): Ra40/Ra20 8.38 = 8.00 + 0.66; Ra80/Ra20 12.81 = 12.42 + 0.36; Ra80/Ra40 4.43 = 4.41 - 0.31 (log-%). A fit using only pre-peak points gives the same split.",
+  "Reading of the Thevenin result: the extra power comes through Voc, i.e. faster rotor speed at light load, not through lower resistance. That fits an aerodynamic effect. The rig cannot tell it apart from a stronger wind on the later days: there is no independent wind measurement, and ambient air was recorded only for Ra40, uncalibrated. A model-dependent check argues against a pure wind offset for Ra80/Ra20. Under R ~ v^-0.791, the offset implied by Voc would lower R by 3.28%; the observed -0.36% has a CI of [-2.19, +1.48] that excludes it. For Ra40/Ra20 the test does not decide (predicted -2.11%, observed -0.66% [-2.70, +1.37]).",
+  "Runs: Ra80 first-to-last dwell 15:24:10-15:32:01 on 26 Aug (471.0 s, 352 dwells). Ra40 15:04:49-15:12:46 on 1 Sep (477.5 s, 352 dwells; trace 15:04:25-15:12:50). Ra20 has 336 dwells with no timestamps or clock. All 42 set points are clean=1 and limited_by=power-rolloff, with 0 tracking=0 rows and 0 notes. Median dwell period is 1.055 s, with 7.4-11.8 s gaps between set points. In both timestamped runs the header 'clock' is 8.0 s after the last dwell, i.e. end of run, although its note says 'run start'.",
+  "Test order vs Ra: the raw power ordering Ra20<Ra40<Ra80 holds at 13/14 set points (not at 700). The test-date ordering Ra20<Ra80<Ra40 holds at 1/14 (700 only). Mean ranks: Ra20 1.00, Ra80 2.93, Ra40 2.07. So the result does not track test order monotonically. Ra20, however, is confounded: it is the first run, uses pre-git code, and was taken before the 22-26 Aug firmware and software changes. Ra40 is the only run with a rotor magnet on record.",
+  "Ra40 turbine_rpm cannot be used. Within a set point the coefficient of variation is 21.8-61.3% (median 33.6%) and max/min is 2.6-271x. Adjacent-dwell jumps have a median of 26% and a 90th percentile of 104%. Rotor rpm falls significantly with load at only 2/14 set points. The implied light-load 'generator constant' V/rpm varies 10.1x (0.314-3.187 mV/rpm). The median reed rpm rises only 7717 to 10436 from fan 500 to 1600, then drops to 8199 at 1800, while light-load voltage rises 8.1x. Summary TSR runs 0.28-8.60 and is not monotonic."
+ ],
+ "anomalies": [
+  {
+   "issue": "Ra20 summary fan_rpm_actual and wind_mps are output frequency x 29.5 rpm/Hz, not shaft speed. The repo's docs call the Ra20 summary wind 'physically correct'.",
+   "severity": "high",
+   "evidence": "All 14 Ra20 summary actuals equal round(k*2.95) (chance 2.6e-7); Ra40 points are on that grid at chance level (10/29) and Ra80 likewise (4/14). The PMC firmware reads 40005 (OUTPUT FREQ) /100 as f2, and the pre-25-Aug transport returned f2*295. Commit 465f286 switched to par 0102 SPEED. Implied synchronous speed is 3-10.5 rpm above command, i.e. normal slip. Motor current is equal across runs to within 0.1 A. docs/09_results.md (~line 197) says '37.50 is the physically correct figure'.",
+   "implication_for_report": "Do not use Ra20's summary wind_mps. Use wind from commanded rpm for all runs, or the Ra20 curve shifts ~1% left and the matched-wind roughness gap shrinks by ~4 points (Ra40/Ra20 +8.44% to +4.51%). The docs statement should be corrected before the professors read it."
+  },
+  {
+   "issue": "The drive_actual_signals header (5310=103) does not describe where Ra40's fan_rpm_actual comes from. The acs550.py docstring's explanation (a register-mapping difference) is contradicted.",
+   "severity": "medium",
+   "evidence": "The 25 Aug 13:31 drive snapshot shows 5310=103 before Ra80. PMCTransport.read(ADDR_ACT1) returns read_param(102) when RD is available (firmware >=3.0), so it bypasses register 40005.",
+   "implication_for_report": "Explain the Ra20-vs-later difference as a readback-code change (frequency-derived vs par 0102), not a drive parameter change. Do not cite the header as the explanation."
+  },
+  {
+   "issue": "The header 'clock' marks end of run, but _clock_note says 'run start'.",
+   "severity": "low",
+   "evidence": "clock_unix - last dwell t_unix = 8.0 s in both Ra40 and Ra80. Metadata is regenerated at every flush and at the end (blade_sweep.py line 522).",
+   "implication_for_report": "Quote start and end times from the t_unix columns (Ra80 15:24:10-15:32:01, Ra40 15:04:49-15:12:46), not from the header."
+  },
+  {
+   "issue": "The P_max fit falls back to raw at two set points, so the 'fit' basis mixes estimators there.",
+   "severity": "medium",
+   "evidence": "Ra20 at 700: vertex outside window, p_fit=p_raw=0.1047. Ra40 at 600: not concave, logged fit = raw = 0.0658. Without 600/700, Ra80/Ra40 fit goes from +4.53% (12/14) to +5.53% (12/12).",
+   "implication_for_report": "State that the fit level uses the rig's rule including its fallbacks; give the n=12 sensitivity alongside."
+  },
+  {
+   "issue": "The roughness power gain sits in light-load voltage (rotor speed), which cannot be separated from a stronger wind on the later test days.",
+   "severity": "medium",
+   "evidence": "V_light is +3.9%/+6.3% at 14/14 set points; R shows no change. There is no pitot or independent wind reading per run. Ambient air was recorded only for Ra40, and its temperature offset is 'NOT SET'.",
+   "implication_for_report": "Present the result as 'the rougher rotor turned faster at light load at the same commanded fan speed'. List a day-to-day wind or tunnel difference as not excluded, and cite the model-dependent R test as weak evidence against a pure wind offset for Ra80/Ra20."
+  },
+  {
+   "issue": "Test-order confound for Ra20, and a Ra40-only rotor magnet.",
+   "severity": "medium",
+   "evidence": "Ra20 (20 Aug) came before PMC 3.0 (24 Aug), the drive-profile restore and 0102 readback (25 Aug), and firmware v5 (26 Aug, after Ra80). Ra20 was written by pre-git code (no t_unix). Ra40 is the only run with rotor pulses, so a magnet was on a Ra40 blade; whether Ra80 carried one is not recorded. Each blade was mounted once.",
+   "implication_for_report": "Ra80 vs Ra40 (+4.91% raw / +4.53% fit), both on post-change software, is the cleanest roughness contrast. The Ra20 baseline needs the repeat run (docs/11 section 2)."
+  },
+  {
+   "issue": "The Ra40 reed-switch turbine_rpm and tsr_at_pmax are meaningless.",
+   "severity": "medium",
+   "evidence": "Within-set-point CV 22-61%, V/rpm varies 10.1x, TSR at P_max 0.28-8.60, and the reed median does not follow the 8.1x rise in light-load voltage.",
+   "implication_for_report": "Omit turbine_rpm/TSR from results. If relative rotor speed is needed, use light-load voltage as the proxy."
+  },
+  {
+   "issue": "Measured current equals the demanded current to 0.1 mA in all 1040 dwells.",
+   "severity": "low",
+   "evidence": "max |amps - demand_a| = 0.0000 across all three points files; tracking = 1 in every row.",
+   "implication_for_report": "Power is effectively V x setpoint current, so the tracking flag carries no information here. Mention it under measurement method."
+  },
+  {
+   "issue": "Ra20 has no timestamps, clock or ambient. Ra20/Ra80 points carry one end-of-ramp fan-speed and motor-current value per set point.",
+   "severity": "low",
+   "evidence": "The Ra20 points header has 7 lines and no t_unix column. Ra20 points fan_rpm_actual differs from the summary at 1100 (1092 vs 1089) and 1400 (1386 vs 1384), because the points value is the end-of-ramp snapshot.",
+   "implication_for_report": "Ra20 duration and start time cannot be stated from the files, and Ra20 cannot be joined to any DAQ record."
+  },
+  {
+   "issue": "compare_blades' CI construction differs from a t-based CI.",
+   "severity": "low",
+   "evidence": "Ra40/Ra20 raw: compare_blades [+6.33, +10.49] (1.96 x detrended residual SE, applied linearly) vs t(13) on mean log ratio [+6.05, +10.82].",
+   "implication_for_report": "Name the CI method used in each table."
+  }
+ ],
+ "numbers": [
+  {
+   "name": "Raw P_max recompute discrepancy (p, i, v), all runs",
+   "value": "0 at 42/42 set points",
+   "source": "recompute_pmax.py vs logs/*_summary.csv"
+  },
+  {
+   "name": "Fit recompute max |dP| Ra40",
+   "value": "0.00006 W (0.137%) at fan 1500",
+   "source": "recompute_pmax.py"
+  },
+  {
+   "name": "Fit recompute max |dP| Ra80",
+   "value": "0.00006 W (0.063%) at fan 1800",
+   "source": "recompute_pmax.py"
+  },
+  {
+   "name": "Fit recompute max |dI| Ra40 / Ra80",
+   "value": "0.0002 A (1.28%) / 0.00007 A (0.38%), both at fan 500",
+   "source": "recompute_pmax.py"
+  },
+  {
+   "name": "Ra20 fit rounding uncertainty (95% half-width)",
+   "value": "<=0.131% (fan 500), <=0.067% at 600, <0.05% above",
+   "source": "sensitivity.py Monte Carlo, 2000 draws"
+  },
+  {
+   "name": "LEVEL Ra40/Ra20 fit",
+   "value": "+8.74% [+6.11, +11.44], 13/14 higher",
+   "source": "recompute_pmax.py, geometric mean, t(13)"
+  },
+  {
+   "name": "LEVEL Ra80/Ra20 fit",
+   "value": "+13.67% [+9.95, +17.52], 14/14",
+   "source": "recompute_pmax.py"
+  },
+  {
+   "name": "LEVEL Ra80/Ra40 fit",
+   "value": "+4.53% [+2.06, +7.06], 12/14 (logged-fit basis +4.52% [+2.05, +7.05])",
+   "source": "recompute_pmax.py"
+  },
+  {
+   "name": "LEVEL Ra40/Ra20 raw (t-based)",
+   "value": "+8.41% [+6.05, +10.82], 14/14",
+   "source": "recompute_pmax.py"
+  },
+  {
+   "name": "LEVEL Ra80/Ra20 raw (t-based)",
+   "value": "+13.73% [+10.67, +16.88], 14/14",
+   "source": "recompute_pmax.py"
+  },
+  {
+   "name": "LEVEL Ra80/Ra40 raw (t-based)",
+   "value": "+4.91% [+2.44, +7.45], 13/14",
+   "source": "recompute_pmax.py"
+  },
+  {
+   "name": "Fit LEVELs excluding fans 600/700",
+   "value": "Ra40/Ra20 +8.16% [+5.20,+11.19]; Ra80/Ra20 +14.13% [+9.75,+18.70]; Ra80/Ra40 +5.53% [+3.12,+7.99]",
+   "source": "sensitivity.py"
+  },
+  {
+   "name": "Ra20 summary fan actual - cmd",
+   "value": "-4 to -21 rpm, 10 distinct values; all 14 on the f2x295 (2.95 rpm) grid, chance 2.6e-7",
+   "source": "fan_speed.py"
+  },
+  {
+   "name": "Ra40/Ra80 summary fan actual - cmd",
+   "value": "0 or +1 rpm; Ra40 trace -2..+1 rpm",
+   "source": "fan_speed.py"
+  },
+  {
+   "name": "Ra20 implied synchronous rpm - cmd (4-pole)",
+   "value": "+3.1 to +10.5 rpm",
+   "source": "fan_speed.py (actual/29.5 Hz x 30)"
+  },
+  {
+   "name": "Ra20 summary wind vs commanded-rpm wind",
+   "value": "-0.714% to -1.203%, mean -1.026%",
+   "source": "fan_speed.py"
+  },
+  {
+   "name": "Power equivalent of the Ra20 wind label at n=3.77",
+   "value": "+2.74% to +4.67% (mean +3.96%); 1.2% wind = 4.66%",
+   "source": "sensitivity.py"
+  },
+  {
+   "name": "Matched-wind Ra40/Ra20 raw with Ra20 summary wind vs cmd wind",
+   "value": "+4.51% vs +8.44% (13 common set points)",
+   "source": "sensitivity.py"
+  },
+  {
+   "name": "Matched-wind Ra80/Ra20 raw with Ra20 summary wind vs cmd wind",
+   "value": "+9.26% vs +13.37%",
+   "source": "sensitivity.py"
+  },
+  {
+   "name": "Motor current Ra20 - Ra80 at the same set point",
+   "value": "-0.1..+0.1 A at all 14 (expected -0.16..-0.19 A at 1600-1800 if the slip were real)",
+   "source": "run_timeline.py"
+  },
+  {
+   "name": "Light-load voltage ratio Ra40/Ra20",
+   "value": "+3.92% [+2.88, +4.96], 14/14",
+   "source": "thevenin.py"
+  },
+  {
+   "name": "Light-load voltage ratio Ra80/Ra20",
+   "value": "+6.29% [+4.46, +8.15], 14/14",
+   "source": "thevenin.py"
+  },
+  {
+   "name": "Voc ratio Ra40/Ra20, Ra80/Ra20, Ra80/Ra40",
+   "value": "+4.08% [+3.30,+4.87]; +6.40% [+4.93,+7.90]; +2.23% [+0.84,+3.64]",
+   "source": "thevenin.py"
+  },
+  {
+   "name": "R_int ratio Ra40/Ra20, Ra80/Ra20, Ra80/Ra40",
+   "value": "-0.66% [-2.66,+1.38]; -0.35% [-2.16,+1.49]; +0.31% [-1.44,+2.09]",
+   "source": "thevenin.py"
+  },
+  {
+   "name": "dlnP_fit decomposition (log-%, mean over 14)",
+   "value": "Ra40/Ra20 8.38 = 8.00 (2dlnVoc) + 0.66 (-dlnR); Ra80/Ra20 12.81 = 12.42 + 0.36; Ra80/Ra40 4.43 = 4.41 - 0.31",
+   "source": "thevenin.py"
+  },
+  {
+   "name": "Thevenin Voc^2/4R vs p_fit",
+   "value": "mean -0.45% (Ra20), -0.16% (Ra40), -0.52% (Ra80); per set point within +/-4.8%",
+   "source": "thevenin.py"
+  },
+  {
+   "name": "Worst Thevenin r2",
+   "value": "Ra20 0.9857, Ra40 0.9848, Ra80 0.9754 (all at fan 500)",
+   "source": "thevenin.py; matches repo generator_model.py"
+  },
+  {
+   "name": "Run span (first to last dwell)",
+   "value": "Ra80 471.0 s (26 Aug 15:24:10-15:32:01); Ra40 477.5 s (1 Sep 15:04:49-15:12:46); Ra20 not recorded",
+   "source": "run_timeline.py"
+  },
+  {
+   "name": "Dwell count",
+   "value": "Ra20 336, Ra40 352, Ra80 352 (= sum of summary steps)",
+   "source": "run_timeline.py"
+  },
+  {
+   "name": "Median dwell period",
+   "value": "1.055 s (Ra40 and Ra80)",
+   "source": "run_timeline.py"
+  },
+  {
+   "name": "Header clock minus last dwell",
+   "value": "+8.0 s (Ra40 and Ra80)",
+   "source": "run_timeline.py"
+  },
+  {
+   "name": "Power ordering by Ra vs by test date",
+   "value": "Ra20<Ra40<Ra80 at 13/14 (raw), 11/14 (fit); Ra20<Ra80<Ra40 at 1/14 (raw), 2/14 (fit)",
+   "source": "run_timeline.py"
+  },
+  {
+   "name": "Ra40 turbine_rpm within-set-point CV",
+   "value": "21.8-61.3%, median 33.6%",
+   "source": "turbine_rpm.py"
+  },
+  {
+   "name": "Ra40 light-load V / reed rpm",
+   "value": "0.314-3.187 mV/rpm (10.1x spread)",
+   "source": "turbine_rpm.py"
+  },
+  {
+   "name": "Ra40 summary tsr_at_pmax range",
+   "value": "0.2849-8.6015",
+   "source": "logs/sweep_v1_Ra40_summary.csv"
+  }
+ ],
+ "details_markdown": "## Rig-run audit: v1 Ra20 / Ra40 / Ra80 (protocol 94bed28333f7)\n\nEverything below comes from scripts in `/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/`. `run_all.sh` rebuilds all outputs using the system python3; the repo's `generator_model.py` was run through the repo venv. Nothing in logs/, src/, docs/, data/ or inputs/ was modified.\n\n### 1. Headers and columns\n\nThe points header is byte-identical to the summary header in every run (Ra20 7 lines, Ra80 10, Ra40 21). The Ra40 trace header is identical to its summary header.\n\n| key | Ra20 | Ra80 | Ra40 |\n|---|---|---|---|\n| blade | v1_Ra20 (the file was `v2_Ra20` until commit 9cae976; data unchanged apart from the label and CRLF line endings) | v1_Ra80 | v1_Ra40 |\n| notes | PETG, 0.2mm, Ra 20 | PETG, 0.2mm layer, 0.2mm nozzle, Ra 80 | PETG, 0.2mm layer, Ra 40 |\n| fan_rpm / wind_mps | 500 / 10.24 (first set point only) | same | same |\n| instrument | Chroma,63004-150-60,630041501113,2.01 | same | same |\n| protocol / protocol_detail | 94bed28333f7 / scaling=v2;step=0.02000;frac=0;dwell=1.00;voff=0.500;range=low;floor=0;operate=80.0;collapse=0.700;confirm=2 | same | same |\n| clock, clock_unix, _clock_note | absent | 2026-08-26T15:32:09-0400 | 2026-09-01T15:12:54-0400 |\n| protocol_extra / protocol_full | absent | absent | min_step_amps=0.002;stop_rpm=1800;... / b5ac081ac5c0 |\n| instrument_check | absent | absent | ok |\n| air_temp_c / pressure / density | absent | absent | 24.63 C / 101043 Pa / 1.1821 (offset NOT SET) |\n| drive_actual_signals | absent | absent | 5310=103;5311=104 |\n| air_temp_drift_c / air_density_end | absent | absent | +0.12 / 1.1817 |\n\n| column | Ra20 summ | Ra20 pts | Ra80 summ | Ra80 pts | Ra40 summ | Ra40 pts | Ra40 trace |\n|---|---|---|---|---|---|---|---|\n| fan_rpm_cmd / fan_rpm | x / - | - / x | x / - | - / x | x / - | - / x | - |\n| fan_rpm_actual, wind_mps, blade | x | x | x | x | x | x | actual only |\n| p_max_w, i_at_pmax_a (raw) | x | | | | | | |\n| p_max_fit_w, i_at_pmax_fit_a, p_max_raw_w, i_at_pmax_raw_a | | | x | | x | | |\n| v_at_pmax_v, i_last_a, limited_by, clean, steps, stopped_by | x | | x | | x | | |\n| turbine_rpm_at_pmax, tsr_at_pmax | | | | | x | | |\n| demand_a, held_a, volts, amps, watts, tracking, note, motor_amps | | x | | x | | x | motor_amps |\n| t_unix, t_local | | | | x | | x | t_unix, t_rel_s |\n| turbine_rpm | | | | | | x | rpm_pulses, rpm_last_us |\n\nSummary wind_mps = f(actual rpm at the end of settle). Points wind_mps = f(commanded rpm). In Ra20 and Ra80, the points fan_rpm_actual and motor_amps hold one end-of-ramp snapshot per set point; Ra40 has a value per dwell.\n\n### 2. P_max rule and recompute\n\n**Source.** `src/peak_finder.py`, unchanged since 7d4dba4 (22 Aug), called from `sweep_core.measure_point` with operate_frac=0.\n\n- **RAW** is the argmax of V\u00b7I over ramp dwells. The first (floor) dwell is excluded, and so is any bad dwell (collapsed, lost tracking, or under v_floor). A later sample must be strictly greater to replace the peak.\n- **FIT** (`refine(span=2)`) uses the tracking dwells with I>0, including the floor dwell. It finds the first max-watts index k and fits an ordinary least-squares quadratic W(I) in measured current, solved by Cramer's rule, through pts[k-2..k+2]. i_fit = -a1/2a2 and p_fit = W(i_fit).\n- **Fallback to raw** happens if there are fewer than 5 points, the window has fewer than 3, |det| < 1e-18, a2 >= 0, or the vertex lies outside [window[0].I, window[-1].I].\n- `compare_blades.py` uses the fit only when both runs have it, so every Ra20 comparison so far has been raw.\n\n**Recompute vs logged:**\n\n| run | p_raw | i_raw | v_raw | p_fit | i_fit | steps, i_last | stop text | fallbacks |\n|---|---|---|---|---|---|---|---|---|\n| Ra20 | 0 | 0 | 0 | not logged | not logged | 0 | 14/14 | 700 (vertex outside window) |\n| Ra40 | 0 | 0 | 0 | max 0.00006 W (0.137%, 1500) | 0.0002 A (1.28%, 500) | 0 | 14/14 | 600 (not concave), matches logged |\n| Ra80 | 0 | 0 | 0 | max 0.00006 W (0.063%, 1800) | 0.00007 A (0.38%, 500) | 0 | 14/14 | none |\n\nThe demand ladders are identical across runs. Measured amps equal demand to 0.0000 A in all 1040 dwells, with no tracking=0 rows and no notes.\n\n| fan | Ra20 raw | **Ra20 fit (new)** | Ra40 raw | Ra40 fit | Ra80 raw | Ra80 fit |\n|---|---|---|---|---|---|---|\n| 500 | 0.0297 | 0.0296 | 0.0298 | 0.0293 | 0.0330 | 0.0316 |\n| 600 | 0.0604 | 0.0591 | 0.0658 | 0.0658* | 0.0660 | 0.0657 |\n| 700 | 0.1047 | 0.1047* | 0.1210 | 0.1186 | 0.1180 | 0.1158 |\n| 800 | 0.1769 | 0.1762 | 0.1920 | 0.1851 | 0.1925 | 0.1877 |\n| 900 | 0.2732 | 0.2743 | 0.2974 | 0.2965 | 0.3079 | 0.3023 |\n| 1000 | 0.4227 | 0.4088 | 0.4642 | 0.4532 | 0.5265 | 0.5248 |\n| 1100 | 0.6433 | 0.6320 | 0.7510 | 0.7500 | 0.8044 | 0.7990 |\n| 1200 | 0.9592 | 0.9542 | 1.0407 | 1.0375 | 1.1009 | 1.0917 |\n| 1300 | 1.3286 | 1.3208 | 1.4007 | 1.3820 | 1.4455 | 1.4395 |\n| 1400 | 1.6653 | 1.6225 | 1.7740 | 1.7710 | 1.8391 | 1.8170 |\n| 1500 | 2.0806 | 2.0454 | 2.1940 | 2.1953 | 2.2569 | 2.2446 |\n| 1600 | 2.5188 | 2.4795 | 2.6547 | 2.6427 | 2.8299 | 2.7846 |\n| 1700 | 3.0329 | 2.9966 | 3.3576 | 3.3248 | 3.5290 | 3.5181 |\n| 1800 | 3.7935 | 3.7217 | 4.0961 | 4.1018 | 4.4981 | 4.4317 |\n\n\\* marks a fallback to raw. Rounding uncertainty on the Ra20 fit, by Monte Carlo on 4-dp watts: 95% half-width 0.13% at 500 and 0.07% at 600, under 0.05% above that. On average the fit sits below raw by 1.25% (Ra20), 0.95% (Ra40) and 1.31% (Ra80).\n\n**Pairwise LEVEL.** Geometric-mean ratio over 14 set points matched on commanded rpm, with a t(13) 95% CI on the mean log ratio.\n\n| pair | raw | fit (all recomputed) | fit (logged Ra40/80, Ra20 recomputed) | fit, excluding 600/700 (n=12) |\n|---|---|---|---|---|\n| Ra40/Ra20 | +8.41% [+6.05, +10.82] 14/14 | +8.74% [+6.11, +11.44] 13/14 | +8.75% [+6.13, +11.43] | +8.16% [+5.20, +11.19] 11/12 |\n| Ra80/Ra20 | +13.73% [+10.67, +16.88] 14/14 | +13.67% [+9.95, +17.52] 14/14 | +13.66% [+9.94, +17.51] | +14.13% [+9.75, +18.70] 12/12 |\n| Ra80/Ra40 | +4.91% [+2.44, +7.45] 13/14 | +4.53% [+2.06, +7.06] 12/14 | +4.52% [+2.05, +7.05] | +5.53% [+3.12, +7.99] 12/12 |\n\nThe compare_blades CIs quoted earlier ([+6.33, +10.49] etc.) use 1.96 times the detrended residual SE, which is a different construction. Per-set-point ratios are in `ratios_by_setpoint.csv`; for example Ra40/Ra20 on the fit basis is -1.28% at 500 and +18.67% at 1100.\n\n### 3. Fan speed and wind\n\n| cmd | Ra20 summ act-cmd | Ra20 pts | Ra20 wind summ | wind from cmd | Ra20 summ vs cmd | Ra20 output Hz (act/29.5) | Ra20 sync-cmd | Ra40 summ / pts | Ra80 summ / pts |\n|---|---|---|---|---|---|---|---|---|---|\n| 500 | -4 | -4 | 10.14 | 10.24 | -0.938% | 16.81 | +4.4 | 0 / -1,0,+1 | 0 / 0 |\n| 600 | -7 | -7 | 12.22 | 12.37 | -1.197% | 20.10 | +3.1 | 0 / 0 | 0 / 0 |\n| 700 | -7 | -7 | 14.36 | 14.50 | -0.966% | 23.49 | +4.7 | 0 / 0 | 0 / 0 |\n| 800 | -6 | -6 | 16.50 | 16.63 | -0.794% | 26.92 | +7.5 | 0 / 0 | 0 / 0 |\n| 900 | -6 | -6 | 18.63 | 18.76 | -0.714% | 30.30 | +9.2 | 0 / 0,+1 | 0 / 0 |\n| 1000 | -9 | -9 | 20.71 | 20.90 | -0.890% | 33.59 | +7.8 | 0 / -1,0,+1 | 0 / 0 |\n| 1100 | -11 | -8 | 22.78 | 23.03 | -1.077% | 36.92 | +7.5 | 0 / 0,+1 | +1 / 0 |\n| 1200 | -11 | -11 | 24.92 | 25.16 | -0.954% | 40.30 | +9.2 | 0 / 0,+1 | 0 / 0 |\n| 1300 | -14 | -14 | 27.00 | 27.29 | -1.070% | 43.59 | +7.8 | 0 / 0,+1 | 0 / 0 |\n| 1400 | -16 | -14 | 29.07 | 29.42 | -1.203% | 46.92 | +7.5 | 0 / 0,+1 | +1 / 0 |\n| 1500 | -16 | -16 | 31.21 | 31.56 | -1.096% | 50.30 | +9.2 | 0 / -1,0,+1 | 0 / +1 |\n| 1600 | -19 | -19 | 33.29 | 33.69 | -1.181% | 53.59 | +7.8 | +1 / 0,+1 | 0 / 0 |\n| 1700 | -18 | -18 | 35.43 | 35.82 | -1.089% | 57.02 | +10.5 | +1 / 0,+1 | +1 / 0 |\n| 1800 | -21 | -21 | 37.50 | 37.95 | -1.191% | 60.30 | +9.2 | 0 / -1,0,+1 | 0 / 0 |\n\n**Why Ra20 shows slip and the later runs do not:**\n- **Ra20 (20 Aug, PMC 2.x, pre-git code).** fan_rpm_actual = f2\u00b7295, where f2 is register 40005 (par 0103 OUTPUT FREQ) divided by 100, so it is output frequency in 0.1 Hz steps times 29.5 rpm/Hz. All 14 values lie on that 2.95-rpm grid (chance 2.6e-7). The 29.5 = 1770/60 nameplate ratio subtracts rated slip (sync/60 = 8.4 rpm at 500, 30 rpm at 1800) from every reading. The implied synchronous speed is 3-10.5 rpm above the command, i.e. ordinary slip with the shaft at the set point: 9904 = 1 (VECTOR:SPEED) in the 25 Aug snapshot.\n- **Ra80 (26 Aug) and Ra40 (1 Sep).** Since commit 465f286 (25 Aug 14:01), PMCTransport serves ACT1 from par 0102 SPEED via RD, which is the drive's regulated speed estimate. It reads the set point: 0/+1 rpm in the summaries, -2..+1 in the Ra40 trace (mean deviation within \u00b10.23 rpm per set point).\n- **5310 did not change.** It was 103 in the 25 Aug 13:31 snapshot and in the Ra40 header, so the header documents register 40005, not the column's source.\n- **Motor current agrees.** Ra20 minus Ra80 is within \u00b10.1 A at all 14 set points. A real 16-21 rpm deficit at 1600-1800 would predict 0.16-0.19 A less current, since the within-run slope is about 0.009 A/rpm.\n\n**Consequence.** Ra20's summary wind is 0.71-1.20% low (mean 1.03%). At n=3.77 that is +2.7 to +4.7% in power at matched wind (1.2% of wind = 4.66% of power). On a wind axis with Ra20's summary wind, the matched-wind Ra40/Ra20 gap is +4.51% instead of +8.44%, and Ra80/Ra20 is +9.26% instead of +13.37% (13 common set points, raw). Pairing on commanded rpm is unaffected.\n\n**Recommendation.** Use one definition in both plots and tables: v = 0.02132\u00b7fan_rpm_cmd - 0.424, which is the points files' wind_mps. The calibration (Test 1, 13 Feb) was fitted against set-point rpm.\n\n### 4. Light-load voltage and Thevenin fit\n\nMy fit mirrors generator_model.fit and matches the repo tool's printed values at 42/42 set points; the tool outputs are in `generator_model_Ra*_repo.txt`. In the table, V_light is the voltage at the floor dwell; I_light is the same in all runs (1.0 mA at 500 to 10.0 mA at 1800).\n\n| fan | Ra20 V_light / Voc / R | Ra40 V_light / Voc / R | Ra80 V_light / Voc / R |\n|---|---|---|---|\n| 500 | 2.848 / 3.181 / 88.4 | 2.988 / 3.389 / 94.2 | 2.938 / 3.326 / 88.8 |\n| 600 | 4.466 / 4.517 / 87.1 | 4.585 / 4.677 / 84.0 | 4.629 / 4.716 / 85.2 |\n| 700 | 5.623 / 5.623 / 73.6 | 5.788 / 5.882 / 74.6 | 5.668 / 5.790 / 72.8 |\n| 800 | 6.744 / 6.857 / 67.5 | 6.962 / 6.991 / 63.7 | 6.923 / 7.006 / 64.7 |\n| 900 | 7.863 / 7.942 / 58.3 | 8.139 / 8.247 / 59.7 | 8.461 / 8.454 / 60.3 |\n| 1000 | 9.194 / 9.332 / 54.9 | 9.943 / 9.779 / 54.2 | 10.339 / 10.314 / 52.2 |\n| 1100 | 10.977 / 10.969 / 49.3 | 11.734 / 11.620 / 47.3 | 12.067 / 12.063 / 46.8 |\n| 1200 | 12.851 / 12.753 / 44.4 | 13.487 / 13.416 / 44.2 | 13.757 / 13.804 / 44.3 |\n| 1300 | 14.566 / 14.536 / 41.4 | 15.212 / 15.043 / 41.3 | 15.413 / 15.310 / 41.6 |\n| 1400 | 16.406 / 16.082 / 39.6 | 16.766 / 16.470 / 38.4 | 17.380 / 16.794 / 38.5 |\n| 1500 | 18.114 / 17.497 / 36.8 | 18.565 / 18.298 / 37.7 | 19.202 / 18.784 / 38.4 |\n| 1600 | 20.094 / 19.416 / 36.6 | 20.900 / 20.216 / 37.2 | 21.249 / 20.760 / 37.9 |\n| 1700 | 21.708 / 21.255 / 36.2 | 22.337 / 22.162 / 36.6 | 23.327 / 22.853 / 37.1 |\n| 1800 | 23.917 / 23.502 / 36.5 | 24.345 / 23.973 / 34.4 | 26.420 / 25.681 / 36.9 |\n\nPer-set-point differences (%):\n\n| fan | Ra40/Ra20 V_light / Voc / R / P_fit | Ra80/Ra20 V_light / Voc / R / P_fit | Ra80/Ra40 V_light / Voc / R / P_fit |\n|---|---|---|---|\n| 500 | +4.93 / +6.53 / +6.65 / -1.28 | +3.16 / +4.54 / +0.45 / +6.55 | -1.69 / -1.87 / -5.81 / +7.93 |\n| 600 | +2.66 / +3.54 / -3.53 / +11.41 | +3.65 / +4.40 / -2.20 / +11.28 | +0.96 / +0.83 / +1.38 / -0.12 |\n| 700 | +2.93 / +4.61 / +1.34 / +13.24 | +0.80 / +2.96 / -1.09 / +10.55 | -2.07 / -1.57 / -2.40 / -2.37 |\n| 800 | +3.23 / +1.96 / -5.68 / +5.08 | +2.65 / +2.17 / -4.14 / +6.58 | -0.56 / +0.21 / +1.64 / +1.43 |\n| 900 | +3.51 / +3.84 / +2.36 / +8.07 | +7.60 / +6.44 / +3.30 / +10.21 | +3.96 / +2.50 / +0.92 / +1.98 |\n| 1000 | +8.14 / +4.79 / -1.33 / +10.87 | +12.45 / +10.53 / -4.82 / +28.38 | +3.99 / +5.47 / -3.54 / +15.79 |\n| 1100 | +6.90 / +5.94 / -4.14 / +18.67 | +9.93 / +9.97 / -5.15 / +26.42 | +2.84 / +3.81 / -1.05 / +6.53 |\n| 1200 | +4.95 / +5.19 / -0.36 / +8.73 | +7.05 / +8.24 / -0.15 / +14.41 | +2.01 / +2.89 / +0.21 / +5.23 |\n| 1300 | +4.44 / +3.49 / -0.37 / +4.63 | +5.82 / +5.33 / +0.52 / +8.98 | +1.33 / +1.78 / +0.89 / +4.15 |\n| 1400 | +2.19 / +2.41 / -2.89 / +9.15 | +5.94 / +4.43 / -2.64 / +11.99 | +3.67 / +1.97 / +0.26 / +2.60 |\n| 1500 | +2.49 / +4.58 / +2.57 / +7.33 | +6.00 / +7.36 / +4.54 / +9.74 | +3.43 / +2.66 / +1.92 / +2.25 |\n| 1600 | +4.01 / +4.12 / +1.52 / +6.58 | +5.75 / +6.92 / +3.49 / +12.30 | +1.67 / +2.69 / +1.94 / +5.37 |\n| 1700 | +2.90 / +4.26 / +1.01 / +10.95 | +7.46 / +7.52 / +2.25 / +17.40 | +4.43 / +3.12 / +1.22 / +5.82 |\n| 1800 | +1.79 / +2.00 / -5.62 / +10.21 | +10.47 / +9.27 / +1.34 / +19.08 | +8.52 / +7.12 / +7.37 / +8.04 |\n\nSummary (geometric mean, t 95% CI, set points higher):\n\n| quantity | Ra40/Ra20 | Ra80/Ra20 | Ra80/Ra40 |\n|---|---|---|---|\n| V_light | +3.92% [+2.88,+4.96] 14/14 | +6.29% [+4.46,+8.15] 14/14 | +2.29% [+0.71,+3.88] 11/14 |\n| Voc (all points) | +4.08% [+3.30,+4.87] 14/14 | +6.40% [+4.93,+7.90] 14/14 | +2.23% [+0.84,+3.64] 12/14 |\n| R_int (all points) | -0.66% [-2.66,+1.38] 6/14 | -0.35% [-2.16,+1.49] 7/14 | +0.31% [-1.44,+2.09] 10/14 |\n| Voc / R (pre-peak points only) | +4.25% / +0.36% | +6.56% / +0.55% | +2.22% / +0.19% |\n| dlnP_fit = 2dlnVoc + (-dlnR), log-% | 8.38 = 8.00 + 0.66 | 12.81 = 12.42 + 0.36 | 4.43 = 4.41 - 0.31 |\n\n**Model check.** Voc\u00b2/4R reproduces p_fit to a mean of -0.45%, -0.16% and -0.52% by run, and to within \u00b14.8% at every set point.\n\n**What drives the difference.** It comes through Voc, not R: 92% (Ra40/Ra20) and 97% (Ra80/Ra20) of the log-power gain. At 1-10 mA the I\u00b7R drop is 1.5-3% of V and the same across blades. With the same generator, a higher V_light means the rougher rotors turned about 3.9% (Ra40) and 6.3% (Ra80) faster at light load at the same commanded fan speed. Apparent R includes rotor droop (docs/11), so an unchanged R means the combined electrical-plus-droop slope did not change.\n\n**Alternative: a stronger wind on later days.** This cannot be excluded, because no run measured wind independently. Density differences alone would move P_max but, to first order, not light-load speed. A model-dependent check uses the within-run R ~ v^-0.791. Under that model, the wind offset implied by Voc predicts dlnR of -2.11% for Ra40/Ra20; the observed -0.66% [-2.70, +1.37] does not decide. For Ra80/Ra20 it predicts -3.28%, and the observed -0.36% [-2.19, +1.48] excludes that.\n\n### 5. Run facts and test order\n\n| | Ra20 | Ra80 | Ra40 |\n|---|---|---|---|\n| date (docs / t_unix) | 20 Aug 2026 (docs 07/09) | 26 Aug | 1 Sep |\n| first to last dwell | not recorded | 15:24:10-15:32:01 (471.0 s) | 15:04:49-15:12:46 (477.5 s); trace 15:04:25-15:12:50 |\n| header clock | none | 15:32:09 (+8.0 s after last dwell) | 15:12:54 (+8.0 s) |\n| dwells | 336 | 352 | 352 |\n| clean / limited_by | 14\u00d71 / power-rolloff | same | same |\n| tracking=0 rows / notes | 0 / 0 | 0 / 0 | 0 / 0 |\n| motor_amps | 4.6-13.6 | 4.5-13.6 | 4.4-13.8 |\n\n- Dwell period: median 1.055 s (range 1.049-1.199). Gap between set points: 7.4-11.8 s.\n- Motor current per set point: Ra20 minus Ra80 is -0.1..+0.1 A, and Ra20 minus Ra40 is -0.1..+0.1 A.\n- **Order check.** Raw power follows Ra20<Ra40<Ra80 at 13/14 set points (not at 700) and follows test-date order (Ra20<Ra80<Ra40) at 1/14. Mean ranks in date order: 1.00, 2.93, 2.07. The fit basis gives 11/14 and 2/14. So there is no monotonic drift with date.\n- **Confounds for Ra20.** It is the first run and the only one before PMC 3.0/v4/v5 and the 25 Aug drive-profile restore and readback change. It was written by pre-git code.\n- **Confound for Ra40.** It is the only run with rotor pulses on record, so a magnet was on a blade.\n- **Mountings.** Each blade was mounted once. The Ra80 vs Ra40 contrast (+4.91% raw / +4.53% fit) is the cleanest.\n\n### 6. Ra40 turbine_rpm\n\n| fan | median | min | max | CV % | Spearman(rpm, I) | p | V_light / rpm (mV/rpm) | summary TSR@Pmax |\n|---|---|---|---|---|---|---|---|---|\n| 500 | 7717 | 213 | 12102 | 51.6 | -0.12 | 0.65 | 0.314 | 8.60 |\n| 600 | 6272 | 438 | 12765 | 46.8 | -0.37 | 0.09 | 0.692 | 5.85 |\n| 700 | 7282 | 2573 | 14071 | 42.8 | +0.03 | 0.89 | 0.494 | 5.24 |\n| 800 | 6721 | 2082 | 11999 | 39.1 | 0.00 | 1.00 | 0.814 | 4.69 |\n| 900 | 7184 | 2030 | 11900 | 35.4 | +0.16 | 0.46 | 2.728 | 3.04 |\n| 1000 | 8323 | 1658 | 13631 | 31.9 | -0.34 | 0.11 | 1.014 | 6.90 |\n| 1100 | 8635 | 357 | 12058 | 41.3 | -0.10 | 0.62 | 1.086 | 0.28 |\n| 1200 | 8392 | 4845 | 12799 | 23.2 | -0.14 | 0.48 | 1.617 | 3.13 |\n| 1300 | 9241 | 443 | 13658 | 28.2 | -0.41 | 0.03 | 1.513 | 2.73 |\n| 1400 | 9442 | 4813 | 13882 | 21.8 | -0.36 | 0.05 | 1.279 | 3.52 |\n| 1500 | 10023 | 2513 | 15844 | 28.6 | -0.05 | 0.82 | 2.558 | 3.88 |\n| 1600 | 10436 | 4962 | 16543 | 25.5 | -0.11 | 0.57 | 2.258 | 4.14 |\n| 1700 | 10360 | 909 | 13690 | 24.8 | -0.20 | 0.32 | 2.091 | 2.74 |\n| 1800 | 8199 | 42 | 11474 | 61.3 | -0.54 | 0.003 | 3.187 | 1.18 |\n\n- **Scatter.** Adjacent-dwell |dln rpm| has a median of 26% and a 90th percentile of 104%. There are 2 blank values at 1800.\n- **Trace pulse rate.** 95-172 counts/s over each ramp, and 70-90% of ticks see no new pulse.\n- **Why the reading is wrong.** A generator constant should be flat, but V/rpm varies 10.1x. Rotor speed should fall with load, but it does so significantly at only 2/14 set points. The pattern is consistent with docs/11: extra counts from bounce or a floating input at low speed, and a reed rated 20 Hz that cannot follow the rotor at high speed.\n- **Verdict.** Unusable for per-dwell speed, TSR or Cp(\u03bb). Use light-load voltage as the relative rotor-speed proxy.",
+ "artifacts": [
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/recompute_pmax.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/pmax_recomputed.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/pairwise_level_raw_vs_fit.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/ratios_by_setpoint.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/stop_rule_replay.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/recompute_pmax_stdout.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/fan_speed.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/fan_speed_by_setpoint.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/fan_speed_stdout.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/thevenin.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/thevenin_by_run.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/thevenin_cross_blade_summary.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/thevenin_cross_blade_by_setpoint.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/thevenin_stdout.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/generator_model_Ra20_repo.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/generator_model_Ra40_repo.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/generator_model_Ra80_repo.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/run_timeline.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/run_timeline_summary.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/run_timeline_by_setpoint.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/motor_current_by_setpoint.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/run_timeline_stdout.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/turbine_rpm.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/ra40_turbine_rpm_by_setpoint.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/ra40_pulse_rate_by_setpoint.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/turbine_rpm_stdout.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/headers.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/headers_by_run.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/columns_by_file.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/sensitivity.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/sensitivity_stdout.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/rigio.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/rig_audit/run_all.sh"
+ ]
+}

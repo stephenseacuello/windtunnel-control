@@ -1,0 +1,17 @@
+place,query,result
+"repo working tree, all files incl logs/ data/ webapp/ src/ tests/ docs/",grep -rIn -E 'Ra ?10\b|v1_Ra10|Ra_10',"only NEXT_SESSION.md (plan: 'The new blade - Ra 10 or Ra 40', lines 244-368) and reports/roughness_2026-09/HANDOFF.md; no data file"
+repo file names,find -iname '*ra10*',none
+repo logs/,ls logs; blade labels grep,"sweep files exist only for v1_Ra20, v1_Ra40, v1_Ra80; labels present: v1_Ra20, v1_Ra40, v1_Ra80, v2_Ra20 (1 historical mention), v1_Ra20_repeat (docs/tests only)"
+"git history (all refs, 1 branch main + origin/main, no stash)",git log --all -S Ra10 / -S 'Ra 10' / -G v1_Ra10 / --stat | grep -i ra10,no hits in any commit (history starts 2026-08-22). NEXT_SESSION.md's Ra 10 text is uncommitted working-tree content
+~/Downloads ~/Desktop ~/Documents,find names *ra10*/*ra_10*/*ra 10*/sweep_* (metadata only); grep -lE 'v1_Ra10|\bRa ?10\b' over every local csv/txt/md/json/py/tex/log <50 MB (iCloud 'dataless' files skipped so nothing is downloaded),"no file names; no content hits (2 min 27 s run, exit 0). Evicted iCloud files in ~/Documents were NOT content-searched; Spotlight (next row) covers indexed content"
+Spotlight index of home dir,"mdfind '""Ra10""'","repo NEXT_SESSION.md, HANDOFF.md, and one unrelated 2025 wandb debug log (CSC 561 coursework) - false positive"
+~/Projects (other repos),find -iname 'sweep_v*' outside repo logs,none
+Google Drive,search title fuzzy/turbine/3mf/Ra10/roughness,"no Ra10 file; found turbines_threeFuzzySettings_06mm.3mf (45.2 MB), ..._plate_2.gcode.3mf (39.1 MB), turbine_default.3mf (60.7 MB) - not downloaded (size)"
+Gmail,"Ra10 OR ""Ra 10"" OR v1_Ra10 (incl. trash)","one hit: 2026-08-20 Stephen->Jeong (19ff68cacbd296e4 msg 1a0211ed22df050e): 'Next week we will complete recording data for surface roughnesses of Ra 10, 40, & 80 micrometers.' No data, no later mention"
+Gmail,fuzzy (all time),threads up to 2026-08-26 only; nothing after 08-27
+Gmail,roughness after:2026/08/06,only 'What Ra are the prints??' (08-12/13) and a newsletter
+Gmail,"""wind tunnel"" after:2026/08/27","Oct 1 'Wind Tunnel Testing' invite accepted by Taegu (09-30); 'Wind Tunnel @ 3PM' (09-30, empty body); PhD committee email (09-22); Wind Tunnel Base CAD (09-21); Tormach adapter (09-14). No Ra10 data"
+Gmail,Ra80/Ra20/Ra40/'Ra 80' etc.,"only 08-20 plan email, 08-25 Nano sensor email, 08-26 logs email to Taegu (attachments Ra20/Ra80 CSVs)"
+Gmail,taegu.kang / kjt23081 after:2026/06/06,no Ra10 data exchanged
+Google Calendar,search_events 'wind tunnel' / 'Taegu' / 'turbine',semantic search returned empty for all three
+Google Calendar,"list_events fullText wind / tunnel / Taegu / turbine / Jeong / blade, 2026-05-01..2026-10-31","events: 05-27 'Meeting with Stephen' (Jeong), 06-08 'Wind Tunnel Meeting w/ Taegu', 09-01 'Wind Tunnel with Taegu', 10-01 'Wind Tunnel Testing' (future). None after 08-27 other than 09-01 and 10-01; none mention Ra10"

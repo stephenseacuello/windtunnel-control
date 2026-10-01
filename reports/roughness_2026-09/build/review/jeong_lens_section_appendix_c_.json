@@ -1,0 +1,182 @@
+{
+ "reviewer": "jeong-lens (Section 6 / Appendix C, read as Prof. Jeong and Taegu Kang)",
+ "summary": "I checked the reprocessing numbers against the raw export and they hold: the recipe reproduces all 64 table values exactly, the current channel has about 31 mA of white noise, the load was at 0 A at 500\u2013700 rpm, the null window gives 1.50 W, and the reprocessed values of 0.008\u20134.261 W and ratios of 0.65\u20130.91 reproduce. Three statements about the lab are wrong or unsupported. First, the \"earlier finding\" of an order of magnitude comes only from Stephen's own draft slides, yet it reads as the lab's. Second, the June load procedure is misdescribed. Third, the \"Loading\" argument is contradicted by the lab's own V\u2013I data at 900 and 1100 rpm. Beyond these, the section reads as an audit of Taegu's processing rather than a joint check. It should credit Taegu (and note that Stephen co-ran the July test) and use the lab's 500\u2013700 rpm windows for a V_oc comparison that does not depend on the current scale. It should also turn the conclusions that rest on inference into questions and a joint recording session on 1 October.",
+ "findings": [
+  {
+   "severity": "critical",
+   "location": "Section 6.1, second consequence bullet (p.12)",
+   "quote": "The earlier finding that the no-texture blade out-produced the textured one by an order of magnitude at low wind comes from this, not from the rotor.",
+   "problem": "No source is given, and nothing the lab sent makes this claim. The sentence sits in a bullet about the lab's table, so readers will assume Taegu or the lab made the 'finding'. The only place this comparison exists is the author's own draft deck, which may never have been circulated.",
+   "evidence": "A grep of the repo, docs, audit files and report sources finds the phrase only in report.tex. docs/slides/jeong_setup_and_results_v1.pptx (untracked, 24 Sep), slide 8: 'Ra20 remains below the July no-texture baseline at matched wind speeds ... Observed difference falls from 91.7% to 8.8%'. That is lab Pdc_max 0.333 W against Ra20 0.030 W at 500 rpm, about 11x. Slide 7: 'No-texture baseline reaches 5.60 W'. provenance_details.md: 'No emailed reply found' to Jeong's 21 Aug slide request. Taegu's 27 Jul emails (thread 19fa4b6458be5961) make no comparative claim.",
+   "fix": "Delete the sentence. If the draft slides were shown to the group, own the claim in the first person: 'My own first comparison (draft slides, September) put the tabulated Pdc_max beside the rig's Ra20 and showed the no-texture rotor about ten times higher at 10 m/s. That gap came from this, not from the rotor.'"
+  },
+  {
+   "severity": "critical",
+   "location": "Section 6, opening paragraph (p.12)",
+   "quote": "Both used the lab's DAQ rather than the automated rig, and a different load procedure: the electronic load was held in constant current and raised by hand at a few levels per wind speed, rather than swept past the power maximum at every wind speed.",
+   "problem": "Only July has a raw export, so the procedure can be inferred for July alone. For June the description is unsupported, and the lab's own records partly contradict it. Taegu ran the June test and will see it misdescribed. Also, 'rather than the automated rig' implies the lab chose not to use it, but the rig did not exist until 19\u201320 August.",
+   "evidence": "Taegu, 5 Jun (19e99387d98b478a): 'recent load variation test ... maximum power curve and the constant RPM test graphs. I would like to conduct one more experiment using constant current (CC) and constant voltage (CV) modes'. CC was proposed as the next step, not the June mode. The lab's June plots (Graph3/Graph4) show power against load current passing through a maximum, titled 'Combined Constant Power Test (Max Envelope)'. The June table shows load current at every setting (Idc_max 0.029 A at 500). provenance_details.md: 'The load mode is not stated for May or July.' The first automated sweep is Stephen's 20 Aug email. For July, CC is confirmed from the raw data: at 72\u201380 s I holds at 14\u201315 mA while V rises from 4.1 to 5.3 V.",
+   "fix": "'Both tests predate the automated rig (first run 20 August) and used the lab's DAQ. In the 27 July test the load appears to have been held in constant current and raised by hand, 0\u20133 levels per setting, without a sweep past the power maximum; this is inferred from the raw export. The 5 June test was a load-variation test whose raw data we do not have.'"
+  },
+  {
+   "severity": "critical",
+   "location": "Section 6.2, 'Loading' bullet (p.13)",
+   "quote": "At 900\u20131300 rpm the lab's load current was well below the current at the rotor's power maximum, so those values understate the no-texture rotor's peak.",
+   "problem": "The benchmark used is the rig Ra20 rotor's current at P_max, not the no-texture rotor's. Applying the report's own Th\u00e9venin method to the lab's July data puts the lab's values at or near the no-texture rotor's own apparent maximum at 900 and 1100 rpm. Loading therefore explains little of the 30\u201335% gap. The gap is in the apparent source resistance, and the same gap persists at 1400\u20131800, where the lab current was at the Ra20 current at P_max (0.88\u20131.21 of it). Taegu could refute this bullet from his own data.",
+   "evidence": "july-verify C8 says 'Lab I is 0.56\u20130.71 of the rig's current at P_max', i.e. relative to the rig, not this rotor. First-pass fits in build/daq_july/july_segments.csv (thev_valid=1): at 900 rpm Voc 7.90 V, R_app 82 \u03a9, MPP 0.189 W at 48 mA; at 1100 rpm 10.57 V, 65 \u03a9, 0.429 W at 81 mA. The report's reprocessed values are 0.192 and 0.449 W. My own 1 s means (build/review/jeong-lens/v6.py): at 900, 15.5 mA gives 6.55 V and 38 mA gives 4.65 V, so Voc \u2248 7.85 V, R \u2248 84 \u03a9, Pmpp \u2248 0.18 W at 47 mA, against a settled 0.175\u20130.18 W. At 1100, R \u2248 74 \u03a9 and Pmpp \u2248 0.42 W against a measured 0.42\u20130.43 W. Rig Ra20 at the same set points: Voc 7.94/10.97 V, R_int 58.3/49.3 \u03a9.",
+   "fix": "Replace the bullet and merge it with 'Current scale': 'Source resistance and current scale. At 900 and 1100 rpm the lab's open-circuit voltage is within a few percent of the rig's Ra20 (7.9 against 7.9 V; 10.6\u201311.1 against 11.0 V). Its apparent source resistance on the 2 A/V scale is 1.3\u20131.5 times the rig's (82\u201384 against 58 \u03a9; 65\u201374 against 49 \u03a9). A current channel reading about 25\u201335% low would produce this, as would a difference in wiring, rectifier or bus capacitor between the setups. Either one lowers every lab power relative to the rig, and neither involves the blades.'"
+  },
+  {
+   "severity": "major",
+   "location": "Section 6.2, paragraph after Fig. 8 and the 'defensible conclusion' paragraph (p.13)",
+   "quote": "That ratio is not a texture effect, for three reasons. ... The defensible conclusion is narrower: on a comparable basis, the July no-texture test is neither clearly above nor clearly below the textured prints",
+   "problem": "Table 6 shows the reprocessed values below Ra20 at every loaded set point, so 'neither clearly above nor clearly below' reads as hand-waving to anyone looking at the table. 'Is not a texture effect' asserts a negative that the data cannot prove. The three reasons leave out the basic differences between the setups: a different print batch, mounting, day and electrical chain. Sections 2 and 7 accept exactly these confounds for the rig comparisons. Listing them also spreads the explanation away from the lab's processing. 'Defensible' implies that someone's earlier conclusion was not defensible.",
+   "evidence": "jeong_rows.tex ratios at 900\u20131800: 0.70, 0.65, 0.70, 0.66, 0.84, 0.89, 0.91, 0.88, 0.89, 0.82. Email [A]: replicas completed 13 Jul. Emails [F]/[H]: the fuzzy prints were made by A. Muszynski in August. Section 2 of the report: 'The prints came from more than one source'.",
+   "fix": "'Reprocessed, the July values are 9\u201335% below the rig's Ra20 at every set point from 900 to 1800 rpm. That gap should not be read as a texture effect. The two tests differ in the rotor print, the mounting, the day and the electrical chain, and the current scale is unconfirmed. Any one of these could account for a gap of this size. What the July test can support is narrower: it cannot say whether the un-textured rotor is above or below the textured ones at the 8\u201314% level.'"
+  },
+  {
+   "severity": "major",
+   "location": "Section 6.1, second bullet; Table 6 / Fig. 8",
+   "quote": "At 500\u2013700 rpm no load current was drawn. The mean current in those windows is within 1.4 mA of zero, so the tabulated 0.333 W at 500 rpm is noise.",
+   "problem": "The tone treats the lab's first three settings as worthless. On substance, those windows are clean free-running (open-circuit) voltage, which is the quantity the report makes central in Section 5.4, and a comparison on voltage does not depend on the unverified current scale. Leaving it out drops the one July comparison that needs no current calibration.",
+   "evidence": "Lab voltage with the load off at 500/600/700: 2.86\u20133.03 / 4.05\u20134.13 / 5.33\u20135.42 V (july_segments voc_at_lowest_I; july-verify C1; my 2 s timeline). Rig Ra20 lightest-load voltage: 2.85 / 4.47 / 5.62 V (sweep_v1_Ra20_points.csv), giving ratios of 1.00\u20131.06 / 0.91\u20130.92 / 0.95\u20130.96. Th\u00e9venin Voc at 900/1100: 7.90/10.57 V against 7.86/10.98 V, ratios 1.00/0.96. On the rig, texture changes Voc by +4.1% (Ra40) and +6.4% (Ra80).",
+   "fix": "'At 500\u2013700 rpm the load was off (mean current within 1.4 mA of zero), so the tabulated power there reflects channel noise rather than delivered power. These windows do give a clean free-running voltage. It matches the rig's Ra20 to within about 10% (3.0 against 2.85 V, 4.1 against 4.5 V, 5.4 against 5.6 V), as do the open-circuit voltages fitted at 900 and 1100 rpm. This comparison does not depend on the current scale. It cannot resolve the 4\u20136% V_oc change texture produces on the rig, but it shows the two setups agree on rotor speed.' Add a V_oc column to Table 6."
+  },
+  {
+   "severity": "major",
+   "location": "Section 6, whole section (no acknowledgement anywhere in the report)",
+   "quote": "Two earlier datasets from Prof. Jeong's group bear on the question ... Both used the lab's DAQ",
+   "problem": "The July test is presented as solely the lab's, and its procedure (0 A at 500\u2013700, hand-raised load, hand-timed dwells) is critiqued at arm's length. The email record shows Stephen co-ran that test, and Taegu co-ran the first automated rig sweep that the lab data are compared against. Taegu is named only in the 'For' line. This framing is what makes the section read as 'caught out'.",
+   "evidence": "Stephen, 27 Jul 12:22Z (thread 19f9b936be5bd8d7): 'I'll be running some wind turbine tests today on the printed blades'. The DAQ record starts 14:45:34 UTC (10:45 EDT). Taegu, 27 Jul: 'Stephen and I will run additional tests'. Stephen, 20 Aug 21:41Z: 'Taegu and I were able to successfully perform an automated test today', which is the Ra20 run date. MANIFEST credits 'VERBATIM as e-mailed by T. Kang'.",
+   "fix": "Add at the start of Section 6: 'Taegu Kang and I ran the 27 July test on the lab's DAQ, and Taegu processed the export; Taegu also co-ran the first automated sweep (Ra20, 20 August). Because Taegu shared the complete raw export, every number below could be traced to source.' Use 'we' for the July procedure, e.g. 'we held the load at 0 A for the first three settings'. Add a one-line acknowledgement after the Summary."
+  },
+  {
+   "severity": "major",
+   "location": "Section 6.1 heading and first paragraph (p.12)",
+   "quote": "How the July table was computed ... Every value in the lab's Summary_Table.csv can be reproduced exactly from it, to floating point precision, by the following recipe.",
+   "problem": "This tells the author of the script how he computed his own table, which reads as forensic. The match is exact and strong evidence, but the intent, the channel map and the scaling are Taegu's to confirm. The kind 'offered in the spirit of making the two labs' numbers comparable' sentence comes only at the end, after the critique.",
+   "evidence": "Verified: all 64 values reproduce (max relative error 3.1e-15; my v1.py). Appendix C itself says the channel identification is 'inferred from the data and to be confirmed against the lab's wiring'. The file names (Pdc_max; June's '_MAX' and 'Max Envelope') suggest the intended quantity was the maximum power at each setting.",
+   "fix": "Retitle to 'Reproducing the July summary table'. Open Section 6 with the 'offered in the spirit' sentence. Lead: 'To be sure we compare like with like, I rebuilt Summary_Table.csv from the raw export. The recipe below reproduces all 64 tabulated values to floating-point precision; Taegu, please check it against your script and correct anything I have inferred wrongly. The column names suggest the aim was the maximum power at each setting; taken over raw 360 Hz samples, a maximum also collects channel noise.' Move the spike magnitudes and the null window to Appendix C."
+  },
+  {
+   "severity": "major",
+   "location": "Section 6.2, closing list (p.14)",
+   "quote": "Four things would settle the comparison: 1. the current-sensor part number and its calibrated zero; 2. a sweep past the power maximum at each held wind speed; 3. dwell means rather than sample maxima; 4. a rotor-speed pulse that does not skip revolutions at high speed.",
+   "problem": "This reads as a list of the lab's shortcomings, and item 4 is inaccurate over the rig's range. The lab pulse misses no revolutions at any setting up to 1900 rpm, above the rig's 1800 maximum; it skips only in the 2000 window. It is also the only rotor-speed record in the project that works, since Sections 4 and 8 say the rig's reed switch is unusable. Items 2 and 3 are things the rig already does, so the simplest route is to record both systems together.",
+   "evidence": "Pulse intervals (v3.py): no gaps longer than 1.5x the median at 500\u20131900 and 12 at 2000. Table 7: 'The reed switch on Ra40 is not usable'. Taegu, 18 Aug: 'Do we need the RPM sensor for the next test?' 'Yes, we do.' Taegu accepted the 1 Oct 3\u20134 PM tunnel session (email [M]).",
+   "fix": "'The simplest way to settle this is a joint session. On 1 October the lab's DAQ can record in parallel with the Chroma load during one automated sweep. That calibrates the current channel directly against the Chroma and shows both statistics on the same data. It also adds the lab's once-per-revolution pulse, which tracked the rotor cleanly at every setting up to 1900 rpm and would give the rig the rotor speed it lacks for \u03bb and C_p(\u03bb). Questions for Taegu: the current sensor's part number, range and zero; the ch1 input range; how the pulse is generated.' Add the lab pulse as an option in Table 7 and Section 9, item 4."
+  },
+  {
+   "severity": "major",
+   "location": "Section 6 opening paragraph and final sentences of 6.2",
+   "quote": "Prof. Jeong asked that new results be compared with the initial test, which had shown no significant differences. ... so June and July cannot be compared directly with each other either. The June values sit close to the rig's Ra 20 curve (Fig. 8b).",
+   "problem": "The PI's explicit request gets a 'cannot' and an unquantified clause at the end of a paragraph about what is wrong. The comparison that can be made, June against the rig, is available and gives a clear, useful answer, but it is not quantified or presented as the response to his request.",
+   "evidence": "June Pdc_max / Ra20 raw P_max: 1.06 (800), 1.07, 1.11, 0.99, 1.25, 1.02, 1.24, 1.00, 0.93, 0.99 (1700). Geometric mean over 800\u20131700 is +6%; 1.26\u20131.56 at 500\u2013700, where P < 0.15 W. Jeong's email 19fa567db43ad6ac: 'you need to compare the results with our initial test'. June is probably the original rotor and was lab-processed.",
+   "fix": "Add a short 'Comparison with the initial test' paragraph near the start of Section 6: 'As Prof. Jeong asked on 27 July, the initial (5 June) values are compared with the rig. At 800\u20131700 rpm they lie between \u22127% and +25% of the rig's Ra20 (geometric mean +6%), and 26\u201356% above it at 500\u2013700 rpm, where powers are below 0.15 W. The rotor (probably the original) and the processing differ, so this is a consistency check, not a texture comparison. Putting June and July on one basis needs the June raw export or the June script, which we would be glad to run with Taegu.'"
+  },
+  {
+   "severity": "major",
+   "location": "Section 6 and Appendix C, distribution",
+   "quote": "Channel identification, inferred from the data and to be confirmed against the lab's wiring",
+   "problem": "Several conclusions in Section 6 rest on inferences Taegu can confirm or correct in minutes: the channel map, the 2 A/V scale, the ch1 range, the intended statistic and the June load mode. Sending them first to all three professors puts him in the position of being corrected in front of his advisor.",
+   "evidence": "july-verify C1: 'PARTLY: identification confirmed; I scale untestable'. The report calls the scale 'unverified'. FINDINGS.md: ch1 at open circuit would be near the 0\u20135 V limit (peak ch1 4.9976 V).",
+   "fix": "Send Section 6, Appendix C and the reprocessing script to Taegu a day before the full distribution. Fold in his answers, and if he agrees add 'recipe checked by T. Kang'. Make the remaining unknowns explicit questions in the text, not conclusions."
+  },
+  {
+   "severity": "minor",
+   "location": "Section 6.1, first consequence bullet",
+   "quote": "The maximum of raw samples picks up current-sensor noise. The current channel carries about 31 mA of white noise",
+   "problem": "The source of the noise is not established: it could be the sensor, the DAQ input or the wiring. 'Current-sensor noise' blames the lab's hardware without evidence.",
+   "evidence": "july-verify C3: \u03c3 = 31.25 mA at 0 A, white, uncorrelated with V. This shows the noise is not rectifier ripple but does not locate it. I confirmed 31\u201332 mA in the 500\u2013700 windows.",
+   "fix": "'A maximum over raw samples also collects noise on the current channel: about 31 mA rms, white, and the same with the load off.'"
+  },
+  {
+   "severity": "minor",
+   "location": "Section 6.1, first consequence bullet",
+   "quote": "Applied to a stretch of the same record where no current was flowing, the recipe returns 1.50 W.",
+   "problem": "The number is correct but lacks context. In that stretch the bus is at 10.7\u201319.6 V (mean 14.8 V), higher than in any loaded window (\u226412.5 V). Since the noise term is about 0.11 A \u00d7 V, 1.50 W is larger than the bias in any lab window. The 500\u2013700 windows already make the point, and this sentence reads as a gotcha.",
+   "evidence": "v1.py: P max 1.5035 W, I max 0.112 A, V 10.74\u201319.64 V over 331.0\u2013341.4 s, with the rotor spinning down from about 510 to 60 rpm.",
+   "fix": "Delete it from Section 6, or move it to Appendix C with the qualifier '(with the bus at 11\u201320 V after the load was switched off; the noise contribution scales as about 0.11 A \u00d7 V)'."
+  },
+  {
+   "severity": "minor",
+   "location": "Appendix C, paragraph after the recipe",
+   "quote": "The pulse count has small errors: two double-counted edges, and at 2000 rpm missed revolutions",
+   "problem": "There are five double counts, not two. They come from the counting rule, not the sensor: a rising edge split across two consecutive samples passes the >0.1 V first-difference test twice.",
+   "evidence": "v4.py finds 3 ms intervals at 90.76 s (900 window), 176.58 s and 178.13 s (1300), and 318.47 s and 323.50 s (2000). In each case two successive diffs exceed 0.1 V on one edge.",
+   "fix": "'A few rising edges that span two samples are counted twice (one at 900 rpm, two at 1300, two at 2000). At 2000 rpm the pulse misses about one revolution in eight (true \u2248667 rpm against 595 tabulated). The pulse is clean at every other setting.'"
+  },
+  {
+   "severity": "minor",
+   "location": "Section 6.2, 'Window placement' bullet",
+   "quote": "Wind speed was changed by hand at irregular intervals, so the fixed windows do not always fall inside one setting.",
+   "problem": "This puts the mismatch on the operators. It is equally a property of the script's assumption of equal dwell times, and the 2000 rpm window is not the only affected one.",
+   "evidence": "july-verify: dwells 12.25\u201338.0 s. Window composition: 1300 is 0.37\u20130.66 outside its setting; 1500 and 1600 up to about 0.3. The fan was under keypad control until the Modbus link of 19 Aug.",
+   "fix": "'The processing assumes equal time at each setting. The settings were changed by hand (drive automation came later), with dwells of about 12\u201338 s, so some windows straddle a change: the 1300 window includes the step to 1400, and the 1500 and 1600 windows include part of the previous setting.'"
+  },
+  {
+   "severity": "minor",
+   "location": "Section 6.2, final paragraph",
+   "quote": "The June table was processed differently (its values carry the signature of 50-sample averages rather than raw maxima)",
+   "problem": "The phrasing is forensic, and the description is imprecise. The June values are maxima of 50-sample averages: V, I and P maxima occur at different instants, and the file is named _MAX. 'Rather than raw maxima' suggests they are plain averages.",
+   "evidence": "June Vdc_max and Idc_max differences fall exactly on the 4\u00b7LSB/50 and 2\u00b7LSB/50 grids and not on any coarser n (my check). Pdc_max/(Vdc_max\u00b7Idc_max) = 0.76\u20130.99.",
+   "fix": "'The June table appears to use maxima of 50-sample averages (its values fall on the grid that such averaging produces; Taegu can confirm), so June and July are on different bases.'"
+  },
+  {
+   "severity": "minor",
+   "location": "Data package: README.md 'Read before comparing numbers' item 4; DATA_DICTIONARY.md Jeong-lab table; 6_code/analyze_july.py",
+   "quote": "The Jeong-lab tables are not directly comparable to the rig. Their `Pdc_max` is the maximum of raw 360 Hz samples, which includes current-sensor noise, and at 500\u2013700 rpm no load current was drawn.",
+   "problem": "This applies July-only facts to both lab tables. By the report's own Section 6, June is 50-sample averaged, and June had load current at 500 rpm (Idc_max 0.029 A). DATA_DICTIONARY likewise describes Vdc_max/Idc_max/Pdc_max and Measured_RPM for both files together. The shipped analyze_july.py docstring says 'reverse-engineer Jeong lab's 27 Jul 2026 DAQ export', and a plot title reads 'Bias of the lab's Pdc_max is current-noise x voltage'.",
+   "evidence": "README lines 61\u201364; DATA_DICTIONARY lines 78\u201385; analyze_july.py lines 3 and 392; June Summary_Table_Part1_MAX.csv.",
+   "fix": "Scope the statements to the 27 July table and add a separate June note ('appears to be maxima of 50-sample averages'). Say 'current channel' instead of 'current-sensor'. In analyze_july.py, change 'reverse-engineer' to 'reproduce' and the plot title to 'Instantaneous max minus 1 s max, against bus voltage'."
+  },
+  {
+   "severity": "minor",
+   "location": "Appendix C vs DATA_DICTIONARY.md (2nd Volt row)",
+   "quote": "(2.4963 V)  vs  'The measured zero is 2.4961 V'",
+   "problem": "The report and the package give different values for the same current zero. The report uses the median over 331.0\u2013341.4 s; the dictionary uses the mean.",
+   "evidence": "v1.py: median of ch2 over 331.0\u2013341.4 s = 2.496338 V; mean = 2.496168 V. The difference is about 0.3 mA of current, which is negligible but visibly inconsistent.",
+   "fix": "Use 2.4963 V (the median over 331.0\u2013341.4 s, as in Appendix C) in both places."
+  },
+  {
+   "severity": "minor",
+   "location": "Data package 3_derived/jeong_0727_reprocessed_by_setting.csv and DATA_DICTIONARY.md",
+   "quote": "ratio_1s_to_Ra20 = 0.271, 0.281, 0.138, 0.525 at 500\u2013800; 'Present only once the reprocessing has been verified.'",
+   "problem": "The CSV gives ratios at 500\u2013800, where the load was off or the window was mostly spin-up; the report deliberately prints '\u2014' there. A lab reader opening the CSV will see a 'no-texture at 14% of Ra20' figure. The dictionary does not define any of the file's 17 columns and still carries a stale conditional sentence.",
+   "evidence": "cut of the CSV columns; build_report.py line 616 suppresses ratios below 900 only in the LaTeX table.",
+   "fix": "Blank ratio_1s_to_Ra20 below 900 rpm, or add a load_off flag. Define each column in DATA_DICTIONARY and remove the stale sentence."
+  },
+  {
+   "severity": "minor",
+   "location": "Fig. 8(b) and its caption",
+   "quote": "(b) The reprocessed July values beside the rig's Ra 20 and the 5 June table, by fan set point.",
+   "problem": "Panel (b) plots the reprocessed July values at 500\u2013800 rpm (0.008\u20130.093 W, load off or spin-up) against Ra20 P_max. Visually this suggests the no-texture rotor produced almost nothing at low wind. The caption also gives no caveats for the June curve.",
+   "evidence": "fig_jeong.png panel (b): the purple line starts near 0 W at 500\u2013800. jeong_rows.tex shows mean current \u22121/0/0/15 mA there.",
+   "fix": "Omit 500\u2013800 from the July series in (b), or draw those points hollow and labelled 'load off'. Add to the caption: 'June: probably the original rotor; lab-processed (50-sample averages).'"
+  },
+  {
+   "severity": "minor",
+   "location": "Section 6.2, first paragraph",
+   "quote": "power is averaged over 1 s before taking the maximum",
+   "problem": "The maximum of a 1 s moving mean is itself biased 2\u201311% above the settled plateau mean. The audit recommended quoting both, but the report quotes only the maximum.",
+   "evidence": "july-verify 'Is a 1 s mean fair?': 'The maximum of a 1 s moving mean is 2\u201311% above the settled plateau means, so quote both.' C8: plateau mean is 0.622\u20130.890 of Ra20, against 0.665\u20130.916 for the 1 s maximum.",
+   "fix": "Add: '(using the settled mean instead lowers these by 2\u201311%)'."
+  },
+  {
+   "severity": "minor",
+   "location": "Section 6, opening paragraph",
+   "quote": "the no-texture test of 27 July on the printed v1 geometry without fuzzy skin",
+   "problem": "The geometry is inferred, not recorded, and Prof. Jahangiri explicitly asked on 27 July which blade was used. The basis for 'v1' should be stated.",
+   "evidence": "provenance_details.md: 'probably v1 geometry, since the v1 STEP dates from Jul 1 and v2 appears ~Jul 30; inference'. Taegu: 'It is the new blades which have no texture.'",
+   "fix": "'on the printed rotor without fuzzy skin (v1, the only geometry printed at the time)'."
+  },
+  {
+   "severity": "minor",
+   "location": "Summary, 'Baselines and Ra10' bullet (p.1)",
+   "quote": "The Jeong-lab no-texture test of 27 July used a different acquisition and processing chain; reprocessed from its raw file it cannot resolve a texture effect of this size",
+   "problem": "This is the first thing Prof. Jeong reads about his lab's work, and it frames the test as deficient without context. The test predates the rig, and the limitation belongs to the cross-setup comparison, not to the test itself.",
+   "evidence": "The rig's first run was 20 Aug (Stephen's email). The Section 6 numbers support 'cannot separate at 8\u201314%' but not a judgement on the test.",
+   "fix": "'The 27 July no-texture test ran on the Jeong-lab DAQ before the automated rig existed. Put on a comparable basis, it cannot be separated from the textured rotors, because the uncertainty between the two setups (chiefly the current scale) is larger than the 8\u201314% texture effect (Section 6).'"
+  }
+ ]
+}

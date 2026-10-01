@@ -1,0 +1,36 @@
+## 1. repo working tree (all files incl. logs/ data/ webapp/; excl .git and this dir)
+/Users/stepheneacuello/Projects/windtunnel-control/NEXT_SESSION.md:244:## 4 · The new blade — Ra 10 or Ra 40
+/Users/stepheneacuello/Projects/windtunnel-control/NEXT_SESSION.md:253:python src/blade_sweep.py --blade v1_Ra10 \
+/Users/stepheneacuello/Projects/windtunnel-control/NEXT_SESSION.md:254:       --notes "PETG, 0.2mm layer, 0.4mm nozzle, Ra 10 — fuzzy skin off" \
+/Users/stepheneacuello/Projects/windtunnel-control/NEXT_SESSION.md:263:python src/compare_blades.py v1_Ra20 v1_Ra10      # two at a time —
+/Users/stepheneacuello/Projects/windtunnel-control/NEXT_SESSION.md:270:**What to look for:** with Ra 10, 20 and 80 you have three points on a
+/Users/stepheneacuello/Projects/windtunnel-control/NEXT_SESSION.md:273:is an optimum. Ra 10 ≈ Ra 20 with only Ra 80 lifted says the effect has a
+/Users/stepheneacuello/Projects/windtunnel-control/NEXT_SESSION.md:368:  v1_Ra10 or Ra40                  25 min  ← the new science
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/HANDOFF.md:21:| **Ra10** | — | not found in logs, Gmail, docs, git, Downloads | ❓ Stephen "not sure". Sep 1 plan said "Ra10
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/HANDOFF.md:52:   nozzles had not arrived by Sep 9); definitive Ra10 search (including calendar);
+## 2. repo file names
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/ra10_search_log.csv
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/ra10_local_search.sh
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/ra10_local_search_output.txt
+## 3. git history: pickaxe -S Ra10, -S 'Ra 10', -G v1_Ra10, --stat
+## 4. every blade label that appears in logs/ data/ webapp/ src/ tests/ docs/
+ 464 v1_Ra20
+ 384 v1_Ra80
+ 370 v1_Ra40
+  16 v1_Ra20_summary
+  11 v1_Ra20_points
+   3 v1_Ra20_repeat
+   1 v2_Ra20
+   1 v1_Ra80_summary
+   1 v1_Ra20_repeat_points
+## 5. ~/Downloads ~/Desktop ~/Documents: names (metadata only), then text contents of LOCAL files
+## 6. Spotlight content index, whole home
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/HANDOFF.md
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/ra10_local_search.sh
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/ra10_local_search_output.txt
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/out/report.pdf
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/ra10_search_log.csv
+/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/timeline.csv
+/Users/stepheneacuello/Documents/Documents - Manbir’s MacBook Air/Coursework/2025-1 Spring/CSC 561 Deep Learning and Neural Networks/final_project/model/wandb/run-20250502_103314-n4p2biao/logs/debug-internal.log
+/Users/stepheneacuello/Projects/windtunnel-control/NEXT_SESSION.md
+## 7. sweep files anywhere under ~/Projects other than the repo logs

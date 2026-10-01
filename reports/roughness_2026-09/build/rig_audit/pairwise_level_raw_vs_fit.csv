@@ -1,0 +1,10 @@
+num,den,basis,level_pct,ci_lo,ci_hi,n,n_num_higher,sd_log_pct
+Ra40,Ra20,raw (recomputed = logged),8.411,6.052,10.822,14,14,3.81
+Ra40,Ra20,"fit (recomputed from points, all runs)",8.742,6.107,11.442,14,13,4.248
+Ra40,Ra20,fit (logged Ra40/Ra80; Ra20 recomputed),8.75,6.131,11.433,14,13,4.221
+Ra80,Ra20,raw (recomputed = logged),13.735,10.671,16.883,14,14,4.729
+Ra80,Ra20,"fit (recomputed from points, all runs)",13.669,9.946,17.519,14,14,5.768
+Ra80,Ra20,fit (logged Ra40/Ra80; Ra20 recomputed),13.665,9.943,17.514,14,14,5.768
+Ra80,Ra40,raw (recomputed = logged),4.911,2.436,7.446,14,13,4.135
+Ra80,Ra40,"fit (recomputed from points, all runs)",4.531,2.061,7.061,14,12,4.142
+Ra80,Ra40,fit (logged Ra40/Ra80; Ra20 recomputed),4.52,2.052,7.048,14,12,4.139

@@ -1,0 +1,146 @@
+EMAIL EVIDENCE - verbatim excerpts (Gmail, read 2026-09-30 via connector, PLAIN_TEXT unless noted)
+Times are as the Gmail API reports them (UTC, 'Z'); EDT = UTC-4.
+
+[A] Thread 19f5c018da3cb3b2 "3D Printed Turbines are Ready"
+  msg 19f5c03ea77a38d2  2026-07-13T15:06Z  Stephen -> Sodhi, Jahangiri, Jeong; cc Taegu, Tim Richards
+    "The set of 3D printed replica turbines are completed.
+     Tim is currently working on a *textured* version with 0.05" sphere bumps in a grid pattern."
+  msg 19f6580140b1e5f5  2026-07-15T11:18Z  Jeong
+    "As Prof. Jahangiri suggested, we will also begin considering the fault scenarios and develop a plan
+     to investigate them as part of the project."
+  msg 19f65f28b07fd7c7  2026-07-15T13:23Z  Tim Richards
+    "The first textured version with the .05'' dimple texture has been printed. Each dimple is .2 inches
+     apart ... Cam is currently printing 2 more for testing."
+  msg 19f66cf9c458a330  2026-07-15T17:25Z  Stephen: "Let's get your v2 0.1" spacing submitted to the shop too please."
+
+[B] Thread 19f9b936be5bd8d7 "Use the slicer to print the rough surface"
+  msg 19f9b936be5bd8d7  2026-07-25T23:18Z  Sodhi -> Stephen, Tim
+    "Where to find the setting in PrusaSlicer ... Fuzzy skin type - "Outside walls" ... Thickness - how far each
+     point deviates. Default is around 0.3mm ... Push to 0.5-0.8mm ... Point distance ... Default ~0.8mm ...
+     fuzzy skin only affects vertical walls, not top surfaces ... Worth printing a small test cube at a couple of
+     thickness values ... Reprint the turbine with different levels of roughness on Monday ?"
+  msg 19fa386b3bf8a1cf  2026-07-27T12:22Z  Stephen: "I'll be running some wind turbine tests today on the printed
+     blades. We may want to also check with Dr. Sodhi on created 3D scans with the Hexagon arm of the printed and
+     original blades."
+
+[C] Thread 19fa4b6458be5961 "Updated Test Data - Wind turbine" (get_thread PLAIN_TEXT only; msg 1 is 16.8 MB, never fetched RAW)
+  msg 19fa4b6458be5961  2026-07-27T17:53Z  Taegu -> Sodhi, Jeong, Stephen, Jahangiri
+    "This is the latest test data using the new blade. Stephen and I will run additional tests as soon as the
+     3D printer finishes making the next blade."  (attachments Power_vs_RPM_0727_WindTurbine.jpg, Summary_Table.csv,
+     0727windturbine.csv)
+  msg 19fa54beeaa7dd9a  2026-07-27T20:37Z  Jahangiri: "Could you clarify which blade you used exactly?"
+  msg 19fa55105a51b2b3  2026-07-27T20:42Z  Taegu: "It is the new blades which have no texture."
+  msg 19fa567db43ad6ac  2026-07-27T21:07Z  Jeong
+    "First, you need to compare the results with our initial test, which showed no significant differences.
+     This will provide a good baseline for our evaluation.
+     In addition, we need to develop a plan for the fault testing. Please discuss this with Prof. Jahangiri and
+     Stephen, and prepare various types of blades representing different fault conditions. I believe we should
+     discuss and finalize the test plan before proceeding with the next round of testing. ...
+     We might discuss it this Wednesday if it works for all."
+
+[D] Thread 19e744d827d31e95 "Wind Turbine Experiment Data and Plan for Additional Experiments"
+  msg 19e744d827d31e95  2026-05-29T15:14Z  Taegu -> Stephen, Sodhi, Jeong  (attachment '05282026 test data2.xlsx')
+    "The file includes the raw data, the calculated measured RPMs from the rotation counter, and a summary table
+     showing the average Vdc, Idc, and Pdc for each RPM step."
+  msg 19e745666716ab07  2026-05-29T15:24Z  Jeong
+    "The generated power has increased compared to the previous wind turbine. However, we need to adjust the DAQ
+     time-step setting for the wind turbine RPM measurements and verify the cause of the dip observed in the
+     generated power. In addition, please consider measuring the load current variations under the same
+     wind-speed conditions ... Taegu will begin studying the relationship between wind speed and generated power"
+  msgs 19e754250272ca24 / 19e754d82c437fef: next experiments Wednesday [2026-06-03] 10:30.
+
+[E] Thread 19e99387d98b478a "Updated Test Data and Plan for Next Experiment"
+  msg 19e99387d98b478a  2026-06-05T19:17Z  Taegu
+    "updated graphs and data from our recent load variation test. Attached are the maximum power curve and the
+     constant RPM test graphs. I would like to conduct one more experiment using constant current (CC) and constant
+     voltage (CV) modes to compare with these results."
+  msg 19e994634f12f4ad  Sodhi: "The dip is interesting ... Yeonho - can we discuss this with Vahid for the power modeling next week ?"
+  msgs 19e9942e00818f2f / 19e9946c9a9f991e: next session Monday [2026-06-08] 12:30-12:45 (calendar 12:30-13:30 'Lab').
+
+[F] Thread 19fce4aeab1f69a1 "Wind Turbine Prints with Fuzzy Texture"
+  msg 19fce4de995ff76b  2026-08-04T19:44Z  Stephen -> Andrew Muszynski; cc Sodhi  (attachments IMG_8608.png, turbine.STEP)
+    "When I spoke with the Professors this afternoon they would like us to go with the v1 of the turbine blades and
+     not the v2 that were-modeled. Can you help me review how to print the attached model with the below three
+     different fuzzy texture settings using a 0.2mm nozzle and fine print layer settings?"
+  msg 19fd251306bf78de  2026-08-05T14:25Z  Andrew (attachment turbines_threeFuzzySettings.3mf; 9.6 MB, not fetched)
+    "printing one of each of those (3 in total) would take about 36 hours to fully print at a slower speed ...
+     formalize the print before starting it on the printer in the garage."
+  msg 19fd269c8062ab60  2026-08-05T14:52Z  Andrew: "If we can print these with good settings then we can print them
+     all out at the same time to ensure consistency in the prints."
+  msg 19fd291ca634c02e  2026-08-05T15:36Z  Andrew
+    "The printer in the garage only has the 0.4mm nozzle and a 0.4mm replacement nozzle. I just emailed Sodhi asking
+     him to order a full 0.2mm assembly for the printer. If he were to order it today we should get it by Saturday
+     and start printing by Monday."
+
+[G] Thread 19fcd2fdc015ddd1 "Fuzzy Texture Setting"  msg 19fcd30665189aff 2026-08-04T14:32Z Stephen -> Andrew
+    Only content: IMG_8608.png (fetched RAW, decoded -> build/provenance/IMG_8608.png, 2532x1170, sha256 128c7cba0d5da329...)
+    The image is a ChatGPT screenshot ("Work with ChatGPT"). Table:
+       Target Ra | Point distance | Thickness | Estimated print time | Estimated savings
+       10 um     | 0.20 mm        | 0.025 mm  | 8-10 hours           | 9-11 hours
+       20 um     | 0.20 mm        | 0.050 mm  | 8-10.5 hours         | 8.5-11 hours
+       40 um     | 0.20 mm        | 0.101 mm  | 8.5-11 hours         | 8-10.5 hours
+    Partly legible context above the table: "The 0.20-mm point distance creates about 80% fewer fuzzy points than
+    your orig[inal] 0.04-mm setting. My realistic estimate:"; below: "...plan on roughly 9-10 hours until Bambu ..."
+
+[H] Thread 19ff7beaaeef2241 "What Ra are the prints??"
+  msg 19ff7bf32f823406  2026-08-12T20:52Z  Stephen: "What fuzzy texture setting did you use for the three prints you dropped off?"
+  msg 19ff7e507ff031ce  2026-08-12T21:33Z  Andrew (Drive links turbines_threeFuzzySettings_06mm.3mf,
+     turbines_threeFuzzySettings_06mm_plate_2.gcode.3mf; inline image.png fetched RAW ->
+     build/provenance/20260812_Muszynski_Ra_table__image.png, sha256 9053a5b44077886d...)
+    "I used the same fuzzy texture settings as the previous print but I didn't have access to a 0.2 mm nozzle head
+     so the layer height is 0.08 mm. I can send you the bambu plate file as well as the gcode for a sliced plate of
+     three blades if you would like to start a new print with the rougher surface blades. I asked Claude to give me
+     an estimate of surface roughness given the settings and it came up with this table:"
+    Image table (an LLM estimate, not a measurement):
+       Test                         | Point distance | Thickness | Estimated Ra
+       Baseline (no fuzzy skin)     | -              | Off       | ~4-8 um (typical 0.08 mm layer FDM wall)
+       Smoothest fuzzy              | 0.8 mm         | 0.02 mm   | ~6-10 um
+       Your existing print          | 0.2 mm         | 0.05 mm   | ~10-15 um
+       Mid (already printed)        | 0.2 mm         | 0.101 mm  | ~20-35 um
+       Roughest safe                | 0.15 mm        | 0.2 mm    | ~35-55 um
+  msg 19ffbc5c2fffd48b  2026-08-13T15:37Z  Stephen: "The two prints feel very different, maybe we should test/verify
+     and/or standardize on the nozzle type." (its image.png is byte-identical to Andrew's table)
+
+[I] Thread 1a010bd8e6b65b66 (no subject)  I2(s) Print Lab (coe3d@etal.uri.edu)
+  2026-08-17T17:20Z  Print Lab -> Stephen, Andrew: Drive link turbine_default.3mf (60.7 MB; not downloaded)
+  2026-08-25T18:50Z  Stephen -> "Cam": "Is there a way to save an STL of each turbine blade with its fuzzy texture from this file?"
+  2026-08-26T13:59Z  Print Lab: "I don't know a way to do that currently."
+
+[J] Thread 1a00f7c0da465d57 "More wind tunnel tests?"
+  2026-08-17T11:30Z Stephen -> Taegu: "I have a few sets of new turbines ready, would you be available later today or
+     tomorrow to collect data on them?"  -> agreed Tue 08-18 2:30 PM.
+  2026-08-18T16:45Z Stephen: "Do we need the RPM sensor for the next test?"  Taegu: "Yes, we do."
+  Stephen: "Ok I will make sure to install it on the next set of blades."
+
+[K] Thread 19ff68cacbd296e4 "Can we change the wind tunnel settings programatically ?"
+  2026-08-12T15:16Z Sodhi asks; 18:03Z Sodhi fwd to Jahangiri & Jeong: "We can generate wind gusts !"
+  2026-08-13T11:45Z Jeong: "When testing a new wind turbine, we might establish several test procedures, such as
+     maximum power point tracking and other operating conditions. ... we will also need to control the electrical load."
+  2026-08-19T21:50Z Stephen: "Taegu and I were able to communicate with the Wind Tunnel ABB-VFD via Modbus RS485 ...
+     connect to the Chroma DC Electronic Load over USB and can control the load."
+  2026-08-20T21:41Z Stephen -> Jeong (cc Sodhi, Jahangiri, Taegu)
+    "Taegu and I were able to successfully perform an automated test today ... sweep from 500RPM to 1800RPM in
+     increments of 100, at each set point the electrical load is increased until Peak Power is found and drops to
+     80%, and then the next RPM set point is tested. ... Next week we will complete recording data for surface
+     roughnesses of Ra 10, 40, & 80 micrometers."
+  2026-08-21T01:21Z Jeong: "Could you and Taegu prepare 1-2 slides summarizing the experimental setup and another
+     1-2 slides summarizing the key data and results? ... a clear record of the setup and results for future reference."
+
+[L] Thread 1a087b7e6cc3b7bb "0.2mm Nozzles for 3D Printing Wind Turbine Blades"
+  2026-09-09T20:04Z Stephen -> Sodhi (cc Andrew M., Andrew Oxley, Tim): "Did we ever receive the small 3D printer
+     nozzles so we could print the blades internally?"
+  2026-09-09T20:45Z Sodhi: "I ordered them but the .4mm were delivered. Have to order them again."
+
+[M] Other
+  19fd2e49b5940ff3 2026-08-05T17:06Z Stephen -> Jahangiri, Jeong: Wilcox, White & Maniaci (2017), Sandia,
+     "Roughness Sensitivity Comparisons of Wind Turbine Blade Sections", https://www.osti.gov/servlets/purl/1404826 -
+     "They seem to believe increased surface roughness will adversely affect the wind turbine due to aerodynamics."
+  19f8a54b61bd7054 2026-07-22 Stephen -> Juan Lopez: "Can our Keyence measure Surface Roughness?" (no reply in thread)
+  19fa46ee76bfa88b 2026-07-27 Hexagon arm case key missing ("no sign of it, and Dr. Sodhi doesn't know where it is")
+  19fc82a5d2e58504 2026-08-03 Stephen -> Sodhi: "The v2 Wind Turbines are much better matching to the original, but
+     still not exact. Is there a way to get 3D Scanning support from Hexagon?"
+  19fb505d2c3cdfbd 2026-07-30/31 Form 4 SLA (resin) print of one blade by Andrew; "The textured blades we've been
+     discussing (fuzzy texture slicing settings) will have to be without supports."
+  1a03f982745b324e 2026-08-26T19:42Z Stephen -> Taegu "Wind Tunnel Logs": sweep_v1_Ra20_{summary,points}.csv,
+     sweep_v1_Ra80_{summary,points}.csv (the only email in which 'PETG' appears, inside the CSV headers)
+  1a0f42d7b20f01d9 2026-09-30T21:16Z Taegu (kjt23081@gmail.com) accepted "Wind Tunnel Testing" Thu 2026-10-01 3-4 PM.

@@ -1,0 +1,32 @@
+% Measurement and control chain used for the rotor sweeps (drawn for this report).
+\begin{tikzpicture}[
+    font=\sffamily\scriptsize,
+    box/.style={draw=ink2, rounded corners=2pt, fill=white, minimum height=9mm,
+                text width=22mm, align=center, inner sep=2pt,
+                execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
+    ctl/.style={-{Stealth[length=2mm]}, draw=navy, line width=0.7pt},
+    pwr/.style={-{Stealth[length=2mm]}, draw=gold, line width=0.9pt},
+    lab/.style={font=\sffamily\tiny, text=ink2},
+    node distance=5mm and 8mm]
+  % control row
+  \node[box] (host) {\textbf{Host PC}\\Python: sweep logic, logging};
+  \node[box, right=of host] (pmc) {\textbf{Portenta}\\machine controller, Modbus master};
+  \node[box, right=of pmc] (vfd) {\textbf{ABB ACS550}\\variable-frequency drive};
+  \node[box, right=of vfd] (fan) {\textbf{Tunnel fan}\\500--1800 rpm};
+  \node[box, right=of fan, fill=note, text width=24mm] (ts) {\textbf{Test section}\\3-blade VAWT rotor\\\vlo--\vhi{} m/s};
+  % measurement row
+  \node[box, below=11mm of ts, text width=24mm] (gen) {\textbf{Generator}\\3-phase, on the rotor shaft};
+  \node[box, left=of gen] (rect) {\textbf{Rectifier}\\3-phase bridge};
+  \node[box, left=of rect] (load) {\textbf{Chroma 63004}\\DC electronic load (constant current)};
+  \node[box, left=of load, text width=30mm] (note) {\textbf{Recorded per 1 s dwell}\\terminal $V$, $I$, $P=VI$;\\commanded fan speed};
+  % arrows
+  \draw[ctl] (host) -- node[above, lab] {USB} (pmc);
+  \draw[ctl] (pmc) -- node[above, lab] {RS-485} (vfd);
+  \draw[pwr] (vfd) -- node[above, lab] {3-phase} (fan);
+  \draw[pwr] (fan) -- node[above, lab] {air} (ts);
+  \draw[pwr] (ts) -- node[right, lab] {shaft} (gen);
+  \draw[pwr] (gen) -- node[above, lab] {AC} (rect);
+  \draw[pwr] (rect) -- node[above, lab] {DC} (load);
+  \draw[ctl] (load.north) |- ++(0,4mm) -| node[pos=0.25, above, lab] {USB (SCPI): set current, read $V$, $I$} (host.south);
+  \draw[densely dotted, ink2] (load) -- (note);
+\end{tikzpicture}

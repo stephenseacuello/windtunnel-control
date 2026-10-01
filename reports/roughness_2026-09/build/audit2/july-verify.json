@@ -1,0 +1,249 @@
+{
+ "summary": "I checked the first-pass decode of the 27 July Jeong-lab export with my own code (verify_july.py), written before reading theirs; its main numbers hold. The lab's table is reproduced exactly (64 values, max relative error 3.1e-15), and the window placement is pinned uniquely (C2 confirmed). The current channel carries 31.25 mA rms of white noise with no current flowing. Every Pdc_max sample is a current spike 0.095-0.144 A above its 1 s mean, a bias of about 0.11 A x Vdc (C3 confirmed). The 500-700 settings had zero load current, so their powers are pure noise (C4 confirmed). The load was constant-current, raised cumulatively, with only 0-3 levels per setting (C5 confirmed). The tach double-counts at 900 and 1300 and misses 14 pulses at 2000, where the true speed is 666.8 rpm against the lab's 594.7 (C9 confirmed). C1 is PARTLY confirmed: the 4x voltage scale matches the rig's open-circuit voltages, but the 2 A/V current scale cannot be tested from the file. C6 is PARTLY confirmed: dwells are 12.25-38.0 s, not 12-41 s, and the quoted window fractions ('2/3', '~30%') mix two different ways of placing boundaries during the 7-10 s rotor spin-up. The robust fact is that the lab's '1300' value comes from 1400 data. C7 is PARTLY confirmed: the June 50-sample-average fingerprint holds, but June's 500 point was a different operating point, so June was probably not noise too. C8's ratios reproduce (0.665-0.916x Ra20; 0.622-0.890x with settled plateau means; 2.695 W at 1700). But at 1400-1800 the lab was loaded near its maximum-power point, so the gap is not just under-loading. It could be the current scale or a real difference, and the data cannot tell. One high-severity issue sits outside the claims: repo docs say Jeong's DAQ measured 18,500 rpm at fan 1800, which is 33x this file's tach rate and physically implausible. That must be reconciled before the report says anything about rotor speed.",
+ "key_findings": [
+  "C1 PARTLY: the channel map is the one the lab used. Vdc_max values sit on the 4-code grid and Idc_max on the 2-code grid, both within 4.1e-7 codes. The 4x voltage scale is physically corroborated: lab zero-current V at 500/600/700 was 3.03/4.13/5.33 V against the rig's first-dwell 2.85/4.47/5.62 V. ch1 decays with tau 18.4 s after the rotor stops (a capacitor). The ch2 zero is 2.49607 V (a -7.85 mA lab offset). The 2 A/V current sensitivity cannot be tested from the file. ch3 = 1 pulse/rev is the lab's own assumption and is supported: in the order-tracked voltage spectrum the line at 1x the ch3 rate is 6.6-58x the median, a 3/rev blade line is present, and there is no comparable line at order 1/2 or 1/3. ch4/ch5 share ch3's edges (100% / 99.95% within 2 samples; slopes 0.481/0.217; r 0.998/0.993) but have different decay shapes (residual 6%/11% rms).",
+  "C2 CONFIRMED: my own implementation reproduces all 64 table values (max relative error: RPM 2.7e-15, V 0, I 6.7e-16, P 3.1e-15). Only a joint start shift of 0 in \u00b1300 samples gives 64/64. Changing the window length by \u00b11 breaks all 16 RPM values. Any count threshold from 0.06 to 0.13 V reproduces every count. The lab used the Relative Time column for duration.",
+  "C3 CONFIRMED: current noise (after removing the 1 s mean) is 31.25 mA with the load off and 31.27 mA at the start of the run. It is white (spectral flatness 0.96; lag-1 autocorrelation <=0.016) and uncorrelated with the voltage residual (r -0.045 to 0.029). At every Pdc_max sample the current is 0.0946-0.1442 A (3.0-4.6 sigma) above its 1 s mean. Resampling the zero-current noise predicts a median of 0.104 A for the maximum of 3742 draws. The bias is 0.110 A x V (first pass), 0.1116 A median (same definition, mine) and 0.1175 A (at-sample fit). Under load an extra 6-16 mA rms component appears, which may be real ripple, but it does not explain the spikes.",
+  "C4 CONFIRMED: mean zero-corrected current in the 500/600/700 windows was -0.84\u00b10.51, +0.62\u00b10.52 and +0.08\u00b10.53 mA; loading first starts at 63.05 s. The recipe on the first pass's null window (331.0-341.4 s, load at 0 A) gives 1.50 W. Sliding windows after load-off give 0.89-1.69 W depending on placement. Whether the load was physically disconnected or set to 0 A cannot be told from the data.",
+  "C5 CONFIRMED for constant current, cumulative raising and no sweep. At the 5 fan steps where the load was untouched, (dI/I)/(dV/V) was -0.06 to +0.07 while V rose 17-38%. During the wind cut, V fell from 12.2 to 7.7 V while I held at 346.6\u00b13.4 mA (normalised ratio 0.043; a resistor would give 1). The 5 s current never fell more than 2.3 mA below its running maximum before load-off. Each setting has only 0-3 current levels. 'By hand' is an inference from irregular increments and a continuous 143-224 mA ramp over 190-205 s. New: at 1400 and 1500 the last current increase coincided with power falling (-1.0% and -3.8%), and at 1800 power was flat (+0.5%).",
+  "C6 PARTLY: I find 15 clear fan steps (rotor +10% to +28%, V +1.1 to +2.0 V). Dwells run 12.25-38.0 s onset to onset, against the first pass's 12-41 s. Each rotor spin-up lasts 7-10 s, so window fractions depend on where the boundary is placed. Measured from the start of each rotor rise, 66% of the '1300' window is post-1400-step and 0% of '1500'/'1600' is previous-setting data; measured from the middle of each rise, 37%, 29% and 31%. The first pass's boundaries mix the two conventions: 175.0 s is at the start of a rise, while 216.0/236.6/255.4 s are at mid-rise. Robust statement: the 1400 step (mid-rise 178.0 s) lies inside the '1300' window, and that window's Pdc_max sample (179.47 s) and 1 s max (1.121 W at 181.85 s) are 1400 data; the 1300 setting's own 1 s max is 0.918 W. 77% and 76% of the '1500' and '1600' windows lie in the spin-up. The possible hidden fan step at about 196-200 s (rotor +4% while current rose 45-71 mA) remains unresolved.",
+  "C7 PARTLY: the June fingerprint is confirmed. n=50 is the smallest averaging length that puts all 13 June V values on the 4Q/n grid and all 13 I values on a common-offset 2Q/n grid (off-grid 7e-6). Multiples of 50 also fit but are statistically disfavoured. The offset residue is exactly Q/200, so the zero was not 2.5 V. Block and moving averages cannot be told apart. June-style processing of July at 500 gives 0.0391 W with the load-off zero (0.0140 W with a 2.5 V zero). But June's 500 point is a different operating point: Vdc 1.86 V at 75 rpm with Idc_max 0.029 A, against July's 3.2 V at 104 rpm and 0.012 A of noise only. June was probably drawing real current, so the 0.039 vs 0.046 W match is coincidental. The July table's 0.333 W at 500 is processing, not rotor.",
+  "C8 CONFIRMED numerically: the 1 s-mean, zero-corrected maximum over each actual setting is 0.665-0.916x rig Ra20 over 900-1800; at 1700 it is 2.695 W against lab 3.818 W and Ra20 3.033 W. Settled plateau means give 0.622-0.890x. Caveats: under-loading explains only part of the gap, and only at 900-1300 (lab I 0.56-0.71 of the rig's current at P_max); at 1400-1800 the lab was near that current (0.88-1.21x). The rig's per-step value is a single Chroma reading after a 1 s dwell (src/peak_finder.py dwell_at), not a 1 s mean. The current scale is unverified.",
+  "C9 CONFIRMED: lab vs true rotor rate is +3.95% at 900 (one two-sample edge counted twice), +2.73% at 1300 (two) and -10.81% at 2000 (true 666.8 rpm vs 594.7; 14 missing pulses plus 2 double counts). The +1.0% to +1.8% errors at 500-700 are just \u00b11-count quantisation (5.77 rpm per count). All 14 missing pulses fall in the 2000 setting (about 11 Hz); none at 1900 (10.2 Hz). The gaps stay flat at baseline (max -1.526 V) while pulses last 7-13 samples, so the sensor did not fire; this is not a sampling miss.",
+  "File and clock claims confirmed: 360 Hz is correct (60.01 Hz mains line on ch3/ch5 at rest). The UTC stamps equal floor(n x 3 ms) exactly (a synthetic 333 Hz clock).",
+  "Scale cross-check vs the rig's own V-I curves at the same fan setting: the lab's voltage is 1.10 V (Ra20), 1.64 V (Ra40) and 2.11 V (Ra80) lower at the same labelled current. The rig would need 1.10-1.60x (Ra20) the lab's current to reach the lab's voltage. The factor is not constant (1.50 at 900-1300, 1.15 at 1400-1800), so a scale error alone cannot explain it, and the data cannot separate a current-scale error from a genuinely weaker lab V-I curve."
+ ],
+ "anomalies": [
+  {
+   "issue": "The repo states that Jeong's DAQ measured 18,500 rpm (308 Hz) at fan 1800 on 1 Sept. That contradicts this lab file and the lab's own Measured_RPM.",
+   "severity": "high",
+   "evidence": "docs/11_open_questions.md:37,49; src/check_rotor.py:290; tests/test_check_rotor.py:286. In the July file the ch3 rate at 1800 is 9.231 Hz (lab Measured_RPM 554.3), so 308/9.231 = 33.4x. 18,500 rpm with R = 0.1016 m is a 196.8 m/s tip speed. The order-tracked V spectrum shows the fundamental of V fluctuation at the ch3 rate. At 1 pulse/rev, lambda at 2000 is 0.166. The rig's Ra40 summary turbine_rpm_at_pmax column (617-13,549 rpm) is a third, inconsistent source.",
+   "implication_for_report": "Do not quote any rotor speed or tip-speed ratio attributed to the Jeong DAQ until the 18,500 rpm statement is traced and reconciled. The lab will read what the report says about their measurements."
+  },
+  {
+   "issue": "The C6 window-contamination fractions depend on the boundary convention, and the first pass mixes conventions.",
+   "severity": "medium",
+   "evidence": "The rotor rise after each fan step takes 7.0-10.0 s. The first pass's boundaries sit at the start of the rise for 1400 (175.0 s) but at mid-rise for 1500/1600/1700 (216.0/236.6/255.4 s, against my midpoints 216.0/237.0/255.75). Fraction of each lab window outside its own setting, measured from the start of the rise: 1300 0.659, 1500 0.000, 1600 0.000. Measured from mid-rise: 0.371, 0.286, 0.307.",
+   "implication_for_report": "Replace '2/3' and '~30%' with the convention-free statement. The 1400 step lies inside the '1300' window, whose Pdc_max sample and 1 s max come after it (1.121 W vs 0.918 W for 1300's own span). 76-77% of the '1500'/'1600' windows lie in spin-up transients."
+  },
+  {
+   "issue": "The 'lower bound' caveat on the lab's 1 s powers (FINDINGS section 7) only holds at 900-1300.",
+   "severity": "medium",
+   "evidence": "Lab plateau current as a fraction of the rig Ra20 current at P_max: 900 0.558, 1000 0.589, 1100 0.707, 1200 0.644, 1300 0.685, 1400 0.934, 1500 0.881, 1700 1.209, 1800 0.993. With the last current increase, power fell 1.0% at 1400 (197 to 225 mA) and 3.8% at 1500 (223 to 232 mA), and rose only 0.5% at 1800.",
+   "implication_for_report": "At 1400-1800 the lab was loaded near its maximum-power point, so the 0.83-0.92x ratios there cannot be dismissed as under-loading. They must instead be attributed to current scale, rotor or setup differences, which the data cannot separate."
+  },
+  {
+   "issue": "The current-sensor scale (2 A/V) is unverified, and the lab's V-I points sit below the rig's.",
+   "severity": "medium",
+   "evidence": "verify_scale_vs_rig.csv: median lab V minus rig V at the same labelled current is -1.095 V (Ra20), -1.641 V (Ra40) and -2.111 V (Ra80). The rig current needed to reach the lab's V is 1.10-1.60x the lab's (Ra20), with a median of 1.495 at 900-1300 and 1.151 at 1400-1800. Because the factor is not constant, it is not a pure scale error.",
+   "implication_for_report": "Any statement that the untextured July rotor is below the textured prints depends on an assumed sensor scale. A 400 mV/A sensor would raise all lab powers by 25%. State this as unresolved and ask the lab."
+  },
+  {
+   "issue": "The C7 inference that June at 500 was also noise is not supported, although the numbers reproduce.",
+   "severity": "low",
+   "evidence": "June 500: Vdc_max 1.861 V, Measured_RPM 75.2, Idc_max 0.0290 A. July 500 with June-style 50-sample averages: V 3.205 V, 103.9 rpm, noise-only I_max 0.0122 A. June-style July Pdc 0.0391 W vs June 0.0464 W.",
+   "implication_for_report": "Say only that July's 0.333 W at 500 is noise (zero load current), not a rotor gain over June. Do not imply June's 0.046 W was also noise."
+  },
+  {
+   "issue": "FINDINGS section 2 describes a '0-5 V range'. The ADC is bipolar.",
+   "severity": "low",
+   "evidence": "Channel minimum is -1.560 V. A 1.2207 mV step means \u00b15 V at 13 bits or \u00b110 V at 14 bits. ch1 max 4.9976 V (code 4094) is a single sample; 38 samples are >=4.95 V and nothing piles up at a top code.",
+   "implication_for_report": "Ask the lab for the input range. If it is \u00b15 V, the load-off transient came within about 1% of full scale."
+  },
+  {
+   "issue": "The EMF slope rests on a single post-load-off point. Spin-down data after about 331 s are capacitor-held.",
+   "severity": "low",
+   "evidence": "Low-speed zero-current fit: 0.03145 V/rpm, -0.20 V (mine) and 0.03172 (first pass), against 0.03342 with the post-disconnect point. After load-off the rotor re-accelerated to 600 rpm and V peaked at 19.79 V at 330.45 s; the low-speed line predicts 18.67 V there, so the peak is a valid EMF sample. Afterwards V/f rises from 1.97 to 7.44 V/Hz while V decays with tau 18.1 s. R_int is 24.0 \u03a9 (IQR 23.4-25.0) with the low-speed line and 26.8 \u03a9 with the first pass's line.",
+   "implication_for_report": "Quote the generator EMF and constant-speed R with about 5% and 10% uncertainty respectively, and never fit EMF to the spin-down."
+  },
+  {
+   "issue": "The rig convention is not '1 s averaging'.",
+   "severity": "low",
+   "evidence": "src/peak_finder.py dwell_at: set CC, sleep(dwell = 1 s), then a single MEAS:VOLT?/MEAS:CURR? (src/chroma_load.py measure). P_max is the argmax over steps. The Chroma's internal averaging window is not documented in the repo.",
+   "implication_for_report": "Describe the lab reprocessing as a 1 s mean that removes sensor noise, compared with the rig's settled single readings. Give both the 1 s max and the plateau mean (the plateau mean is 2-11% lower)."
+  },
+  {
+   "issue": "Tach (ch3) reliability.",
+   "severity": "low",
+   "evidence": "14 missing pulses, all in the 2000 setting (317.7-327.1 s). There are 16 multi-sample edges in the whole record. The lab's '2000' window also includes the wind cut (rotor decelerating from about 327.0 s; window ends 327.34 s).",
+   "implication_for_report": "Do not use Measured_RPM for tip-speed ratio. Ask how the pulse is generated."
+  }
+ ],
+ "numbers": [
+  {
+   "name": "Summary_Table reproduction max relative error (RPM, V, I, P)",
+   "value": "2.7e-15, 0, 6.7e-16, 3.1e-15",
+   "source": "verify_july.py -> verify_numbers.json C2_max_rel_err_by_col"
+  },
+  {
+   "name": "Joint window start shifts (\u00b1300 samples) reproducing 64/64",
+   "value": "[0] only",
+   "source": "verify_numbers.json C2_joint_start_shifts_reproducing_64of64"
+  },
+  {
+   "name": "ch3 diff-threshold range reproducing all 16 counts",
+   "value": "0.06-0.13 V (first pass 0.055-0.13)",
+   "source": "verify_numbers.json C2_threshold_range_reproducing_all_counts_V"
+  },
+  {
+   "name": "Current noise sigma, zero current (lab 2 A/V scale)",
+   "value": "31.25 mA (load off), 31.27 mA (0.5-20 s)",
+   "source": "verify_numbers.json C3_sigma_I_loadoff_mA / C3_sigma_I_start_mA"
+  },
+  {
+   "name": "Current noise sigma in lab windows",
+   "value": "31.1-34.9 mA",
+   "source": "verify_numbers.json C3_sigma_I_windows_range_mA"
+  },
+  {
+   "name": "I minus 1 s mean at each Pdc_max sample",
+   "value": "0.0946-0.1442 A (3.0-4.6 sigma)",
+   "source": "verify_numbers.json C3_I_minus_1s_mean_at_Pmax_range_A"
+  },
+  {
+   "name": "Bias coefficient dP/V",
+   "value": "0.1116 A median ((Pdc_max - max 1 s)/mean V); 0.1175 A at-sample fit; first pass 0.110",
+   "source": "verify_numbers.json C3_alt_bias_median_A, C3_dP_over_V_fit_A; daq_july/key_numbers.json bias_dP_over_V_A"
+  },
+  {
+   "name": "Bootstrap max of 3742 zero-current noise draws (5/50/95%)",
+   "value": "0.094 / 0.104 / 0.119 A",
+   "source": "verify_numbers.json C3_bootstrap_max_of_3742_zero_current_noise_A"
+  },
+  {
+   "name": "ch2 zero (load off / run start)",
+   "value": "2.49607 V / 2.49549 V; lab offset -7.85 mA",
+   "source": "verify_numbers.json ch2_zero_*"
+  },
+  {
+   "name": "Mean zero-corrected I in 500/600/700 lab windows",
+   "value": "-0.84\u00b10.51, +0.62\u00b10.52, +0.08\u00b10.53 mA",
+   "source": "verify_numbers.json C4_zero_current_check"
+  },
+  {
+   "name": "Recipe on load-off windows (null test)",
+   "value": "1.50 W at 331.0-341.4 s (first pass); 0.89-1.69 W sliding (mine)",
+   "source": "verify_numbers.json C4_null_all_windows_Pdc_max_range_W; daq_july/key_numbers.json null_window_after_disconnect"
+  },
+  {
+   "name": "Noise share of lab Pdc_max (1 - 1 s max zero-corr / Pdc_max)",
+   "value": "0.97 at 500-700; 0.75 at 900; 0.39 at 1300; 0.24-0.29 at 1500-2000",
+   "source": "verify_numbers.json C8_noise_share_of_lab_Pdc_max"
+  },
+  {
+   "name": "CC test, wind cut 326.5 s to load-off",
+   "value": "V 12.16->7.72 V, I 346.6\u00b13.4 mA, normalised (dI/I)/(dV/V) 0.043",
+   "source": "verify_numbers.json C5_windcut_326.5s_to_loadoff"
+  },
+  {
+   "name": "CC test, fan steps with the load untouched",
+   "value": "-0.059 to +0.072 (n=5)",
+   "source": "verify_numbers.json C5_fan_step_ratio_range_when_load_untouched(|dI|<6mA)"
+  },
+  {
+   "name": "Dwell range (rise start to rise start, excluding first)",
+   "value": "12.25-38.0 s (first pass 12-41 s)",
+   "source": "verify_numbers.json C6_dwell_range_excl_first_s"
+  },
+  {
+   "name": "Fan-step rotor rise duration",
+   "value": "7.0-10.0 s",
+   "source": "verify_numbers.json C6_rise_duration_s_range"
+  },
+  {
+   "name": "'1300' window fraction after 1400 step (rise-start / mid-rise boundary)",
+   "value": "0.659 / 0.371",
+   "source": "verify_numbers.json C6_window_frac_not_own_setting_by_onset / _by_midpoint"
+  },
+  {
+   "name": "'1500','1600' fraction previous setting (rise-start / mid-rise boundary)",
+   "value": "0.000,0.000 / 0.286,0.307",
+   "source": "verify_numbers.json C6_window_frac_not_own_setting_*"
+  },
+  {
+   "name": "'1300' lab-window 1 s max vs 1300 own-span 1 s max",
+   "value": "1.121 W (at 181.85 s, 1400 data) vs 0.918 W",
+   "source": "verify_power_vs_rig.csv"
+  },
+  {
+   "name": "June averaging length fingerprint",
+   "value": "n=50 smallest consistent; offset residue = Q/200 (6.10e-6 V) so zero != 2.5 V",
+   "source": "verify_numbers.json C7_june_grid_test, C7_implied_zero_mod_Q_over_50_V"
+  },
+  {
+   "name": "June-style processing of July at 500",
+   "value": "0.0391 W (load-off zero) / 0.0140 W (2.5 V zero); June table 0.0464 W",
+   "source": "verify_numbers.json C7_june_style_on_july"
+  },
+  {
+   "name": "1 s max zero-corrected / rig Ra20, 900-1800",
+   "value": "0.665-0.916",
+   "source": "verify_numbers.json C8_span_1s_max_over_Ra20_range_900_1800"
+  },
+  {
+   "name": "Plateau mean / rig Ra20, 900-1800",
+   "value": "0.622-0.890",
+   "source": "verify_numbers.json C8_plateau_mean_over_Ra20_range_900_1800"
+  },
+  {
+   "name": "1700: lab 1 s max / lab Pdc_max / Ra20 / Ra40 / Ra80",
+   "value": "2.695 / 3.818 / 3.033 / 3.358 / 3.529 W",
+   "source": "verify_power_vs_rig.csv; logs/sweep_v1_Ra{20,40,80}_summary.csv (raw argmax)"
+  },
+  {
+   "name": "Lab I / rig Ra20 I at P_max",
+   "value": "0.56-0.71 (900-1300); 0.88-1.21 (1400-1800)",
+   "source": "verify_numbers.json C8_lab_Imax_over_rig_Ra20_Impp"
+  },
+  {
+   "name": "Rig current needed at lab V / lab current (Ra20)",
+   "value": "median 1.343, range 1.10-1.60; 1.495 (900-1300), 1.151 (1400-1800)",
+   "source": "verify_scale_vs_rig.csv; verify_numbers.json scale_check_Irig_at_Vlab_over_Ilab"
+  },
+  {
+   "name": "Measured_RPM error vs true (900, 1300, 2000)",
+   "value": "+3.95%, +2.73%, -10.81% (true 666.8 vs 594.7 rpm)",
+   "source": "verify_lab_windows.csv / verify_numbers.json C9_table"
+  },
+  {
+   "name": "Missing tach pulses",
+   "value": "14 (12 gaps), all 317.7-327.1 s; max ch3 inside gaps -1.526 V",
+   "source": "verify_numbers.json missing_pulses_total, max_ch3_inside_gaps_V"
+  },
+  {
+   "name": "Mains line at rest assuming 360 Hz",
+   "value": "60.009 / 60.136 / 60.022 Hz on ch3/ch4/ch5",
+   "source": "verify_numbers.json mains_line_at_rest_Hz_and_peak_over_median_if_fs360"
+  },
+  {
+   "name": "Capacitor decay tau after rotor stops",
+   "value": "18.38 s",
+   "source": "verify_numbers.json V_decay_tau_after_last_pulse_s"
+  },
+  {
+   "name": "EMF, low-speed zero-current fit",
+   "value": "0.03145 V/rpm, -0.20 V; post-load-off V peak 19.79 V at 600 rpm (fit predicts 18.67)",
+   "source": "verify_numbers.json EMF_fit_*, post_loadoff_V_peak_rev"
+  },
+  {
+   "name": "ch3 rate at 1800 vs repo's 308 Hz claim",
+   "value": "9.231 Hz; ratio 33.37",
+   "source": "verify_numbers.json f_ch3_1800_hz, ratio_308Hz_to_f_ch3_1800"
+  }
+ ],
+ "details_markdown": "## Method\n- **Script:** `build/july_verify/verify_july.py`, run with system python3 in about 2 s. It reads only the lab CSVs and, for C8, the rig summary and points logs.\n- **Independence:** I wrote my own pulse detector, fan-step detector, plateau finder, noise and bias estimates, and June grid test. I opened `analyze_july.py` and `key_numbers.json` only after reaching my own answers, then diffed.\n- **Outputs:** `verify_numbers.json`, `verify_lab_windows.csv`, `verify_settings.csv`, `verify_plateaus.csv`, `verify_power_vs_rig.csv`, `verify_scale_vs_rig.csv`, `verify_log.txt`, `verify_segmentation.png`, `verify_noise.png`.\n- **Exploration:** my exploratory scripts and plots are in `explore/`.\n\n## Verdicts\n| claim | verdict | my numbers |\n|---|---|---|\n| C1 channel map | **PARTLY**: identification confirmed; I scale untestable | V/I table values on the 4-code and 2-code grids (off-grid \u22644.1e-7). Zero-current V at 500/600/700 is 3.03/4.13/5.33 V against rig 2.85/4.47/5.62 V. ch1 capacitor tau 18.4 s. ch2 zero 2.49607 V. ch3 order-1 V line 6.6-58\u00d7 the median, 3/rev line present, no order-\u00bd or order-\u2153 line of comparable size. ch4/ch5 slopes 0.481/0.217, r 0.998/0.993, edges coincide, decays differ (residual 6%/11%). |\n| C2 recipe | **CONFIRMED** | Max relative error 3.1e-15. Joint shift 0 is the only 64/64 match in \u00b1300 samples. Length \u00b11 breaks all RPM values. Threshold 0.06-0.13 V. |\n| C3 noise and bias | **CONFIRMED** | \u03c3 = 31.25 mA at 0 A, white (flatness 0.96), r(V,I) between -0.045 and 0.029. Spikes 0.0946-0.1442 A (3.0-4.6\u03c3). Bias 0.110 A (first pass), 0.1116 A (mine, same definition), 0.1175 A (at-sample). Extra 6-16 mA rms under load. |\n| C4 500-700 at 0 A | **CONFIRMED** | Window means -0.84, +0.62, +0.08 mA (\u00b10.5). First loading at 63.05 s. Null window gives 1.50 W (0.89-1.69 W by placement). |\n| C5 CC, cumulative, no sweep | **CONFIRMED** (lower-bound consequence only at 900-1300) | Untouched fan steps: ratio -0.06 to +0.07. Wind cut: 0.043. Maximum current drop 2.3 mA. 0-3 current levels per setting. P fell with the last I increase at 1400 (-1.0%) and 1500 (-3.8%). |\n| C6 dwells and misattribution | **PARTLY** | Dwells 12.25-38.0 s. Fractions depend on where in the 7-10 s spin-up the boundary sits (table below). The hidden step near 197 s is unresolved. |\n| C7 June processing | **PARTLY** | n=50 fingerprint and non-2.5 V zero confirmed. June-style July at 500 gives 0.0391 W. June's 500 point differs (1.86 V at 75 rpm vs 3.2 V at 104 rpm), so the match with June is coincidental. |\n| C8 reprocessed vs rig | **CONFIRMED** numerically; interpretation needs caveats | 1 s max 0.665-0.916\u00d7 Ra20. Plateau mean 0.622-0.890\u00d7. At 1700: 2.695 W. Lab I is 0.56-0.71 of the rig's current at P_max at 900-1300 and 0.88-1.21 at 1400-1800. |\n| C9 Measured_RPM | **CONFIRMED** | +3.95% (900), +2.73% (1300), -10.81% (2000; true 666.8 rpm). 14 missed pulses, all at 2000. |\n\n## Window composition (fraction of each lab window outside its own setting)\nBoundaries measured two ways: from the start of each rotor rise, and from its midpoint.\n\n| lab window | span [s] | from rise start | from mid-rise | share of window inside a spin-up |\n|---|---|---|---|---|\n| 800 | 67.5-77.9 | 0.00 | 0.43 | 0.91 |\n| 1200 | 150.7-161.1 | 0.37 | 0.00 | 0.37 |\n| 1300 | 171.5-181.9 | 0.66 | 0.37 | 0.66 |\n| 1500 | 213.0-223.4 | 0.00 | 0.29 | 0.77 |\n| 1600 | 233.8-244.2 | 0.00 | 0.31 | 0.76 |\n| 1700 | 254.6-265.0 | 0.00 | 0.11 | 0.42 |\n\nThe first pass's boundaries (24.1, 41.4, 69.7, 81.7, 103.3, 123.4, 144.4, 160.4, 175.0, 216.0, 236.6, 255.4, 270.8, 293.1, 311.4 s) do not use one convention. Some sit at the start of a rise (175.0), others at mid-rise (216.0, 236.6, 255.4).\n\n## Power comparison (W; lab current zero-corrected on the 2 A/V scale; rig values are raw argmax)\n| setting | lab Pdc_max | lab 1 s max, own span | plateau mean | Ra20 | ratio (1 s max / Ra20) | lab I / Ra20 I at P_max |\n|---|---|---|---|---|---|---|\n| 900 | 0.768 | 0.195 | 0.180 | 0.273 | 0.713 | 0.558 |\n| 1100 | 1.016 | 0.452 | 0.420 | 0.643 | 0.703 | 0.707 |\n| 1300 | 1.825 | 0.918 | 0.884 | 1.329 | 0.691 | 0.685 |\n| 1400 | 2.253 | 1.519 | 1.416 | 1.665 | 0.912 | 0.934 |\n| 1500 | 2.611 | 1.906 | 1.852 | 2.081 | 0.916 | 0.881 |\n| 1700 | 3.818 | 2.695 | 2.591 | 3.033 | 0.889 | 1.209 |\n| 1800 | 4.304 | 3.129 | 3.053 | 3.794 | 0.825 | 0.993 |\n\n## Diff against the first pass\n| item | first pass | mine |\n|---|---|---|\n| \u03c3_I at 0 A | 31.27 mA | 31.25 / 31.27 mA |\n| ch2 zero | 2.49611 V | 2.49607 V |\n| bias coefficient | 0.110 A | 0.1116 (same definition) / 0.1175 A |\n| 1700 1 s power | 2.694 W | 2.695 W |\n| RPM errors (900, 1300, 2000) | +3.6, +2.8, -10.9% | +3.95, +2.73, -10.81% |\n| EMF slope | 0.03342 (with the post-disconnect point) | 0.03145 (low-speed only); the post-disconnect point is valid (V peak 19.79 V at 600 rpm) |\n| R_int | 26.8 \u03a9 | 24.0 \u03a9 with the low-speed line |\n| dwell range | 12-41 s | 12.25-38.0 s |\n\n## Alternative explanations considered\n- **Could ch2 scaling differ?** Yes. The file only proves the lab applied 2 A/V. Against the rig's V-I curves the lab's voltage is 1.1 V lower at the same labelled current. The rig would need 1.10-1.60\u00d7 the current, and the factor is not constant, so a scale error alone cannot explain it.\n- **Did the lab intend instantaneous maxima?** The recipe is exactly that. It is a legitimate definition, but 24-97% of the value is noise, and Vdc_max and Idc_max occur at different instants (Pdc/(Vmax\u00b7Imax) = 0.83-0.98).\n- **Is the \"noise\" real rectifier ripple?** No for the 31 mA floor. It is identical at 0 A with the load off, it is white, and it is uncorrelated with V. Real current of 31 mA rms through a ~24 \u03a9 source would produce about 0.75 V rms of anticorrelated voltage ripple, whereas the voltage residual is 0.08-0.14 V and uncorrelated. The 6-16 mA excess under load may be partly real.\n- **Is a 1 s mean fair?** Yes for suppressing sensor noise (to 1.6 mA). But the rig's value is a single settled Chroma reading after a 1 s dwell. The maximum of a 1 s moving mean is 2-11% above the settled plateau means, so quote both.\n\n## Suggested wording to the lab\nWe were able to reproduce every entry in the 27 July Summary_Table exactly from the raw DAQ export. That let us see how each number is formed: the largest single 360 Hz sample of V, of I and of V\u00b7I in the middle half of each of 16 equal slices of the record. We think these peak values mostly reflect the current channel's broadband noise rather than the turbine. That noise is about 31 mA rms on your 2 A/V scale, and it is the same with no current flowing. As a result, Pdc_max sits about 0.11 A \u00d7 Vdc above the power averaged over one second. That is roughly a quarter of the value at the highest settings. At 500-700 rpm, where the load current was at zero, it is essentially all of the value. Averaged over 1 s, the reading near 36 m/s becomes 2.7 W rather than 3.8 W. That is 8-38% below our rig's readings at the same fan settings, depending on setting and averaging choice. We do not read that gap as a rotor or roughness effect. At 900-1300 rpm the load stayed below the maximum-power current. We are also unsure of the current-sensor scale (we assumed 2 A/V about a 2.5 V zero) and of the DAQ input range, and we may have misread other parts of your setup. It would help us to know the sensor part and calibration, the input range, and how the tachometer pulse is produced; we saw it miss about one pulse in eight at the top speed. A future run that steps the load past the power peak and records the mean of each dwell would let the two setups be compared directly. We would be glad to share our scripts.",
+ "artifacts": [
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_july.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_numbers.json",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_lab_windows.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_settings.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_plateaus.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_power_vs_rig.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_scale_vs_rig.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_log.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/run_stdout.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_segmentation.png",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/verify_noise.png",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/july_verify/explore/"
+ ]
+}

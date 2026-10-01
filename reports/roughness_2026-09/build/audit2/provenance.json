@@ -1,0 +1,235 @@
+{
+ "summary": "I checked the specimen facts against blades/v1.stl and they reproduce: span 245.11 mm, chord 48.03 mm, wall 1.786 mm, swept area 2RH = 0.04980 m\u00b2, and Re 32,376\u2013119,735, which corresponds to \u03bd = 1.5033e-5 m\u00b2/s. How the roughness levels were produced is much weaker than the sweep headers suggest. Ra 20/40/80 are labels, not measurements. No profilometer, Keyence or Hexagon measurement was found. The Keyence question went unanswered and the Hexagon case key was missing. Ra 10/20/40 come from a ChatGPT screenshot that Stephen emailed on Aug 4 (IMG_8608.png, now decoded). It maps target Ra to fuzzy-skin thickness 0.025, 0.050 and 0.101 mm, all at 0.20 mm point distance. On Aug 12 Andrew Muszynski sent a Claude estimate for the same printed settings: about 10\u201315 \u00b5m for 0.050 mm and about 20\u201335 \u00b5m for 0.101 mm. That is roughly half the Ra20 and Ra40 labels. No email, table or repo file states what setting 'Ra 80' is. The nozzle and layer entries in the sweep notes conflict with every email. The garage printer had only 0.4 mm nozzles (Aug 5). Andrew's three prints had 'no 0.2 mm nozzle \u2026 layer height is 0.08 mm' (Aug 12). The 0.2 mm nozzles had still not arrived on Sep 9 (0.4 mm ones were delivered instead). Yet the notes say Ra80 '0.2mm layer, 0.2mm nozzle' and Ra40 '0.2mm layer'. The blades came from at least two sources: Andrew on a Bambu printer in the garage, and the I\u00b2(s) Print Lab file turbine_default.3mf. Stephen wrote on Aug 13 that 'the two prints feel very different'. Nothing records which rotor came from which print file. The only definitive record is three Bambu .3mf project files on Drive (39\u201361 MB). I did not download them. Jeong-lab tests: May 28 and Jun 3 ('load variation' and 'constant RPM' tests; CC/CV proposed for Jun 8), probably on the original rotor. That is inferred, because the printed replicas were only finished Jul 13. On Jul 27 Taegu and Stephen tested the printed 'new blades which have no texture'. Jeong asked them to compare with 'our initial test, which showed no significant differences' and to draw up a fault-testing plan with blades representing fault conditions. Ra10 search: I searched the repo tree, git history, local folders, Spotlight, Gmail, Calendar and Drive, and found no Ra10 data anywhere. Ra10 was planned from Aug 4 and announced on Aug 20 ('Ra 10, 40, & 80'). On Sep 1 NEXT_SESSION offered 'Ra 10 or Ra 40', and Ra 40 was run. The Ra20 remount repeat and the Ra80 rotor-rpm re-run were also never run. A 'Wind Tunnel Testing' session with Taegu is on the calendar for Oct 1, 15:00\u201316:00.",
+ "key_findings": [
+  "Roughness values are nominal LLM-derived targets, not measurements. IMG_8608.png (Aug 4, a ChatGPT screenshot) gives Target Ra 10/20/40 \u00b5m = fuzzy-skin thickness 0.025/0.050/0.101 mm at 0.20 mm point distance. Andrew's Claude table (Aug 12) estimates ~10\u201315 \u00b5m for 0.050 mm and ~20\u201335 \u00b5m for 0.101 mm. No profilometry was done: the Keyence question (Jul 22) got no reply, and the Hexagon arm case key was missing (Jul 27).",
+  "No setting for 'Ra 80' is documented anywhere: it is in neither LLM table, in no email and in no repo file. The label first appears in Stephen's Aug 20 email plan ('Ra 10, 40, & 80 micrometers').",
+  "The nozzle confound is real, and the sweep notes contradict the emails. Aug 5 (Andrew): the garage printer has only 0.4 mm nozzles. Aug 12 (Andrew): 'didn't have access to a 0.2 mm nozzle head so the layer height is 0.08 mm'. Sep 9 (Sodhi): 0.2 mm nozzles ordered, but '.4mm were delivered'. Yet the notes say Ra80 '0.2mm layer, 0.2mm nozzle' and Ra40 '0.2mm layer'. The Ra20 note '0.2mm' is ambiguous: every setting used a 0.20 mm point distance.",
+  "There were at least two print sources: Andrew Muszynski on the garage Bambu printer (three prints dropped off by Aug 12) and the I\u00b2(s) Print Lab ('Cam', turbine_default.3mf, Aug 17). On Aug 13 Stephen wrote: 'The two prints feel very different, maybe we should test/verify and/or standardize on the nozzle type.' Nothing records which physical rotor went with which print file.",
+  "The definitive slicer records are three Bambu .3mf files on Drive: turbines_threeFuzzySettings_06mm.3mf (45.2 MB), turbines_threeFuzzySettings_06mm_plate_2.gcode.3mf (39.1 MB) and turbine_default.3mf (60.7 MB). They were not downloaded because of their size. Their Metadata/project_settings.config would settle nozzle, layer height, fuzzy-skin thickness and point distance, printer and filament.",
+  "The Ra20 sweep (Aug 20) was logged as 'v2_Ra20' and relabelled 'v1_Ra20' on Aug 25 (commit 9cae976). I checked the files against the original commit: after swapping the label and normalising CRLF line endings, all data rows and headers are identical.",
+  "Specimen facts check out against blades/v1.stl: 27,056 triangles; bounding box 24.46 \u00d7 48.03 \u00d7 245.11 mm; wall 2V/A = 1.786 mm. R = 0.1016 m (README: measured, axis to blade attachment). 2RH = 0.04980 m\u00b2 (1.536 \u00d7 \u03c0R\u00b2). The docs' Re range 32,376\u2013119,735 equals \u03bd = 1.5033e-5 m\u00b2/s at 10.14\u201337.50 m/s.",
+  "Jeong-lab tests. May 28: Taegu; per-step average Vdc/Idc/Pdc with a rotation counter. Jun 3: 'load variation' and 'constant RPM' tests, 13 fan set points 500\u20131700. Jun 8: CC/CV test planned; no results email found. Jul 27: 'new blades which have no texture' (the printed replica), DAQ 10:45:34\u201310:51:55 EDT, 16 set points 500\u20132000. Only the July test is identified by email; I infer May and June used the original rotor, because the replicas were only finished Jul 13.",
+  "Jeong, Jul 27 (verbatim): 'you need to compare the results with our initial test, which showed no significant differences. This will provide a good baseline for our evaluation.' He also asked for a fault-testing plan ('prepare various types of blades representing different fault conditions \u2026 finalize the test plan before proceeding with the next round'). Aug 21: he asked for 1\u20132 setup slides and 1\u20132 results slides. I found no emailed reply to either request.",
+  "Ra10 definitive search found no data anywhere: repo tree (incl. logs/, data/, webapp/), git history (-S/-G/--stat), ~/Downloads, ~/Desktop, ~/Documents (names plus local text content), Spotlight, ~/Projects, Drive, Gmail (incl. trash) and Calendar. The only mentions are plans: IMG_8608 (Aug 4), the Aug 20 email, and the uncommitted NEXT_SESSION.md edited Sep 1 08:07 ('Ra 10 or Ra 40'). Ra40 was run that afternoon.",
+  "Planned but not run: v1_Ra20_repeat (the remount, listed first on Sep 1), v1_Ra10, v1_Ra80_rpm, the June CC/CV test (outcome unknown), recording the slicer recipe in blades/v1.json, and Jeong's fault-testing plan.",
+  "Upcoming: 'Wind Tunnel Testing' Thu 2026-10-01 15:00\u201316:00 with Taegu, accepted 2026-09-30. It could produce Ra10 or repeat data after the report goes out.",
+  "Every run was a single mounting. Order and times: Ra20 Aug 20 (file closed 14:29:49), Ra80 Aug 26 15:24:10\u201315:32:01, Ra40 Sep 1 15:04:25\u201315:12:50. Material 'PETG' appears only in the operator's --notes; no email confirms the filament."
+ ],
+ "anomalies": [
+  {
+   "issue": "Ra values are LLM-generated targets, not measured, and the two LLM estimates disagree roughly two-fold",
+   "severity": "high",
+   "evidence": "IMG_8608.png (Gmail msg 19fcd30665189aff, a ChatGPT screenshot): Target Ra 10/20/40 \u00b5m \u2192 thickness 0.025/0.050/0.101 mm at 0.20 mm point distance. Andrew's Claude table (msg 19ff7e507ff031ce): 0.05 mm \u2192 ~10\u201315 \u00b5m; 0.101 mm \u2192 ~20\u201335 \u00b5m. Keyence question 19f8a54b61bd7054 got no reply. Hexagon key missing (19fa46ee76bfa88b).",
+   "implication_for_report": "Call them 'nominal Ra 20/40/80 (slicer fuzzy-skin labels, not measured)' everywhere. Do not fit anything against Ra as a physical variable; treat it as an ordinal label. Recommend profilometry of the actual rotors."
+  },
+  {
+   "issue": "'Ra 80' has no documented print setting",
+   "severity": "high",
+   "evidence": "80 \u00b5m is in neither IMG_8608 nor the Aug 12 Claude table, nor in any email or repo file. It first appears as a plan in the Aug 20 email to Jeong (msg 1a0211ed22df050e). The Aug 25 commit 9cae976 wrote the 'Ra 80 plan' with notes 'PETG, 0.2mm, Ra 80'; the actual run notes differ.",
+   "implication_for_report": "Say plainly that the Ra80 specimen's print recipe is unrecorded. The +13.7% Ra80 result is attributable to 'a different print', not demonstrably to roughness alone."
+  },
+  {
+   "issue": "Sweep --notes contradict the email record on nozzle and layer height",
+   "severity": "high",
+   "evidence": "Ra80 notes: 'PETG, 0.2mm layer, 0.2mm nozzle, Ra 80'. Ra40: 'PETG, 0.2mm layer, Ra 40'. Ra20: 'PETG, 0.2mm, Ra 20'. Emails: garage printer only 0.4 mm (19fd291ca634c02e, Aug 5); 'didn't have access to a 0.2 mm nozzle head so the layer height is 0.08 mm' (19ff7e507ff031ce, Aug 12); 0.2 mm nozzles never received, '.4mm were delivered' (1a087ebaffcb012b, Sep 9). NEXT_SESSION's own draft Ra10 notes say '0.4mm nozzle'.",
+   "implication_for_report": "Do not repeat the notes' nozzle or layer values as fact. State that in-house prints before Sep 9 could only have used a 0.4 mm nozzle, and that the Ra80 '0.2 mm nozzle' entry is unverified. The confound between nozzle/printer and roughness is unresolved until the .3mf files are read."
+  },
+  {
+   "issue": "Rotor-to-print-file mapping is unrecorded; at least two print sources; the operator felt the prints differed",
+   "severity": "high",
+   "evidence": "Andrew's 3 prints (Bambu, garage) dropped off by Aug 12. I\u00b2(s) Print Lab turbine_default.3mf Aug 17. Aug 13 'The two prints feel very different\u2026standardize on the nozzle type' (19ffbc5c2fffd48b). Aug 17 'a few sets of new turbines ready'. blades/v1.json has no print fields despite Aug 25\u201327 NEXT_SESSION to-dos to record the slicer recipe.",
+   "implication_for_report": "List this under limitations. Ask Stephen and Andrew to identify which physical set is Ra20, Ra40 and Ra80, and to open the three .3mf files (Drive IDs 1CesRyALHGRr8DzRo1l_nCYRthbne_tuP, 1Xv5oAF5xRjp7fzWmqfWY9ceH0vi5I1i6, 1ZpHThgKDhp8yo0qaxSqMIIIpVtwWDDs1)."
+  },
+  {
+   "issue": "Ra20 sweep was recorded as v2_Ra20 and relabelled after the fact",
+   "severity": "medium",
+   "evidence": "Commit 9cae976 (2026-08-25 14:38): 'The reference sweeps were labelled v2_Ra20 but the rotor was v1'. File mtimes are 2026-08-25 14:34:19, creation 2026-08-20 14:29:49. I compared the files against the original commit 7d4dba4: identical apart from the label and CRLF line endings.",
+   "implication_for_report": "Mention in the data-package README. No data change. The geometry claim (v1) rests on the Aug 25 statement plus the Aug 4 'go with the v1' email."
+  },
+  {
+   "issue": "Jeong-lab wind-speed column uses a different fan-to-wind mapping from the repo's calibration",
+   "severity": "medium",
+   "evidence": "Summary_Table (June and July): 500 rpm \u2192 9.786 m/s; 800 \u2192 16.188; 1400 \u2192 29.4; 1700 \u2192 35.9625; 2000 \u2192 42.525. Repo: v = 0.02132\u00b7rpm \u2212 0.424 \u2192 10.236, 16.632, 29.424, 35.82, 42.216 (\u22124.4% at 500 rpm, +0.4% at 1700).",
+   "implication_for_report": "When overlaying Jeong-lab data on this campaign, use fan set point as the common axis, or convert both with one calibration and say which."
+  },
+  {
+   "issue": "The planned remount repeat was never run, so every result is a single mounting",
+   "severity": "medium",
+   "evidence": "NEXT_SESSION.md (uncommitted, 2026-09-01 08:07) puts v1_Ra20_repeat first ('If the day gets cut short, the repeat run is worth more than the new blade'). Only sweep_v1_Ra40 exists for Sep 1. No v1_Ra20_repeat or v1_Ra80_rpm log exists.",
+   "implication_for_report": "No mount-to-mount error bar exists. The CI on level differences is within-run only."
+  },
+  {
+   "issue": "Header '# clock' is written at run end, but its note says run start",
+   "severity": "low",
+   "evidence": "Ra80: first t_unix 15:24:10, clock 2026-08-26T15:32:09. Ra40: trace first 15:04:25, clock 2026-09-01T15:12:54. The clocks match the file birth times. _clock_note says 'host wall clock at run start'.",
+   "implication_for_report": "Quote run times from the t_unix spans, not from the clock header."
+  },
+  {
+   "issue": "v1.json still says tip radius is unknown, while README and docs/09 give R = 0.1016 m 'measured, axis to blade attachment'",
+   "severity": "low",
+   "evidence": "blades/v1.json tip_radius_m null, 'STILL UNKNOWN and still blocking' (written in HAWT terms). README.md:272 says measured R = 0.1016 m (4 in). Blade camber depth is 24.46 mm, so the effective radius depends on where the attachment sits relative to the camber.",
+   "implication_for_report": "Harmless for P_max comparisons. For any Cp or \u03bb statement, give R's definition (axis to attachment) and note the \u00b124 mm camber depth."
+  },
+  {
+   "issue": "v1.json camber '42% chord' cannot be reproduced from the bounding box",
+   "severity": "low",
+   "evidence": "STL bounding-box camber depth / chord = 24.46 / 48.03 = 0.51; json camber_pct_chord 42 with no definition given.",
+   "implication_for_report": "Quote camber as '24.5 mm depth (bounding box)' or omit the percentage."
+  },
+  {
+   "issue": "Connector and size limits left some sources unread",
+   "severity": "medium",
+   "evidence": "Not downloaded: the three .3mf files (39\u201361 MB); msg 19fd251306bf78de (9.6 MB, contains turbines_threeFuzzySettings.3mf); May 28 xlsx '05282026 test data2.xlsx'. iCloud-evicted files in ~/Documents were skipped in the content grep (Spotlight covered indexed content). Calendar semantic search returned empty; list_events fullText worked.",
+   "implication_for_report": "The nozzle, layer and fuzzy settings of the actual prints remain unverified until someone opens the .3mf files locally."
+  },
+  {
+   "issue": "Minor record-keeping gaps",
+   "severity": "low",
+   "evidence": "logs/peak_1800.csv header notes are the placeholder 'material, layer height, finish'. Sep 1 calendar invite: Taegu's response is still 'needsAction'. No emailed reply found to Jeong's Aug 21 slide request, although docs/slides/jeong_setup_and_results_v1.pptx (Sep 24, untracked, Office lock file present) exists.",
+   "implication_for_report": "Credit Taegu for Aug 20 and Aug 26 (confirmed by email). For Sep 1, attendance is not confirmed."
+  }
+ ],
+ "numbers": [
+  {
+   "name": "Blade span (STL bbox)",
+   "value": "245.11 mm (v1.json span_mm 245.1; docs H = 0.2451 m)",
+   "source": "ran build/provenance/verify_geometry.py on blades/v1.stl"
+  },
+  {
+   "name": "Chord (STL bbox)",
+   "value": "48.03 mm (v1.json 48.0)",
+   "source": "verify_geometry.py"
+  },
+  {
+   "name": "Camber depth (STL bbox)",
+   "value": "24.46 mm",
+   "source": "verify_geometry.py; v1.json bbox_mm"
+  },
+  {
+   "name": "Wall thickness 2V/A",
+   "value": "1.786 mm (V = 31,014 mm3, A = 34,724 mm2, 27,056 triangles)",
+   "source": "verify_geometry.py (v1.json: 1.79 mm, V = 31,015)"
+  },
+  {
+   "name": "t/c",
+   "value": "0.037 computed (v1.json 0.04)",
+   "source": "verify_geometry.py"
+  },
+  {
+   "name": "Rotor radius R",
+   "value": "0.1016 m (4 in, axis to blade attachment)",
+   "source": "README.md:272 'Measured'; docs/09_results.md:141"
+  },
+  {
+   "name": "Swept area 2RH",
+   "value": "0.04980 m2 (piR^2 = 0.03243; ratio 1.536)",
+   "source": "verify_geometry.py"
+  },
+  {
+   "name": "Blade count / material",
+   "value": "3 / PETG (material from sweep --notes only)",
+   "source": "blades/v1.json; logs/sweep_v1_Ra*_summary.csv '# notes'"
+  },
+  {
+   "name": "Re_chord range",
+   "value": "32,376 to 119,735 (implies nu = 1.5033e-5 m2/s at 10.14 to 37.50 m/s; 31,435 to 116,254 at 24.63 C)",
+   "source": "docs/09_results.md:145; reproduced with verify_geometry.py"
+  },
+  {
+   "name": "IMG_8608 fuzzy settings (ChatGPT)",
+   "value": "Target Ra 10/20/40 um \u2192 thickness 0.025/0.050/0.101 mm, point distance 0.20 mm all; est. print time 8\u201310 / 8\u201310.5 / 8.5\u201311 h",
+   "source": "Gmail msg 19fcd30665189aff, decoded to build/provenance/IMG_8608.png (sha256 128c7cba\u2026)"
+  },
+  {
+   "name": "Claude Ra estimates (Andrew, Aug 12)",
+   "value": "no fuzzy ~4\u20138 um; 0.8/0.02 ~6\u201310; 0.2/0.05 ('your existing print') ~10\u201315; 0.2/0.101 ('mid, already printed') ~20\u201335; 0.15/0.2 ('roughest safe') ~35\u201355 um",
+   "source": "Gmail msg 19ff7e507ff031ce image, build/provenance/20260812_Muszynski_Ra_table__image.png"
+  },
+  {
+   "name": "Layer height of Andrew's prints",
+   "value": "0.08 mm (no 0.2 mm nozzle)",
+   "source": "Gmail msg 19ff7e507ff031ce"
+  },
+  {
+   "name": "Garage printer nozzles",
+   "value": "0.4 mm only (Aug 5); 0.2 mm still not received Sep 9",
+   "source": "Gmail 19fd291ca634c02e; 1a087ebaffcb012b"
+  },
+  {
+   "name": "Estimated print time for three settings",
+   "value": "about 36 hours",
+   "source": "Gmail 19fd251306bf78de (Andrew, Aug 5)"
+  },
+  {
+   "name": "Sodhi fuzzy-skin defaults (PrusaSlicer)",
+   "value": "thickness ~0.3 mm (0.5\u20130.8 mm 'you can really feel'), point distance ~0.8 mm, 'Outside walls'",
+   "source": "Gmail 19f9b936be5bd8d7"
+  },
+  {
+   "name": "Slicer project files on Drive",
+   "value": "45,210,565 B; 39,132,708 B; 60,668,075 B",
+   "source": "Drive get_file_metadata 1CesRy\u2026, 1Xv5oA\u2026, 1ZpHTh\u2026"
+  },
+  {
+   "name": "Ra20 sweep file closed",
+   "value": "2026-08-20 14:29:49 EDT (no t_unix column)",
+   "source": "stat birth time, build/provenance/log_session_times.py"
+  },
+  {
+   "name": "Ra80 sweep span",
+   "value": "2026-08-26 15:24:10 to 15:32:01 EDT (352 rows)",
+   "source": "t_unix in logs/sweep_v1_Ra80_points.csv"
+  },
+  {
+   "name": "Ra40 sweep span",
+   "value": "2026-09-01 15:04:25 to 15:12:50 EDT (trace 9,426 rows; points 352)",
+   "source": "t_unix in logs/sweep_v1_Ra40_trace.csv / points"
+  },
+  {
+   "name": "July Jeong-lab DAQ span",
+   "value": "10:45:34 to 10:51:55 EDT (14:45:34 to 14:51:55 'Time Stamp UTC'), 127,208 samples at 0.002778 s",
+   "source": "inputs/jeong_lab/2026-07-27_no_texture_baseline/0727windturbine.csv"
+  },
+  {
+   "name": "Jeong-lab set points",
+   "value": "June: 13 (500\u20131700); July: 16 (500\u20132000)",
+   "source": "inputs/jeong_lab/*/Summary_Table*.csv"
+  },
+  {
+   "name": "Jeong-lab vs repo wind at 500 rpm",
+   "value": "9.786 vs 10.236 m/s (\u22124.4%)",
+   "source": "Summary_Table columns vs v = 0.02132\u00b7rpm \u2212 0.424"
+  },
+  {
+   "name": "Relabelled Ra20 data rows",
+   "value": "points 337 lines / summary 15 lines identical to commit 7d4dba4 after label swap and EOL normalisation",
+   "source": "python diff in this audit (git show 7d4dba4:logs/sweep_v2_Ra20_*.csv)"
+  },
+  {
+   "name": "Ra10 data files found",
+   "value": "0",
+   "source": "build/provenance/ra10_local_search.sh output + Gmail/Calendar/Drive queries (ra10_search_log.csv)"
+  },
+  {
+   "name": "Next scheduled tunnel session",
+   "value": "2026-10-01 15:00\u201316:00 EDT 'Wind Tunnel Testing' (Taegu accepted 2026-09-30 21:16Z)",
+   "source": "Calendar event _652k4h9k6l1j8b9k60ojab9k651k4b9o8913eb9g8h0j4cho6ss38dq568; Gmail 1a0f42d7b20f01d9"
+  }
+ ],
+ "details_markdown": "# Provenance audit: specimen, print process, Jeong-lab context, Ra10 search, timeline\n\nAll claims below come from files I read, commands I ran, or Gmail, Calendar and Drive items I retrieved on 2026-09-30. Verbatim email excerpts with message IDs are in `build/provenance/email_evidence.txt`.\n\n## 1. Rotor / specimen\n\n| item | value | source |\n|---|---|---|\n| Type | Vertical-axis H-rotor, **3 blades** | docs/09_results.md; blades/v1.json `n_blades` |\n| Radius R | **0.1016 m (4 in), \"axis to blade attachment\"**, listed as *Measured* | README.md:272, docs/09:141. Note: blades/v1.json still says `tip_radius_m: null`, \"STILL UNKNOWN\" (a stale note written in HAWT terms) |\n| Span H | **0.2451 m**; STL bounding box 245.11 mm | verify_geometry.py on blades/v1.stl |\n| Swept area | **2RH = 0.04980 m\u00b2**; \u03c0R\u00b2 = 0.03243; ratio 1.536 | verify_geometry.py |\n| Chord | **48.0 mm** (bounding box 48.03) | STL |\n| Wall | **1.79 mm** (2V/A = 1.786; V = 31,014 mm\u00b3, A = 34,724 mm\u00b2, 27,056 triangles) | STL (json: V = 31,015) |\n| t/c | 0.04 in json; 0.037 computed | STL |\n| Camber | depth 24.46 mm (bounding box). json says 42 % of chord with no definition given; the bounding box gives 51 % | STL / json |\n| Other | turning 183\u00b0, square-cut edges, zero twist (prismatic, \u00b10.02 %); \"thin cambered plate, not an airfoil\" | blades/v1.json |\n| Material | **PETG**. Appears only in the sweep `--notes`; the only email containing \"PETG\" is the CSVs attached to the Aug 26 logs email | logs headers; Gmail |\n| Re_chord | **32,376 \u2192 119,735**. Reproduced exactly with \u03bd = 1.5033e-5 m\u00b2/s (\u224820 \u00b0C) over 10.14\u201337.50 m/s. At 24.63 \u00b0C (the uncalibrated node reading on Sep 1): 31,435\u2013116,254 | docs/09:145; verify_geometry.py |\n| Geometry source | One blade. `~/Downloads/turbine_meters.stl` \u2190 SolidWorks 2024 `turbine.STEP` (AP214, 2026-07-01) | blades/v1.json `_source` |\n| v1 vs v2 | Aug 3: \"The v2 Wind Turbines are much better matching to the original, but still not exact\". Aug 4: \"the Professors \u2026 would like us to go with the v1 of the turbine blades and not the v2\" | Gmail 19fc82a5d2e58504, 19fce4aeab1f69a1 |\n\n## 2. How each Ra level was produced\n\n### What the documents say\n\n| date | evidence (verbatim or near) | source |\n|---|---|---|\n| Jul 25 | Sodhi: PrusaSlicer fuzzy skin how-to. \"Outside walls\"; thickness default ~0.3 mm (0.5\u20130.8 mm for a texture you can feel); point distance default ~0.8 mm; \"only affects vertical walls\"; \"Reprint the turbine with different levels of roughness on Monday ?\" | 19f9b936be5bd8d7 |\n| Aug 4 | Stephen \u2192 Andrew Muszynski: print v1 \"with the below three different fuzzy texture settings using a 0.2mm nozzle and fine print layer settings\". The image **IMG_8608.png** (decoded, `build/provenance/IMG_8608.png`) is a **ChatGPT screenshot**. Its table: **Target Ra 10 \u00b5m \u2192 point distance 0.20 mm, thickness 0.025 mm; 20 \u00b5m \u2192 0.20 / 0.050; 40 \u00b5m \u2192 0.20 / 0.101**, with estimated print times of 8\u201311 h. The text above the table mentions reducing from an \"original 0.04-mm\" point distance and \"Bambu\" | 19fcd30665189aff, 19fce4de995ff76b |\n| Aug 5 | Andrew: \"one of each of those (3 in total) would take about 36 hours \u2026 on the printer in the garage\". Then: \"**The printer in the garage only has the 0.4mm nozzle and a 0.4mm replacement nozzle.** I just emailed Sodhi asking him to order a full 0.2mm assembly\" | 19fd251306bf78de, 19fd291ca634c02e |\n| Aug 12 | Stephen: \"What fuzzy texture setting did you use for the three prints you dropped off?\" Andrew: \"**I used the same fuzzy texture settings as the previous print but I didn't have access to a 0.2 mm nozzle head so the layer height is 0.08 mm.** I can send you the bambu plate file \u2026\" He attached Drive links `turbines_threeFuzzySettings_06mm.3mf` and `\u2026_plate_2.gcode.3mf`, plus a **Claude**-generated table: no fuzzy skin ~4\u20138 \u00b5m; 0.8/0.02 ~6\u201310 \u00b5m; **\"Your existing print\" 0.2/0.05 \u2192 ~10\u201315 \u00b5m; \"Mid (already printed)\" 0.2/0.101 \u2192 ~20\u201335 \u00b5m**; \"Roughest safe\" 0.15/0.2 \u2192 ~35\u201355 \u00b5m | 19ff7e507ff031ce (image saved) |\n| Aug 13 | Stephen: \"**The two prints feel very different, maybe we should test/verify and/or standardize on the nozzle type.**\" (no resolution found) | 19ffbc5c2fffd48b |\n| Aug 17 | I\u00b2(s) Print Lab (coe3d@etal.uri.edu) sends `turbine_default.3mf`. Aug 25, Stephen to \"Cam\": \"save an STL of each turbine blade with its fuzzy texture from this file?\" Aug 26 reply: \"I don't know a way\" | 1a010bd8e6b65b66 |\n| Aug 17 | Stephen \u2192 Taegu: \"I have a few sets of new turbines ready\" | 1a00f7c0da465d57 |\n| Aug 20 | Stephen \u2192 Jeong et al.: \"Next week we will complete recording data for surface roughnesses of **Ra 10, 40, & 80** micrometers.\" This is the first appearance of 80 | 1a0211ed22df050e |\n| Sep 9 | Stephen: \"Did we ever receive the small 3D printer nozzles so we could print the blades internally?\" Sodhi: \"**I ordered them but the .4mm were delivered. Have to order them again.**\" | 1a087b7e6cc3b7bb |\n\n### What the sweep headers say (operator `--notes`)\n\n- v1_Ra20 (Aug 20): `PETG, 0.2mm, Ra 20`. Ambiguous: all IMG_8608 settings use a 0.20 mm point distance.\n- v1_Ra80 (Aug 26): `PETG, 0.2mm layer, 0.2mm nozzle, Ra 80`. The Aug 25 plan (commit 9cae976) had suggested `PETG, 0.2mm, Ra 80`.\n- v1_Ra40 (Sep 1): `PETG, 0.2mm layer, Ra 40`.\n- Repo to-dos to record the slicer recipe (commits 4d28e0e, 8a1c477, 5bca021) were never completed; blades/v1.json has no print fields.\n\n### Conclusions\n\n1. **Nominal, not measured.** Ra 10/20/40 are ChatGPT *targets* for fuzzy-skin thickness 0.025/0.050/0.101 mm. A second LLM (Claude, via Andrew) put the two printed settings at about 10\u201315 and 20\u201335 \u00b5m, roughly half the labels. I found **no measurement**: the Keyence question (Jul 22) got no reply, the Hexagon arm case key was missing (Jul 27), and there is no profilometer mention anywhere.\n2. **Ra 80 has no documented setting** in any table, email or repo file.\n3. **Nozzle confound.** Every email says in-house prints used 0.4 mm nozzles, both before and after the campaign. Andrew's prints used a 0.08 mm layer. So the notes' \"0.2mm layer\" (Ra40, Ra80) and \"0.2mm nozzle\" (Ra80) are unsupported. They look like intent copied from the Aug 4 request (\"0.2mm nozzle and fine print layer settings\"), not settings read from the slicer. The Ra80 note can only be true if those blades came from a printer with a 0.2 mm nozzle. The I\u00b2(s) Print Lab is the only candidate, and I found no evidence either way.\n4. **Who printed.** The Jul 13 replica (no texture) was announced by Stephen, with textured versions designed by Tim Richards and sent to \"the shop\", where \"Cam\" was printing. The fuzzy sets came from Andrew Muszynski (garage Bambu printer; three prints by Aug 12) and possibly the I\u00b2(s) Print Lab (turbine_default.3mf, Aug 17). **Which physical rotor was labelled Ra20, Ra40 or Ra80 is recorded nowhere.** It is plausible that Ra20 = thickness 0.050 and Ra40 = 0.101 from Andrew's set, but that is inference.\n5. **To settle it:** open the three .3mf files locally. They are zips; read `Metadata/project_settings.config` for nozzle_diameter, layer_height, fuzzy_skin, fuzzy_skin_thickness, fuzzy_skin_point_distance, printer_model and filament_type. Then have Stephen and Andrew match each physical rotor set to a file. The Drive files are 45.2, 39.1 and 60.7 MB, and I did not download them. It is unexplained what \"06mm\" in the file names means.\n\n## 3. Jeong-lab tests (email context)\n\n| date | what | rotor | who | notes |\n|---|---|---|---|---|\n| Mar 16 | DAQ capture 16:55\u201316:59, 6 ch at 300 Hz (\"Collected with Dr Jeong\") | not stated | Stephen, Jeong | docs/08_march_daq.md |\n| May 28 | Test: RPM steps; raw data, \"measured RPMs from the rotation counter\", average Vdc/Idc/Pdc per step (`05282026 test data2.xlsx`) | not stated. Jeong: \"**generated power has increased compared to the previous wind turbine**\" | Taegu (+Stephen) | Jeong asked to adjust the DAQ time-step for RPM, \"verify the cause of the dip\", and measure \"load current variations under the same wind-speed conditions\" |\n| Jun 3 (Wed 10:30) | \"**load variation test**\" + \"**constant RPM test**\"; max-power curve (reported Jun 5) | not stated; presumably the original rotor, since the printed replicas were finished only Jul 13 (inference) | Taegu + Stephen | 13 set points 500\u20131700. Taegu: \"one more experiment using **constant current (CC) and constant voltage (CV) modes**\". Sodhi: \"The dip is interesting \u2026 discuss this with Vahid for the power modeling\" |\n| Jun 8 12:30\u201313:30 | Lab session (calendar), CC/CV planned | not stated | Taegu + Stephen | **no results email found** |\n| Jul 13\u201315 | Replicas done; Jeong: \"As Prof. Jahangiri suggested, we will also begin considering the **fault scenarios** and develop a plan\" | printed replicas | | 19f5c018da3cb3b2 |\n| Jul 23 ~16:15 | Tunnel session | not stated | Taegu + Stephen | no data located |\n| Jul 27 10:45\u201310:52 EDT | Test on \"**the new blades which have no texture**\" (Taegu to Jahangiri, who asked \"which blade you used exactly?\") | printed replica, no texture (probably v1 geometry, since the v1 STEP dates from Jul 1 and v2 appears ~Jul 30; inference) | Taegu + Stephen | 16 set points 500\u20132000; DAQ 360 Hz. Jeong: \"**you need to compare the results with our initial test, which showed no significant differences. This will provide a good baseline for our evaluation.**\" He does not say which two things were compared. \"**we need to develop a plan for the fault testing \u2026 prepare various types of blades representing different fault conditions \u2026 finalize the test plan before proceeding with the next round of testing**\" |\n| Jul 28 ~15:45 | Session (\"I need to collect more data\") | not stated | Taegu + Stephen | no data located |\n| Aug 13 | Jeong: \"maximum power point tracking and other operating conditions \u2026 we will also need to control the electrical load\" | | | 19ff68cacbd296e4 |\n| Aug 21 | Jeong: \"prepare **1\u20132 slides summarizing the experimental setup and another 1\u20132 slides summarizing the key data and results** \u2026 a clear record \u2026 for future reference\" | | | No emailed reply found. docs/slides/jeong_setup_and_results_v1.pptx (Sep 24, untracked) exists |\n\nInstruments named in email: the Jeong-lab DAQ, a proximity-sensor/magnet revolution counter (Apr\u2013May), and the Chroma DC electronic load. The load mode is not stated for May or July. June was a \"load variation\" test with a CC/CV comparison proposed. The Aug campaign headers record Chroma 63004-150-60, S/N 630041501113, fw 2.01, and the ABB ACS550 drive via Modbus RS-485.\n\n**Wind-axis caution:** the Jeong-lab `Wind_Speed_ms` column maps 500 rpm \u2192 9.786 m/s, where the repo calibration gives 10.236 (\u22124.4 %). At 1700 rpm it is 35.9625 vs 35.82. Use fan set point as the common axis.\n\n## 4. Definitive Ra10 search. Result: none exists\n\n| place | query | result |\n|---|---|---|\n| repo tree (all files incl. logs/, data/, webapp/) | `Ra ?10\\b\\|v1_Ra10\\|Ra_10` | only NEXT_SESSION.md (plan text) and HANDOFF.md |\n| repo file names | `*ra10*` | none (apart from this audit's own script) |\n| blade labels in logs/data/webapp/src/tests/docs | `v[0-9]_Ra[0-9]+\u2026` | v1_Ra20, v1_Ra40, v1_Ra80, v2_Ra20 (historical), v1_Ra20_repeat (docs/tests only) |\n| git (all refs; main + origin/main; no stash) | `log --all -S Ra10`, `-S 'Ra 10'`, `-G v1_Ra10`, `--stat \\| grep -i ra10` | **no hits**. HEAD's NEXT_SESSION.md (Aug 27) has no \"Ra 10\"; the Ra10 plan exists only in the uncommitted copy, modified 2026-09-01 08:07 |\n| ~/Downloads ~/Desktop ~/Documents | names plus content grep of local csv/txt/md/json/py/tex/log files under 50 MB (iCloud-evicted files skipped) | none |\n| Spotlight (home) | `\"Ra10\"` | repo files and one unrelated 2025 wandb log (false positive) |\n| ~/Projects | `sweep_v*` outside repo logs | none |\n| Drive | titles fuzzy/turbine/3mf/Ra10/roughness | no Ra10 file |\n| Gmail (incl. trash) | `Ra10 OR \"Ra 10\" OR v1_Ra10` | only the **Aug 20 plan** email |\n| Gmail | `fuzzy`; `roughness after:2026/08/06`; `\"wind tunnel\" after:2026/08/27`; Taegu threads | nothing after Aug 26 about roughness; no Ra10 data |\n| Calendar | search_events (empty); list_events fullText wind/tunnel/Taegu/turbine/Jeong/blade, May\u2013Oct | May 27, Jun 8, Sep 1, **Oct 1 (scheduled)**; none mention Ra10 |\n\n**Conclusion:** Ra10 was planned from the Aug 4 settings table onward (the 0.025 mm thickness row), announced Aug 20, and offered as \"Ra 10 **or** Ra 40\" on Sep 1. Ra 40 was run and Ra10 never was. An Ra10 rotor may physically exist among the Aug 12 prints, but that is undocumented. The Oct 1 session could produce new data.\n\n## 5. Wind-tunnel sessions (all sources) and campaign timeline\n\nSessions (`sessions.csv`):\n- Mar 16 DAQ capture.\n- May 28 test.\n- Jun 3 test.\n- Jun 8 (planned CC/CV).\n- Jul 23, Jul 27 (10:45\u201310:52), Jul 28.\n- Aug 18 14:30 (meeting or test; no data found).\n- **Aug 19** 17:36\u201317:54: first scripted control.\n- **Aug 20** 13:41\u201314:48: steps, peaks, **Ra20** (closed 14:29:49), gusts.\n- Aug 25: bench snapshots.\n- **Aug 26** 14:40\u201315:32: gusts, then **Ra80** 15:24:10\u201315:32:01.\n- Aug 29 (Sat) 10:56\u201311:32: fan step_up runs.\n- Aug 31: bench snapshot.\n- **Sep 1**: **Ra40** 15:04:25\u201315:12:50. The calendar event was 14:00\u201315:00; Taegu's invite is still unanswered.\n- **Oct 1** 15:00\u201316:00: scheduled.\n\nTimeline highlights (`timeline.csv`, 39 rows):\n- Replicas finished Jul 13.\n- Fuzzy-skin method Jul 25.\n- v1 chosen, and the ChatGPT settings sent, Aug 4.\n- 0.4 mm-only printer Aug 5.\n- Prints handed over Aug 12 (0.08 mm layer).\n- \"Two prints feel very different\" Aug 13.\n- Print Lab file Aug 17.\n- Automation Aug 19\u201320.\n- Relabel v2 \u2192 v1 Aug 25 (data verified unchanged).\n- Ra80 Aug 26.\n- Ra40 Sep 1.\n- 0.2 mm nozzles still absent Sep 9.\n\n**Planned, not run:**\n- v1_Ra20_repeat (remount), which Sep 1 ranked first.\n- v1_Ra10.\n- v1_Ra80_rpm.\n- The June CC/CV test (outcome unknown).\n- The slicer recipe written into blades/v1.json.\n- Jeong's fault-testing plan and blades.\n\n## Could not check\n- Contents of the three .3mf files (39\u201361 MB). I did not download them, to keep the session safe.\n- Message 19fd251306bf78de (9.6 MB, contains the original turbines_threeFuzzySettings.3mf).\n- The May 28 xlsx.\n- Message 19fa4b6458be5961: read only via get_thread PLAIN_TEXT, as instructed.\n- Content of iCloud-evicted files in ~/Documents.\n\n## Artifacts\nAll in `reports/roughness_2026-09/build/provenance/`:\n- `IMG_8608.png` and `20260812_Muszynski_Ra_table__image.png`: the two settings tables, decoded from the emails.\n- `email_evidence.txt`: verbatim excerpts with message IDs.\n- `sessions.csv`, `timeline.csv`, `ra10_search_log.csv`: the three tables summarised above.\n- `ra10_local_search.sh` and its output `ra10_local_search_output.txt`.\n- `log_session_times.py` \u2192 `log_session_times.csv`: run times from the log files.\n- `verify_geometry.py`: the geometry and Re check.\n- `decode_mime.py`, `thread_dump.py`: helpers for reading the emails.",
+ "artifacts": [
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/IMG_8608.png",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/20260812_Muszynski_Ra_table__image.png",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/email_evidence.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/sessions.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/timeline.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/ra10_search_log.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/ra10_local_search.sh",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/ra10_local_search_output.txt",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/log_session_times.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/log_session_times.csv",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/verify_geometry.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/decode_mime.py",
+  "/Users/stepheneacuello/Projects/windtunnel-control/reports/roughness_2026-09/build/provenance/thread_dump.py"
+ ]
+}

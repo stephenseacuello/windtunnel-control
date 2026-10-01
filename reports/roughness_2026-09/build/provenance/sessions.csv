@@ -1,0 +1,17 @@
+date,time_EDT,what,who,rotor,evidence,data_located
+2026-03-16,16:55-16:59,"DAQ capture (Jeong lab DAQ, 6 ch, 300 Hz)",Stephen + Jeong,"not stated (pre-dates the July printed replicas, so presumably the original rotor - inference)",docs/08_march_daq.md; reference/data/03162026_sec_backup.xlsx,yes (repo reference/)
+2026-05-28,not stated,"Jeong-lab test: RPM steps, avg Vdc/Idc/Pdc per step, rotation counter",Taegu (+Stephen),not stated; Jeong 5/29: 'generated power has increased compared to the previous wind turbine',"Gmail 19e744d827d31e95 (Taegu 2026-05-29, attachment '05282026 test data2.xlsx')",xlsx in Gmail only (not in inputs/)
+2026-06-03,10:30 (planned),Jeong-lab 'load variation test' + 'constant RPM test' (reported 6/5),Taegu + Stephen,"not stated (pre-replica -> original rotor, inference)",Gmail 19e744d827d31e95 (Taegu: 'I will go lab 10:30 on Wednesday'); 19e99387d98b478a (6/5 results),inputs/jeong_lab/2026-06-05_initial_reference/ (13 set points 500-1700)
+2026-06-08,12:30-13:30,"planned CC/CV-mode test ('Wind Tunnel Meeting w/ Taegu', Lab)",Taegu + Stephen,not stated,Calendar event mphalerja3bcqc2gdr28rd2ono; Gmail 19e99387d98b478a,no results email found
+2026-07-23,~16:15,tunnel session,Taegu + Stephen,not stated,Gmail 19f4390c8e4c3ccf ('meet you at the Wind Tunnel around 415PM'),none located
+2026-07-27,10:45:34-10:51:55 (DAQ),"Jeong-lab test, printed 'new blades which have no texture'",Taegu + Stephen,"printed replica, no texture (Taegu to Jahangiri)",Gmail 19fa3d4c4fec1728 (10:30-11AM); 19fa4b6458be5961; DAQ 'Time Stamp UTC' 14:45:34-14:51:55,inputs/jeong_lab/2026-07-27_no_texture_baseline/ (16 set points 500-2000)
+2026-07-28,~15:45,tunnel session ('I need to collect more data'),Taegu + Stephen,not stated,Gmail 19fa3d4c4fec1728,none located
+2026-08-18,14:30,meeting/test with Taegu ('few sets of new turbines ready ... collect data'),Taegu + Stephen,unknown,Gmail 1a00f7c0da465d57,none located (repo logs start 08-19)
+2026-08-19,17:36-17:54,first scripted control: drive via Modbus + Chroma via USB,Stephen + Taegu,not recorded,"logs/peak_500.csv (17:36-17:40), logs/20260819_175349_step.csv; Gmail 19ff68cacbd296e4 (8/19 21:50Z)",yes
+2026-08-20,13:41-14:48,"step runs, peak_1200, peak_1800, first automated sweep v1_Ra20 (file closed 14:29:49), 1-cosine gusts",Stephen + Taegu,v1_Ra20 (labelled v2_Ra20 at run time; relabelled 08-25),logs/2026082013*..14*; logs/sweep_v1_Ra20_*; Gmail 1a0211ed22df050e,yes
+2026-08-25,13:28-13:31,drive dashboard + parameter fullscan snapshots (bench),Stephen,n/a,data/snapshots/20260825_*,yes
+2026-08-26,14:40-15:32,"gust runs (sine, von Karman) then sweep v1_Ra80 15:24:10-15:32:01",Stephen + Taegu (3 PM agreed),v1_Ra80,logs/20260826_*; logs/sweep_v1_Ra80_*; Gmail 1a0399cb87214c18; logs emailed to Taegu 1a03f982745b324e,yes
+2026-08-29 (Sat),10:56-11:32,seven fan step_up runs,Stephen,not recorded,logs/20260829_*_step_up.csv,yes
+2026-08-31,10:18,drive dashboard + fullscan snapshots (bench),Stephen,n/a,data/snapshots/20260831_101809_*,yes
+2026-09-01,15:04:25-15:12:50 (calendar 14:00-15:00),sweep v1_Ra40 (with node ambient + trace),Stephen; Taegu invited (calendar response still needsAction - attendance not confirmed),v1_Ra40,logs/sweep_v1_Ra40_*; Calendar _8l2k8gpm8d33cba470oj6b9k6h1j6b9p710jgba16co3ghhj84rk6ga560,yes
+2026-10-01,15:00-16:00 (SCHEDULED),"'Wind Tunnel Testing' - future, not yet run",Stephen + Taegu (accepted 2026-09-30 via kjt23081@gmail.com),not stated,Calendar _652k4h9k6l1j8b9k60ojab9k651k4b9o8913eb9g8h0j4cho6ss38dq568; Gmail 1a0f42d7b20f01d9,n/a (future)

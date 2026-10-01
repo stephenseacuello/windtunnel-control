@@ -1,0 +1,40 @@
+date,type,event,source,status
+2026-03-16,test,"DAQ capture with Jeong, 16:55-16:59, six channels at 300 Hz",docs/08_march_daq.md,done
+2026-04-29..05-21,instrument,Rotor RPM sensor discussion; proximity-sensor revolution counter (1.2->1.5 V pulse) proposed for the DAQ,Gmail 19dda44707495b96,done
+2026-05-26,people,Jeong adds Taegu Kang ('visiting student from South Korea') to the work on small wind turbine modeling,Gmail 19dda44707495b96 msg 19e668af7c1edc4b,done
+2026-05-27,meeting,"09:30 meeting, Jeong's office (calendar 'Meeting with Stephen')",Calendar 5mejoholo2f4t3m5qcjmrlpnve,done
+2026-05-28,test,"Jeong-lab test: RPM steps; average Vdc, Idc, Pdc per step; rotation counter",Gmail 19e744d827d31e95,done
+2026-06-03,test,'load variation test' and 'constant RPM test' (reported 06-05; 13 set points 500-1700),Gmail 19e99387d98b478a; inputs/jeong_lab/2026-06-05_initial_reference,done
+2026-06-08,test (planned),CC and CV load-mode experiment proposed by Taegu; lab session 12:30-13:30,Gmail 19e99387d98b478a; Calendar mphalerja3bcqc2gdr28rd2ono,outcome not found in email
+2026-07-01,geometry,SolidWorks master turbine.STEP (AP214) dated 2026-07-01 per blades/v1.json _source,blades/v1.json,done
+2026-07-02,measurement (planned),Hexagon arm scan of the turbine blade requested,Gmail 19f2380c8cb7a76e,not done (case key missing 07-27)
+2026-07-13,specimens,'The set of 3D printed replica turbines are completed',Gmail 19f5c018da3cb3b2,done
+2026-07-15,specimens,"Textured (0.05in dimple, 0.2in pitch) version printed; v2 at 0.1in pitch sent to the shop; Jeong: plan fault scenarios (Jahangiri's suggestion)",Gmail 19f5c018da3cb3b2,done (not tested in the Ra campaign)
+2026-07-22,measurement (planned),'Can our Keyence measure Surface Roughness?',Gmail 19f8a54b61bd7054,no reply found
+2026-07-23,test,Tunnel session ~16:15 (Stephen + Taegu),Gmail 19f4390c8e4c3ccf,no data located
+2026-07-25,method,Sodhi: fuzzy skin how-to (PrusaSlicer); 'Reprint the turbine with different levels of roughness on Monday ?',Gmail 19f9b936be5bd8d7,done
+2026-07-27,test,"Printed replica, no texture: DAQ 10:45:34-10:51:55 EDT, 16 set points 500-2000; Jeong asks for comparison with initial test and a fault-testing plan",Gmail 19fa4b6458be5961; inputs/jeong_lab/2026-07-27_no_texture_baseline,done
+2026-07-28,test,Tunnel session ~15:45 ('I need to collect more data'),Gmail 19fa3d4c4fec1728,no data located
+2026-07-30..08-04,specimens,Form 4 SLA resin blade; v2 remodel ('much better matching to the original'); professors choose v1 (08-04),"Gmail 19fb505d2c3cdfbd, 19fc82a5d2e58504, 19fce4aeab1f69a1",done
+2026-08-04,method,Three fuzzy settings sent to Andrew Muszynski (ChatGPT table: target Ra 10/20/40 um; point distance 0.20 mm; thickness 0.025/0.050/0.101 mm); asks for 0.2 mm nozzle,"Gmail 19fcd2fdc015ddd1, 19fce4aeab1f69a1; build/provenance/IMG_8608.png",done
+2026-08-05,specimens,Garage printer has only 0.4 mm nozzles; 0.2 mm assembly requested from Sodhi; Wilcox 2017 Sandia report shared with Jahangiri and Jeong,"Gmail 19fce4aeab1f69a1, 19fd2e49b5940ff3",done
+2026-08-12,specimens,"Andrew drops off three prints: 'same fuzzy texture settings as the previous print', no 0.2 mm nozzle, layer height 0.08 mm; Claude Ra-estimate table; Bambu 3mf files on Drive",Gmail 19ff7beaaeef2241,done
+2026-08-13,specimens,"'The two prints feel very different, maybe we should test/verify and/or standardize on the nozzle type.'",Gmail 19ffbc5c2fffd48b,no resolution found
+2026-08-17,specimens,'a few sets of new turbines ready'; I2(s) Print Lab sends turbine_default.3mf,"Gmail 1a00f7c0da465d57, 1a010bd8e6b65b66",done
+2026-08-18,meeting/test,14:30 with Taegu; RPM sensor to be installed 'on the next set of blades',Gmail 1a00f7c0da465d57,no data located
+2026-08-19,automation,Drive via Modbus RS-485 and Chroma via USB both controlled from Python; first scripted runs 17:36-17:54,"Gmail 19ff68cacbd296e4; logs/peak_500.csv, logs/20260819_175349_step.csv",done
+2026-08-20,run,"First automated sweep, logged as v2_Ra20 (relabelled v1_Ra20 on 08-25), protocol 94bed28333f7, 14/14 points; plan emailed: 'Ra 10, 40, & 80' next week",logs/sweep_v1_Ra20_*; Gmail 1a0211ed22df050e,done
+2026-08-21,request,Jeong asks for 1-2 setup slides and 1-2 results slides,Gmail 1a021e8f24b028fd,deck exists: docs/slides/jeong_setup_and_results_v1.pptx (untracked); not checked here
+2026-08-22,software,Repository first commit (7d4dba4),git,done
+2026-08-25,data,Relabel v2_Ra20 -> v1_Ra20 (commit 9cae976); data rows verified identical apart from the label and line endings,git; build/provenance (this audit),done
+2026-08-26,run,"Sweep v1_Ra80 15:24:10-15:32:01 (notes 'PETG, 0.2mm layer, 0.2mm nozzle, Ra 80'); logs emailed to Taegu",logs/sweep_v1_Ra80_*; Gmail 1a03f982745b324e,done
+2026-08-29,run,Seven fan step_up runs 10:56-11:32 (no blade recorded),logs/20260829_*_step_up.csv,done
+2026-09-01,run,"Sweep v1_Ra40 15:04:25-15:12:50 (notes 'PETG, 0.2mm layer, Ra 40'), with ambient air and a 9,426-row trace",logs/sweep_v1_Ra40_*,done
+2026-09-01,planned-not-run,"v1_Ra20_repeat (dismount + remount the Ra20 rotor; NEXT_SESSION step 3, listed first)",NEXT_SESSION.md; no log file,NOT RUN
+2026-09-01,planned-not-run,v1_Ra10 (NEXT_SESSION step 4 offered 'Ra 10 or Ra 40'; Ra 40 was run),NEXT_SESSION.md; Gmail 1a0211ed22df050e,NOT RUN (no data anywhere)
+2026-09-01,planned-not-run,"v1_Ra80_rpm re-run with rotor rpm (NEXT_SESSION step 5, 'only if the reed works')",NEXT_SESSION.md; no log file,NOT RUN
+2026-08-25..09-01,planned-not-run,"Write down the slicer recipe (fuzzy skin, layer, nozzle, orientation) into blades/v1.json","git 4d28e0e, 5bca021; blades/v1.json has no print fields",NOT DONE
+2026-07-15..07-27,planned-not-run,"Fault-testing plan / 'various types of blades representing different fault conditions' (Jeong, Jahangiri)","Gmail 19f5c018da3cb3b2, 19fa4b6458be5961",no plan found in email
+2026-09-09,specimens,0.2 mm nozzles never received ('the .4mm were delivered. Have to order them again.'),Gmail 1a087b7e6cc3b7bb,open
+2026-09-22..09-24,specimens,I2(s) Print Lab prints an unnamed 'project' for Stephen (ready 09-24),"Gmail 1a0ca040c28d7292, 1a0d3ab6a5dc1d34",content unknown
+2026-10-01,scheduled,'Wind Tunnel Testing' 15:00-16:00 with Taegu (accepted 09-30),Calendar _652k4h9k6l1j8b9k60ojab9k651k4b9o8913eb9g8h0j4cho6ss38dq568,future

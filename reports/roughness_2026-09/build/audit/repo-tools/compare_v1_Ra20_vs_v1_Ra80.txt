@@ -1,0 +1,37 @@
+
+  baseline   v1_Ra20        94bed28333f7   PETG, 0.2mm, Ra 20
+  candidate  v1_Ra80        94bed28333f7   PETG, 0.2mm layer, 0.2mm nozzle, Ra 80
+  note: one run predates protocol_full, so a ladder difference could not be checked
+  power column: p_max_w vs p_max_raw_w  —  raw argmax — one run predates the fit columns, and a fit against an argmax is not a comparison
+
+   fan rpm     m/s     v1_Ra20     v1_Ra80    change
+  -------- ------- ----------- ----------- ---------
+       500    10.2      0.0297      0.0330    +11.1%
+       600    12.3      0.0604      0.0660     +9.3%
+       700    14.4      0.1047      0.1180    +12.7%
+       800    16.6      0.1769      0.1925     +8.8%
+       900    18.7      0.2732      0.3079    +12.7%
+      1000    20.8      0.4227      0.5265    +24.6%
+      1100    22.9      0.6433      0.8044    +25.0%
+      1200    25.0      0.9592      1.1009    +14.8%
+      1300    27.1      1.3286      1.4455     +8.8%
+      1400    29.3      1.6653      1.8391    +10.4%
+      1500    31.4      2.0806      2.2569     +8.5%
+      1600    33.5      2.5188      2.8299    +12.4%
+      1700    35.6      3.0329      3.5290    +16.4%
+      1800    37.7      3.7935      4.4981    +18.6%
+
+  ── paired analysis, 14 matched points ──
+
+  LEVEL   +13.73%   95% CI [+11.21%, +16.26%]   ← resolved
+  Δn      +0.024    ± 0.064
+  scatter 4.81% about the fit
+
+  The LEVEL is the headline. A uniform power change gives Δn = 0.000
+  exactly, so the exponent is blind to the most likely outcome.
+
+  Remember what this cannot separate: without rotor speed this is
+  electrical power, so a blade that captures more energy but spins slower
+  can read LOWER. See docs/07_blade_campaign.md.
+
+exit=0

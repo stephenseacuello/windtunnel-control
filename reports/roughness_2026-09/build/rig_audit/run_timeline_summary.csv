@@ -1,0 +1,4 @@
+run,n_setpoints,n_dwells_points,sum_steps,clean_values,limited_by_values,tracking0_rows,nonempty_note_rows,motor_amps_min,motor_amps_max,header_clock,first_dwell,last_dwell,span_s,header_clock_minus_last_dwell_s,dwell_dt_median,dwell_dt_min,dwell_dt_max
+Ra20,14,336,336,[1],['power-rolloff'],0,0,4.6,13.6,(none),not recorded (no t_unix column),not recorded,,,,,
+Ra40,14,352,352,[1],['power-rolloff'],0,0,4.4,13.8,2026-09-01T15:12:54-0400,2026-09-01 15:04:49,2026-09-01 15:12:46,477.5,8.0,1.055,1.05,1.199
+Ra80,14,352,352,[1],['power-rolloff'],0,0,4.5,13.6,2026-08-26T15:32:09-0400,2026-08-26 15:24:10,2026-08-26 15:32:01,471.0,8.0,1.055,1.049,1.172

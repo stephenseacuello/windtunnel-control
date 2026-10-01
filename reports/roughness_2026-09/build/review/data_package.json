@@ -1,0 +1,126 @@
+{
+ "reviewer": "data-package",
+ "summary": "The package is sound. All 34 MANIFEST entries match their files on sha256, bytes and data_rows. All 14 raw files are byte-identical to logs/ and inputs/jeong_lab/. Running `python3 6_code/build_report.py` from the unzipped copy reproduces build/numbers.tex, every table, july_final.csv and all six PNGs exactly. The problems are in what the package tells a reader. blade_v1.json contradicts the README and the report, and says surface finish has little effect on this blade. The July reprocessed CSV and the other derived tables are undocumented and do not carry the report's exclusions. Several dictionary and README statements are wrong: the drive readback source, the June processing, the header clock, rpm_last_us, the current zero, and the claim that the files are byte-for-byte as recorded.",
+ "findings": [
+  {
+   "severity": "critical",
+   "location": "4_reference/blade_v1.json (whole file); README.md line 33; report Table 1",
+   "quote": "\"tip_radius_m\": null, \"_tip_radius_note\": \"STILL UNKNOWN and still blocking. ... guessing it is not an option.\" ... \"_WHY_THIS_MATTERS\": \"... blade surface finish has little leverage on it. ... Any analysis that assumes an airfoil here - XFOIL, a polar lookup, a roughness argument - is answering a question about a different part.\" ... \"_corrected\": \"25 Aug 2026, from the STL itself after a 9-agent audit.\"",
+   "problem": "This is the stale internal repo note (blades/v1.json), copied into the package unedited. It says the rotor radius is unknown, which contradicts the README's and Table 1's R = 0.1016 m. It also states that surface finish has little leverage on this blade, which is the opposite of the report's headline result. The rest is internal material that should not reach three professors: '9-agent audit', ~/Downloads paths in _source, and 'Rename this file to match a --blade argument'. The README also drops Table 1's qualifier 'axis to blade attachment'.",
+   "evidence": "I read the packaged file, which is byte-identical to blades/v1.json dated Aug 25. build/audit2/provenance_details.md:10 already flags it: 'blades/v1.json still says tip_radius_m: null, \"STILL UNKNOWN\" (a stale note written in HAWT terms)'. src/sweep_core.py:499 and docs/09_results.md:141 give R = 0.1016 m, axis to blade attachment. The STL parses as 27,056 triangles in metres with extents 24.5 x 48.0 x 245.1 mm, in blade-local coordinates (x 2.3-26.8 mm, y 5.2-53.2 mm, z 0-245.1 mm), so its origin is not the rotor axis.",
+   "fix": "Replace blade_v1.json with a curated geometry file containing only: n_blades 3; R 0.1016 m (axis to blade attachment); span 0.2451 m; chord 48 mm; wall 1.79 mm; camber depth 24.46 mm; turning 183\u00b0; twist 0; section 'thin cambered plate, square edges'; units metres; and a note that the STL is one blade in local coordinates, not positioned on the rotor. Drop every underscore note and the 'notes' field. In README line 33 write 'R = 0.1016 m (axis to blade attachment)'."
+  },
+  {
+   "severity": "major",
+   "location": "3_derived/jeong_0727_reprocessed_by_setting.csv; DATA_DICTIONARY.md lines 137-138",
+   "quote": "500,9.786,...,0.0297,0.0298,0.033,0.27106615066933  /  \"Present only once the reprocessing has been verified.\"",
+   "problem": "(a) The column ratio_1s_to_Ra20 has values at 500, 600, 700 and 800 rpm (0.271, 0.281, 0.138, 0.525). The report's Table 6 prints '\u2014' there because the load was at 0 A at 500-700 and the 800 window is mostly spin-up. The 1300 row (0.841) has no flag, although the report daggers it ('Window contains the step to 1400 rpm') and leaves it out of the 0.65-0.91 range. A reader can quote a '0.27\u00d7 at 500 rpm' figure the report explicitly disowns. (b) None of the 17 columns is documented (i_spike_at_pmax_a, p_1s_max_zc_w, p_mean_zc_w, t_start_s, rig_v1_Ra*_p_raw_w, ...). (c) The caveats from the verification are missing: the power is at the lab's hand-set CC point, so it is a lower bound, not a maximum; the 2 A/V current scale is unverified; and the 1 s moving max runs 2-11% above the plateau mean. (d) Values are written at full float precision (e.g. 0.10498046799999994), unlike the %.6g used in the other derived tables. (e) The 'Present only once...' line is build-time logic leaking into the documentation and leaves the reader unsure whether the file is verified.",
+   "evidence": "I viewed the CSV and compared it with build/tables/jeong_rows.tex, where rows 500-800 end in '\u2014'. build_report.py writes the report ratios only for s>=900 and computes jlratiolo/hi excluding 1300. build/audit2/july-verify_details.md shows the 800 window is 91% inside a spin-up and 1300 is 66%, and recommends the lower-bound and current-scale caveats. build_package.py copies july_final.csv with copy() and never applies float_format.",
+   "fix": "Write NaN in ratio_1s_to_Ra20 for 500-800. Add a column usable_for_rig_comparison (0 for 500-800 and 1300, 1 otherwise) and a window_note column ('load at 0 A', 'window contains step to 1400 rpm'). Write the file with float_format='%.6g'. Add a dictionary table for all 17 columns, with the three caveats above. Replace the 'Present only once...' sentence with 'Independently verified 30 Sep 2026; see report Appendix C.'"
+  },
+  {
+   "severity": "major",
+   "location": "DATA_DICTIONARY.md lines 121-136 (3_derived); report Appendix D",
+   "quote": "Report App. D: \"DATA_DICTIONARY.md defines every column.\"  /  power_law_fits.csv header: rotor,basis,n,n_ci95_lo,n_ci95_hi,a_w,r2_log,r2_linear",
+   "problem": "The report says the dictionary defines every column, but it does not. paired_comparisons.csv and power_law_fits.csv get one sentence each and no column list (change_pct, ci95_lo_pct, setpoints_higher, sign_test_p, delta_n, delta_n_ci95_half, basis; n, n_ci95_lo, a_w, r2_log, r2_linear). The dictionary never says that change_pct is the geometric-mean ratio minus 1, or that the fits use nominal wind. thevenin_by_setpoint.csv has four undocumented columns: rotor, fan_rpm_cmd, wind_mps_nominal, n_steps_fitted. Two names mislead. a_w = 4.66e-06 is not in watts; its units are W/(m/s)^n. 'n' is the exponent here but a count (n_setpoints) in the paired file.",
+   "evidence": "I diffed the dictionary tables against the actual CSV headers with pandas. I confirmed the a values against build_report.powerlaw(), whose a = exp(intercept) of ln P vs ln v_nominal.",
+   "fix": "Add a column table for each of the three files. Rename a_w to a_w_per_mps_pow_n, or state its units. Rename n to exponent_n. State: 'change_pct = 100\u00b7(exp(mean ln(P_cand/P_base)) \u2212 1) over matched set points; t-based CI on the log-ratios; two-sided sign test; wind axis = wind_mps_nominal'."
+  },
+  {
+   "severity": "major",
+   "location": "README.md lines 61-64 (item 4); DATA_DICTIONARY.md lines 78-85",
+   "quote": "\"The Jeong-lab tables are not directly comparable to the rig. Their `Pdc_max` is the maximum of raw 360 Hz samples, which includes current-sensor noise, and at 500\u2013700 rpm no load current was drawn.\"",
+   "problem": "The README applies the July recipe to both lab tables, and the dictionary gives one definition for the June and July files. The report (\u00a77) says the opposite for June: 'The June table was processed differently (its values carry the signature of 50-sample averages rather than raw maxima)'. The 0 A statement is also July-only. Kang, who produced the June table, will see the README misdescribe his processing and contradict the report. Measured_RPM also needs a warning: it double-counts at 900 and 1300 and misses revolutions at 2000 (\u221210.9%, true 667 rpm).",
+   "evidence": "out/report.txt lines 653-655; build/daq_july/FINDINGS.md \u00a75 ('June's table carries the quantisation fingerprint of 50-sample moving averages and a calibrated zero'); july-verify C7 'n=50 fingerprint and non-2.5 V zero confirmed'; FINDINGS \u00a74 and C9 for the RPM errors.",
+   "fix": "README item 4: 'The July table's Pdc_max is the maximum of raw 360 Hz samples ... at 500\u2013700 rpm no load current was drawn. The June table was processed differently (consistent with maxima of 50-sample moving averages and a calibrated zero); it is comparable neither to July nor to the rig.' In the dictionary, split the definition by file and add to Measured_RPM: 'July: +3.6%/+2.8% at 900/1300 (double counts), \u221210.9% at 2000 (missed pulses); do not use for tip-speed ratio.'"
+  },
+  {
+   "severity": "major",
+   "location": "DATA_DICTIONARY.md line 24",
+   "quote": "`drive_actual_signals` | which drive parameters feed `fan_rpm_actual` (Ra40: `5310=103;5311=104`)",
+   "problem": "This is factually wrong, and it undercuts README item 2. ACS550 signal 103 is OUTPUT FREQ. The header records the drive's Modbus register mapping, which is what the Ra20-era readback used. In the Ra40 run, fan_rpm_actual came from parameter 0102 SPEED, read directly. A reader who knows ACS550 codes will conclude that Ra40 also logged output frequency, which is exactly the convention the README says only Ra20 had.",
+   "evidence": "src/acs550.py:336: 'Expected: 103 (OUTPUT FREQ) and 104 (CURRENT). Signal 102 is SPEED'. src/transport.py (ADDR_ACT1 branch): 'Prefer the drive's OWN speed register ... read_param(102)' once firmware has RD. In the data, Ra40 fan_rpm_actual is within 0-1 rpm of the command and only 5 of 14 values sit on the 2.95-rpm output-frequency grid; for Ra20 all 14 do.",
+   "fix": "'`drive_actual_signals`: the drive's Modbus register mapping (par 5310/5311 \u2192 0103 OUTPUT FREQ, 0104 CURRENT). It does not describe fan_rpm_actual in this run: from 25 Aug the software read the drive's speed estimate (par 0102) directly. The output-frequency path is what the Ra20 readback used.'"
+  },
+  {
+   "severity": "major",
+   "location": "DATA_DICTIONARY.md line 17 (`notes` header key); README 'Read before comparing numbers'",
+   "quote": "`notes` | free text entered at the start of the run   (Ra80 file: \"PETG, 0.2mm layer, 0.2mm nozzle, Ra 80\")",
+   "problem": "The raw headers carry print details that the report (\u00a72.2) calls unreliable. The in-house printer had only 0.4 mm nozzles, the printer reported a 0.08 mm layer, and the '0.2mm nozzle' and '0.2mm layer' entries record intent. The package never says so. A recipient opening the Ra80 file sees an apparent nozzle difference from Ra20 and Ra40, and could read '0.2mm' as the fuzzy-skin thickness.",
+   "evidence": "I read the headers of all three runs. See out/report.txt \u00a72.2, 'The print details in the run notes are not reliable ...', and build/audit2/provenance_details.md:50 on the nozzle.",
+   "fix": "Add to the dictionary: 'Typed by the operator. Not reliable for print settings: the \"0.2mm layer\" and \"0.2mm nozzle\" entries record intent (only 0.4 mm nozzles were available; the printer reported a 0.08 mm layer). \"0.2mm\" is not the fuzzy-skin thickness (0.050/0.101/0.202 mm). See report \u00a72.2.' Add a one-line item 7 to the README's 'Read before comparing numbers'."
+  },
+  {
+   "severity": "minor",
+   "location": "README.md lines 5, 67-68, 73-74; report \u00a71 and Appendix D",
+   "quote": "\"Raw files are exactly as recorded\" / \"Only the label changed; the data rows are identical.\" / report: \"every raw file used, unmodified\", \"every rig file, byte-for-byte as recorded\"",
+   "problem": "The Ra20 files are not as recorded. The 25 Aug relabel rewrote them: 'v2_Ra20' became 'v1_Ra20' in the header and in the `blade` field of every data row (336 + 14 rows), and the line endings changed from CRLF to LF. So 'the data rows are identical' is literally false, and 'byte-for-byte as recorded' does not hold for Ra20. The numbers are unchanged. 'Every rig file' also overstates: only the 7 sweep files are included.",
+   "evidence": "`git show 7d4dba4:logs/sweep_v2_Ra20_{points,summary}.csv` gives CRLF files with 'v2_Ra20' in 337 and 15 lines. After substituting the label and stripping CR they are identical to the packaged files. Original sha256: points 2edbe73c\u20264943 (23,258 B), summary d2fcdfde\u2026a9bb (2,325 B). Ra40 and Ra80 in the package still have CRLF.",
+   "fix": "README item 6: 'Relabelled v1_Ra20 on 25 Aug: the label in the header and in the `blade` column changed and line endings were normalised to LF. Every numeric value is unchanged (original sha256 2edbe73c\u2026/d2fcdfde\u2026).' Line 73: 'byte-for-byte copies of the files in the repository'. Report App. D: 'every rig sweep file used, byte-for-byte as held in the repository (Ra20 relabelled, see README)'."
+  },
+  {
+   "severity": "minor",
+   "location": "DATA_DICTIONARY.md line 105; README line 5; 6_code/build_package.py, 6_code/analyze_july.py, 6_code/build_report.py docstring",
+   "quote": "\"3_derived/ \u2014 generated for the report (reproducible from 6_code/)\"",
+   "problem": "The 3_derived files are not produced by anything that runs from the package. build_report.py writes rebuilt/tables/pmax_v1_*.csv, thevenin_*.csv and july_final.csv under other names, with other column names (p_raw, i_raw, ...). 3_derived itself is assembled by build_package.py, which fails from the package and leaves an empty out/ folder behind. analyze_july.py also fails, and it uses a different current zero (mean of ch2 for t>331 s, 2.4961 V) from the report's (median over 331.0-341.4 s, 2.4963 V). The run also prints about 20 fontTools warnings ('1 extra bytes in post.stringData array') that look like errors. The packaged docstring still says 'python3 src/build_report.py (from reports/roughness_2026-09)'.",
+   "evidence": "From the unzipped copy: build_package.py raises FileNotFoundError on .../build/review/package/logs/sweep_v1_Ra20_summary.csv and creates out/URI_VAWT_\u2026; analyze_july.py raises FileNotFoundError on .../unzipped/inputs/jeong_lab/.... The values in rebuilt/tables match 3_derived to better than 1e-5 relative, so only the path from code to files is missing.",
+   "fix": "In PACKAGED mode, have build_report.py also write rebuilt/3_derived/*.csv with the exact names and columns (move the table assembly from build_package.py into build_report.py). Either drop build_package.py and analyze_july.py from the package or mark them 'provenance only, not runnable here'. Silence the fontTools logger in figures.py with logging.getLogger('fontTools').setLevel(logging.ERROR). Update the docstring."
+  },
+  {
+   "severity": "minor",
+   "location": "6_code/build_report.py (package) vs src/build_report.py",
+   "quote": "package 27,053 B sha256 6c23ae0d\u2026 ; src 27,356 B (modified 19:20:52, zip built 19:19:40)",
+   "problem": "The package was zipped before the last code change. src/build_report.py gained an ALIASES guard (v1_Ra0 / v1_notexture \u2192 v1_smooth) afterwards. Results are unaffected, but the shipped code is not the current code, and any later rebuild changes the MANIFEST checksums.",
+   "evidence": "`diff` shows only the ALIASES lines. The packaged code reproduces build/numbers.tex exactly.",
+   "fix": "Rerun build_report.py, the LaTeX build and build_package.py as the last step before sending. Optionally, have build_package.py assert that the 6_code checksums equal the src checksums."
+  },
+  {
+   "severity": "minor",
+   "location": "README.md lines 75-82; report \u00a71 and Appendix D",
+   "quote": "\"Every number, table and figure in the report can be regenerated from this folder\" / \"`rebuilt/numbers.tex` then contains every number the report quotes.\"",
+   "problem": "This overstates the case. report.tex types a number of values by hand: 24.6 \u00b0C, 101.04 kPa, 'within 0.14%', V_oc\u221dv^1.50, R_int\u221dv^\u22120.79, n = 3.79, '15%'/'0.27' for the cut-in shift, Re 32 376\u2013119 735, and 9.79 m/s. The generator exponents 0.791/1.497 are also hard-coded in build_report.py. Figures 2 and 3 (system_overview, sweep_protocol, from docs/diagrams) are neither regenerated nor in 5_figures. The typed values I checked are correct (recomputed Voc and Rint slopes 1.497 and \u22120.791; maximum fit deviation 0.133%).",
+   "evidence": "grep of report.tex, and graphicspath {../../../docs/diagrams/}. 5_figures holds 6 PNGs against 8 report figures.",
+   "fix": "Say 'every result number, table and data figure'. Alternatively, turn the typed values into macros and add the two diagrams to 5_figures."
+  },
+  {
+   "severity": "minor",
+   "location": "DATA_DICTIONARY.md lines 14-24 (header keys)",
+   "quote": "`clock`, `clock_unix` | host wall clock at the start of the run (Ra40, Ra80)",
+   "problem": "The clock header is written after the fan and load shut down, so it marks the end of the run, not the start. Several header keys are undocumented. `# fan_rpm,500` and `# wind_mps,10.24` appear in all 7 files and look like the run's operating point. Also undocumented: `instrument_check`, `_clock_note` (whose verbatim text wrongly says 'at run start'), `air_temp_offset` and `_air_note` (which say the board 'reads ~20 C high', while the report quotes 24.6 \u00b0C as ambient), `air_temp_drift_c` and `air_density_end`. `protocol_detail` contains `scaling=v2`, which is the step-scaling rule version, not rotor geometry v2. That is worth saying given the v2\u2192v1 relabel.",
+   "evidence": "Ra40: clock 15:12:54, dwells 15:04:49\u201315:12:46. Ra80: clock 15:32:09, dwells 15:24:10\u201315:32:01. In src/blade_sweep.py, protocol_meta_shared() runs after interlock.safe_shutdown(), and load_ramp.py:346 stamps time.time().",
+   "fix": "Correct `clock` to 'host wall clock when the header was written, at the end of the run (~8 s after the last dwell); use t_unix per row'. Add rows for each undocumented key: fan_rpm/wind_mps = 'first set point; ignore'; air_* start and end; and explain that the '~20 C high' text is a generic warning, so the logged temperature is an upper bound and the density a lower bound. Note: 'scaling=v2 is the step-scaling rule, not the rotor'."
+  },
+  {
+   "severity": "minor",
+   "location": "DATA_DICTIONARY.md lines 52, 56, 59-60, 72, 96, 98; MANIFEST.csv row for sweep_v1_Ra40_trace.csv; README line 65",
+   "quote": "`rpm_last_us` | microseconds between the last two pulses  /  `fan_rpm_actual` | drive-reported fan speed during the dwell  /  \"differs from the summary's wind_mps by 0\u20131.2% for Ra20\"  /  \"The measured zero is 2.4961 V\"  /  \"~16 Hz\"",
+   "problem": "Several column definitions are wrong or loose. (a) rpm_last_us is the PMC's micros() timestamp at the last accepted edge, not an interval. (b) For Ra20 and Ra80, the points files' fan_rpm_actual and motor_amps hold one reading per ladder, repeated on every dwell; only Ra40 is per-dwell. (c) `amps` is billed as a primary measurement but equals demand_a and held_a to 0.0000 A in all 1040 dwells, with tracking = 1 and note empty throughout. (d) The Ra20 points-vs-summary wind difference is 0.69\u20131.21%, never 0; the README correctly says 0.7\u20131.2%. (e) The current zero used in the report and derived CSV is 2.4963 V, not 2.4961 V. (f) The trace runs at ~18.7 Hz, not ~16 Hz. (g) 'Time Stamp UTC' values are synthetic, floor(n \u00d7 3 ms), and span 381 s for a 353.35 s record; they are not just 'quantised'. (h) README item 5 omits turbine_rpm_at_pmax and the trace's rpm_pulses/rpm_last_us, which come from the same bouncing reed switch.",
+   "evidence": "(a) The trace column is monotonic, 2.067e9\u20132.568e9 \u00b5s; src/transport.py TELEMETRY_FIELDS: 'rpm_last_us micros() at the last accepted edge'. (b) groupby nunique = 1 at all 14 set points for Ra20 and Ra80. (c) max|amps\u2212demand_a| = 0 in every run. (d) Computed per set point. (e) numbers.tex \\jlzero{2.4963}; the median of ch2 over 331\u2013341.4 s is 2.496338. (f) 9426 rows over 504.6 s, median interval 56 ms. (g) build/daq_july/FINDINGS.md \u00a71.",
+   "fix": "Correct each definition: (a) 'PMC micros() at the last accepted pulse; difference consecutive (rpm_pulses, rpm_last_us) pairs for speed'. (b) 'Ra20/Ra80: one settled reading per ladder; Ra40: drive state at the dwell time'. (c) 'In CC mode the measured current equals the demand to 0.1 mA in every dwell; the voltage carries the information'. (d) '0.7\u20131.2%'. (e) '2.4963 V (median over 331.0\u2013341.4 s)'. (f) '~18 Hz'. (g) 'synthetic, 3 ms per sample; drifts 28 s over the record'. (h) List all four reed-switch columns in README item 5."
+  },
+  {
+   "severity": "minor",
+   "location": "README.md line 13; 5_figures/; zip contents",
+   "quote": "\"**Every load step.** See `1_rig_sweeps/<rotor>/sweep_<rotor>_points.csv`.\"",
+   "problem": "The path template is wrong: the folders are named <rotor>_<date> (e.g. v1_Ra20_2026-08-20). The 5_figures names (fig_ratio, fig_pmax, fig_trend, fig_thevenin, fig_pi, fig_jeong) do not map to the report's figure numbers (1, 4, 5, 6, 7, 8). The report PDF is not in the zip, although the README relies on it ('Table 4 of the report', 'report \u00a76'). A forwarded zip loses that context.",
+   "evidence": "Checked against the unzip listing, report.tex \\includegraphics order, and the Table 4/5 captions in report.txt.",
+   "fix": "Write `1_rig_sweeps/<rotor>_<date>/`. Rename the figures fig1_ratio.png, fig4_pmax.png and so on, or add a mapping line to the README. Include report.pdf at the package root."
+  },
+  {
+   "severity": "minor",
+   "location": "3_derived/peak_power_all_rotors.csv (and thevenin_by_setpoint.csv, power_law_fits.csv)",
+   "quote": "rotor,ra_nominal_um,test_date,...",
+   "problem": "The README (lines 27-28) says 'Treat the fuzzy-skin thickness as the texture variable'. The main analysis-ready table instead identifies texture only by the unmeasured Ra label (ra_nominal_um) and has no thickness column, so anyone fitting a texture trend from the package will use the label the report calls a name only.",
+   "evidence": "Column list of peak_power_all_rotors.csv. build_package.py inserts only ra_nominal_um.",
+   "fix": "Add fuzzy_skin_mm (0.050 / 0.101 / 0.202) next to ra_nominal_um in all three derived tables, and document it."
+  },
+  {
+   "severity": "minor",
+   "location": "README.md line 26 (footnote to the 'nominal Ra' column); report Table 2 caption",
+   "quote": "\"*The Ra values are the roughness targets used to choose the print settings.\"",
+   "problem": "This is true only for Ra20 and Ra40. The 4 Aug settings table gives targets of 10, 20 and 40 \u00b5m (for 0.025, 0.050 and 0.101 mm). No document gives 80 \u00b5m for 0.202 mm; 'Ra80' is a label extrapolated by doubling.",
+   "evidence": "build/provenance/email_evidence.txt [G] (IMG_8608 table: 10/20/40 \u00b5m only); build/audit2/provenance_details.md:49: 'Ra 80 has no documented setting in any table, email or repo file.'",
+   "fix": "'*Ra20 and Ra40 are the targets in the 4 Aug settings table; Ra80 is a label chosen by doubling. None was measured, and a second estimate put them at about half these values.' Make the same change to the Table 2 caption."
+  }
+ ]
+}

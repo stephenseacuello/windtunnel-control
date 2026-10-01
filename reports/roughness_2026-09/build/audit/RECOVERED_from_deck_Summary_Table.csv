@@ -1,0 +1,20 @@
+# RECOVERED, NOT ORIGINAL: values read from the chart XML embedded in docs/slides/jeong_setup_and_results_v1.pptx (slide 7, charts 7-8),
+# which was built from Summary_Table.csv attached to "Updated Test Data - Wind turbine" (T. Kang, 2026-07-27).
+# Wind speed is rounded to 0.1 m/s in the deck; Vdc_max and Idc_max are not recoverable. Replace with the original file when available.
+Wind_Speed_ms_rounded,Measured_RPM,Pdc_max
+9.8,103.9294,0.3331899618
+12.0,132.7987,0.5331873863
+14.0,178.9896,0.5082607296
+16.2,167.4419,0.6074905383
+18.4,219.4066,0.7677078216
+20.6,236.7281,0.9183883733
+22.8,254.0497,1.0158658081
+25.0,271.3713,1.3403534932
+27.2,352.2053,1.825332642
+29.4,375.3007,2.2530555768
+31.6,404.17,2.611279484
+33.8,461.9086,3.102636333
+36.0,508.0994,3.8178682371
+38.2,554.2903,4.3040514037
+40.3,617.8027,5.0725460151
+42.5,594.7073,5.6016445138

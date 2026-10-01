@@ -1,0 +1,126 @@
+{
+ "reviewer": "numbers",
+ "summary": "I recomputed every macro number from the raw CSVs and the July 360 Hz export without importing build_report.py, and all of them reproduce. That covers P_max on both bases, the paired levels, CIs, sign counts, delta-n, the power-law n, a, R^2, beta, the Thevenin Voc and Rint values, light-load V, slip, roll-off, run minutes, Cp_el and every Table 6 value. The real problems sit elsewhere. Every negative number that passes through math mode prints as \"=\" in the PDF. Several typed-in claims do not survive a check against the data: the 15% / 0.27 cut-in figures, \"June close to Ra20\", \"July neither above nor below\", the Ra80 target said to come from the 4 Aug table, and \"excess at 21-23 m/s appears against both\". A few secondary numbers are also mis-defined or come from the artefact wind readback.",
+ "findings": [
+  {
+   "severity": "critical",
+   "location": "Table 4 'Range over set points' column (p.9); Sec 5.4 para 2 (p.10); Sec 7 'Wind speed on the day' (p.15). Source: report.tex lines 319, 360, 577-579; generator src/build_report.py lines 424, 447, 581",
+   "quote": "=2.5 to +13.4 | =1.3 to +18.7 | =2.4 to +15.8 ; (=0.7%, CI [=2.7, +1.4]; =0.4%, CI [=2.2, +1.5]) ; observed =0.4% (CI [=2.2, +1.5]) ... observed =0.7%, CI [=2.7, +1.4]",
+   "problem": "Every negative value that a macro emits inside $...$ shows up in the PDF as an equals sign, not a minus. Readers see 'Rint =0.7%' and 'CI [=2.7, +1.4]', which are meaningless and read like a typo in the key Thevenin result. Negative macros used in text mode (e.g. '-3.2%', '-2.1%', Table 6 '-1') print correctly.",
+   "evidence": "I rendered pages 9, 10 and 15 with pdftoppm and the '=' signs are visible. `pdftotext -layout report.pdf | grep '=[0-9]'` finds 7 occurrences (Table 4 rows 3, 4 and 6; Sec 5.4; Sec 7 twice). build_report.py:424 replaces '-' with '\\textminus{}', and those macros are then used in math mode ($\\rintB\\%$, $[\\rintloB,\\ \\rinthiB]$, the pairwise rows).",
+   "fix": "In build_report.py make negatives math-safe: replace '\\textminus{}' with '\\ensuremath{-}' in pct() (l.424) and at ll.447, 527, 581, 614. Rebuild, then grep pdftotext output for '=[0-9]' to confirm no occurrences are left."
+  },
+  {
+   "severity": "major",
+   "location": "Sec 5.5 para 1 (p.11), report.tex l.392-394; relied on in Sec 7 (ii), l.532-535",
+   "quote": "shifting cut-in by 0.5 m/s changes the level by about 15% but also lowers n by about 0.27, which the data exclude",
+   "problem": "These two numbers were copied from docs/09_results.md (-0.50 m/s: +15.4%, dn -0.267), and no cut-in model consistent with the measured exponent reproduces them. In fact the pair (15%, -0.27) requires P ~ (v - 7.7)^3, which has an apparent exponent of 5.3 over 10.2-38 m/s, not the measured 3.76. The conclusion still holds, but the exclusion margin is overstated about 2-3x, and for Ra40 it is narrow.",
+   "evidence": "I fitted P = a(v - vc)^m to the Ra20 raw P_max (best fit vc = 0.83 m/s, m = 3.60). A -0.5 m/s cut-in shift then gives +9.4% level and dn = -0.10. I also scanned vc = 0-8 m/s with m chosen so the apparent n = 3.76: a 0.5 m/s shift gives +9.4% to +10.9% and dn -0.09 to -0.22. The shift needed to fake Ra80's +13.7% is 0.63-0.72 m/s, giving dn -0.13 to -0.27, against a measured [-0.047, +0.095]. For Ra40's +8.4% the shift is 0.38-0.45 m/s, giving dn -0.085 to -0.17, against a measured [-0.055, +0.061]. Excluded, but only by 0.03 in the vc = 0 case. Scripts: build/review/numbers/cutin.py and cutin2.py.",
+   "fix": "Replace with: 'A cut-in shift large enough to produce the Ra 80 gain (about 0.6-0.7 m/s) would lower n by 0.13-0.27 and one producing the Ra 40 gain by 0.09-0.17 (P = a(v - v_c)^m, constrained to the measured n); the measured Delta n intervals exclude both, the Ra 40 case narrowly.' Also fix docs/09_results.md, the source of the old numbers."
+  },
+  {
+   "severity": "major",
+   "location": "Sec 6.2 last paragraph (p.13), report.tex l.491-493; Fig 8b",
+   "quote": "The June values sit close to the rig's Ra 20 curve (Fig. 8b).",
+   "problem": "This statement is the reader's only takeaway on the comparison Prof. Jeong asked for, and it is not supported. The June values sit well above Ra20 on average and match Ra80 on average. Stating that they sit close to Ra20 invites the reading that the original rotor performs at the Ra20 level.",
+   "evidence": "June Pdc_max / rig Ra20 raw by set point, 500-1700: 1.56, 1.50, 1.26, 1.06, 1.07, 1.11, 0.99, 1.25, 1.02, 1.24, 1.00, 0.93, 0.99. Geometric mean over all 13 = 1.138 (+14%); June/Ra80 geometric mean = 1.004. Restricted to 800-1700: +6% vs Ra20 and -7% vs Ra80, i.e. at about the Ra40 level. June is above Ra20 at 9 of 13 set points.",
+   "fix": "Replace with: 'The June values lie between -7% and +56% of the rig's Ra 20 at the same fan setting (geometric mean +14%; +6% over 800-1700 rpm), inside the band spanned by the three textured rotors. Processed differently, they cannot place the original rotor relative to them.'"
+  },
+  {
+   "severity": "major",
+   "location": "Sec 6.2, paragraph after the three reasons (p.13), report.tex l.488-490",
+   "quote": "on a comparable basis, the July no-texture test is neither clearly above nor clearly below the textured prints",
+   "problem": "This misdescribes the report's own Table 6. On the reprocessed basis the no-texture rotor is below Ra20, and further below Ra40 and Ra80, at every one of the 10 comparable set points, including 1400-1800 rpm where the report's loading caveat does not apply. The honest statement is 'consistently below, but the offset is within what the unverified current scale could produce', not 'neither above nor below'.",
+   "evidence": "Reprocessed / Ra20 = 0.70, 0.65, 0.70, 0.66, 0.84, 0.89, 0.91, 0.88, 0.89, 0.82 for 900-1800 (all < 1; recomputed independently from 0727windturbine.csv). At 1400-1800 the lab mean current reached 74-109% of the rig's Ra20 I_at_Pmax, and the ratio is 0.82-0.91. At 1700 the Ra80 ratio is 2.690/3.529 = 0.76.",
+   "fix": "Replace with: 'On the reprocessed basis the no-texture test is below the rig's Ra 20 at all ten comparable set points (by 9-18% at 1400-1800 rpm, where the load reached the peak region). A 10-20% error in the unverified 2 A/V current scale would remove or reverse that, so it cannot resolve a difference of 8-14%.'"
+  },
+  {
+   "severity": "major",
+   "location": "Table 2 caption and Ra80 row (p.4), report.tex l.135-137, 146; also README 'nominal Ra*' footnote",
+   "quote": "Ra values are the roughness targets in the settings table used to choose the prints (4 August), not measurements. ... v1_Ra80 0.202 mm 80 \u00b5m",
+   "problem": "The 4 August settings table has no 80 \u00b5m / 0.202 mm row, so the caption assigns a source that does not contain the Ra80 value. The report's own bullet two paragraphs later lists only '10, 20 and 40 \u00b5m for thicknesses of 0.025, 0.050 and 0.101 mm'. A reader cross-checking will see the inconsistency.",
+   "evidence": "build/provenance/IMG_8608.png (the 4 Aug table) has exactly three rows: 10 \u00b5m/0.20/0.025, 20 \u00b5m/0.20/0.050, 40 \u00b5m/0.20/0.101. audit2/provenance_details.md l.49: 'Ra 80 has no documented setting in any table, email or repo file.'",
+   "fix": "Caption: '...Ra 20 and Ra 40 are the targets in the 4 August settings table; Ra 80 is a label for the doubled thickness (0.202 mm), not in that table. None is a measurement.' Add the same note to the README footnote."
+  },
+  {
+   "severity": "major",
+   "location": "Sec 5.2 (p.9), report.tex l.306-308; Fig 1",
+   "quote": "Both textured rotors show a local excess at 21\u201323 m/s (fan 1000\u20131100). It appears against both, so it more likely reflects a low Ra 20 reading there",
+   "problem": "At 1000 rpm (20.9 m/s) the excess is not against both. Ra40/Ra20 is +9.8%, barely above its +8.4% mean, while Ra80 alone is high. Ra80/Ra40 = +13.4% there is the largest Ra80-vs-Ra40 difference in the data. So at 1000 rpm the excess is Ra80-specific, and the 'low Ra20 reading' explanation fits only 1100 rpm.",
+   "evidence": "Raw ratios vs Ra20: 1000 rpm Ra40 +9.8%, Ra80 +24.6%; 1100 rpm Ra40 +16.7%, Ra80 +25.0%. Ra80/Ra40: 1000 +13.4%, 1100 +7.1%. The fit basis is the same at 1000: +10.9% vs +28.4%, and Ra80/Ra40 +15.8%. Voc (Fig 6c) behaves the same way: at 1000 Ra40 +4.8% (mean 4.1) vs Ra80 +10.5% (mean 6.4).",
+   "fix": "Replace with: 'Ra 80 shows a local excess at 21-23 m/s (fan 1000-1100), +25% against Ra 20. At 1100 rpm Ra 40 is also high (+16.7%), which points to a low Ra 20 reading there; at 1000 rpm only Ra 80 is high (+13.4% over Ra 40), so that point is Ra 80-specific.'"
+  },
+  {
+   "severity": "major",
+   "location": "Sec 9 item 1 (p.16), report.tex l.622-624",
+   "quote": "Below about 3% the present results stand; above about 10%, mounting dominates and every rotor needs two mountings.",
+   "problem": "This decision rule for the 1 Oct repeat is too generous. The remount difference X directly estimates the SD of any single-mount rotor-vs-rotor difference. At X = 3%, the Ra80-vs-Ra40 step (+4.9%) is only 1.6X, so the ordering and the monotonic trend would not 'stand'. At X = 5-6%, well below 10%, even the Ra40-vs-Ra20 gain (+8.4%) is under 2X. A single repeat also gives an error estimate with 1 degree of freedom.",
+   "evidence": "Levels from Table 4: +8.4%, +13.7%, +4.9%. Two single mountings differ by sqrt(2)\u00b7sigma_m, which is the same quantity a remount of one rotor measures.",
+   "fix": "Replace with: 'If the remount moves P_max by less than about 2%, the Ra 40 and Ra 80 gains over Ra 20 stand and the Ra 80-Ra 40 step is probably real; at 3-5% only the Ra 80 gain is clearly above mounting scatter; above about 5%, every rotor needs repeat mountings. One repeat gives only a rough error bar.'"
+  },
+  {
+   "severity": "minor",
+   "location": "Sec 5.4 para 2 (p.10), report.tex l.361",
+   "quote": "The Voc change alone accounts for 92% and 97% of the power gain.",
+   "problem": "The denominator is not the measured power gain. build_report.py:254 computes 2\u00b7dlnVoc/(2\u00b7dlnVoc - dlnRint), the share of the modelled Voc^2/4Rint change. Against the measured raw P_max gain the Voc share is 99% (Ra40) and 96% (Ra80). For Ra40 the modelled gain (+9.1%) exceeds the measured one (+8.4%).",
+   "evidence": "mean dlnVoc = 0.0400 (Ra40), 0.0620 (Ra80); mean dlnRint = -0.0066, -0.0035; mean dlnPmax(raw) = 0.0808, 0.1287. 0.0800/0.0866 = 92.4% (report); 0.0800/0.0808 = 99.1% (vs measured). 0.1240/0.1275 = 97.2%; 0.1240/0.1287 = 96.4%.",
+   "fix": "Either use 'accounts for 99% and 96% of the measured P_max gain', or keep 92/97 and write 'of the gain predicted by V_oc^2/4R_int'."
+  },
+  {
+   "severity": "minor",
+   "location": "Table 1 'Chord Reynolds number' (p.4), report.tex l.121; Sec 7 (ii) l.533",
+   "quote": "32 376 to 119 735 over the tested wind range",
+   "problem": "The range is computed from Ra20's logged wind (10.14-37.50 m/s). That is the output-frequency readback that Sec 4 calls a logging artefact, so it conflicts with the report's rule that wind speed is nominal from the command (10.24-37.95 m/s). Six significant figures is also spurious for a nu-dependent quantity.",
+   "evidence": "build/provenance/verify_geometry.py reproduces 32376-119735 with nu = 1.5033e-5 over v = 10.14-37.50. With the nominal v and the same nu: 32 684-121 178. The ratio 119735/32376 = 3.698 = 37.50/10.14, not 37.95/10.24 = 3.708.",
+   "fix": "'about 3.3 \u00d7 10^4 to 1.2 \u00d7 10^5 (nominal wind, \u03bd \u2248 1.5 \u00d7 10^-5 m^2/s)'. The 3.2 \u00d7 10^4 in Sec 7 (ii) becomes 3.3 \u00d7 10^4."
+  },
+  {
+   "severity": "minor",
+   "location": "Sec 5.4 para 2 (p.10), report.tex l.358-359",
+   "quote": "by +4.1% (\u00b10.8) for Ra 40 and +6.4% (\u00b11.4) for Ra 80",
+   "problem": "The \u00b1 is the log-space half-width \u00d7 100 (thev_compare voc_half). The actual percent-space interval for Ra80 is [+4.9, +7.9], \u00b11.5. The Rint CIs in the same sentence are in percent space, so the two conventions are mixed.",
+   "evidence": "Voc Ra80/Ra20: exp(mean \u00b1 t\u00b7s/\u221a14) - 1 = [+4.93%, +7.90%]; Ra40: [+3.30%, +4.87%]. t\u00b7s/\u221a14 in log units = 0.0140 and 0.0075.",
+   "fix": "Quote the CIs as for Rint: '+4.1% [+3.3, +4.9] for Ra 40 and +6.4% [+4.9, +7.9] for Ra 80'."
+  },
+  {
+   "severity": "minor",
+   "location": "Appendix C last paragraph of 'Reproducing' (p.18), report.tex l.709-711",
+   "quote": "The pulse count has small errors: two double-counted edges, and at 2000 rpm missed revolutions",
+   "problem": "There are five double-counted edges in three windows, not two.",
+   "evidence": "Rising jumps > 0.1 V in ch3 that are 1 sample (2.8 ms) apart, impossible at these rotor speeds: 900 rpm window 1, 1300 window 2, 2000 window 2. Counts with the lab rule are 38/61/103, against 37/59/101 debounced. The Measured_RPM rule itself reproduces to 3e-15, and the 667 vs 595 figure is confirmed (114 revolutions from gap/period analysis vs 103 counted).",
+   "fix": "'...small errors: five double-counted edges (in the 900, 1300 and 2000 rpm windows), and at 2000 rpm missed revolutions...'"
+  },
+  {
+   "severity": "minor",
+   "location": "Sec 6.1 first consequence bullet (p.12), report.tex l.451-452",
+   "quote": "Applied to a stretch of the same record where no current was flowing, the recipe returns 1.50 W.",
+   "problem": "The number is correct, but it was taken at the post-load-off open-circuit bus voltage of 10.7-19.6 V. That is higher than in any loaded window, where V_max is 3.4-12.5 V. Unqualified, it suggests noise adds about 1.5 W to each tabulated value, whereas at 500 rpm the same spike gives about 0.33 W.",
+   "evidence": "V = 4\u00b7ch1 over t = 331.0-341.4 s ranges 10.74-19.64 V; max I_lab there = 0.112 A; max V\u00b7I = 1.5035 W. Loaded-window Vdc_max = 3.42 (500 rpm) to 12.51 V (2000 rpm).",
+   "fix": "Add: '...returns 1.50 W, at the 11-20 V open-circuit voltage there; in the loaded windows the same noise adds roughly 0.1 A \u00d7 V, from 0.3 W at 500 rpm to about 1.3 W at 1800 rpm.'"
+  },
+  {
+   "severity": "minor",
+   "location": "Sec 2.2 first bullet (p.4-5), report.tex l.155-156; README footnote",
+   "quote": "a second estimate for the same settings put them at roughly half those values",
+   "problem": "The second estimate covered only the two printed settings (0.050 and 0.101 mm), not all three. Its ranges run from half to about 0.9 of the labels, with midpoints near two-thirds, not half.",
+   "evidence": "Aug 12 table (audit2/provenance_details.md l.32): 0.2/0.05 \u2192 ~10-15 \u00b5m (label 20); 0.2/0.101 \u2192 ~20-35 \u00b5m (label 40). Ratios 0.50-0.75 and 0.50-0.88; midpoints 0.63 and 0.69.",
+   "fix": "'a second estimate for the 0.050 and 0.101 mm settings put them at 10-15 and 20-35 \u00b5m, one-half to three-quarters of the targets.'"
+  },
+  {
+   "severity": "minor",
+   "location": "Sec 3.3 (p.7), report.tex l.216-225; Table 8",
+   "quote": "it falls back to the arg max if the fit is not concave or its vertex lies outside that window",
+   "problem": "The fallback actually fired at 2 of the 42 set points: Ra20 700 rpm (vertex outside) and Ra40 600 rpm (convex). The 'parabolic fit' basis therefore mixes estimators there, and the report does not say so. At Ra20 700, the fit-basis ratio compares an arg max (biased high) with Ra40/Ra80 fits.",
+   "evidence": "My port of PeakResult.refine: Ra20 700 fit = raw = 0.1047; Ra40 600 fit = raw = 0.0658 (3_derived/peak_power_all_rotors.csv fit_points = 0 at Ra20 700). rig_audit/sensitivity_stdout.txt: excluding those two set points, the fit-basis Ra40/Ra20 is +8.16% [+5.20, +11.19].",
+   "fix": "Add one sentence: 'The fit fell back to the arg max at two set points (Ra 20 at 700 rpm, Ra 40 at 600 rpm); excluding them changes the fit-basis levels by less than 0.6 points.'"
+  },
+  {
+   "severity": "minor",
+   "location": "Sec 2.1 (p.4), report.tex l.105-106",
+   "quote": "24.5 mm camber depth on a 48 mm chord",
+   "problem": "Both figures are the outer bounding-box extents of the solid blade (24.46 \u00d7 48.03 mm), which include the 1.79 mm wall. They are not the mean-line camber depth and chord. The provenance audit also notes that blade_v1.json gives 42% of chord for camber.",
+   "evidence": "verify_geometry.py on blades/v1.stl: bbox sorted = [24.46, 48.03, 245.11] mm; wall 2V/A = 1.786 mm; t/c = 0.037 ('about 4%' is fine).",
+   "fix": "'about 24.5 mm deep overall (outer extent, including the wall) on a 48 mm chord'."
+  }
+ ]
+}

@@ -1,0 +1,45 @@
+fit fallbacks:
+   blade  fan_rpm_cmd              fit_status
+v1_Ra20          700 fallback:vertex_outside
+v1_Ra40          600         fallback:convex
+
+(a) fit-basis level excluding set points 600 and 700 (where a fit fell back), n=12:
+   Ra40/Ra20: fit +8.16% [+5.20, +11.19] (11/12 higher); raw +7.79% [+5.34, +10.29] (12/12)
+   Ra80/Ra20: fit +14.13% [+9.75, +18.70] (12/12 higher); raw +14.20% [+10.65, +17.87] (12/12)
+   Ra80/Ra40: fit +5.53% [+3.12, +7.99] (12/12 higher); raw +5.95% [+3.60, +8.35] (12/12)
+
+(b) Monte Carlo: Ra20 fit uncertainty from 4-dp rounding of watts (uniform +/-0.5e-4 W), 2000 draws:
+   500: p_fit 0.02964 W, sd 0.067%, 95% half-width 0.131%
+   600: p_fit 0.05906 W, sd 0.035%, 95% half-width 0.067%
+   700: p_fit 0.10470 W, sd 0.028%, 95% half-width 0.045%
+   800: p_fit 0.17615 W, sd 0.010%, 95% half-width 0.019%
+   900: p_fit 0.27432 W, sd 0.006%, 95% half-width 0.012%
+   1000: p_fit 0.40880 W, sd 0.004%, 95% half-width 0.009%
+   1100: p_fit 0.63201 W, sd 0.003%, 95% half-width 0.006%
+   1200: p_fit 0.95416 W, sd 0.002%, 95% half-width 0.004%
+   1300: p_fit 1.32085 W, sd 0.001%, 95% half-width 0.003%
+   1400: p_fit 1.62254 W, sd 0.001%, 95% half-width 0.002%
+   1500: p_fit 2.04540 W, sd 0.001%, 95% half-width 0.002%
+   1600: p_fit 2.47952 W, sd 0.001%, 95% half-width 0.001%
+   1700: p_fit 2.99656 W, sd 0.001%, 95% half-width 0.001%
+   1800: p_fit 3.72171 W, sd 0.001%, 95% half-width 0.001%
+
+(c) wind label arithmetic at n = 3.77:
+   wind 0.714% low -> power at matched wind +2.74% (inverse -2.67%)
+   wind 1.026% low -> power at matched wind +3.96% (inverse -3.81%)
+   wind 1.203% low -> power at matched wind +4.67% (inverse -4.46%)
+   wind 1.200% low -> power at matched wind +4.66% (inverse -4.45%)
+
+(b2) matched-wind comparison restricted to the same 13 set points (drop 1800):
+   Ra40/Ra20 raw, Ra20 wind=summary: +4.51%
+   Ra40/Ra20 raw, Ra20 wind=cmd    : +8.44%
+   Ra80/Ra20 raw, Ra20 wind=summary: +9.26%
+   Ra80/Ra20 raw, Ra20 wind=cmd    : +13.37%
+
+(d) would a pure wind-speed offset explain the Thevenin pattern?
+   Ra20: Voc ~ v^1.497, R ~ v^-0.791, V_light ~ v^1.567
+   Ra40: Voc ~ v^1.487, R ~ v^-0.810, V_light ~ v^1.559
+   Ra80: Voc ~ v^1.528, R ~ v^-0.762, V_light ~ v^1.607
+   Ra40/Ra20: dlnVoc +4.00% -> implied wind offset +2.67% -> predicted dlnR -2.11%; observed dlnR -0.66% [-2.70, +1.37]
+   Ra80/Ra20: dlnVoc +6.21% -> implied wind offset +4.15% -> predicted dlnR -3.28%; observed dlnR -0.36% [-2.19, +1.48]
+   Ra80/Ra40: dlnVoc +2.21% -> implied wind offset +1.47% -> predicted dlnR -1.17%; observed dlnR +0.31% [-1.45, +2.06]

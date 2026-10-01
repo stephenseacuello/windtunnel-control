@@ -1,0 +1,98 @@
+run,file,order,key,value
+Ra20,summary,1,blade,v1_Ra20
+Ra20,summary,2,notes,"PETG, 0.2mm, Ra 20"
+Ra20,summary,3,fan_rpm,500
+Ra20,summary,4,wind_mps,10.24
+Ra20,summary,5,instrument,"Chroma,63004-150-60,630041501113,2.01"
+Ra20,summary,6,protocol,94bed28333f7
+Ra20,summary,7,protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+Ra20,points,1,blade,v1_Ra20
+Ra20,points,2,notes,"PETG, 0.2mm, Ra 20"
+Ra20,points,3,fan_rpm,500
+Ra20,points,4,wind_mps,10.24
+Ra20,points,5,instrument,"Chroma,63004-150-60,630041501113,2.01"
+Ra20,points,6,protocol,94bed28333f7
+Ra20,points,7,protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+Ra40,summary,1,blade,v1_Ra40
+Ra40,summary,2,notes,"PETG, 0.2mm layer, Ra 40"
+Ra40,summary,3,fan_rpm,500
+Ra40,summary,4,wind_mps,10.24
+Ra40,summary,5,instrument,"Chroma,63004-150-60,630041501113,2.01"
+Ra40,summary,6,protocol,94bed28333f7
+Ra40,summary,7,protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+Ra40,summary,8,clock,2026-09-01T15:12:54-0400
+Ra40,summary,9,clock_unix,1788289974.956
+Ra40,summary,10,_clock_note,host wall clock at run start. Every row carries t_unix so a DAQ record can be joined to it — check the two machines agree to better than a dwell before trusting the join.
+Ra40,summary,11,protocol_extra,min_step_amps=0.002;stop_rpm=1800;start_rpm=500;rpm_step=100;settle_min=2;settle_max=20;settle_poll=0.5;settle_tol=0.01;settle_confirm=3;rpm_tol_abs=10;rpm_tol_frac=0.02;unload_amps=0
+Ra40,summary,12,protocol_full,b5ac081ac5c0
+Ra40,summary,13,instrument_check,ok
+Ra40,summary,14,air_temp_c,24.63
+Ra40,summary,15,air_pressure_pa,101043
+Ra40,summary,16,air_density_kg_m3,1.1821
+Ra40,summary,17,air_temp_offset,"NOT SET — this board reads ~20 C high when it has been powered a while, which is ~6.5% in every Cp derived from this run. Run `tunnel_node.py calibrate <true °C>`."
+Ra40,summary,18,_air_note,"Measured by the tunnel node (LPS22HB), dry-air formula — the Lite board has no humidity sensor, so density reads ~1% high on a humid day. The sensor SELF-HEATS: verify the OFFSET against a reference thermometer before trusting this, because Cp goes as 1/rho and 20 C of self-heating is 6.5% of Cp."
+Ra40,summary,19,drive_actual_signals,5310=103;5311=104
+Ra40,summary,20,air_temp_drift_c,+0.12
+Ra40,summary,21,air_density_end,1.1817
+Ra40,points,1,blade,v1_Ra40
+Ra40,points,2,notes,"PETG, 0.2mm layer, Ra 40"
+Ra40,points,3,fan_rpm,500
+Ra40,points,4,wind_mps,10.24
+Ra40,points,5,instrument,"Chroma,63004-150-60,630041501113,2.01"
+Ra40,points,6,protocol,94bed28333f7
+Ra40,points,7,protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+Ra40,points,8,clock,2026-09-01T15:12:54-0400
+Ra40,points,9,clock_unix,1788289974.956
+Ra40,points,10,_clock_note,host wall clock at run start. Every row carries t_unix so a DAQ record can be joined to it — check the two machines agree to better than a dwell before trusting the join.
+Ra40,points,11,protocol_extra,min_step_amps=0.002;stop_rpm=1800;start_rpm=500;rpm_step=100;settle_min=2;settle_max=20;settle_poll=0.5;settle_tol=0.01;settle_confirm=3;rpm_tol_abs=10;rpm_tol_frac=0.02;unload_amps=0
+Ra40,points,12,protocol_full,b5ac081ac5c0
+Ra40,points,13,instrument_check,ok
+Ra40,points,14,air_temp_c,24.63
+Ra40,points,15,air_pressure_pa,101043
+Ra40,points,16,air_density_kg_m3,1.1821
+Ra40,points,17,air_temp_offset,"NOT SET — this board reads ~20 C high when it has been powered a while, which is ~6.5% in every Cp derived from this run. Run `tunnel_node.py calibrate <true °C>`."
+Ra40,points,18,_air_note,"Measured by the tunnel node (LPS22HB), dry-air formula — the Lite board has no humidity sensor, so density reads ~1% high on a humid day. The sensor SELF-HEATS: verify the OFFSET against a reference thermometer before trusting this, because Cp goes as 1/rho and 20 C of self-heating is 6.5% of Cp."
+Ra40,points,19,drive_actual_signals,5310=103;5311=104
+Ra40,points,20,air_temp_drift_c,+0.12
+Ra40,points,21,air_density_end,1.1817
+Ra80,summary,1,blade,v1_Ra80
+Ra80,summary,2,notes,"PETG, 0.2mm layer, 0.2mm nozzle, Ra 80"
+Ra80,summary,3,fan_rpm,500
+Ra80,summary,4,wind_mps,10.24
+Ra80,summary,5,instrument,"Chroma,63004-150-60,630041501113,2.01"
+Ra80,summary,6,protocol,94bed28333f7
+Ra80,summary,7,protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+Ra80,summary,8,clock,2026-08-26T15:32:09-0400
+Ra80,summary,9,clock_unix,1787772729.932
+Ra80,summary,10,_clock_note,host wall clock at run start. Every row carries t_unix so a DAQ record can be joined to it — check the two machines agree to better than a dwell before trusting the join.
+Ra80,points,1,blade,v1_Ra80
+Ra80,points,2,notes,"PETG, 0.2mm layer, 0.2mm nozzle, Ra 80"
+Ra80,points,3,fan_rpm,500
+Ra80,points,4,wind_mps,10.24
+Ra80,points,5,instrument,"Chroma,63004-150-60,630041501113,2.01"
+Ra80,points,6,protocol,94bed28333f7
+Ra80,points,7,protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+Ra80,points,8,clock,2026-08-26T15:32:09-0400
+Ra80,points,9,clock_unix,1787772729.932
+Ra80,points,10,_clock_note,host wall clock at run start. Every row carries t_unix so a DAQ record can be joined to it — check the two machines agree to better than a dwell before trusting the join.
+Ra40,trace,1,blade,v1_Ra40
+Ra40,trace,2,notes,"PETG, 0.2mm layer, Ra 40"
+Ra40,trace,3,fan_rpm,500
+Ra40,trace,4,wind_mps,10.24
+Ra40,trace,5,instrument,"Chroma,63004-150-60,630041501113,2.01"
+Ra40,trace,6,protocol,94bed28333f7
+Ra40,trace,7,protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+Ra40,trace,8,clock,2026-09-01T15:12:54-0400
+Ra40,trace,9,clock_unix,1788289974.956
+Ra40,trace,10,_clock_note,host wall clock at run start. Every row carries t_unix so a DAQ record can be joined to it — check the two machines agree to better than a dwell before trusting the join.
+Ra40,trace,11,protocol_extra,min_step_amps=0.002;stop_rpm=1800;start_rpm=500;rpm_step=100;settle_min=2;settle_max=20;settle_poll=0.5;settle_tol=0.01;settle_confirm=3;rpm_tol_abs=10;rpm_tol_frac=0.02;unload_amps=0
+Ra40,trace,12,protocol_full,b5ac081ac5c0
+Ra40,trace,13,instrument_check,ok
+Ra40,trace,14,air_temp_c,24.63
+Ra40,trace,15,air_pressure_pa,101043
+Ra40,trace,16,air_density_kg_m3,1.1821
+Ra40,trace,17,air_temp_offset,"NOT SET — this board reads ~20 C high when it has been powered a while, which is ~6.5% in every Cp derived from this run. Run `tunnel_node.py calibrate <true °C>`."
+Ra40,trace,18,_air_note,"Measured by the tunnel node (LPS22HB), dry-air formula — the Lite board has no humidity sensor, so density reads ~1% high on a humid day. The sensor SELF-HEATS: verify the OFFSET against a reference thermometer before trusting this, because Cp goes as 1/rho and 20 C of self-heating is 6.5% of Cp."
+Ra40,trace,19,drive_actual_signals,5310=103;5311=104
+Ra40,trace,20,air_temp_drift_c,+0.12
+Ra40,trace,21,air_density_end,1.1817

@@ -1,0 +1,142 @@
+{
+ "reviewer": "figures-tables-typography",
+ "summary": "The data figures (Figs 1, 4\u20138) are clean and use the series colours and markers consistently. There is one critical rendering bug: every negative number the generator emits inside math mode prints as \"=\" instead of a minus sign (Table 4, Section 5.4, Section 7). Figures 2 and 3 are old internal slides: nearly all their text is 3\u20135 pt, and they contradict the report's own numbers and claims (wind range, run time, dwell, and rotor rpm \"ALREADY RECORDED\"). The layout wastes a lot of space: pages 3 and 19 are near-empty, and pages 5, 10 and 13 are a third to a half blank. There are also some notation and hyphenation nits.",
+ "findings": [
+  {
+   "severity": "critical",
+   "location": "p.9 Table 4 ('Range over set points' column, 3 rows); p.10 Section 5.4 para 2; p.15 Section 7, 'Wind speed on the day' bullet",
+   "quote": "=2.5 to +13.4 / =1.3 to +18.7 / =2.4 to +15.8 ; \"Ra 20's (=0.7%, CI [=2.7, +1.4]; =0.4%, CI [=2.2, +1.5])\" ; \"against an observed =0.4% (CI [=2.2, +1.5])\" ; \"observed =0.7%, CI [=2.7, +1.4]\"",
+   "problem": "Every negative value typeset inside $...$ prints as an equals sign. A reader sees \"=0.7%\" or \"CI [=2.7, +1.4]\" and cannot tell that these are negative. The R_int result, the wind-speed exclusion argument and the Ra 80 vs Ra 40 range all depend on those signs. On the same line of p.15 the text-mode values print correctly (\"predicted \u22122.1%\"), so the page is inconsistent as well as wrong.",
+   "evidence": "report.log has 22 warnings of the form \"LaTeX Warning: Command \\textminus invalid in math mode\" (tables at input lines 3/4/6 and report.tex lines 360, 577\u2013579). A 300 dpi crop of p.9 shows \"=2.5\", \"=1.3\", \"=2.4\". report.txt lines 389\u2013392, 452, 743\u2013744 contain \"=0.7%\", \"[=2.7\", \"=0.4%\", \"[=2.2\". The source is build_report.py: pct() at line 424, the dn macros at line 447 and the pairwise-row cell at line 581 all do .replace(\"-\", \"\\\\textminus{}\"), and the results go into math mode (pairwise_rows.tex wraps them in $...$, and report.tex lines 360 and 577\u2013579 use $\\rintB\\%$ etc.).",
+   "fix": "In build_report.py, replace \"\\\\textminus{}\" with \"\\\\ensuremath{-}\" in pct(), in the dn/jlimean macros and in the Table 4 and Table 6 row builders. \\ensuremath{-} gives a correct minus in both text and math mode. Rebuild, and confirm that report.log has no \"\\textminus invalid in math mode\" warnings."
+  },
+  {
+   "severity": "major",
+   "location": "p.6 Figure 2 (docs/diagrams/system_overview.png)",
+   "quote": "\"rotor rpm \u2014 proximity sensor, ALREADY RECORDED\"; \"wind 10.1 \u2013 37.5 m/s\"; \"NOT trusted with safety\"; \"the SAME laptop\"; \"fan rpm \u2014 PMC analog out O0, 0.5 V + rpm/300 (firmware v4)\"; watchdog / turbine-interlock / E-STOP panels",
+   "problem": "Figure 2 is an internal lab slide from 26 Aug and contradicts the report. (1) It says rotor rpm is \"ALREADY RECORDED\", but the Summary and Section 7 say rotor speed was not reliably recorded, and Section 3.1 says the DAQ it feeds was not used in the sweeps. (2) Its wind range of 10.1\u201337.5 m/s disagrees with the 10.2\u201338.0 m/s in the Summary, Section 5.1 and Table 8. (3) The shouting capitals, the note that the host is \"NOT trusted with safety\", the firmware version, and the watchdog, interlock and E-stop boxes are internal commissioning notes, not part of a measurement chain. (4) It puts a \"V / I sense IC\" in the power path, which the text does not mention. (5) The rotor icon has bowed blades, but Section 2.1 describes a prismatic, untwisted H-rotor.",
+   "evidence": "I read system_overview.png at full resolution. build_diagrams.py line 189 hard-codes \"wind 10.1 \u2013 37.5 m/s\" and line 237 \"ALREADY RECORDED\". The calibration in Section 3.1 gives v(500) = 10.24 and v(1800) = 37.95 m/s, which matches Table 8's 10.2 and 38.0.",
+   "fix": "Replace it with a report-specific block diagram drawn at print size: fan chain (host \u2192 PMC \u2192 ACS550 \u2192 fan) and electrical chain (rotor \u2192 generator \u2192 rectifier \u2192 Chroma load \u2192 host). Drop the Jeong DAQ, the watchdog, interlock and E-stop panels and the internal annotations, give the wind range as 10.2\u201338.0 m/s, and draw straight blades. If the DAQ must stay, relabel its link \"rotor pulse (Jeong-lab DAQ only; not used in these sweeps)\"."
+  },
+  {
+   "severity": "major",
+   "location": "p.7 Figure 3 (docs/diagrams/sweep_protocol.png) vs Section 3.2 on p.6",
+   "quote": "\"~10 minutes per rotor, unattended\"; \"14 points \u00b7 10.1 \u2192 37.5 m/s\"; \"Dwell 1.0 \u2013 1.5 s\"; \"0.000 V is perfectly stable \u2014 speed must be confirmed first, not voltage\"",
+   "problem": "The protocol diagram contradicts the text beside it. Section 3.2 says \"dwelling 1.0 s per step\" and \"A run takes about eight minutes (8.0 and 7.9 minutes...)\", and the report's wind range is 10.2\u201338.0 m/s. The note about 0.000 V being \"perfectly stable\" is a developer note that means nothing to this audience.",
+   "evidence": "build_diagrams.py line 291 has \"~10 minutes per rotor\", line 307 \"10.1 \u2192 37.5 m/s\" and line 333 \"Dwell 1.0 \u2013 1.5 s\". report.tex line 201 has \"dwelling \\SI{1.0}{s}\", and the minutesB/minutesC macros give 8.0 and 7.9.",
+   "fix": "Regenerate the diagram with the report's values: \"\u22488 minutes per rotor\", \"14 points \u00b7 10.2 \u2192 38.0 m/s\" and \"Dwell 1.0 s\". Delete the 0.000 V note, or build the diagram from the same numbers.tex macros so that it cannot drift from the text."
+  },
+  {
+   "severity": "major",
+   "location": "p.6 Figure 2 and p.7 Figure 3 (legibility)",
+   "quote": "e.g. \"Python orchestration + logging\", \"150 V / 60 A / 400 W\", \"current stopped tracking demand\", legend \"control / digital\"",
+   "problem": "At print scale nearly all the text in Figs 2 and 3 is 3\u20134 pt (maximum about 5 pt), well below the 7.5\u20139 pt used in the data figures and too small to read on paper. Both figures are also raster PNGs on a tinted slide background, while every other figure is vector PDF, so they look pasted in.",
+   "evidence": "system_overview.svg is 1760 px wide and is placed at \\linewidth (468 pt), so 1 px \u2248 0.266 pt. Its fonts are mostly 11\u201312.5 px, which is 2.9\u20133.3 pt; 16 px is 4.3 pt and the 20 px title is 5.3 pt. sweep_protocol.svg (1680 px at 0.92\\linewidth) works out at 2.8\u20135.1 pt. A 300 dpi crop of p.6 confirms that the sub-labels are about 3 pt.",
+   "fix": "Redraw both at the final size (6.5 in wide) with no text below 7 pt, cutting content as needed. Export as vector PDF from the SVG, e.g. rsvg-convert -f pdf, rather than PNG."
+  },
+  {
+   "severity": "major",
+   "location": "pp.3, 5, 10, 13, 19 (page layout)",
+   "quote": "p.3: TOC tail then ~56% blank; p.5: 47% blank below Section 3.1; p.10: 32% blank; p.13: 29% blank; p.19: a single bullet ('6_code/') and one paragraph, 90% blank",
+   "problem": "Every float uses [H], so a figure or table that does not fit is pushed whole to the next page and leaves a large hole. Together with the TOC spill onto p.3 and the appendix spill onto p.19, 5 of the 19 pages are 30\u201390% empty. For a report going to three professors, that looks unfinished.",
+   "evidence": "I rendered all 19 pages at 110 dpi and measured the last inked row of each page body: p3 56% blank, p5 47%, p10 32%, p13 29%, p19 90%. I also inspected p6 (21%) and p15 (20%) visually. The TOC runs to 1.4 pages because the global \\parskip of 0.45em also spaces every TOC line.",
+   "fix": "Use [tbp] (or [!htbp]) instead of [H] for Figs 2\u20138 and Tables 5\u20139, and let LaTeX float them. Typeset the TOC with {\\setlength{\\parskip}{0pt}\\tableofcontents} and \\setcounter{tocdepth}{1} so that it fits on p.2 under Fig. 1, or drop it. After the fixes above, check that Appendix D no longer spills onto a page of its own; if it still does, shorten the list or use \\enlargethispage{2\\baselineskip}."
+  },
+  {
+   "severity": "minor",
+   "location": "p.1 Summary, bullet 2",
+   "quote": "Power ranks Ra 20 < Ra 40 < Ra 80 at 13 of 14 wind speeds",
+   "problem": "Here \"Ra\" is set in math italic, as if R and a were variables, while everywhere else it is upright text \"Ra 20\". The 250 dpi crop shows the italic \"Ra\" and the upright \"Ra 20, Ra 80, Ra 40\" on the same line.",
+   "evidence": "report.tex line 46 has $\\Ra{20}<\\Ra{40}<\\Ra{80}$, and the \\Ra macro in preamble.tex is Ra\\,#1 with no \\text or \\mathrm.",
+   "fix": "Redefine the macro as \\newcommand{\\Ra}[1]{\\ensuremath{\\mathrm{Ra}\\,#1}}, or write the line in text mode: \"\\Ra{20} $<$ \\Ra{40} $<$ \\Ra{80}\"."
+  },
+  {
+   "severity": "minor",
+   "location": "p.2 Figure 1; first cited on p.9 (Section 5.2); p.10 'Table 9'",
+   "quote": "\"Table 4 and Fig. 1 give the paired comparisons\" (p.9); \"Fig. 6 and Table 9 show the result\" (p.10)",
+   "problem": "The headline figure sits between the Summary and the Contents, but the Summary never cites it; the first citation is seven pages later. Section 5.4 cites Table 9, which is seven pages on in Appendix A, with no pointer to where it is. Tables 3, 7 and 8 are never cited by number.",
+   "evidence": "There is no \\figref{fig:ratio} in the Summary (report.tex lines 29\u201375); the only one is at line 301. \\tabref{tab:thevenin} is at line 357, but the table is on p.17. grep finds no \\tabref for tab:inventory, tab:limits or tab:data.",
+   "fix": "End Summary bullet 1 with \"(Fig. 1)\". In Section 5.2 write \"Fig. 1 (page 2)\" (or use \\cpageref), and in Section 5.4 write \"Table 9 (Appendix A)\". Add a \\tabref to Table 3 in Section 4, Table 7 in Section 8 and Table 8 in Section 5.1."
+  },
+  {
+   "severity": "minor",
+   "location": "p.9 Table 4 header",
+   "quote": "Comparison | Basis | Change | 95% CI | Higher | Range over set points | \u0394n",
+   "problem": "The Change, 95% CI and Range columns have no units. A reader cannot tell from the table alone whether \"+8.4\" is a percentage, a ratio or watts, and the caption does not say.",
+   "evidence": "report.tex line 317 gives these column heads without \"%\", and the caption at lines 312\u2013313 mentions only \u0394n.",
+   "fix": "Change the headers to \"Change (%)\", \"95% CI (%)\" and \"Range over set points (%)\", or add \"Changes in percent.\" to the caption."
+  },
+  {
+   "severity": "minor",
+   "location": "Throughout: p.10 Section 5.4, p.11 Fig. 6 axis labels, p.17 Table 9 header, p.18 Appendix B",
+   "quote": "V_{oc}, R_{int} (italic subscripts) vs P_max, t_fuzz, N_fan (upright subscripts); \"r\u00b2 \u2265 0.975\" (Section 5.4) vs \"R\u00b2\" (Table 5, Section 3.1)",
+   "problem": "The descriptive subscripts are set two different ways: italic in V_oc and R_int (text, Table 9, Fig. 6 labels) and upright in P_max, t_fuzz and N_fan. The goodness-of-fit symbol also switches between r\u00b2 and R\u00b2.",
+   "evidence": "report.tex writes V_{oc} and R_{int} in math mode (lines 351\u2013363, 658\u2013659, 681). figures.py writes \"$V_{oc}$\" and \"$R_{int}$\" as axis labels, while \\pmax is defined with \\max and t_\\text{fuzz} is used.",
+   "fix": "Define \\newcommand{\\Voc}{V_\\mathrm{oc}} and \\newcommand{\\Rint}{R_\\mathrm{int}} and use them in the text and tables; use $V_{\\mathrm{oc}}$ and $R_{\\mathrm{int}}$ in figures.py. Use R\u00b2 throughout, or note once that r\u00b2 is the ladder-fit value."
+  },
+  {
+   "severity": "minor",
+   "location": "p.9 Figure 4(b); p.10 Figure 5",
+   "quote": "Fig. 4b: \"power-law exponents n = 3.76, 3.77, 3.79\"; Fig. 5 x ticks \"0.05  0.101  0.202\"",
+   "problem": "Fig. 4b lists three exponents but does not say which rotor each belongs to. Fig. 5 labels the first tick \"0.05\" while the text, Table 2 and every legend give \"0.050 mm\". Fig. 5's black fit line also starts at about +0.8% at 0.050 mm, not at the Ra 20 marker at 0, because the code draws it through the centroid of the textured levels. The caption does not say this, so the line looks misplaced.",
+   "evidence": "In figures.py, fig_pmax joins the exponents without labels, and fig_trend uses f\"{v:g}\" for the ticks. I recomputed the line at 0.050 mm with c0 from fig_trend and got +0.82%.",
+   "fix": "In Fig. 4b, write \"n = 3.76 (Ra 20), 3.77 (Ra 40), 3.79 (Ra 80)\" or colour each number. In Fig. 5, format the ticks with f\"{v:.3f}\" and add to the caption \"Black line: fitted slope \u03b2, drawn through the mean of the textured levels (the fit has a free intercept per set point).\""
+  },
+  {
+   "severity": "minor",
+   "location": "p.2 Fig. 1, p.9 Fig. 4, p.10 Fig. 5 captions",
+   "quote": "\"Change in peak electrical power relative to the Ra 20 rotor at each of the 14 matched fan set points.\"",
+   "problem": "The report stresses that there are two P_max estimators (Section 3.3, Table 4), but none of the figure captions says which one is plotted (raw arg max). Fig. 1 is the one most likely to be lifted into slides, where the basis will be lost.",
+   "evidence": "figures.py plots p_raw in fig_ratio, fig_pmax and fig_trend. None of the captions at report.tex lines 80\u201382, 295\u2013296 and 341\u2013343 names the basis.",
+   "fix": "Add \"Raw arg max basis; the parabolic-fit basis is in Table 4.\" to the captions of Figs 1, 4 and 5."
+  },
+  {
+   "severity": "minor",
+   "location": "p.8 Table 3; p.9 Table 4 caption; p.12 Section 6 para 1; p.13 top; p.14 Table 6 caption; p.15 top",
+   "quote": "\"times-/tamps\" (Table 3); \"exponent, \u00b1/95% half-width\"; \"Prof./Jeong asked\"; \"\u2020Window contains the step to 1400/rpm.\"; widow lines \"rig's Ra 20. Over 900\u20131800 rpm ...\" (p.13) and \"across it.\" (p.15)",
+   "problem": "There are several bad line breaks. The justified X column in Table 3 splits \"timestamps\" as times-tamps. Breaks fall between \u00b1 and its value, between \"Prof.\" and the name, and between a number and \"rpm\" (leaving \"rpm.\" alone on the last caption line). Single lines are also stranded at the tops of pp.13 and 15.",
+   "evidence": "All of these are visible in the 110 dpi page renders and in a 250 dpi crop of p.8.",
+   "fix": "Set Table 3's last column to >{\\raggedright\\arraybackslash}X, and add \\hyphenation{time-stamps}. Use ties: \"$\\pm$~95\\%\", \"Prof.~Jeong\", \"1400~rpm\" (or \\SI{1400}{rpm}). Add \\widowpenalty=10000 and \\clubpenalty=10000 to the preamble."
+  },
+  {
+   "severity": "minor",
+   "location": "Running header, pp.2\u201319; PDF metadata",
+   "quote": "\"Surface-roughness wind-tunnel tests of a 3D-printed VAWT rotor\"",
+   "problem": "The running header does not match the title (\"Printed surface texture and the electrical output of a small vertical-axis wind turbine rotor\"). It also uses \"roughness\", a term the report avoids because Ra was not measured, and it says \"a ... rotor\" when three were tested. The PDF Title and Author fields are empty, so viewers show \"report.pdf\" in the window title.",
+   "evidence": "preamble.tex has \\fancyhead[L]. pdfinfo reports empty Title and Author fields.",
+   "fix": "Set the header to \"Printed surface texture and VAWT electrical output\", and add \\hypersetup{pdftitle={Printed surface texture and the electrical output of a small VAWT rotor}, pdfauthor={Stephen Eacuello}}."
+  },
+  {
+   "severity": "minor",
+   "location": "p.1 Summary bullet 1; p.8 Section 4; p.10 Section 5.4",
+   "quote": "\"the Ra 40 rotor produced +8.4% more peak power (95% CI [+6.1, +10.8]%) ... higher at 14 and 14 of 14 wind speeds respectively\" vs \"+4.3% [+2.0, +6.7]\" (p.8)",
+   "problem": "The format of the confidence intervals changes from section to section: \"%\" after the bracket, no \"%\" at all, \"CI\" written or left out. \"+8.4% more\" says the direction twice, and \"14 and 14 of 14 ... respectively\" reads clumsily.",
+   "evidence": "report.tex lines 42\u201344, 273\u2013274 and 360.",
+   "fix": "Choose one format, e.g. \"+8.4% (95% CI +6.1 to +10.8%)\", and use it everywhere. Write \"8.4% more\" (no plus sign) in prose. Rewrite the end of bullet 1 as \"higher at all 14 wind speeds for both\"."
+  },
+  {
+   "severity": "minor",
+   "location": "p.4 Table 1; p.18 Appendix C",
+   "quote": "\"Chord Reynolds number 32 376 to 119 735\"; \"127 208 rows\" vs \"\u230a127208/17\u230b\"",
+   "problem": "Table 1 gives the Reynolds number to 5 significant figures, which is spurious given the approximate viscosity and nominal wind speed, and Section 7 quotes the same range as 3.2\u00d710^4 to 1.2\u00d710^5. Appendix C groups the same integer's digits in the text but not in the formula.",
+   "evidence": "report.tex lines 121, 533, 685 and 700.",
+   "fix": "In Table 1 write \"3.2\u00d710^4 to 1.2\u00d710^5\". In Appendix C, group the digits in the formula too: \\num{127208}, or $127\\,208$."
+  },
+  {
+   "severity": "minor",
+   "location": "Appendix D (p.18) vs data package 5_figures/",
+   "quote": "\"5_figures/: the figures.\"; \"Running build_report.py regenerates every number, table and figure in this report\"",
+   "problem": "The packaged figures are named fig_ratio, fig_pmax, fig_trend, fig_thevenin, fig_pi and fig_jeong, which do not map to Figures 1\u20138. Figures 2 and 3 are neither in the package nor produced by build_report.py (they come from docs/diagrams/build_diagrams.py, which is not in 6_code/). As written, Appendix D's claim is not true for two of the eight figures.",
+   "evidence": "ls of 5_figures/ shows 6 PNGs, identical to build/fig. 6_code/ holds only analyze_july.py, build_package.py, build_report.py, figures.py and style.py. report.log shows Figs 2 and 3 were loaded from ../../../docs/diagrams/.",
+   "fix": "Rename the files by figure number (fig1_ratio.png, fig4_pmax.png, ...) or add a mapping table to README.md. Either add the redrawn Figs 2 and 3 and their generator to the package, or change Appendix D to say \"every number, table and data figure\"."
+  },
+  {
+   "severity": "minor",
+   "location": "Figs 4\u20137 (Ra 80) vs Fig. 8b (5 June series)",
+   "quote": "Ra 80 colour #1baf7a (triangle); Jeong lab 5 Jun colour #008300 (plus)",
+   "problem": "Two different datasets are both drawn in green. They never share a plot, but a reader moving from Fig. 4 or 6 to Fig. 8b may connect \"green\" with Ra 80. In print Ra 80 reads as green rather than the intended aqua.",
+   "evidence": "style.py SERIES entries; visual inspection of fig_pmax.png, fig_thevenin.png and fig_jeong.png.",
+   "fix": "Shift Ra 80 toward a clear aqua/teal (e.g. #1a9fb0) or give the June series a non-green hue (e.g. a brown or grey). Re-run the palette validator mentioned in style.py."
+  }
+ ]
+}

@@ -1,0 +1,182 @@
+{
+ "reviewer": "professors-as-readers (Jahangiri / Jeong / Sodhi lens)",
+ "summary": "The core result is presented honestly, but three things weaken the report for these readers. First, it does not directly answer the three requests the professors made: Jeong's comparison with \"our initial test\", the fault-testing plan (never mentioned), and Jahangiri's \"which blade exactly?\", where the report states an inference as fact. Second, two display defects will mislead: Fig. 2 says rotor rpm was \"ALREADY RECORDED\", which contradicts the text, and minus signs print as \"=\" in the R_int evidence and in Table 4. Third, the summary is not a 60-second read and about 5 of the 19 pages carry nothing for this audience. The highest-value fixes are: fix Fig. 2 and the minus signs; add a boxed bottom line with a \"responses to your requests\" list; answer Jeong's June comparison with numbers; add a short fault-plan section; add a rotor-identity table; state the tip-speed ratio (about 0.1\u20130.2) that the report's own Appendix C already implies.",
+ "findings": [
+  {
+   "severity": "critical",
+   "location": "Fig. 2 (p. 6), Sec. 3.1",
+   "quote": "rotor rpm \u2014 proximity sensor, ALREADY RECORDED ... wind 10.1 \u2013 37.5 m/s",
+   "problem": "The rig diagram tells Prof. Jeong (who owns the DAQ) that rotor speed was recorded on his DAQ. The Summary says the opposite (\"rotor speed was not reliably recorded\"), and so does Sec. 3.1 (\"The Jeong-lab DAQ shown in the figure was not used in the rotor sweeps\"). The figure also gives the wind range as 10.1\u201337.5 m/s, while the rest of the report uses 10.2\u201338.0. At printed size most labels are about 3\u20134 pt and cannot be read. Half the figure (watchdogs, turbine interlock, E-stop) has nothing to do with the texture question. His first question will be \"where is the rotor-rpm record?\"",
+   "evidence": "I re-rendered p. 6 of out/report.pdf at 200 dpi: the green dashed line runs from the generator to the \"Jeong Lab DAQ\" box and is labelled \"ALREADY RECORDED\", and the test-section label reads \"wind 10.1 \u2013 37.5 m/s\". The source is docs/diagrams/system_overview.png, a generic rig diagram dated 26 Aug. Report text: Summary bullet 4 and Sec. 3.1, last sentence. The nominal range 10.2\u201338.0 follows from v = 0.02132N \u2212 0.424 at 500 and 1800 rpm.",
+   "fix": "Regenerate a report-specific diagram with docs/diagrams/build_diagrams.py showing only the chain actually used: host \u2192 PMC \u2192 ACS550 \u2192 fan \u2192 rotor \u2192 generator \u2192 rectifier \u2192 V/I sense \u2192 Chroma \u2192 host. Delete the DAQ box and both dashed DAQ lines, or grey them out with the label \"Jeong-lab DAQ: not connected during the Aug\u2013Sep sweeps\". Change the wind label to \"10.2\u201338.0 m/s (nominal)\" and delete the watchdog, interlock and E-stop panels. Size it so the smallest text is at least 7 pt (a one-row strip at about 60% of text width is enough). Do not reuse chain_strip.png as it is: it carries the same \"rotor rpm \u2026 already recorded\" line."
+  },
+  {
+   "severity": "critical",
+   "location": "Table 4 (p. 9); Sec. 5.4 para 2 (p. 10); Sec. 7 'Wind speed on the day' (p. 15)",
+   "quote": "=2.5 to +13.4 ... =1.3 to +18.7 ... (=0.7%, CI [=2.7, +1.4]; =0.4%, CI [=2.2, +1.5]) ... against an observed =0.4% (CI [=2.2, +1.5]) ... observed =0.7%, CI [=2.7, +1.4]",
+   "problem": "Every negative number set in math mode prints with an \"=\" in place of the minus sign. The R_int changes are the evidence behind the Summary's \"source resistance unchanged\" and \"originates on the rotor side\". Printed as \"CI [=2.7, +1.4]\" they are unreadable. \"=2.5 to +13.4\" for Ra 80 vs Ra 40 reads as an all-positive range, which contradicts the 13/14 in the next column. The Sec. 7 wind-exclusion argument (\"predicted \u22122.1%, observed =0.7%\") loses its sign too.",
+   "evidence": "A crop of p. 10 at 220 dpi shows \"(=0.7%, CI [=2.7, +1.4]; =0.4%, CI [=2.2, +1.5])\", and report.txt has the same text. Cause: numbers.tex defines \\rintB etc. as \\textminus{}0.7, and report.tex uses them inside $...$. build/tables/pairwise_rows.tex writes $\\textminus{}2.5$. The same macros print correctly in text mode (Table 6 shows \"\u22121\"; \u00a77 shows \"\u22123.2%\").",
+   "fix": "Make build_report.py emit a math-safe minus, e.g. define \\newcommand{\\mminus}{\\ifmmode-\\else\\textminus\\fi} and use it in numbers.tex and every *_rows.tex, or emit a plain '-' inside $...$. Rebuild, then check with pdftotext that no '=' directly precedes a digit anywhere in the PDF."
+  },
+  {
+   "severity": "major",
+   "location": "Summary bullet 5; Sec. 6 intro and end of 6.2; Fig. 8b",
+   "quote": "Prof. Jeong asked that new results be compared with the initial test, which had shown no significant differences. ... so June and July cannot be compared directly with each other either. The June values sit close to the rig's Ra 20 curve (Fig. 8b).",
+   "problem": "Jeong's 27 July request (\"compare the results with our initial test ... a good baseline\") is his main outstanding question, and the report does not answer it plainly. The Summary discusses only the July test and never mentions the June (initial) test. Sec. 6 states that the exact comparison he asked for cannot be made, then gives the one usable answer (June \u2248 rig Ra 20) in a single unquantified sentence at the end. \"No significant differences\" is left unexplained (between what and what?), so Jahangiri and Sodhi cannot follow it. Fig. 8b puts June \"as reported\" (a different processing basis) next to reprocessed July and the rig, and the caption gives no warning.",
+   "evidence": "Email thread C, msg 19fa567db43ad6ac (Jeong, 27 Jul). I computed June Pdc_max (Summary_Table_Part1_MAX.csv) against rig p_raw (build/tables/pmax_v1_*.csv). June/Ra20 is 0.93\u20131.25 at 800\u20131700 rpm (geometric mean 1.06) and 1.26\u20131.56 at 500\u2013700. June/Ra40 is 0.85\u20131.16 and June/Ra80 is 0.79\u20131.12 at 800\u20131700. So the initial reference lies inside the band spanned by the three textured rotors, and its scatter is larger than the 8\u201314% texture effect.",
+   "fix": "Add a Summary bullet: \"Comparison with the initial test (5 June), as Prof. Jeong asked: at 800\u20131700 rpm the June values are within \u22127% to +25% of Ra 20 and inside the range of the three textured rotors, so the printed rotors perform about like the initial reference. The June processing differs, and that difference is larger than the 8\u201314% texture effect.\" Put the same statement in a short box at the top of Sec. 6 with a small ratio table. Say in one clause what the initial test compared (\"no significant differences between \u2026\"), or ask Jeong. Add to the Fig. 8 caption: \"June is plotted on the lab's own processing basis (50-sample averages), not the rig's.\""
+  },
+  {
+   "severity": "major",
+   "location": "Whole report; Sec. 9 (Recommended next steps)",
+   "quote": "(no occurrence of 'fault' anywhere in the report)",
+   "problem": "Jeong asked twice for a fault-testing plan (15 July: \"As Prof. Jahangiri suggested, we will also begin considering the fault scenarios\"; 27 July: \"we need to develop a plan for the fault testing ... prepare various types of blades representing different fault conditions ... finalize the test plan before proceeding with the next round of testing\"). The roughness runs went ahead anyway. The report never mentions the plan, and none of the five next steps covers it. Jeong and Jahangiri will both notice. The report also has the ingredients to answer: a validated 8-minute automated sweep, and a Th\u00e9venin split that separates rotor-side changes (V_oc) from electrical-side changes (R_int), which is exactly a fault discriminator.",
+   "evidence": "A grep of report.tex for fault/imbalance/vibration found nothing (\"accelerometer\" appears once, in Sec. 9 item 4). Email evidence [A] and [C]. The September deck (docs/slides/jeong_setup_and_results_v1.pptx, slide 10) did include \"predefined fault blades\", so the topic has dropped out of this report.",
+   "fix": "Add a half-page subsection, e.g. 9.1 \"Toward the fault-testing plan\". Cover: (a) status (not yet drafted or agreed); (b) what the rig now offers: an automated MPP sweep in about 8 min, and demonstrated sensitivity, since a 4% V_oc shift was resolved at 14/14 set points, so rotor-side faults show in V_oc and electrical faults in R_int; plus the tunnel-node accelerometer/FFT for imbalance; (c) a candidate list, e.g. tip-mass imbalance on one blade, a chipped or shortened blade, a missing blade, added bearing drag, an open generator phase; (d) a request to set a date to finalize the plan with Profs. Jeong and Jahangiri."
+  },
+  {
+   "severity": "major",
+   "location": "Sec. 7, last paragraph (p. 15); Summary bullet 4; Appendix C",
+   "quote": "is 0.09\u20130.27%, far below a working H-rotor, because the generator loads the rotor far down its Cp(\u03bb) curve",
+   "problem": "This causal claim is unsupported, and the report's own data point the other way. Appendix C says the July DAQ's ch3 is a once-per-revolution pulse and quotes \"true rotor speed about 667 rpm\" at fan 2000 (42.5 m/s), which gives \u03bb \u2248 0.17. Jahangiri will do that arithmetic in a minute. Across the lab table \u03bb is 0.11\u20130.16 under load. Mapping the rig's own V_oc through the lab's EMF line gives free-running \u03bb of only about 0.11\u20130.22. So even unloaded the rotor never approaches the \u03bb of a lift-driven H-rotor. The low Cp_elec is not \"the generator loading it down\". The 183\u00b0 arc blades (48 mm chord, 24.5 mm depth, i.e. a semicircular bucket) are consistent with drag-dominated operation. The Summary's \"rotor speed was not reliably recorded\" also reads as if no rotor-speed information exists, and the report never explains why the lab DAQ tach was not run in parallel, although Taegu said on 18 Aug that the RPM sensor was needed.",
+   "evidence": "July Summary_Table Measured_RPM with the lab wind gives \u03bb = 0.113\u20130.163. The June table gives 0.082\u20130.144. build/daq_july/key_numbers.json emf_line: V_oc = 0.03342\u00b7rpm \u2212 0.448 (open circuit 19.7 V at 602 rpm). Applied to build/tables/thevenin_v1_*.csv, V_oc gives free-running speeds of 109\u2192717 rpm for Ra20 (782 for Ra80) and \u03bb_free = 0.113\u20130.201 (Ra20), 0.117\u20130.219 (Ra80). Email [J], 18 Aug.",
+   "fix": "Replace the causal clause with: \"The Jeong-lab tachometer (27 July, once per revolution, reliable below about 10 Hz) puts the loaded rotor at \u03bb \u2248 0.1\u20130.16. Mapping the rig's V_oc through the same generator constant gives free-running \u03bb \u2248 0.1\u20130.2. The rotor therefore runs far below the \u03bb at which a lift-driven H-rotor works, even unloaded, which explains the very low Cp_elec better than generator loading does.\" Label it an estimate. In the Summary, write \"rotor speed was not recorded on the rig (the Jeong-lab tach gives an order-of-magnitude \u03bb \u2248 0.1\u20130.2)\". State that the lab DAQ tach will run in parallel on 1 Oct."
+  },
+  {
+   "severity": "major",
+   "location": "Sec. 2 (Test articles), Table 2; Sec. 6 intro; Table 3",
+   "quote": "the no-texture test of 27 July on the printed v1 geometry without fuzzy skin ... probably on the original rotor ... the printer reported a 0.08 mm layer",
+   "problem": "Jahangiri's July question was \"which blade exactly?\", and the report still cannot answer it cleanly. It states an inference as fact: Taegu said only \"the new blades which have no texture\", and v1 is inferred. \"v1\" and \"the original rotor\" are never defined. The Ra 20 run was logged as v2_Ra20 until it was relabelled on 25 Aug; the data-package README says so but the report does not. Table 2 has no printer or who printed it, no print date, orientation, mass or photo. The 0.08 mm layer was reported by the person who printed the blades, by email, not by \"the printer\". The report also never says what a \"mounting\" physically involves (blades swapped on a common hub, or whole rotor).",
+   "evidence": "build/audit2/provenance_details.md \u00a73: \"probably v1 geometry \u2026 inference\" and \"Which physical rotor was labelled Ra20, Ra40 or Ra80 is recorded nowhere\". Email thread [C] (Jahangiri 20:37Z, Taegu 20:42Z). Data package README item 6 and commit 9cae976 (v2\u2192v1 relabel). Email [H] 12 Aug, Andrew Muszynski: \"the layer height is 0.08 mm\".",
+   "fix": "Add a 'Rotor identity' table covering all five conditions (original, 27 Jul no-texture, Ra 20, Ra 40, Ra 80). Columns: geometry source (v1 = first printed replica of the original rotor from turbine.STEP, chosen by the professors on 4 Aug over v2), who printed and where (garage Bambu, 0.4 mm nozzle / I\u00b2(s) Print Lab / unknown), date, layer and nozzle (known or unknown), blade mass (weigh before 1 Oct), and a photo. Hedge the July rotor as \"printed replica without texture; geometry probably v1, to be confirmed by Taegu\". Mention the v2\u2192v1 relabel of the Ra 20 file in one sentence. Change \"the printer reported\" to \"the person who printed the blades reported (12 Aug)\". Say in one line what is removed and refitted in a \"remount\"."
+  },
+  {
+   "severity": "major",
+   "location": "Table 2 caption and Sec. 2.2 bullet 1 (pp. 4\u20135); Summary para 1",
+   "quote": "Ra values are the roughness targets in the settings table used to choose the prints (4 August), not measurements.",
+   "problem": "This is wrong for Ra 80. The 4 August table lists only 10, 20 and 40 \u00b5m (0.025, 0.050, 0.101 mm). No Ra 80 / 0.202 mm target exists in that table or anywhere else, and the bullet below the table quietly lists only 10/20/40, so the caption and the text disagree. The report also never says where the \"settings table\" and the \"second estimate\" came from: they are a ChatGPT screenshot (4 Aug) and a Claude output (12 Aug). Sodhi, as advisor and manufacturing specialist, needs to know these labels are LLM guesses, not from a vendor, standard or paper, before anyone repeats \"Ra 80 gives +14%\".",
+   "evidence": "build/provenance/email_evidence.txt [G] (IMG_8608.png, a ChatGPT table with the 10/20/40 rows only) and [H] (a Claude-generated table: 0.05 mm \u2192 about 10\u201315 \u00b5m, 0.101 \u2192 about 20\u201335 \u00b5m). provenance_details.md \u00a72 conclusion 2: \"Ra 80 has no documented setting in any table, email or repo file.\"",
+   "fix": "Caption: \"Ra 20 and Ra 40 are targets from an LLM-generated settings table (ChatGPT, 4 Aug). Ra 80 was never in that table: the label extends the doubling. A second LLM estimate (12 Aug) put the printed settings at about 10\u201315 and 20\u201335 \u00b5m. None is a measurement.\" Use the same wording in the bullet, and in the Summary say \"labels, not measured or sourced values\"."
+  },
+  {
+   "severity": "major",
+   "location": "Summary (p. 1) and Fig. 1 (p. 2)",
+   "quote": "higher at 14 and 14 of 14 wind speeds respectively ... Pmax \u221d tfuzz^0.092 (95% CI 0.075\u20130.109) ... A Th\u00e9venin decomposition of every load sweep shows the textured rotors' open-circuit voltage",
+   "problem": "A busy professor cannot get the answer in 60 seconds. The Summary opens with setup and then spreads the answer over five dense bullets full of CIs, a fitted exponent and circuit-theory terms that Sodhi and Jahangiri will not parse. There is no absolute number (e.g. 3.79 vs 4.50 W at 38 m/s), no list of what the report answers from the July/August requests, and no 'what I need from you'. The one figure is on the next page. The wording also has slips: \"14 and 14 of 14\" and \"+8.4% more\".",
+   "evidence": "Rendered p. 1: about 430 words, 5 bullets plus a closing paragraph. Fig. 1 falls on p. 2 above the ToC.",
+   "fix": "Open with a two-sentence boxed bottom line, e.g. \"On one mounting each, rotors printed with 0.10 mm and 0.20 mm fuzzy skin produced 8% and 14% more peak electrical power than the 0.05 mm rotor, at every wind speed from 10 to 38 m/s. The extra power comes from the rotor spinning faster, not from the electrical side. Whether the cause is the texture, rather than mounting or print differences, is not yet shown; the remount repeat on 1 Oct is the first check.\" Follow it with a 3-row table (rotor, thickness, Pmax at 38 m/s, change vs Ra 20 [95% CI]). Then add 'Responses to open requests' (Jeong: initial-test comparison \u2192 \u00a76; fault plan \u2192 \u00a79; Jahangiri: which blade \u2192 \u00a72) and 'Needed from you' (current-sensor part and zero from the Jeong lab; profilometer access; a fault-plan meeting). Move the exponent and the Th\u00e9venin wording to the body. Write \"higher at all 14 wind speeds for both\"."
+  },
+  {
+   "severity": "major",
+   "location": "Sec. 6.1, 'At 500\u2013700 rpm' bullet (p. 12)",
+   "quote": "The earlier finding that the no-texture blade out-produced the textured one by an order of magnitude at low wind comes from this, not from the rotor.",
+   "problem": "The report does not say whose finding this was, so a reader, and Taegu in particular, will take it as an error by the Jeong lab. The comparison appears to be the student's own: the September deck showed Ra 20 \"91.7%\" below the July no-texture run at 10.1 m/s. The same section also calls the lab's 0.333 W \"noise\" as a fact, while Appendix C says the channel map is \"inferred from the data and to be confirmed against the lab's wiring\". Taegu, who produced that table, is a recipient.",
+   "evidence": "docs/slides/jeong_setup_and_results_v1.pptx slide 8: \"Ra20 remains below the July no-texture baseline ... 91.7%\" at 10.1 m/s; 0.333/0.0297 = 11.2\u00d7. Appendix C, first paragraph. build/audit2/july-verify_details.md has a ready-made 'Suggested wording to the lab'.",
+   "fix": "Rewrite as: \"My September slides compared the lab's Pdc_max directly with the rig and showed the no-texture blade about 11\u00d7 higher at 10 m/s. That comparison was wrong for the reason above and is withdrawn.\" If the slides were never shown, delete the sentence. Send \u00a76 and Appendix C to Taegu to confirm the channel map before distributing, or change 'is noise' to 'appears to be sensor noise (the same recipe returns 1.50 W with no current flowing)'."
+  },
+  {
+   "severity": "major",
+   "location": "Whole document: ToC (pp. 2\u20133), Figs. 2\u20133 (pp. 6\u20137), Sec. 6, Table 7, p. 19",
+   "quote": "19 pages",
+   "problem": "About 5 of the 19 pages carry nothing for this audience. The ToC spills onto p. 3 and leaves it about 70% blank. Figs. 2\u20133 fill most of pp. 6\u20137 and cannot be read. Page 19 holds three lines. The single-mounting caveat appears at least eight times (Summary twice, Fig. 1 caption, \u00a73.4, \u00a75.3, \u00a77 twice, Table 7, \u00a79). Table 7 repeats \u00a77's 'Alternative explanations' list. Sec. 6 spends 2.5 pages reconstructing the lab's processing between Results and Discussion, which breaks the flow for the two professors who did not run those tests.",
+   "evidence": "Page renders from pdftoppm of out/report.pdf (pp. 3, 6, 7, 19); section page numbers from report.toc.",
+   "fix": "Set tocdepth=1 so the ToC fits on p. 2, or drop it. Replace Figs. 2\u20133 with one readable strip, since the numbered list in \u00a73.2 already describes the protocol. Move \u00a76.1, Table 6 and Fig. 8a into Appendix C, keeping a half-page \u00a76 with the answer, Fig. 8b and the four asks. Fold Table 7 into \u00a77 as one list. State the single-mounting caveat once in the Summary and once in \u00a77. Target about 12\u201313 pages."
+  },
+  {
+   "severity": "major",
+   "location": "Sec. 7, feature (ii) vs 'Mounting and friction' bullet (pp. 14\u201315)",
+   "quote": "A constant (Coulomb-type) friction or cut-in difference between rotors would change the exponent (Section 5.5), so it is excluded. ... Mounting and friction. Bearing preload, balance and alignment change the free-running speed just as extra aerodynamic torque would. ... this is the main open alternative.",
+   "problem": "Read together, these say friction is both excluded and the main open alternative. Jahangiri (structures/dynamics) will stop here. The report never says which kinds of mounting effect the flat exponent rules out and which it does not.",
+   "evidence": "Sec. 7 text on pp. 14\u201315; Sec. 5.5 exponent argument (\u0394n = +0.003 \u00b1 0.058 and +0.024 \u00b1 0.071).",
+   "fix": "Replace with: \"The unchanged exponent rules out a constant friction torque. It does not rule out losses that scale with rotor speed (viscous bearing drag, windage from misalignment), or a mounting change to the effective geometry (blade angle, radius). Those remain the main open alternative, and the remount repeat plus a spin-down test address them.\""
+  },
+  {
+   "severity": "major",
+   "location": "Fig. 3 (p. 7) vs Sec. 3.2",
+   "quote": "~10 minutes per rotor, unattended ... Dwell 1.0 \u2013 1.5 s ... 14 points \u00b7 10.1 \u2192 37.5 m/s ... has power fallen to 80% of its peak?",
+   "problem": "The protocol figure contradicts the text beside it. The text gives \"about eight minutes (8.0 and 7.9)\", \"dwelling 1.0 s per step\" and \"10.2 to 38.0 m/s\". The text never states the 80% stop rule the figure shows; it says only \"fallen clearly past its maximum (54\u201379%)\". At printed size the figure's text is about 4 pt.",
+   "evidence": "docs/diagrams/sweep_protocol.png is dated 26 Aug. In logs/sweep_v1_Ra40_points.csv the median spacing between dwells is 1.055 s and the run span is 7.96 min. The header protocol_detail reads \"dwell=1.00 ... operate=80.0\".",
+   "fix": "Cut Fig. 3 (the numbered list in \u00a73.2 is enough), or regenerate it with 8 min, 1.0 s and 10.2\u201338.0 m/s. In \u00a73.2 item 3 write \"the ramp stops at the first step where power falls below 80% of the running maximum (in these runs the last step was at 54\u201379%)\"."
+  },
+  {
+   "severity": "minor",
+   "location": "Summary bullet 3; Sec. 5.4; Sec. 3.1",
+   "quote": "with the electrical source resistance unchanged",
+   "problem": "The Summary calls R_int \"electrical\". Sec. 5.4 says it \"combines the winding, rectifier and wiring with the rotor's slowing under load\", and the July constant-speed data put the true source resistance at about 24\u201327 \u03a9 against a fitted 36\u201394 \u03a9, so most of R_int is not electrical. Fig. 2 also shows a series V/I sense IC in the power path that the text leaves out of R_int. Jeong (power electronics) will notice both.",
+   "evidence": "build/daq_july/key_numbers.json R_int_constant_speed_ohm median 26.8 \u03a9 (24.0 \u03a9 in the independent verification); Table 9 R_int 34.4\u201394.2 \u03a9; Fig. 2 'V / I sense IC, series'.",
+   "fix": "Use \"apparent source resistance\" everywhere, the Summary included. Add \"the series current-sense IC\" to the list of what R_int contains."
+  },
+  {
+   "severity": "minor",
+   "location": "Running head; title; Summary heading; \u00a73.3; \u00a74; Fig. 1 axis",
+   "quote": "Surface-roughness wind-tunnel tests of a 3D-printed VAWT rotor ... Rougher texture, more electrical power ... raw arg max ... load ladder ... tracking dwells ... tunnel node",
+   "problem": "Terminology drifts. The running head and zip name say \"roughness\", while the title and body deliberately say \"texture\" because roughness was never measured, yet the first Summary heading asserts \"Rougher\". Coined terms (ladder, dwell, tracking dwells, arg max, fingerprint, tunnel node) are used without definition, which loses Sodhi and Jahangiri. Fig. 1 labels the axis \"nominal\" two sections before \u00a74 defines it. Earlier slides labelled the same points 10.1\u201337.5 m/s, and the report does not flag that it now uses 10.2\u201338.0.",
+   "evidence": "preamble.tex \\fancyhead[L]; Summary bullet 1; \u00a73.3 first use of 'load ladder'; \u00a79 item 4 'the accelerometer on the tunnel node'; slides v1 slide 4 ('1779 rpm, 37.5 m/s, 3.793 W').",
+   "fix": "Running head: \"Printed surface texture and VAWT electrical output\". Summary heading: \"Thicker fuzzy skin, more electrical power\". In \u00a73.2 define 'ladder' and 'dwell' once. Say 'highest single reading' for raw arg max. Add to the Fig. 1 caption: \"nominal = from commanded fan speed via the tunnel calibration; earlier slides labelled the same points 10.1\u201337.5 m/s from the logged fan speed\". Define 'tunnel node' in \u00a79."
+  },
+  {
+   "severity": "minor",
+   "location": "Fig. 4(b) (p. 9); Fig. 6(a),(b) (p. 11)",
+   "quote": "power-law exponents n = 3.76, 3.77, 3.79",
+   "problem": "In Fig. 4(b) and Fig. 6(a)/(b) the three curves lie on top of each other at plotted scale, so they cannot show the 4\u201314% differences, or the \"R_int unchanged\" claim that 6(b) is cited for. Fig. 4(b) repeats Table 5.",
+   "evidence": "Rendered pp. 9 and 11.",
+   "fix": "Drop Fig. 4(b). Replace Fig. 6(b) with 'R_int change vs Ra 20 (%)' plus a CI band, styled like 6(c), so both halves of the decomposition read as ratios."
+  },
+  {
+   "severity": "minor",
+   "location": "Sec. 6.2, final paragraph (p. 13)",
+   "quote": "on a comparable basis, the July no-texture test is neither clearly above nor clearly below the textured prints",
+   "problem": "Table 6, directly above, shows the reprocessed July run below Ra 20 at every set point (0.65\u20130.91). The sentence reads as contradicting the table unless the reader rebuilds the uncertainty argument.",
+   "evidence": "Table 6, last column: 0.70, 0.65, 0.70, 0.66, 0.84, 0.89, 0.91, 0.88, 0.89, 0.82.",
+   "fix": "\"On the numbers the July run is 9\u201335% below Ra 20. The unverified current scale and the under-loading at 900\u20131300 rpm are each large enough to account for that, so it cannot be read as a texture effect.\""
+  },
+  {
+   "severity": "minor",
+   "location": "Sec. 4 (Data inventory and quality)",
+   "quote": "(no mention of any repeat measurement)",
+   "problem": "The professors will ask how repeatable the rig is without remounting. The only same-rotor repeat data (Ra 20 single-point peaks) go unmentioned, although they agree with the sweep to within 0.3%.",
+   "evidence": "logs/peak_1200.csv max 0.9619 W vs Ra 20 sweep 0.9592 W (+0.28%); logs/peak_1800.csv (v1_Ra20, protocol 98d91e3a89f2) 3.8004 W vs 3.7935 W (+0.18%). docs/09_results.md discusses both.",
+   "fix": "Add one sentence: \"Two single-point re-measurements of Ra 20 on the same mounting (a different protocol, so indicative only) matched the sweep to within 0.3% at 1200 and 1800 rpm, so within-mounting repeatability is well below the effects reported.\""
+  },
+  {
+   "severity": "minor",
+   "location": "Summary, 'Most valuable next measurement'; Sec. 9 item 1",
+   "quote": "Most valuable next measurement: a remount repeat of Ra 20 (about 15 minutes of tunnel time)",
+   "problem": "The report is dated 30 Sep and the remount is already scheduled for 1 Oct, 3\u20134 PM (Taegu accepted). Readers will ask why the report went out the day before a run that may change its error bars. The report never says it is scheduled.",
+   "evidence": "email_evidence.txt [M], 1a0f42d7b20f01d9: Taegu accepted 'Wind Tunnel Testing' Thu 2026-10-01 3\u20134 PM.",
+   "fix": "\"A remount repeat of Ra 20 is scheduled for 1 October (with the Jeong-lab tach running in parallel); an addendum with its result will follow within the week.\""
+  },
+  {
+   "severity": "minor",
+   "location": "Title banner; no acknowledgements section",
+   "quote": "SODHI LAB \u00d7 JEONG LAB",
+   "problem": "Prof. Jahangiri is a named recipient and originated the fault-scenario request, but his lab is missing from the banner. There is no credit to Taegu Kang, who co-ran the 20 Aug Ra 20 sweep and ran the June and July tests the report reprocesses, or to Andrew Muszynski, who printed the textured blades.",
+   "evidence": "Email [K], 20 Aug: \"Taegu and I were able to successfully perform an automated test today\". Email [H]: Andrew's prints handed over on 12 Aug.",
+   "fix": "Include all three labs in the banner, or drop lab names. Add a two-line Contributions/Acknowledgements note before the References."
+  },
+  {
+   "severity": "minor",
+   "location": "Table 1 (p. 4)",
+   "quote": "Chord Reynolds number 32 376 to 119 735 over the tested wind range",
+   "problem": "These values come from the logged Ra 20 wind speeds (10.14\u201337.50 m/s), not the nominal 10.2\u201338.0 m/s used everywhere else in the report, and five significant figures suggests a precision the data do not have. Also relevant for Jahangiri: neither the test-section dimensions nor the blockage ratio is given anywhere.",
+   "evidence": "provenance_details.md \u00a71: reproduced exactly with \u03bd = 1.5033e-5 over 10.14\u201337.50 m/s. At the nominal range the same \u03bd gives about 32 700\u2013121 200. No test-section size appears in report.tex or data/tunnel.json.",
+   "fix": "\"3.3\u00d710\u2074 to 1.2\u00d710\u2075 (\u03bd at 20 \u00b0C, nominal wind)\". Add the test-section size and blockage ratio, noting that blockage cancels in paired ratios but affects Cp_elec."
+  },
+  {
+   "severity": "minor",
+   "location": "Sec. 3.1 / Sec. 4",
+   "quote": "a Chroma 63004-150-60 DC electronic load ... sets the operating point and measures terminal voltage and current",
+   "problem": "The report gives no readback accuracy or resolution. At 500 rpm Pmax occurs at about 18 mA on the load's 2 A low range, and Jeong will ask what the current reading is worth at that level.",
+   "evidence": "logs/sweep_v1_Ra40_summary.csv, 500 rpm: i_at_pmax_raw_a = 0.0180. docs/06_chroma.md: CCL full scale 2 A. Headers: range=low.",
+   "fix": "Add one sentence with the datasheet V/I readback accuracy on the CCL range, and note that a fixed offset largely cancels in paired ratios taken at the same current."
+  },
+  {
+   "severity": "minor",
+   "location": "Sec. 3.4 and Table 4",
+   "quote": "A two-sided sign test counts the set points at which one rotor is higher.",
+   "problem": "A sign test is announced but its p-value is never reported. Only counts appear, so a reader cannot tell what \"13/14\" means statistically.",
+   "evidence": "numbers.tex defines \\signpABraw = 1.2\u00d710\u207b\u2074, \\signpBCraw = 1.8\u00d710\u207b\u00b3 etc., and report.tex never uses them.",
+   "fix": "Report the p-value in Table 4's 'Higher' column, e.g. \"14/14 (p = 1.2\u00d710\u207b\u2074)\", or drop the words 'sign test'."
+  }
+ ]
+}
