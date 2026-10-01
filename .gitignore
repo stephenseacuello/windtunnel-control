@@ -22,3 +22,6 @@ data/snapshots/*_dashboard.json
 # Anything genuinely worth keeping goes in data/snapshots/simulated/ on
 # purpose, not by accident.
 data/snapshots/*SIMULATED*.json
+
+# Office lock files
+~$*

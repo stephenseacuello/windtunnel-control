@@ -64,6 +64,7 @@
     <div class="tab" data-p="calib">Calibration</div>
     <span class="tab-group">check</span>
     <div class="tab" data-p="node">Node</div>
+    <div class="tab" data-p="cfd">CFD</div>
     <div class="tab" data-p="diag">Diagnostics</div>
     <div class="tab" data-p="logs">Logs</div>
     <div class="rail-foot" id="foot">—</div>
@@ -72,9 +73,67 @@
   <main class="main">
 
   <!-- ============================= NODE ============================== -->
+  <section class="page" id="p-cfd">
+    <div class="card">
+      <h3>OpenFOAM <span class="lbl" id="cf-ver">—</span></h3>
+      <div class="sm dim" id="cf-install" style="margin-bottom:10px"></div>
+      <div class="row" style="gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <label class="f">case
+          <select id="cf-case" style="min-width:220px"></select></label>
+        <label class="f">commands
+          <input type="text" id="cf-cmds" value="blockMesh simpleFoam"
+                 style="width:260px"></label>
+        <button class="go" id="cf-go">Run</button>
+        <button class="go" id="cf-stop">Stop</button>
+        <span class="sm dim" id="cf-stat"></span>
+      </div>
+      <div class="sm dim" style="margin-top:8px">
+        Only whitelisted OpenFOAM binaries run, and only on cases inside the
+        run directory. This is not a shell — see <code>src/openfoam.py</code>.
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Residuals <span class="lbl" id="cf-conv">—</span></h3>
+        <canvas class="plot" id="cv-cf-res" height="220"></canvas>
+        <div class="sm dim">
+          <b>Initial</b> residual per SIMPLE iteration, log scale. Falling
+          three or four decades and flattening is convergence. Flat from the
+          start is a mesh or boundary-condition problem, not a solver one —
+          and a residual that rises is diverging, which no amount of extra
+          iterations fixes.
+        </div>
+      </div>
+      <div class="card">
+        <h3>Solver output <span class="lbl" id="cf-time">—</span></h3>
+        <pre id="cf-out" class="sm"
+             style="height:250px;overflow:auto;margin:0;white-space:pre-wrap"
+             ></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sm dim">
+        <b>What this is for.</b> The rig measures P_max(v) and — once rotor
+        speed is trustworthy — Cp(λ). A case predicts the same quantities from
+        geometry alone. Neither settles anything by itself: the rig is the
+        truth but cannot say <i>why</i> a blade behaves as it does, and the
+        simulation says why only once it agrees with the rig. The product
+        worth having is the <b>residual between the two</b>, which is the
+        argument <code>src/twin_residual.py</code> already makes one level
+        down about the generator model.
+      </div>
+    </div>
+  </section>
+
   <section class="page" id="p-node">
     <div class="card">
-      <h3>Tunnel node <span class="lbl" id="nd-id">—</span></h3>
+      <h3>Tunnel node <span class="lbl" id="nd-id">—</span>
+        <button class="go" id="nd-connect"
+                style="float:right;font-size:12px;padding:3px 10px">Connect</button>
+        <span class="sm dim" id="nd-cstat" style="float:right;margin-right:8px"></span>
+      </h3>
       <div class="readouts">
         <div class="ro meas"><div class="lbl">air temperature</div>
           <div class="big" id="nd-t">—<span class="unit">°C</span></div></div>
@@ -254,8 +313,12 @@
         <span class="sm dim">rotor <b id="tw-rpm">no data</b> rpm</span>
       </div>
       <div class="note" style="margin-top:8px">
-        <b>The rotor speed here is inferred, not measured.</b> Nothing on this
-        rig reports rotor rpm — the DAQ channel is not wired in — so the
+        <b>The rotor speed here is inferred, not measured.</b> A proximity
+        sensor now feeds PMC firmware 5.7 on ENC0 index, so the rig does
+        report rotor rpm — but it counts each magnet pass 2–3 times and not
+        the same number twice, so nothing here uses it yet. Run
+        <code>src/check_rotor.py</code> on a sweep to see whether that is
+        still true. Until it reads clean, the
         animation is driven from terminal voltage through an unmeasured
         generator constant. Treat it as an illustration of state, never as
         data. The mesh is <b>one blade</b>, instanced about the hub; tip radius
@@ -325,7 +388,9 @@
         <th>fan rpm</th><th>m/s</th><th>P_max (W)</th><th>at (A)</th>
         <th>stop</th></tr></thead><tbody></tbody></table>
       <div class="sm dim">Electrical power at the load terminals. <b>Not Cp</b>
-        — that needs rotor RPM from the DAQ, which is not yet wired in.</div>
+        — that needs rotor RPM. The sensor is wired to the PMC (firmware 5.7)
+        but bounces, so no banked sweep carries a usable
+        <code>turbine_rpm</code> column yet.</div>
     </div>
 
   </section>

@@ -17,8 +17,13 @@
  *  Sensor: DIGITEN VJ12-D10K, a 2-wire DRY CONTACT (reed switch). One magnet
  *  on one blade, so ONE PULSE PER REVOLUTION. No supply, no polarity.
  *
- *      reed wire A  ---->  PMC  ENC0 A   (PJ_8, encoder connector)
+ *      reed wire A  ---->  PMC  ENC0 Z (Z0, index)   <-- NOT A. See below.
  *      reed wire B  ---->  PMC  GND
+ *
+ *  The wire moved from ENC0 A to Z0 in v5.5: QEI::setEncoding() never assigns
+ *  encoding_, so X2 decoding needs BOTH channels moving and a single-channel
+ *  signal on A counted nothing. getRevolutions() reads the index channel and
+ *  counts one per magnet pass, which is what we want anyway.
  *
  *  NOT AI0. The analog inputs are an ADC behind SPI and one read is a
  *  blocking transaction of order a millisecond. At 2400 rpm the magnet is in
@@ -27,15 +32,30 @@
  *  rpm LOW exactly where the rotor makes most power. PJ_8 is a real MCU pin,
  *  so a hardware interrupt catches the edge whatever else the loop is doing.
  *
- *  The pin is configured INPUT_PULLUP, so the contact simply shorts it to
- *  ground. Nothing can be damaged by getting the two wires the wrong way
- *  round; there is no wrong way round.
+ *  *** REQUIRED, NOT RECOMMENDED: 4k7 from Z0 to 3V3, 10 nF Z0 to GND. ***
  *
- *  RECOMMENDED, not required: a 4.7k pull-up to 3V3 and 10 nF to GND at the
- *  PMC end, with the run in shielded twisted pair. The internal pull-up is
- *  about 40k, which is a high-impedance node next to a 15 HP motor and a VFD.
- *  Firmware debouncing will cope either way; the resistor just means fewer
- *  rejected edges to explain later.
+ *  There is NO internal pull-up on this pin. An earlier revision of this
+ *  comment said "configured INPUT_PULLUP"; that described v5.0, which drove
+ *  the sensor through InterruptIn on PJ_8. v5.3 tried pin_mode(..., PullUp)
+ *  on the QEI-owned pin and HUNG THE BOARD. It was removed and never
+ *  replaced, so since v5.4 the input has floated.
+ *
+ *  A 2-wire dry contact has no output drive: it shorts or it opens. With
+ *  nothing pulling the line up, an open contact leaves a high-impedance CMOS
+ *  input floating a few feet from a 15 HP motor and a VFD, and it counts
+ *  switching noise as revolutions.
+ *
+ *  This is what that looks like, measured 1 Sept 2026: ten revolutions BY
+ *  HAND registered 23 counts with a 5.5 ms debounce. By hand is ~1-2 Hz --
+ *  twenty times below this reed's own 20 Hz rating -- so bandwidth cannot
+ *  explain it, and contact bounce settles in 1-5 ms so a 5.5 ms debounce
+ *  would have swallowed it. Extra edges spread over tens of ms are a
+ *  floating input, and no amount of firmware debouncing fixes that: the
+ *  noise is indistinguishable from signal once it is through the Schmitt
+ *  trigger.
+ *
+ *  Nothing can be damaged by getting the two sensor wires the wrong way
+ *  round; there is no wrong way round.
  *
  *  ---------------------------------------------------------------------------
  *  WHAT THIS SENSOR CANNOT DO, AND HOW YOU WILL KNOW
@@ -767,8 +787,14 @@ void setup() {
   Serial.println("# acs550-pmc 5.7 ready (RD/WR, rotor rpm on ENC0 INDEX / Z0)");
   Serial.println("# T,t_ms,state,sp_hz,act_hz,amps,kw,sw,settled,fault,errs,"
                  "rpm_pulses,rpm_last_us,rotor_rpm");
-  Serial.println("# rotor: 1 magnet/rev on PJ_8, INPUT_PULLUP, "
-                 "2 ms debounce. Send RPM? and pass the magnet by hand.");
+  Serial.print("# rotor: 1 magnet/rev on ENC0 INDEX (Z0), NO internal "
+               "pull-up, debounce ");
+  Serial.print(rpmMinGapUs);
+  Serial.println(" us. Send RPM? and pass the magnet by hand.");
+  Serial.println("# rotor: a 2-wire DRY CONTACT into a pin with no pull-up "
+                 "FLOATS between passes.");
+  Serial.println("#        Fit 4k7 Z0->3V3 and 10nF Z0->GND, shielded twisted "
+                 "pair, or it counts noise.");
 
   writeCommand(CW_PREPARE, 0);
   state       = ST_IDLE;

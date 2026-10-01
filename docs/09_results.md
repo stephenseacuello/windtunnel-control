@@ -44,7 +44,13 @@ to fake +13.7% would also drag the power-law exponent down by about 0.24:
 | −0.25 m/s | +7.4% | −0.141 |
 | −0.50 m/s | +15.4% | −0.267 |
 
-**Measured Δn is +0.024 ± 0.064 — 4.1σ from the −0.24 that artefact requires.**
+**Measured Δn is +0.024 ± 0.064, which is 8.1σ from the −0.24 that artefact
+requires.** The ± here is a **95% half-width** (`compare_blades.py` prints
+`1.96·SE`), so SE = 0.033 and (0.024 + 0.240)/0.033 = 8.1. This line read
+"4.1σ" until 31 Aug — the distance divided by the half-width rather than by
+the standard error, which understates the exclusion by exactly 1.96×. The
+conclusion was never at risk; the arithmetic simply did not check out for
+anyone who tried it.
 Generator warm-up is excluded the same way: it predicts Δn ≈ −0.063 *and* a
 deficit, not a gain.
 
@@ -103,8 +109,17 @@ left for the blade to move.
 ## What the rig cannot yet say
 
 **Cp_elec is 0.10–0.24%**, roughly 100× below a working H-rotor. Peak power
-sits at ω/ω_runaway ≈ 0.70 → 0.94, the far limb of Cp(λ) where Cp → 0 by
-construction.
+sits far out on the limb of Cp(λ) where Cp → 0 by construction.
+
+> This line quoted **ω/ω_runaway ≈ 0.70 → 0.94** until 31 Aug. That figure is
+> **not reproducible**. Recovering it from the banked data needs the Thévenin
+> match relation ω/ω_runaway = 2·V_pmax/V_oc, and that returns values **above
+> 1.0 at five of the fourteen wind speeds** — physically impossible, so the
+> method is invalid rather than imprecise. **Rotor droop under load is not
+> knowable from these sweeps**, because rotor speed was never measured, which
+> is the entire reason the sensor exists. Any figure quoted for it — including
+> the 45% that a draft of `NEXT_SESSION.md` used to size the reed's usable
+> range — is a guess.
 
 **This is electrical power, not Cp.** The consequence is not academic: a blade
 that captures more energy but spins slower produces less voltage and therefore
@@ -154,10 +169,45 @@ cross-checks answer a question about a different part.
 
 | finding | strength |
 |---|---|
-| P ∝ v^3.77, R² = 0.998 | **strong** — 14 points, independent single-point repeats to 0.3%/0.2% |
+| P ∝ v^3.77, R² = 0.998 log / 0.990 power | **strong** — 14 points. The single-point repeats support the *rig*, not the protocol: see below |
 | Thévenin fit, n = 2a−b = 3.79 vs 3.77 | **strong** — an independent cross-check the fits were not tuned for |
-| Ra 80 is +13.73% | **good** — resolved, artefact excluded at 4.1σ, but see below |
+| Ra 80 is +13.73% | **good** — resolved, artefact excluded at 8.1σ, but see below |
 | The cause is surface roughness | **weak** — see below |
+
+### What the single-point repeats do and do not show
+
+`logs/peak_1200.csv` and `logs/peak_1800.csv` land within **0.28% and 0.18%**
+of the sweep at the same fan setting. That agreement is real, but it is weaker
+evidence than "independent repeat" suggests:
+
+- **Neither is on the campaign protocol.** `peak_1800` is `98d91e3a89f2`;
+  `peak_1200` carries **no header metadata at all** — no protocol, no blade,
+  no wind speed. By this repo's own rule they are not comparable to a
+  `94bed28333f7` run, so they evidence the rig's repeatability rather than
+  the campaign result.
+- **`peak_1800` records no measured fan speed**, only the command. Whether it
+  actually had the same air as the sweep is not established, just likely.
+
+### Do not "correct" the 0.18% across the wind columns
+
+The summary says 37.50 m/s at fan 1800 and the points file says 37.95. That
+gap is **not** two conventions for one number and it is not noise: both come
+from the same `v = 0.02132·rpm − 0.424`, the summary fed with the **measured**
+fan speed (1779) and the points file with the **commanded** one (1800). The
+drive slips 4–21 rpm below setpoint, so **37.50 is the physically correct
+figure** and 37.95 is nominal.
+
+It is tempting — having noticed that — to correct the 0.18% across the 1.2%
+gap with P ∝ v^3.77, which would turn a genuine agreement into a **−4.2%
+discrepancy**. Do not. `p_max_w` in the summary *is* the argmax of the points
+file: both read 3.7935 W at fan 1800. The two files disagree about which wind
+speed to *label* that power with; they do not disagree about the power, and
+there is no wind difference between the two numbers being compared because
+they are the same measurement.
+
+The rule that does hold is the one in `07_blade_campaign.md`: never pair a
+power from one file with a wind speed from the other. Quote both from the
+summary, which is the measured pair.
 
 **Both runs are a single mounting of a single rotor.** There is no
 mount-to-mount error bar, so remounting could move a result by an unknown

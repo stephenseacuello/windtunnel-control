@@ -324,7 +324,7 @@ $$('.tab').forEach(t => t.onclick = () => {
   $('#p-' + t.dataset.p).classList.add('on');
   const load = {params: loadParams, calib: loadCalib, logs: loadLogs,
                 commission: pollJob, blades: loadBlades,
-                analysis: loadAnalysis, node: loadNode};
+                analysis: loadAnalysis, node: loadNode, cfd: loadCfd};
   if (load[t.dataset.p]) load[t.dataset.p]();
   // Canvases drawn while their tab was hidden are zero-sized. Redraw on the
   // frame after the tab becomes visible, once layout has settled.
@@ -1412,6 +1412,118 @@ let BLADE_REQ = 0;
 
 let NODE_BURST = null;
 
+// ── CFD ───────────────────────────────────────────────────────────────────
+
+const CF_COLORS = {Ux: '#0b6fb4', Uy: '#00a3a1', Uz: '#7a4fa3',
+                   p: '#b03030', k: '#8a7038', epsilon: '#2e7d32',
+                   omega: '#5b7288'};
+let CF_POLL = null;
+
+async function loadCfdInstall() {
+  const r = await api('/api/cfd/install').catch(() => null);
+  if (!r) return;
+  $('#cf-ver').textContent = r.version || 'not installed';
+  $('#cf-install').innerHTML = r.ok
+    ? `<span class="dim">${r.wrapper} · cases in ${r.cases_root}</span>`
+    : `<span class="warn">${r.note || 'not found'}</span>`;
+}
+
+async function loadCfdCases() {
+  const r = await api('/api/cfd/cases').catch(() => null);
+  const sel = $('#cf-case');
+  if (!r || !r.cases || !r.cases.length) {
+    sel.innerHTML = '<option value="">no cases found</option>';
+    return;
+  }
+  const keep = sel.value;
+  sel.innerHTML = r.cases.map(c =>
+    `<option value="${c.name}">${c.name}` +
+    `${c.latest_time ? `  (t=${c.latest_time})` : ''}</option>`).join('');
+  if (keep) sel.value = keep;
+}
+
+function drawCfdResiduals(res) {
+  const series = Object.keys(res || {}).sort().map(f => ({
+    color: CF_COLORS[f] || '#5b7288', width: 1.5, label: f,
+    x: res[f].t, y: res[f].r}));
+  // Log Y is not decoration. Residuals span four or five decades, and on a
+  // linear axis everything below the first iteration is a flat line on zero —
+  // which is exactly the region that says whether it converged.
+  drawPlot($('#cv-cf-res'), series,
+           {logY: true, xlabel: 'iteration', ylabel: 'initial residual',
+            legend: true, empty: 'no residuals yet'});
+}
+
+async function loadCfd() {
+  await Promise.all([loadCfdInstall(), loadCfdCases()]);
+  await pollCfd();
+}
+
+async function pollCfd() {
+  const r = await api('/api/cfd/state').catch(() => null);
+  if (!r) return;
+  const st = r.state || 'idle';
+  $('#cf-stat').innerHTML = r.running
+    ? `<span class="dim">running ${r.case || ''}…</span>`
+    : (st === 'failed' ? `<span class="warn">${r.message || 'failed'}</span>`
+                       : `<span class="dim">${r.message || st}</span>`);
+  $('#cf-conv').textContent = r.converged
+    ? `converged in ${r.converged}` : (r.time != null ? `t = ${r.time}` : '—');
+  $('#cf-time').textContent = r.exec_s != null ? `${r.exec_s.toFixed(1)} s` : '';
+
+  const out = $('#cf-out');
+  const atBottom = out.scrollTop + out.clientHeight >= out.scrollHeight - 30;
+  out.textContent = (r.output || []).join('\n');
+  if (atBottom) out.scrollTop = out.scrollHeight;   // follow, unless scrolled up
+
+  drawCfdResiduals(r.residuals);
+
+  // Poll only while something is running, and only while this tab is shown.
+  const visible = $('#p-cfd').classList.contains('on');
+  if (CF_POLL) { clearTimeout(CF_POLL); CF_POLL = null; }
+  if (r.running && visible) CF_POLL = setTimeout(pollCfd, 1000);
+}
+
+async function runCfd() {
+  const btn = $('#cf-go');
+  const cmds = $('#cf-cmds').value.trim().split(/\s+/).filter(Boolean);
+  const cse = $('#cf-case').value;
+  if (!cse) { $('#cf-stat').innerHTML = '<span class="warn">pick a case</span>'; return; }
+  btn.disabled = true;
+  try {
+    await api('/api/cfd/run', {method: 'POST',
+      body: JSON.stringify({case: cse, commands: cmds})});
+    await pollCfd();
+  } catch (e) {
+    $('#cf-stat').innerHTML = `<span class="warn">${e.message || e}</span>`;
+  } finally { btn.disabled = false; }
+}
+
+async function stopCfd() {
+  await api('/api/cfd/stop', {method: 'POST'}).catch(() => null);
+  await pollCfd();
+}
+
+
+async function connectNode() {
+  // /api/node/connect existed with no caller: nothing in this file ever hit
+  // it and there was no control in the page, so a node that was not already
+  // attached when the server started could not be reached from the dashboard
+  // at all — the tab rendered "not connected" with no way to act on it.
+  const b = $('#nd-connect'), st = $('#nd-cstat');
+  b.disabled = true; st.textContent = 'scanning…';
+  try {
+    const r = await api('/api/node/connect', {method: 'POST', body: '{}'});
+    st.textContent = r && r.connected ? '' : (r && r.error) || 'not found';
+    await loadNode();
+  } catch (e) {
+    st.innerHTML = `<span class="warn">${e.message || e}</span>`;
+  } finally {
+    b.disabled = false;
+  }
+}
+
+
 async function loadNode() {
   const r = await api('/api/node/state').catch(() => null);
   if (!r || !r.ok) return;
@@ -1419,6 +1531,7 @@ async function loadNode() {
   $('#nd-id').textContent = r.connected
     ? (r.identity || '').replace('OK ID ', '')
     : (r.error || 'not connected');
+  $('#nd-connect').textContent = r.connected ? 'Reconnect' : 'Connect';
 
   const last = r.last;
   if (last) {
@@ -2417,4 +2530,22 @@ function wireScan() {
   loadSnapshots();
 }
 
+function wireNode() {
+  // Both of these were dead. `runBurst` was defined and never referenced, so
+  // the Capture button and the FFT it draws did nothing at all; `connectNode`
+  // had no control and no caller, so a node that was not already attached
+  // when the server started was unreachable from the page. The tab rendered
+  // correctly either way, which is why it read as finished.
+  const c = document.querySelector('#nd-connect');
+  if (c) c.onclick = connectNode;
+  const g = document.querySelector('#nd-go');
+  if (g) g.onclick = runBurst;
+
+  const cg = document.querySelector('#cf-go');
+  if (cg) cg.onclick = runCfd;
+  const cs = document.querySelector('#cf-stop');
+  if (cs) cs.onclick = stopCfd;
+}
+
 document.addEventListener('DOMContentLoaded', wireScan);
+document.addEventListener('DOMContentLoaded', wireNode);

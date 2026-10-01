@@ -45,13 +45,14 @@ import contextlib
 import io
 
 import characterize as _char
+import openfoam as _of
 import feedforward as _ff
 import gusts
 import preflight as _pre
 from acs550 import ACS550, DriveError
 from calibration import Calibration
 from calibration import TO_MPS
-from config import TunnelConfig
+from config import TunnelConfig, DEFAULT_PATH as _DEFAULT_CONFIG
 from player import ProfileAborted, ProfilePlayer
 from simulator import SimulatedACS550
 import sweep_core as _sc   # the protocol — shared with src/blade_sweep.py
@@ -172,10 +173,19 @@ class TunnelController:
     """Owns the drive. Everything the web app does goes through here."""
 
     def __init__(self, port, baud=19200, parity="N", unit=1,
-                 dry_run=False, config_path="tunnel.json", poll_hz=4.0):
-        self.cfg = TunnelConfig.load(config_path)
+                 dry_run=False, config_path=None, poll_hz=4.0,
+                 sweep_poll_hz=20.0):
+        self.cfg = TunnelConfig.load(config_path or _DEFAULT_CONFIG)
         self.dry_run = dry_run
         self.poll_period = 1.0 / poll_hz
+        # Rotor speed is read from the gap between two telemetry samples, so
+        # the sample rate has to be MUCH shorter than a dwell or the window
+        # spills into the previous ladder step — which loads differently, and
+        # the rotor slows under load. At 4 Hz against a 1 s dwell there are
+        # four samples per window; the CLI uses twenty and measured 18.7 Hz
+        # sustained on this link. Idle stays slow because nothing needs 20 Hz
+        # of a stationary fan.
+        self.sweep_poll_period = 1.0 / sweep_poll_hz
 
         ref = self.cfg.get("drive_reference") or {}
         self.ref_unit = ref.get("unit", "rpm")
@@ -242,9 +252,12 @@ class TunnelController:
         self.target_hz = 0.0
         self.running = False
 
-        # Telemetry ring buffer. 4 Hz x 900 = 15 minutes of history, which is
-        # longer than any single profile and cheap to hold.
-        self.trace = deque(maxlen=900)
+        # Telemetry ring buffer, sized for a WHOLE sweep at the fast rate.
+        # At 900 it held 225 s at 20 Hz, and the Ra 40 sweep ran 505 s — so
+        # the first half of every sweep was silently discarded, including
+        # every rotor sample belonging to the low wind speeds. 16000 covers
+        # 13 minutes at 20 Hz and is a few hundred kB.
+        self.trace = deque(maxlen=16000)
         # The ambient node. Separate board, separate port, entirely optional:
         # it must never be able to stop a run. Sampled slowly because the
         # LPS22HB is slow and air does not change fast; 1800 samples at one
@@ -259,6 +272,15 @@ class TunnelController:
         # for on the Chroma.
         self._node_lock = threading.Lock()
         self.node_trace = deque(maxlen=1800)
+        # CFD. `maxlen` on the output keeps a long simpleFoam run from
+        # growing without bound — 4000 lines is ~600 SIMPLE iterations,
+        # and the residual series is kept separately and in full.
+        self._cfd = {"case": None, "state": "idle", "message": "",
+                     "_state": {"residuals": {}}}
+        self._cfd_out = deque(maxlen=4000)
+        self._cfd_thread = None
+        self._cfd_stop = threading.Event()
+        self._cfd_install = None
         self._node_next = 0.0
         self.events = deque(maxlen=200)
 
@@ -463,6 +485,84 @@ class TunnelController:
             "n": len(self.node_trace),
         }
 
+    # ── CFD ──────────────────────────────────────────────────────────────
+    #
+    # Deliberately independent of the rig. A simulation needs no drive, no
+    # load and no E-stop, and coupling it to the tunnel's job system would
+    # mean a CFD run could be blocked by a fault on hardware it never
+    # touches — or worse, that stopping a simulation looked like stopping a
+    # fan. Separate thread, separate state, separate stop flag.
+
+    def cfd_state(self):
+        d = dict(self._cfd)
+        st = d.pop("_state", {}) or {}
+        d["residuals"] = _of.residual_series(st)
+        d["time"] = st.get("time")
+        d["converged"] = st.get("converged")
+        d["exec_s"] = st.get("exec_s")
+        d["output"] = list(self._cfd_out)
+        d["running"] = bool(self._cfd_thread and self._cfd_thread.is_alive())
+        return d
+
+    def cfd_install(self):
+        """Cached — the first call MOUNTS a disk image and takes seconds."""
+        if self._cfd_install is None:
+            self._cfd_install = _of.discover()
+        return self._cfd_install
+
+    def cfd_cases(self):
+        return _of.list_cases()
+
+    def cfd_run(self, case, commands):
+        if self._cfd_thread and self._cfd_thread.is_alive():
+            raise RuntimeError("a CFD run is already going — stop it first")
+        cmds = [c if isinstance(c, list) else [c] for c in commands]
+        _of.resolve_case(case)              # refuse early, in the request
+        for c in cmds:
+            if not c or c[0] not in _of.ALLOWED:
+                raise RuntimeError(f"{(c or ['?'])[0]!r} is not an allowed "
+                                   f"OpenFOAM command")
+
+        self._cfd_stop.clear()
+        self._cfd_out.clear()
+        self._cfd = {"case": case, "commands": [c[0] for c in cmds],
+                     "state": "running", "started": time.time(),
+                     "message": "", "_state": {"residuals": {}}}
+
+        def work():
+            try:
+                r = _of.run(case, cmds,
+                            on_line=self._cfd_out.append,
+                            stop=self._cfd_stop.is_set)
+                self._cfd["_state"] = r["state"]
+                if r.get("aborted") or self._cfd_stop.is_set():
+                    self._cfd["state"] = "aborted"
+                    self._cfd["message"] = "stopped"
+                elif r["ok"]:
+                    self._cfd["state"] = "done"
+                    c = r["state"].get("converged")
+                    self._cfd["message"] = (
+                        f"converged in {c} iterations" if c
+                        else "ran to the end of controlDict without converging")
+                else:
+                    self._cfd["state"] = "failed"
+                    self._cfd["message"] = (
+                        f"{r['failed']} exited {r.get('returncode')}")
+            except Exception as e:
+                self._cfd["state"] = "failed"
+                self._cfd["message"] = str(e)
+            self.log(f"CFD {case}: {self._cfd['message']}",
+                     "ok" if self._cfd["state"] == "done" else "warn")
+
+        self._cfd_thread = threading.Thread(target=work, daemon=True,
+                                            name="cfd")
+        self._cfd_thread.start()
+        return self.cfd_state()
+
+    def cfd_stop(self):
+        self._cfd_stop.set()
+        return True
+
     def node_burst(self, n=2000, axis="mag"):
         """One burst, with its spectrum. Blocks for a couple of seconds."""
         if self.node is None:
@@ -488,8 +588,15 @@ class TunnelController:
             "f": freqs[::fstep], "amp": amp[::fstep],
         }
 
+    @property
+    def _active_period(self):
+        """Fast while a run is in progress, slow when idle."""
+        busy = ((self.sweep and self.sweep.get("state") == "running") or
+                (self._job and self._job.get("state") in ("running", "settling")))
+        return self.sweep_poll_period if busy else self.poll_period
+
     def _poll_loop(self):
-        while not self._stop_evt.wait(self.poll_period):
+        while not self._stop_evt.wait(self._active_period):
             try:
                 with self._lock:
                     hz, amps = self.drive.actuals()
@@ -742,6 +849,32 @@ class TunnelController:
         if self._job and self._job.get("state") in ("running", "settling"):
             self._job["state"] = "aborted"
         self._abort_evt.set()
+
+    def _arm_run(self):
+        """
+        Clear the per-run abort latch before starting a new run.
+
+        `_abort_evt` is set by the ORDINARY stop as well as by E-stop, but it
+        used to be cleared only on the E-stop-clear path. So one press of the
+        normal Ramp Stop latched it for the life of the process: every later
+        blade sweep passed its guards, took HTTP 200, ran the fan up to the
+        first wind speed, then quit at point 1 of 14 and reported state
+        "done" with an empty points list. A stop button that silently
+        disables the instrument until restart is worse than one that fails
+        loudly.
+
+        E-STOP IS NOT CLEARED HERE. That latch is `self.estopped` and it stays
+        until somebody explicitly clears it, having looked at the rig.
+        """
+        if self._job_thread is not None and self._job_thread.is_alive():
+            raise RuntimeError(
+                "a run is still finishing — wait for it before starting "
+                "another, or two threads will drive the fan")
+        if self.estopped:
+            raise RuntimeError(
+                "E-stop is latched. Clear it deliberately before starting a "
+                "run — this is not the same as the ordinary stop.")
+        self._abort_evt.clear()
 
     def should_stop(self):
         """
@@ -1407,6 +1540,7 @@ class TunnelController:
         # the velocity hold in one place. Each of those called drive.start()
         # directly and was behind no load check at all.
         self._guard(f"start {kind}")
+        self._arm_run()
         self._job = {"state": "running", "kind": kind, "progress": 0.0,
                      "started": time.time(), "duration": est_duration,
                      "output": "", "desc": kind}
@@ -2132,7 +2266,9 @@ class TunnelController:
             self.log(f"earlier {blade} run archived as "
                      f"{', '.join(self._archived)}", "warn")
 
-        self.sweep = {"blade": blade, "notes": notes, "state": "running",
+        self._arm_run()
+        self.sweep = {"_t0": time.time(),
+                      "blade": blade, "notes": notes, "state": "running",
                       "rpms": rpms, "i": 0, "n": len(rpms), "points": [],
                       "ramp": [], "current_rpm": None, "message": "",
                       "protocol": fingerprint, "protocol_detail": shape,
@@ -2227,6 +2363,7 @@ class TunnelController:
                     # is 10-30 minutes of fan and load time, and an abort or a
                     # crash at point 9 must not discard points 1-8.
                     self._write_sweep(sw)
+                    self._write_trace(sw)
                     self.load_demand = cfg.unload_amps
                 else:
                     sw["message"] = "complete"
@@ -2263,6 +2400,45 @@ class TunnelController:
                                             name="blade-sweep")
         self._job_thread.start()
         return self.sweep
+
+    def _write_trace(self, sw):
+        """
+        The raw telemetry series at the poll rate, beside the two sweep CSVs.
+
+        Matches what blade_sweep.py writes, so a dashboard run and a CLI run
+        of the same fingerprint produce the same three files. Without it a
+        dashboard sweep left no record of what the fan and the rotor pulse
+        counter were doing between dwells — which is exactly the evidence
+        needed when a point looks wrong afterwards, and the only place a
+        rotor-sensor fault is visible at all.
+        """
+        import csv as _csv
+        try:
+            tr = [e for e in list(self.trace)
+                  if e.get("t") and e["t"] >= sw.get("_t0", 0)]
+            if not tr:
+                return
+            path = Path(str(sw["summary_csv"]).replace("_summary.csv",
+                                                       "_trace.csv"))
+            t0 = tr[0]["t"]
+            tmp = path.with_suffix(path.suffix + ".part")
+            with tmp.open("w", newline="") as f:
+                w = _csv.writer(f)
+                w.writerow(["# blade", sw["blade"]])
+                w.writerow(["# via", "dashboard"])
+                w.writerow(["# protocol", sw["protocol"]])
+                w.writerow(["# poll_hz", f"{1.0/self.sweep_poll_period:.1f}"])
+                w.writerow(["t_unix", "t_rel_s", "fan_rpm_actual",
+                            "motor_amps", "rpm_pulses", "rpm_last_us"])
+                for e in tr:
+                    w.writerow([f"{e['t']:.3f}", f"{e['t']-t0:.3f}",
+                                f"{e.get('meas') or 0:.1f}",
+                                f"{e.get('amps') or 0:.2f}",
+                                "" if e.get("pulses") is None else e["pulses"],
+                                "" if e.get("last_us") is None else e["last_us"]])
+            tmp.replace(path)
+        except Exception as e:
+            self.log(f"trace not written: {e}", "warn")
 
     def _write_sweep(self, sw):
         """Rewrite both CSVs from scratch. Small files; atomicity beats speed."""

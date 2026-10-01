@@ -79,8 +79,13 @@ limits are quantified rather than unexamined.
 
 Slide 5 does **not** say "Cp is still climbing with Reynolds." An earlier draft
 did. A nine-agent adversarial audit on 25 Aug showed **v^3.77 is a generator
-characteristic**: V_oc ∝ v^1.52, R_int ∝ v^−0.64, every peak at the Thévenin
-match, and n = 2a − b = 3.69 against 3.77 measured.
+characteristic**: V_oc ∝ v^1.497, R_int ∝ v^−0.791, every peak at the
+Thévenin match, and n = 2a − b = **3.79** against 3.77 measured.
+
+(The exponents here read 1.52, −0.64 and 3.69 until 31 Aug — the audit's
+first-pass fit, superseded by `src/generator_model.py`'s full-range one. The
+*conclusion* never moved; only the digits did, and they moved the agreement
+from 2.1% to 0.5%.)
 
 The honest version is the stronger one, and it is what makes slide 6 an
 argument rather than a wish.

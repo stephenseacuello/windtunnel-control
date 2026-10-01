@@ -57,9 +57,11 @@
       }
     },
     "scaling": {
-      "p_exponent": 3.73,
-      "v_oc_exponent": 1.39,
-      "_note": "P ~ v^3.73 and V_oc ~ v^1.39 fitted over 600-1100 rpm of the live sweep. Both exceed the constant-Cp expectation (3.0 and 1.0), so Cp is still climbing with Reynolds across the whole test range. A blade ranked at 10 m/s may not rank the same at 38."
+      "p_exponent": 3.77,
+      "v_oc_exponent": 1.497,
+      "r_int_exponent": -0.791,
+      "_note": "P ~ v^3.77 (R2 0.998 in LOG space, 0.990 in power space - quoting 0.998 alone flatters it) and V_oc ~ v^1.497, both over the full 10.2-38.0 m/s range. THIS IS A GENERATOR CHARACTERISTIC, NOT AN AERODYNAMIC ONE. An earlier version of this note read the exponents as 'Cp is still climbing with Reynolds across the whole test range'; that was retracted after it had propagated into six documents, and it lived on here because merge_load_facts.py restores this file over tunnel.json. src/generator_model.py fits the rig as a Thevenin source at every wind speed (r2 >= 0.986): V_oc = 0.101*v^1.497 and R_int = 595.5*v^-0.791. Every peak sits at the Thevenin match, so P_max = V_oc^2/4*R_int and n = 2a - b = 3.79 against 3.77 measured - agreement neither fit was tuned to produce. Almost no aerodynamic residual is left for the blade to move. The blade is a thin cambered plate with square-cut edges, which is the Reynolds-INSENSITIVE class.",
+      "_retracted": "DO NOT REINSTATE: 'Both exceed the constant-Cp expectation (3.0 and 1.0), so Cp is still climbing with Reynolds across the whole test range. A blade ranked at 10 m/s may not rank the same at 38.'"
     },
     "reference_sweep": {
       "blade": "v1_Ra20",
@@ -68,21 +70,23 @@
       "protocol": "94bed28333f7",
       "points": 14,
       "all_clean": true,
-      "p_exponent": 3.754,
-      "p_exponent_r2": 0.99841,
-      "p_max_w_at_1800": 3.7217,
-      "i_at_p_max_a_at_1800": 0.328,
-      "_note": "First full 14-point sweep, 500-1800 rpm, all points stopped on the power roll-off. P ~ v^3.754 with R2 0.998 over the whole 10.2-38.0 m/s range. Peak powers use the PARABOLIC FIT, not the raw argmax: over a flat maximum the argmax is biased high (+1.3% mean here, positive in 13 of 14 points) and the bias grows with the number of samples near the peak, so blades sampled differently would be compared unfairly. Reproduces the earlier standalone 1200 and 1800 rpm runs to 0.3% and 0.2%.",
-      "_caveat": "P_max(v) is electrical power at the Chroma terminals. It is NOT Cp and cannot separate rotor aerodynamics from generator matching. Rotor RPM from Jeong's DAQ is still the missing channel.",
+      "p_exponent": 3.77,
+      "p_max_w_at_1800": 3.7935,
+      "i_at_p_max_a_at_1800": 0.32,
+      "_note": "First full 14-point sweep, 500-1800 rpm, all points stopped on the power roll-off. P ~ v^3.77, R2 0.998 log-space / 0.990 power-space. PEAK POWERS ARE THE RAW ARGMAX, NOT A FIT. sweep_v1_Ra20_summary.csv carries `p_max_w` and nothing else - verified against the points file, equal at 14 of 14. An earlier version of this note claimed the parabolic fit, which is the same error docs/07 corrects: the fit column (p_max_fit_w) only exists on runs from Ra 80 onward. The argmax IS biased high over a flat maximum (+1.3% mean, positive in 13 of 14) and the bias grows with samples near the peak, which is why compare_blades drops BOTH sides to raw when either lacks the fit column rather than comparing a fit against an argmax.",
+      "_caveat": "P_max(v) is electrical power at the Chroma terminals. It is NOT Cp and cannot separate rotor aerodynamics from generator matching. Rotor speed now comes from a proximity sensor on PMC firmware 5.7 (ENC0 index), not from Jeong's DAQ - but it counts each magnet pass 2-3 times and not the same number twice, so no banked sweep carries a usable turbine_rpm column. Run src/check_rotor.py on a sweep before trusting one.",
       "notes": "PETG, 0.2mm layers, Ra 20",
-      "_notes_note": "Confirmed 2026-08-20: PETG 0.2mm is correct for every test so far. An earlier aborted run was mislabelled 'PLA, 0.1mm'; that run produced no usable points and is not in any curve."
+      "_notes_note": "Confirmed 2026-08-20: PETG 0.2mm is correct for every test so far. An earlier aborted run was mislabelled 'PLA, 0.1mm'; that run produced no usable points and is not in any curve.",
+      "p_exponent_r2_log": 0.998,
+      "p_exponent_r2_power": 0.99,
+      "power_column": "p_max_w"
     },
     "v_open_circuit": {
       "_note": "Near-open-circuit terminal volts, taken from the first (lightest) dwell of each wind speed in the v1_Ra20 sweep. Loads of 1-10 mA, so within a percent or so of true V_oc. This answers TODO B3's second item WITHOUT a separate open-circuit run - which is the item the interlock exists to discourage.",
       "at_15mps_v": 5.8,
       "at_25mps_v": 12.85,
       "at_38mps_v": 23.92,
-      "scaling": "V_oc ~ v^1.39, not v^1.0 - runaway tip-speed ratio rises with wind speed"
+      "scaling": "V_oc ~ v^1.497 (see turbine.scaling.v_oc_exponent). This is a GENERATOR characteristic, not evidence that the runaway tip-speed ratio rises with wind: R_int falls as v^-0.791 over the same range, every peak sits at the Thevenin match, and n = 2a - b = 3.79 accounts for the power exponent with nothing left over. This field read 'V_oc ~ v^1.39, not v^1.0 - runaway tip-speed ratio rises with wind speed', which is the retracted aerodynamic reading in different words, and it contradicted v_oc_exponent two lines above it."
     },
     "type": "VAWT \u2014 vertical axis, H-rotor / Darrieus, 3 straight blades",
     "radius_m": 0.1016,

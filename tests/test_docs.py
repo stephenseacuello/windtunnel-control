@@ -350,3 +350,51 @@ def test_tau_is_quoted_consistently():
             if bad in text:
                 stale.append(f"{f.relative_to(ROOT)}: {bad}")
     assert not stale, "superseded tau values still quoted:\n  " + "\n  ".join(stale)
+
+
+def test_characterize_cannot_silently_replace_the_measured_tau():
+    """
+    The stored tau is a mean of FOUR unclipped gust runs. `characterize` runs
+    once. An E-stopped run once wrote 4.756 s — eight times the truth — and
+    nothing downstream asks whether a tau is plausible, so the bandwidth guard
+    simply starts passing profiles it should refuse.
+
+    This became sharper when DEFAULT_PATH was repointed at data/tunnel.json:
+    a save that previously landed in a nonexistent root scratch file now lands
+    in the real config.
+    """
+    src = (ROOT / "src" / "run.py").read_text()
+    assert "force_tau" in src, "the tau overwrite guard is gone"
+    assert "NOT SAVED" in src
+
+    # the guard's arithmetic, stated once so it cannot drift from the source
+    def blocked(prev, new, force=False):
+        return bool(prev) and not force and abs(new - prev) > 0.30 * prev
+
+    assert not blocked(0.60, 0.62)          # ordinary run-to-run variation
+    assert not blocked(0.60, 0.75)
+    assert blocked(0.60, 1.504)             # what a stray run actually wrote
+    assert blocked(0.60, 4.756)             # what the E-stopped run wrote
+    assert not blocked(0.60, 4.756, True)   # --force-tau still gets through
+    assert not blocked(None, 4.756)         # first measurement must save
+
+
+def test_default_config_path_resolves():
+    """
+    DEFAULT_PATH was a bare relative Path("tunnel.json") that never resolved,
+    and load() answers a missing path with an EMPTY config — so every consumer
+    using the default silently ran with no tau, no calibration, no port and no
+    limits, while still completing and writing plausible files.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "src"))
+    from config import DEFAULT_PATH, TunnelConfig
+    assert DEFAULT_PATH.is_absolute(), DEFAULT_PATH
+    assert DEFAULT_PATH.exists(), f"{DEFAULT_PATH} is missing"
+    assert len(TunnelConfig.load(DEFAULT_PATH).data) > 10
+
+    for f in ("run.py", "blade_sweep.py"):
+        s = (ROOT / "src" / f).read_text()
+        assert '"--config", default="tunnel.json"' not in s, f
+        assert '"--config", default="data/tunnel.json"' not in s, \
+            f"{f}: cwd-relative default only resolves from the repo root"

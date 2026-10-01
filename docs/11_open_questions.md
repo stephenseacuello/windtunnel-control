@@ -8,14 +8,55 @@ measurements, not features; none is blocked on software.
 ## 1 · Rotor speed is not yet trustworthy
 
 The magnet-and-reed sensor counts, but each magnet pass registers **2–3 times
-and the number varies** — 28 raw counts over 10 hand revolutions. A fixed
-ratio would be correctable; a varying one is not, so rotor rpm carries roughly
-±20% scatter against a blade effect of 13.7%.
+and the number varies** — 23 counts over 10 hand revolutions at a 5.5 ms
+debounce (1 Sept 2026). `check_rotor` on `sweep_v1_Ra40` returns K rising
+**+91.5%** with 206% spread: missing counts at speed, on top of extra counts
+at rest.
 
-**What settles it:** a capacitor from `Z0` to `GND` (start 0.1 µF, tune until
-10 revolutions read 10 counts), or a Hall-effect sensor, which has no contacts
-to bounce. The VJ12-D10K is rated **20 Hz by its own packaging** and this rotor
-needs 50–70 Hz.
+### These are TWO faults, and only one of them is the sensor
+
+**Fault A — the input floats. Fixable, and it is the one to fix first.**
+The VJ12-D10K is a **2-wire dry contact**: it shorts or it opens, with no
+output drive. There is **no pull-up on `Z0`**. v5.3 tried to set one in
+firmware, hung the board, and it was removed — while the boot banner went on
+printing `INPUT_PULLUP` until 1 Sept. So an open contact leaves a CMOS input
+floating beside a 15 HP motor and a VFD.
+
+That is what the hand test measures. Ten turns by hand is **1–2 Hz, twenty
+times below this reed's own 20 Hz rating**, so bandwidth cannot produce extra
+counts there; and contact bounce settles in 1–5 ms, so a 5.5 ms debounce would
+have absorbed it. Extra edges spread over tens of milliseconds are noise on a
+floating line, and no firmware debounce removes them — past the Schmitt
+trigger they are indistinguishable from signal.
+
+> **Fit 4.7 kΩ from `Z0` to 3V3 and 10 nF from `Z0` to `GND`, run in shielded
+> twisted pair.** The firmware has recommended exactly this since v5.0 and it
+> has never been fitted. No reflash needed — this is two components.
+
+**Fault B — the reed cannot follow the rotor. Not fixable.**
+Jeong's DAQ measured **18,500 rpm at fan 1800 = 308 Hz**. A mechanical reed
+rated 20 Hz is 15× short, and signal conditioning does not change that. Fixing
+Fault A should give clean counts at the bottom of the wind range and nothing
+above roughly fan 800.
+
+**What actually settles it:** a Hall-effect or optical sensor (308 Hz is
+trivial for either), or the two contact-free methods in §1a below, both of
+which work today.
+
+### 1a · Two ways to get ω without any new sensor
+
+**The generator is a tachometer.** V_oc ∝ rotor speed, and Jeong's DAQ anchors
+the constant: `K = V_oc(1800)/18,500 = 1.316 mV/rpm`. Light-load λ from the
+Ra 40 sweep comes out **2.36 → 5.19, smooth and monotonic** — against the
+reed's 0.28–8.6 scatter. For λ at the *peak* the winding resistance is needed:
+`ω = (V + I·R_w)/K`. At fan 1700 that gives λ 2.93 / 4.54 / 6.14 for R_w of
+10 / 30 / 50 Ω, so **`R_w` must be measured with a meter, not assumed** — and
+NOT taken from the fitted `R_int`, which falls 88→36 Ω with wind because it is
+absorbing rotor droop.
+
+**The IMU sees it.** The tunnel node bursts accel at 989 Hz, Nyquist 494 Hz,
+and the rotor 1× line at 308 Hz is resolved across the whole range. A burst
+per wind speed gives ω with no contact and no bandwidth ceiling.
 
 **Why it matters:** without ω there is no λ and no Cp. Every blade comparison
 so far is electrical power, which cannot separate rotor aerodynamics from

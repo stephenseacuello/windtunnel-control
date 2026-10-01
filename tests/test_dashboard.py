@@ -517,3 +517,29 @@ def test_tabs_are_grouped_without_being_reordered():
     first = HTML.index('data-p="control"')
     assert 'class="tab on"' in HTML[first - 40:first], \
         "Control is no longer the default tab"
+
+
+def test_every_node_tab_control_has_a_handler():
+    """
+    The Node tab rendered correctly with two dead controls: `runBurst` was
+    defined and never referenced, so Capture and its FFT did nothing, and
+    `connectNode` did not exist at all, so an unattached node could not be
+    reached from the page. A tab that renders is not a tab that works.
+    """
+    js = (ROOT / "webapp" / "static" / "app.js").read_text()
+    html = (ROOT / "webapp" / "templates" / "index.html").read_text()
+
+    for el, fn in (("nd-go", "runBurst"), ("nd-connect", "connectNode")):
+        assert f'id="{el}"' in html, f"#{el} is missing from the page"
+        assert f"function {fn}" in js or f"async function {fn}" in js
+        assert f"#{el}')" in js or f'#{el}"' in js, f"#{el} is never selected"
+        # referenced somewhere other than its own definition
+        assert js.count(fn) >= 2, f"{fn} is defined but never wired to anything"
+
+
+def test_the_node_connect_route_is_reachable_from_the_page():
+    js = (ROOT / "webapp" / "static" / "app.js").read_text()
+    app = (ROOT / "webapp" / "app.py").read_text()
+    assert "/api/node/connect" in app
+    assert "/api/node/connect" in js, \
+        "the route exists server-side with no caller in the page"

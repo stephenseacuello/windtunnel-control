@@ -67,7 +67,11 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-RHO_DEFAULT = 1.225
+# 1.204 kg/m3 = dry air at 20 C, 101325 Pa — a lab, not the ISA 15 C sea-level
+# 1.225 this used to hold. The docs quote 1.204 and the difference is 1.7% in
+# every Cp, which is larger than several effects this rig is trying to resolve.
+# Pass --temp and --pressure from the tunnel node and neither number applies.
+RHO_DEFAULT = 1.204
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -167,7 +171,18 @@ def compute(points, radius_m, hub_m=0.0, rho=RHO_DEFAULT, area=None):
     points: iterable of dicts with mps, p_w, and rpm (rotor).
     Returns the same rows with lam and cp_elec added.
     """
-    A = area if area is not None else swept_area(radius_m, hub_m, 'hawt')
+    if area is None:
+        # No silent default. 'hawt' here meant pi*R^2, which for this VAWT is
+        # 0.0324 against the true 2*R*H = 0.0498 — every Cp inflated by 53.6%
+        # with nothing raised. The CLI always passes an area, so this only
+        # ever bit a programmatic caller, which is exactly the caller with no
+        # banner to notice it.
+        raise ValueError(
+            "compute() needs an explicit swept area. Call "
+            "swept_area(radius, hub, rotor, height) and pass the result — "
+            "a VAWT sweeps a cylinder (2*R*H), not a disc, and guessing "
+            "wrong is a 54% error in every Cp.")
+    A = area
     out = []
     for p in points:
         v, P, n = p.get("mps"), p.get("p_w"), p.get("rpm")
@@ -183,8 +198,47 @@ def compute(points, radius_m, hub_m=0.0, rho=RHO_DEFAULT, area=None):
     return out
 
 
-def read_sweep(path):
+RPM_NAMES = ("turbine_rpm", "turbine_rpm_at_pmax", "rotor_rpm", "rpm")
+
+
+def read_header(path):
+    """The CSV's column names, skipping the `#` metadata block."""
+    with open(path) as f:
+        for line in f:
+            if not line.startswith("#"):
+                return [c.strip() for c in line.rstrip("\n").split(",")]
+    return []
+
+
+def read_sweep(path, prefer=None):
+    """
+    Returns (rows, rpm_col, n_blank).
+
+    `rpm_col` is the rotor-speed column found, or None. `n_blank` counts rows
+    that HAVE the column but leave it empty — sweep_core writes a blank
+    whenever the rotor window held no pulses, which happens routinely at the
+    bottom of the wind range and during a stall. Those rows are real data for
+    everything except lambda, so they are reported, not used to condemn the
+    file.
+    """
     rows = []
+    rpm_col, n_blank = None, 0
+    # `prefer` is --rpm-column. It used never to reach here: the flag only
+    # selected a branch in main() and formatted a display string, so a fully
+    # populated `shaft_rpm` plus `--rpm-column shaft_rpm` was reported as
+    # "every cell is empty ... Re-run it" — a confident message pointing at a
+    # sensor fault that did not exist, costing a tunnel session. A misspelled
+    # name meanwhile succeeded and stamped the nonexistent column into the
+    # result's provenance line.
+    # NO FALLBACK when the operator names a column. Appending the standard
+    # names as backups meant a blank cell in `shaft_rpm` silently took the
+    # value from `turbine_rpm` instead — a bouncing reed reading 2x high —
+    # while the banner and the result CSV's provenance line both still said
+    # `shaft_rpm`. The headline lambda came out doubled from a column the
+    # operator had explicitly told the tool not to use, and the archived file
+    # recorded the wrong source, so it could not be caught afterwards.
+    # Naming a column is an instruction, not a hint.
+    names = (prefer,) if prefer else RPM_NAMES
     with open(path) as f:
         body = [l for l in f if not l.startswith("#")]
     for r in csv.DictReader(body):
@@ -196,14 +250,31 @@ def read_sweep(path):
             continue
         row = {"mps": v, "p_w": p,
                "fan_rpm": float(r.get("fan_rpm_cmd") or r.get("fan_rpm") or 0)}
-        for k in ("rotor_rpm", "rpm"):
+        for k in names:
+            if k in r:
+                rpm_col = rpm_col or k
+                if not str(r[k]).strip():
+                    n_blank += 1
+                break
+        # `turbine_rpm` FIRST: that is what sweep_core actually writes
+        # (POINTS_HEADER) and what the summary carries as
+        # `turbine_rpm_at_pmax`. This list originally held only the two names
+        # below, so a sweep that DID record rotor speed would have been read as
+        # one that did not, and Cp would have quietly come from --assume-lambda
+        # instead. Nothing in the output would have said so.
+        # `break` on the first hit. Without it the LAST populated name won,
+        # so a file carrying both turbine_rpm and rotor_rpm reported
+        # "column 'turbine_rpm'" in the banner while computing lambda from
+        # rotor_rpm — the banner and the arithmetic naming different columns.
+        for k in names:
             if r.get(k):
                 try:
                     row["rpm"] = float(r[k])
+                    break
                 except ValueError:
                     pass
         rows.append(row)
-    return rows
+    return rows, rpm_col, n_blank
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -245,17 +316,49 @@ def main():
     p.add_argument("--csv", default=None, help="write the result here")
     a = p.parse_args()
 
-    rows = read_sweep(a.sweep)
+    rows, found_col, n_blank = read_sweep(a.sweep, a.rpm_column)
+    if a.rpm_column and found_col != a.rpm_column:
+        raise SystemExit(
+            f"\n  --rpm-column '{a.rpm_column}' is not a column in "
+            f"{Path(a.sweep).name}.\n"
+            f"  Columns present: {', '.join(read_header(a.sweep))}\n\n"
+            f"  Checked against the header rather than assumed, because a\n"
+            f"  typo here used to succeed and write the misspelled name into\n"
+            f"  the result's provenance line while using a different column.\n")
     if not rows:
         raise SystemExit(f"no usable rows in {a.sweep}")
     rho = air_density(a.temp, a.pressure)
 
     # ── rotor speed ─────────────────────────────────────────────────────
     src = None
-    if a.rpm_column:
-        src = f"column '{a.rpm_column}'"
-        if not all("rpm" in r for r in rows):
-            raise SystemExit(f"{a.sweep} has no rotor-rpm column")
+    have = [r for r in rows if "rpm" in r and r["rpm"] > 0]
+    # NOT `and have`: a column that exists but is entirely blank is a
+    # different problem from a column that is absent, and it needs its own
+    # message. Gating on `have` sent the empty case to the generic "no rotor
+    # speed, give one of these flags" text, which invites the operator to
+    # reach for --assume-lambda over a file whose sensor simply never fired.
+    if a.rpm_column or (found_col and not a.daq and not a.assume_lambda):
+        col = a.rpm_column or found_col
+        src = f"column '{col}'"
+        if not have:
+            raise SystemExit(
+                f"\n  '{col}' is present in {Path(a.sweep).name} but every "
+                f"cell is empty.\n  The sweep ran before the rotor sensor "
+                f"produced pulses. Re-run it.\n")
+        # Partial coverage is NORMAL, not a failure. sweep_core leaves the
+        # cell blank whenever a dwell's rotor window caught no pulses, which
+        # happens at low wind and through a stall. Rejecting all fourteen
+        # wind speeds to protect against one missing dwell used to print
+        # "has no rotor-rpm column" about a file that plainly had one, and
+        # sent the operator back to burn tunnel time re-running a good sweep.
+        if len(have) < len(rows):
+            print(f"  {len(rows) - len(have)} of {len(rows)} rows have no "
+                  f"rotor speed and are skipped for Cp(lambda).")
+            if len(have) < 3:
+                raise SystemExit(
+                    f"\n  only {len(have)} row(s) carry rotor speed — too few "
+                    f"for a curve.\n")
+        rows = have
     elif a.daq:
         if not a.poles:
             raise SystemExit("--daq needs --poles (magnetic poles, not pairs)")
@@ -281,15 +384,30 @@ def main():
             r["rpm"] = a.assume_lambda * r["mps"] / a.radius * 60 / (2 * math.pi)
     else:
         raise SystemExit(
-            "\n  No rotor speed. Give one of:\n"
-            "    --rpm-column <name>     a column already in the CSV\n"
+            "\n  No rotor speed in " + Path(a.sweep).name + ".\n"
+            "  Columns searched: turbine_rpm, turbine_rpm_at_pmax, "
+            "rotor_rpm, rpm\n\n"
+            "  A sweep that recorded rotor speed needs NO flag — it is found\n"
+            "  automatically. So this file did not record any, and no flag\n"
+            "  will conjure it. Re-run the sweep with the sensor working.\n\n"
+            "  Only if you know what you are doing:\n"
+            "    --rpm-column <name>     a differently-named column\n"
             "    --daq <file> --poles N  recovered from the generator phases\n"
-            "    --assume-lambda X       exploratory only\n\n"
+            "    --assume-lambda X       ⚠ FABRICATES rotor speed from an\n"
+            "                            assumed lambda. The resulting Cp(λ)\n"
+            "                            is circular — it can only return the\n"
+            "                            lambda you fed it. Never a result.\n\n"
             "  Rotor speed is the measurement that separates rotor "
             "aerodynamics\n  from generator matching. Without it this is "
             "P_max(v), not Cp(lambda).\n")
 
-    A_ = swept_area(a.radius, a.hub, a.rotor, a.height)
+    # SystemExit, not a traceback. The message is right either way, but a
+    # stack trace reads as "the tool broke" rather than "you left a flag off",
+    # and the operator is at a rig with the fan running.
+    try:
+        A_ = swept_area(a.radius, a.hub, a.rotor, a.height)
+    except ValueError as e:
+        raise SystemExit(f"\n  {e}\n")
     res = compute(rows, a.radius, a.hub, rho, A_)
     if not res:
         raise SystemExit("nothing computable")

@@ -46,8 +46,10 @@ record it in tunnel.json so the next person does not rediscover it.
 
 from __future__ import annotations
 
+import glob
 import threading
 import time
+from pathlib import Path
 
 
 class TransportError(RuntimeError):

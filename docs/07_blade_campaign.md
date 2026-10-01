@@ -185,8 +185,13 @@ drive:
 ```bash
 python src/load_ramp.py --mode peak --fan-rpm 1200 --max-amps 0.3 \
        --blade v1_Ra20 --volt-off 0.5 --wait-for-source 120 \
-       --csv logs/peak_1200.csv
+       --csv logs/peak_1200_$(date +%H%M).csv
 ```
+
+> ⚠️ **Do not write to `logs/peak_1200.csv` or `logs/peak_1800.csv`.** Those
+> are banked single-point runs that `09_results.md` cites as the independent
+> reproduction of the sweep, and `load_ramp.py --csv` truncates rather than
+> archiving. This command used to name them exactly.
 
 `--wait-for-source` turns the load on at the floor and then waits for terminal
 voltage to appear, so you can raise the wind *after* starting it — which is the

@@ -405,6 +405,16 @@ The exponent is the finding — constant Cp would give 3.0. Cp is still climbing
 with Reynolds at 38 m/s, so a blade ranked at 10 m/s may not rank the same at
 38.
 
+> ⚠️ **SUPERSEDED — the second paragraph above is wrong.** Left in place
+> because this is a changelog, but it must not be read as current. `v^3.77`
+> (not 3.754) is a **generator** characteristic: `V_oc = 0.101·v^1.497`,
+> `R_int = 595.5·v^-0.791`, every peak at the Thévenin match, so
+> `n = 2a − b = 3.79` against 3.77 measured. Nothing is left for Reynolds,
+> and the blade is a thin cambered plate with square-cut edges — the
+> Reynolds-**insensitive** class. Peak is **3.7935 W at 37.50 m/s**
+> (measured fan speed; 37.95 is the commanded figure). See
+> `docs/09_results.md`.
+
 ## v3.2 — 2026-08-13
 
 ### Added

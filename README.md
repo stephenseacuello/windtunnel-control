@@ -235,25 +235,44 @@ characterisation unattended in about ten minutes.
 **Reference result** — blade `v1_Ra20` (PETG, 0.2 mm, Ra 20), 20 Aug 2026:
 electrical power **P ∝ v^3.77** across 10.1–37.5 m/s, peaking at **3.793 W at
 37.5 m/s** (raw argmax). Independent single-point runs reproduce the sweep to
-0.2–0.3%.
+0.2–0.3% — though both single-point runs are on a *different* protocol than
+the campaign (and `peak_1200.csv` records none at all), so they evidence the
+rig's repeatability rather than the campaign result. The summary and points
+files also label the same power with different wind speeds — measured fan rpm
+against commanded — which is a labelling difference, not a disagreement about
+power. See `docs/09_results.md` before correcting anything across it.
 
 R² is **0.998 in log space, 0.990 in power space** — say which, because the
 log-space figure is flattered by the 3.7× span in v. And the exponent is a
 **generator** characteristic, not evidence about the blade: see
 `docs/09_results.md`.
 
-That exponent is itself a result: 3.75 rather than 3.0 means **Cp is still
-climbing with Reynolds across the entire tunnel range**, so a blade ranked at
-10 m/s may not rank the same at 38.
+**3.77 rather than 3.0 is not a blade result.** This paragraph used to read
+it as *"Cp is still climbing with Reynolds across the entire tunnel range"*,
+which contradicted the paragraph immediately above it and propagated into six
+documents before anyone checked. `src/generator_model.py` fits the rig as a
+Thévenin source at all fourteen wind speeds (r² ≥ 0.986): `V_oc = 0.101·v^1.497`
+and `R_int = 595.5·v^-0.791`. Every peak sits at the Thévenin match, so
+`P_max = V_oc²/4R_int` and **n = 2a − b = 3.79 against 3.77 measured** —
+agreement neither fit was tuned to produce. Almost nothing is left for the
+blade. The rotor is a thin cambered plate with square-cut edges, which is the
+Reynolds-**insensitive** class.
 
 ## Still open
 
-- **Rotor RPM from Jeong's DAQ.** The one missing channel. Without it you have
-  P_max(v) per blade — a real comparison, but one that cannot separate rotor
-  aerodynamics from generator matching. Every blade run before it lands has to
-  be re-run to get λ, so the cost of waiting grows with each rotor tested.
-- **Rotor tip radius.** Still `null`. A ruler. λ scales linearly with it, Cp as
-  1/r², and nothing downstream works without it.
+- **A rotor-speed sensor that does not bounce.** No longer Jeong's DAQ: a
+  proximity sensor reads a magnet on one blade into PMC firmware 5.7 (ENC0
+  index), and `blade_sweep.py` writes a `turbine_rpm` column. But it counts
+  each magnet pass 2–3 times and **not the same number twice**, so no banked
+  sweep carries a usable one. Run `src/check_rotor.py` on a sweep to see
+  whether that is still true. Until it reads clean you have P_max(v) per
+  blade — a real comparison, but one that cannot separate rotor aerodynamics
+  from generator matching. Every blade run before it works has to be re-run
+  to get λ, so the cost of waiting grows with each rotor tested.
+- ~~**Rotor tip radius.**~~ **Measured: R = 0.1016 m** (4 in, axis to blade
+  attachment), span 0.2451 m. `data/tunnel.json` carries both, and
+  `sweep_core.ROTOR_RADIUS_M` matches. Swept area is **2·R·H = 0.0498 m²** —
+  the rotor is a VAWT and sweeps a *cylinder*, so πR² is wrong by 54%.
 - **Sending fan rpm to the DAQ** so both rigs share one time base. Drive
   analog output X1-7/9 is the recommended route; see `docs/05_integration.md`.
 - **The anemometer calibration form.** Fitting says linear-output (cup or

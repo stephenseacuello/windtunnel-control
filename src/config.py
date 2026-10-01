@@ -31,13 +31,28 @@ import math
 from datetime import datetime
 from pathlib import Path
 
-DEFAULT_PATH = Path("tunnel.json")
+# Anchored to the repo, NOT the working directory. As a bare relative
+# "tunnel.json" this never resolved from anywhere, and `load()` answers a
+# missing path with an EMPTY config rather than an error — so every consumer
+# using the default silently ran with no calibration, no tau, no port and no
+# limits. This module's own docstring promises the bandwidth guard is "on by
+# default rather than by discipline"; a path that never resolves turned it off
+# by default instead.
+DEFAULT_PATH = Path(__file__).resolve().parents[1] / "data" / "tunnel.json"
 
 
 class TunnelConfig:
-    def __init__(self, data=None, path=DEFAULT_PATH):
+    def __init__(self, data=None, path=DEFAULT_PATH, readonly=False):
         self.path = Path(path)
         self.data = dict(data or {})
+        # A dry run models the tunnel; it must not leave marks on the real
+        # config. `run.py --dry-run characterize` measured the SIMULATOR's
+        # time constant and wrote 1.504 s over the measured 0.60 s — a
+        # four-run mean — in data/tunnel.json. Under the old broken default
+        # that landed in a throwaway file nobody read; once the path was
+        # fixed to resolve, the same command started hitting the real one.
+        # Guarding the nine .save() sites individually would leave the tenth.
+        self.readonly = bool(readonly)
 
     # ── access ───────────────────────────────────────────────────────────
 
@@ -82,19 +97,87 @@ class TunnelConfig:
     # ── persistence ──────────────────────────────────────────────────────
 
     @classmethod
-    def load(cls, path=DEFAULT_PATH, required=False):
+    def load(cls, path=DEFAULT_PATH, required=False, readonly=False):
         p = Path(path)
         if not p.exists():
             if required:
                 raise FileNotFoundError(
                     f"no config at {p}. Run `calibrate` and `characterize` "
                     f"first, or pass the values explicitly.")
-            return cls({}, p)
-        return cls(json.loads(p.read_text()), p)
+            # SAY SO. An empty config is not a neutral default: tau is absent
+            # so the bandwidth guard passes everything, calibration is absent
+            # so velocities read as zero, and the port is absent so the link
+            # falls back to autodetect. All of that is survivable; none of it
+            # is survivable *silently*, because the run still completes and
+            # writes a plausible-looking file.
+            import sys as _s
+            print(f"  ⚠ no config at {p} — continuing with an EMPTY config: "
+                  f"no tau, no calibration, no port, no limits.",
+                  file=_s.stderr)
+            return cls({}, p, readonly=readonly)
+        return cls(json.loads(p.read_text()), p, readonly=readonly)
 
     def save(self, path=None):
+        """
+        Persist, MERGING over whatever is on disk now rather than replacing it.
+
+        This file is written by several processes that do not know about each
+        other: the dashboard holds a copy loaded at startup, `run.py` writes
+        calibration, and `tunnel_node.py` writes the node's temperature
+        offset. A plain write of an in-memory dict silently reverts every key
+        another process added since load — the dashboard's own /api/ambient
+        save was erasing the node offset that tunnel_node.connect() re-applies
+        each session, which would have put a 20 C self-heating error back into
+        every density, and therefore 6.5% into every Cp, with nothing saying
+        so.
+
+        Keys THIS instance holds win; keys only on disk survive. Nothing in
+        this codebase deletes config keys, so merge-wins-on-conflict is the
+        right rule here — if deletion is ever needed it will need an explicit
+        path, because this will resurrect a removed key.
+
+        Written temp-then-rename so a crash mid-write cannot leave a
+        half-written config, which is unreadable rather than merely wrong.
+        """
         p = Path(path or self.path)
-        p.write_text(json.dumps(self.data, indent=2, default=str))
+        if self.readonly and path is None:
+            import sys as _s
+            print(f"  (dry run — not saved to {p})", file=_s.stderr)
+            return p
+
+        def merge(base, over):
+            for k, v in over.items():
+                if isinstance(v, dict) and isinstance(base.get(k), dict):
+                    merge(base[k], v)
+                else:
+                    base[k] = v
+            return base
+
+        out = self.data
+        if p.exists():
+            try:
+                out = merge(json.loads(p.read_text()), self.data)
+            except (ValueError, OSError):
+                out = self.data          # unreadable on disk: ours is better
+        p.parent.mkdir(parents=True, exist_ok=True)
+        # Unique per writer. A fixed ".tmp" means two processes writing at
+        # once share one scratch file: one rename wins, the other raises
+        # FileNotFoundError, and the window in between can leave the real
+        # file torn — which makes it unparseable for EVERY consumer at
+        # startup, not merely stale. That is the opposite of what an atomic
+        # write is for.
+        import os as _os
+        tmp = p.with_suffix(f"{p.suffix}.{_os.getpid()}.tmp")
+        try:
+            tmp.write_text(json.dumps(out, indent=2, default=str) + "\n")
+            tmp.replace(p)
+        finally:
+            if tmp.exists():
+                try:
+                    tmp.unlink()
+                except OSError:
+                    pass
+        self.data = out
         return p
 
     # ── reporting ────────────────────────────────────────────────────────

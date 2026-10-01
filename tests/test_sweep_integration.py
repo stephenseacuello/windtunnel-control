@@ -167,3 +167,145 @@ def test_the_campaign_fingerprint_is_still_the_banked_one():
     import sweep_core as sc
     a = sc.settings(step_amps=0.02, dwell=1.0)
     assert sc.protocol(a, 0.5, "low")["protocol"] == "94bed28333f7"
+
+
+def test_every_sweep_records_which_signal_the_fan_readback_came_from():
+    """
+    Par 5310/5311 decide what `actuals()` returns, and they are NOT among the
+    383 parameters the profile captures — so nothing restores them and they
+    are whatever the drive happens to hold.
+
+    That is not hypothetical. sweep_v1_Ra20 recorded fan speed slipping 4-21
+    rpm below setpoint across 10 distinct values — a real measurement of a
+    loaded 15 HP fan. sweep_v1_Ra80 recorded 0-1 rpm across TWO distinct
+    values: the setpoint echoed back. Same code, same rig, different meaning,
+    and it moves the wind column 1.2%, which is 4.6% in power at v^3.77.
+
+    Recording it per run makes that answerable later instead of forensic.
+    """
+    import sweep_core
+    assert hasattr(sweep_core, "actuals_meta")
+
+    class Drive:
+        def actual_signals(self):
+            return 103, 104
+
+    m = sweep_core.actuals_meta(Drive())
+    assert m["drive_actual_signals"].startswith("5310=103;5311=104")
+    assert "⚠" not in m["drive_actual_signals"]
+
+    class Wrong(Drive):
+        def actual_signals(self):
+            return 102, 104          # SPEED, not OUTPUT FREQ
+
+    assert "⚠" in sweep_core.actuals_meta(Wrong())["drive_actual_signals"]
+
+    class Dead:
+        def actual_signals(self):
+            raise RuntimeError("no link")
+
+    # must never abort a sweep over a diagnostic
+    assert "not read" in sweep_core.actuals_meta(Dead())["drive_actual_signals"]
+
+
+def test_the_banked_runs_disagree_about_fan_telemetry():
+    """Guards the observation above against someone 'fixing' the CSVs."""
+    import csv
+
+    def slips(path, key):
+        rows = [r for r in csv.DictReader(
+            [l for l in open(ROOT / path) if not l.startswith("#")])]
+        return {round(float(r["fan_rpm_actual"]) - float(r[key]), 1)
+                for r in rows if r.get("fan_rpm_actual")}
+
+    ra20 = slips("logs/sweep_v1_Ra20_summary.csv", "fan_rpm_cmd")
+    ra80 = slips("logs/sweep_v1_Ra80_summary.csv", "fan_rpm_cmd")
+    assert len(ra20) >= 8, f"Ra20 should show real slip, got {ra20}"
+    assert min(ra20) <= -15
+    assert len(ra80) <= 2, f"Ra80 should be a setpoint echo, got {ra80}"
+    assert min(ra80) >= -1
+
+
+# ── logging rate: the dashboard must match the CLI ────────────────────────
+
+def test_dashboard_polls_fast_enough_during_a_run():
+    """
+    Rotor speed is read from the gap between two telemetry samples, so the
+    sample period must be MUCH shorter than a dwell. At 4 Hz against a 1 s
+    dwell there were four samples per window and the window spilled into the
+    previous ladder step — which carries a different load, and the rotor slows
+    under load. Idle stays slow; nothing needs 20 Hz of a stationary fan.
+    """
+    import controller as C
+    c = C.TunnelController.__new__(C.TunnelController)
+    c.poll_period, c.sweep_poll_period = 0.25, 0.05
+
+    c.sweep, c._job = None, None
+    assert c._active_period == 0.25, "idle should stay slow"
+
+    c.sweep = {"state": "running"}
+    assert c._active_period == 0.05, "a running sweep must poll fast"
+
+    c.sweep = {"state": "done"}
+    c._job = {"state": "settling"}
+    assert c._active_period == 0.05, "settling counts as a run"
+
+
+def test_dashboard_trace_buffer_outlives_a_whole_sweep():
+    """
+    900 entries held 225 s at 20 Hz. The Ra 40 sweep ran 505 s, so the first
+    half — every rotor sample belonging to the low wind speeds — was silently
+    dropped before anything could write it out.
+    """
+    src = (ROOT / "webapp" / "controller.py").read_text()
+    import re
+    m = re.search(r"self\.trace = deque\(maxlen=(\d+)\)", src)
+    assert m, "trace deque not found"
+    maxlen = int(m.group(1))
+    assert maxlen / 20.0 >= 600, \
+        f"{maxlen} at 20 Hz is {maxlen/20:.0f}s — shorter than a sweep"
+
+
+def test_dashboard_writes_the_same_trace_file_as_the_cli(tmp_path):
+    """A dashboard run and a CLI run must produce the same three files."""
+    import csv
+    import controller as C
+    c = C.TunnelController.__new__(C.TunnelController)
+    c.sweep_poll_period = 0.05
+    c.log = lambda *a, **k: None
+    c.trace = [{"t": 1000 + i * 0.05, "meas": 1800.0, "amps": 13.6,
+                "pulses": 100 + i * 15, "last_us": 5000 + i * 900}
+               for i in range(200)]
+    sw = {"_t0": 1000.0, "blade": "t", "protocol": "94bed28333f7",
+          "summary_csv": str(tmp_path / "s_summary.csv")}
+    c._write_trace(sw)
+
+    p = tmp_path / "s_trace.csv"
+    assert p.exists(), "no trace file from the dashboard"
+    rows = list(csv.DictReader([l for l in open(p) if not l.startswith("#")]))
+    assert len(rows) == 200
+    assert list(rows[0]) == ["t_unix", "t_rel_s", "fan_rpm_actual",
+                             "motor_amps", "rpm_pulses", "rpm_last_us"]
+    dt = float(rows[1]["t_rel_s"]) - float(rows[0]["t_rel_s"])
+    assert abs(dt - 0.05) < 1e-6, f"interval {dt}, expected 0.05"
+    assert all(r["rpm_pulses"] for r in rows)
+
+
+def test_trace_only_covers_the_run_not_the_idle_before_it():
+    """The ring buffer holds pre-run idle; a trace must start at the sweep."""
+    import controller as C
+    c = C.TunnelController.__new__(C.TunnelController)
+    c.sweep_poll_period, c.log = 0.05, lambda *a, **k: None
+    c.trace = [{"t": 900 + i, "meas": 0.0, "amps": 0.0,
+                "pulses": None, "last_us": None} for i in range(50)] + \
+              [{"t": 1000 + i * 0.05, "meas": 1800.0, "amps": 13.6,
+                "pulses": i, "last_us": i} for i in range(20)]
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        sw = {"_t0": 1000.0, "blade": "t", "protocol": "x",
+              "summary_csv": f"{d}/x_summary.csv"}
+        c._write_trace(sw)
+        import csv as _c
+        rows = list(_c.DictReader([l for l in open(f"{d}/x_trace.csv")
+                                   if not l.startswith("#")]))
+    assert len(rows) == 20, f"idle samples leaked in: {len(rows)} rows"

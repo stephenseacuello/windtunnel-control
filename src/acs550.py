@@ -317,6 +317,27 @@ class ACS550:
         freq = struct.unpack(">h", struct.pack(">H", act1))[0] / 10.0
         return freq, act2 / 10.0
 
+    def actual_signals(self):
+        """
+        What `actuals()` is really returning: (par 5310, par 5311).
+
+        These decide which drive signal lands in each Modbus actual register,
+        and **the 383-parameter profile does not contain them** — nothing in
+        this repo captures or restores 5310/5311, so they are whatever the
+        drive happens to hold.
+
+        That is not hypothetical. `sweep_v1_Ra20` recorded fan speed slipping
+        4–21 rpm below setpoint across 10 distinct values, which is a real
+        measurement of a loaded 15 HP fan. `sweep_v1_Ra80` recorded 0–1 rpm
+        of slip across TWO distinct values — the setpoint echoed back. Same
+        code, same rig, different meaning, and it shifted the wind column by
+        1.2%, which is 4.6% in power at P proportional to v^3.77.
+
+        Expected: 103 (OUTPUT FREQ) and 104 (CURRENT). Signal 102 is SPEED,
+        which is a different quantity on a slipping machine.
+        """
+        return self.read_param(5310), self.read_param(5311)
+
     def is_faulted(self):
         return self.status()["TRIPPED"]
 

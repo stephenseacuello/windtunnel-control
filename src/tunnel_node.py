@@ -114,6 +114,10 @@ class TunnelNode:
         self.baud, self.timeout = baud, timeout
         self.ser = None
         self.identity = None
+        # None means "never calibrated", which is NOT the same as 0.0 and must
+        # not read as it: 0.0 is a board that was checked and found true, None
+        # is a board reading ~20 C high with nobody having noticed.
+        self.offset_c = None
 
     # ── connection ───────────────────────────────────────────────────────
 
@@ -158,6 +162,32 @@ class TunnelNode:
 
         self.ser.reset_input_buffer()
         self.identity = self.command("ID")
+        if "tunnel-node" in (self.identity or ""):
+            # Re-apply the recorded temperature offset EVERY connect.
+            #
+            # The firmware's OFFSET is runtime state and the board reboots on
+            # DTR, which is exactly when a host attaches — so an offset set by
+            # hand is gone by the next session, and the reading silently
+            # reverts to the self-heated one. A number that has to be re-typed
+            # to stay true will not stay true.
+            off = self.recorded_offset()
+            if off is not None:
+                try:
+                    r = self.command(f"OFFSET {off:.2f}")
+                    if not r.startswith("OK OFFSET"):
+                        raise NodeError(r)
+                    self.offset_c = float(r.split()[-1])
+                except Exception as e:
+                    # Leave offset_c None and SAY SO. Swallowing this left the
+                    # board reading ~20 C high while every downstream reader
+                    # saw an ordinary connected node — a 6.5% error in Cp with
+                    # nothing anywhere recording that it was there.
+                    self.offset_c = None
+                    import sys as _s
+                    print(f"  ⚠ tunnel node: recorded offset {off:+.2f} °C "
+                          f"was NOT applied ({e}).\n"
+                          f"    Temperatures from this session are "
+                          f"uncorrected.", file=_s.stderr)
         if "tunnel-node" not in self.identity:
             self.close()
             raise NodeError(
@@ -166,6 +196,83 @@ class TunnelNode:
                 f"opened the DRIVE link; unplug nothing and check "
                 f"tunnel_node.port in data/tunnel.json.")
         return self
+
+    @staticmethod
+    def recorded_offset():
+        """The offset in data/tunnel.json, or None if never calibrated."""
+        try:
+            cfg = json.loads((ROOT / "data" / "tunnel.json").read_text())
+            v = (cfg.get("tunnel_node") or {}).get("temp_offset_c")
+            return float(v) if v is not None else None
+        except Exception:
+            return None
+
+    def set_offset(self, c, persist=True):
+        """
+        Apply a temperature offset and record it so it survives a reboot.
+
+        Persisted because the firmware's copy does not survive one, and the
+        board reboots the moment a host opens the port.
+        """
+        r = self.command(f"OFFSET {float(c):.2f}")
+        if not r.startswith("OK OFFSET"):
+            raise NodeError(r)
+        self.offset_c = float(r.split()[-1])
+        if persist:
+            # Through TunnelConfig, not a bare read-modify-write. This file
+            # is written by the dashboard and by run.py as well, and a plain
+            # write_text here reverts whatever they added since this process
+            # read it — the same cross-process clobber that was erasing this
+            # very offset from the other direction.
+            import sys as _s
+            _s.path.insert(0, str(ROOT / "src"))
+            from config import TunnelConfig
+            cfg_o = TunnelConfig.load(ROOT / "data" / "tunnel.json")
+            node = dict(cfg_o.get("tunnel_node") or {})
+            node["temp_offset_c"] = self.offset_c
+            node["_offset_note"] = (
+                "Added to the LPS22HB reading. The sensor sits on a powered "
+                "board and self-heats - about +20 C observed. Cp goes as "
+                "1/rho, so an uncorrected 20 C is a 6.5% error in every Cp. "
+                "Re-applied by tunnel_node.connect() on every session because "
+                "the firmware's copy does not survive the reboot that opening "
+                "the port causes.")
+            cfg_o.set("tunnel_node", node)
+            cfg_o.save()
+        return self.offset_c
+
+    def calibrate(self, true_temp_c, samples=5):
+        """
+        Set the offset from a reference thermometer reading.
+
+        Takes the board's own current reading with the offset zeroed, and
+        makes up the difference. Returns (raw, offset, corrected).
+        """
+        # Zeroing first is necessary — the raw reading is what we need — but
+        # it means any failure between here and set_offset() leaves the BOARD
+        # uncorrected while data/tunnel.json still holds the old value. The
+        # file wins on the next connect, so this self-heals across sessions;
+        # what it does not survive is the rest of THIS one, where every
+        # reading would be ~20 C high and nothing would say so.
+        prior = self.offset_c
+        self.command("OFFSET 0")
+        try:
+            vals = []
+            for _ in range(samples):
+                vals.append(self.ambient()[0])
+                time.sleep(0.3)
+        except BaseException:                 # includes KeyboardInterrupt
+            if prior is not None:
+                try:
+                    self.command(f"OFFSET {prior:.2f}")
+                    self.offset_c = prior
+                except Exception:
+                    pass
+            raise
+        raw = sum(vals) / len(vals)
+        off = float(true_temp_c) - raw
+        self.set_offset(off)
+        return raw, off, self.ambient()[0]
 
     def close(self):
         try:
@@ -333,8 +440,10 @@ def blade_pass_hz(rotor_rpm, blades=3):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
-    ap.add_argument("mode", choices=["read", "imu", "burst", "rate", "id"])
-    ap.add_argument("n", nargs="?", type=int, default=2000)
+    ap.add_argument("mode", choices=["read", "imu", "burst", "rate", "id",
+                                     "offset", "calibrate"])
+    ap.add_argument("n", nargs="?", type=float, default=2000,
+                    help="burst: samples · calibrate: true room °C · offset: °C")
     ap.add_argument("--port", default=None)
     ap.add_argument("--csv", default=None, help="write a burst here")
     a = ap.parse_args()
@@ -356,12 +465,35 @@ def main():
             acc, gyr = node.imu()
             print(f"  accel  {acc[0]:+.4f} {acc[1]:+.4f} {acc[2]:+.4f}  g")
             print(f"  gyro   {gyr[0]:+.2f} {gyr[1]:+.2f} {gyr[2]:+.2f}  dps")
+        elif a.mode == "offset":
+            if a.n == 2000:                      # not supplied
+                print(f"  current offset {node.command('OFFSET?').split()[-1]} °C")
+            else:
+                v = node.set_offset(a.n)
+                print(f"  offset set to {v:+.2f} °C and recorded in "
+                      f"data/tunnel.json")
+        elif a.mode == "calibrate":
+            if a.n == 2000:
+                raise SystemExit("\n  give the TRUE room temperature, e.g. "
+                                 "`calibrate 21.5`\n")
+            raw, off, corr = node.calibrate(a.n)
+            print(f"  board reads   {raw:6.2f} °C  (uncorrected)")
+            print(f"  you say       {a.n:6.2f} °C")
+            print(f"  offset        {off:+6.2f} °C  — recorded in data/tunnel.json")
+            print(f"  now reads     {corr:6.2f} °C")
+            t, p_, rho = node.ambient()
+            print(f"\n  density now {rho:.4f} kg/m³, "
+                  f"{100*(rho/1.204-1):+.1f}% vs standard")
+            if abs(off) > 30:
+                print(f"  ⚠ an offset that large is more likely a wrong "
+                      f"reference reading than\n    20 °C of self-heating — "
+                      f"check the thermometer.")
         elif a.mode == "rate":
             for k, v in node.rate().items():
                 print(f"  {k:<18} {v}")
         elif a.mode == "burst":
-            print(f"  capturing {a.n} samples…")
-            hz, rows = node.burst(a.n)
+            print(f"  capturing {int(a.n)} samples…")
+            hz, rows = node.burst(int(a.n))
             print(f"  {len(rows)} samples at {hz:.1f} Hz measured")
             out = Path(a.csv) if a.csv else (
                 ROOT / "logs" / f"burst_{time.strftime('%Y%m%d_%H%M%S')}.csv")

@@ -177,7 +177,17 @@ def protocol(a, voff, rng, load=None):
     """
     import hashlib as _h
     meta = protocol_meta(a, load, voff, rng)
-    extra = ";".join(f"{k}={getattr(a, k, '')}" for k in _UNHASHED)
+    # Canonical numeric form. argparse hands back `--stop-rpm 1800` as int
+    # while the dashboard float()s every field, so `1800` and `1800.0` used to
+    # hash differently and compare_blades declared two IDENTICAL ladders "NOT
+    # comparable" — on exactly the dashboard-vs-CLI pairing this project is
+    # about to do for v1_Ra20_repeat. Formatting is not protocol.
+    def _canon(v):
+        if isinstance(v, bool) or not isinstance(v, (int, float)):
+            return str(v)
+        f = float(v) + 0.0            # -0.0 + 0.0 == 0.0: they must not
+        return f"{f:.6g}"             # hash apart, and unload_amps is 0.0
+    extra = ";".join(f"{k}={_canon(getattr(a, k, ''))}" for k in _UNHASHED)
     meta["protocol_extra"] = extra
     # A second hash over shape + the settings the first one cannot see. Two
     # runs agreeing on `protocol` but differing on `protocol_full` walked
@@ -185,6 +195,69 @@ def protocol(a, voff, rng, load=None):
     meta["protocol_full"] = _h.sha256(
         (meta["protocol_detail"] + ";" + extra).encode()).hexdigest()[:12]
     return meta
+
+
+def check_instrument(load, cfg, allow=False):
+    """
+    Refuse a campaign sweep on a DIFFERENT physical instrument.
+
+    A blade campaign attributes power differences to the blade. Swapping the
+    measuring instrument mid-campaign puts an uncontrolled change inside that
+    attribution, and nothing downstream can separate the two afterwards — the
+    numbers stay entirely plausible.
+
+    This is not hypothetical: on 1 Sept a Chroma serial ...1115 was plugged in
+    where Ra 20 and Ra 80 had both been measured on ...1113. The resource
+    string still named ...1113, so the run would have failed to connect — but
+    had the resource been auto-detected it would have run and produced a clean
+    curve on the wrong instrument.
+
+    Identity, not resource: the VISA resource string embeds the serial, so a
+    mismatch there fails loudly. A config repaired by autodetect would not.
+    """
+    want = ((cfg.get("load") or {}).get("identity") or "").strip()
+    got = (getattr(load, "identity", "") or "").strip()
+    if not want or not got or want == got:
+        return {"instrument_check": "ok" if want else "no recorded identity"}
+
+    def serial(s):
+        parts = [p.strip() for p in s.split(",")]
+        return parts[2] if len(parts) > 2 else s
+
+    msg = (f"\n  INSTRUMENT MISMATCH\n"
+           f"    tunnel.json records : {want}\n"
+           f"    connected           : {got}\n\n"
+           f"  Serial {serial(want)} vs {serial(got)} — a DIFFERENT physical\n"
+           f"  load. Every banked run in this campaign was measured on\n"
+           f"  {serial(want)}. A blade comparison across an instrument change\n"
+           f"  cannot support a roughness claim, and the curve will look fine.\n\n"
+           f"  Swap the instrument back, or pass --allow-instrument-change and\n"
+           f"  accept that this run is not comparable to the banked ones.\n")
+    if not allow:
+        raise SystemExit(msg)
+    print(msg + "  --allow-instrument-change given; continuing.\n")
+    return {"instrument_check": f"MISMATCH — recorded {serial(want)}, "
+                                f"ran on {serial(got)}"}
+
+
+def actuals_meta(drive):
+    """
+    Record which drive signals the fan-speed readback came from.
+
+    A sweep whose wind column cannot be interpreted is not comparable to
+    another one, and the two banked runs already differ this way. Recording it
+    per run costs one Modbus read and makes the question answerable later
+    instead of forensic.
+    """
+    try:
+        a1, a2 = drive.actual_signals()
+    except Exception as e:
+        return {"drive_actual_signals": f"not read — {str(e)[:60]}"}
+    note = ""
+    if a1 != 103:
+        note = (f"  ⚠ EXPECTED 103 (OUTPUT FREQ). {a1} means fan_rpm_actual "
+                f"is a DIFFERENT quantity, and wind_mps is derived from it.")
+    return {"drive_actual_signals": f"5310={a1};5311={a2}{note}"}
 
 
 def ambient_meta(node):
@@ -208,10 +281,22 @@ def ambient_meta(node):
         return {"air": "not recorded — no tunnel node connected"}
     try:
         t, pa, rho = node.ambient()
+        # Record the offset STATE, not just the reading. Without this a sweep
+        # taken on an uncorrected board is byte-for-byte indistinguishable
+        # from a calibrated one, and the error it carries — 20 C, 6.5% of
+        # every Cp — is exactly the size of the result being measured.
+        off = getattr(node, "offset_c", None)
+        if off is None:
+            off_s = ("NOT SET — this board reads ~20 C high when it has been "
+                     "powered a while, which is ~6.5% in every Cp derived "
+                     "from this run. Run `tunnel_node.py calibrate <true °C>`.")
+        else:
+            off_s = f"{off:+.2f} C applied"
         return {
             "air_temp_c": f"{t:.2f}",
             "air_pressure_pa": f"{pa:.0f}",
             "air_density_kg_m3": f"{rho:.4f}",
+            "air_temp_offset": off_s,
             "_air_note": (
                 "Measured by the tunnel node (LPS22HB), dry-air formula — the "
                 "Lite board has no humidity sensor, so density reads ~1% high "

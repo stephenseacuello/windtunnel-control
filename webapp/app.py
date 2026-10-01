@@ -46,6 +46,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from flask import Flask, Response, jsonify, render_template, request
 
 import analyze as analysis
+import openfoam as _of
 from controller import TunnelController
 
 app = Flask(__name__)
@@ -352,8 +353,18 @@ def _sweep_summary(name):
             rows.append({
                 "rpm": float(r.get("fan_rpm_cmd") or r.get("fan_rpm") or 0),
                 "mps": float(r["wind_mps"]),
-                "p_w": float(r.get("p_max_fit_w") or r.get("p_max_w") or 0),
-                "i_a": float(r.get("i_at_pmax_fit_a") or r.get("i_at_pmax_a") or 0),
+                # RAW argmax, deliberately, on every run. `p_max_fit_w or
+                # p_max_w` silently took the parabolic FIT from runs that have
+                # it (Ra 80 onward) and the raw ARGMAX from runs that do not
+                # (Ra 20) — so this tab compared two different estimators, and
+                # the argmax is biased high by ~1.3% mean over a flat maximum.
+                # compare_blades.py drops BOTH sides to raw for exactly this
+                # reason; the tab beside it did the opposite.
+                "p_w": float(r.get("p_max_raw_w") or r.get("p_max_w") or 0),
+                "p_fit_w": (float(r["p_max_fit_w"])
+                            if r.get("p_max_fit_w") else None),
+                "i_a": float(r.get("i_at_pmax_raw_a")
+                             or r.get("i_at_pmax_a") or 0),
                 "limited_by": r.get("limited_by", ""),
                 "clean": (r.get("clean") or "1") in ("1", "True", "true")})
         except (KeyError, ValueError):
@@ -450,8 +461,48 @@ def api_node_state():
 @app.route("/api/node/connect", methods=["POST"])
 def api_node_connect():
     d = request.get_json(force=True, silent=True) or {}
-    ident = ctl.connect_node(d.get("port") or None)
-    return ok(identity=ident, **ctl.node_snapshot())
+    ctl.connect_node(d.get("port") or None)
+    # node_snapshot() already carries `identity`, so passing it again as a
+    # keyword raised TypeError on EVERY call — the connect button could never
+    # have worked once.
+    return ok(**ctl.node_snapshot())
+
+
+# ── CFD ───────────────────────────────────────────────────────────────────
+
+@app.route("/api/cfd/state")
+def api_cfd_state():
+    return ok(**ctl.cfd_state())
+
+
+@app.route("/api/cfd/install")
+def api_cfd_install():
+    """Cached. The first call mounts a disk image and takes a few seconds."""
+    return ok(**ctl.cfd_install())
+
+
+@app.route("/api/cfd/cases")
+def api_cfd_cases():
+    return ok(cases=ctl.cfd_cases(), root=str(_of.CASES_ROOT))
+
+
+@app.route("/api/cfd/run", methods=["POST"])
+def api_cfd_run():
+    d = request.get_json(force=True, silent=True) or {}
+    case = (d.get("case") or "").strip()
+    cmds = d.get("commands") or ["blockMesh", "simpleFoam"]
+    if not case:
+        return err("no case given")
+    try:
+        return ok(**ctl.cfd_run(case, cmds))
+    except Exception as e:
+        return err(str(e))
+
+
+@app.route("/api/cfd/stop", methods=["POST"])
+def api_cfd_stop():
+    ctl.cfd_stop()
+    return ok(stopped=True)
 
 
 @app.route("/api/node/burst", methods=["POST"])

@@ -217,9 +217,23 @@ class Calibration:
     # ── the mapping ──────────────────────────────────────────────────────
 
     def velocity(self, hz):
-        """Hz → velocity. Vectorized."""
+        """
+        Hz → velocity. Vectorized. Never negative.
+
+        The fit is affine with a negative intercept (−0.424 m/s on this rig),
+        so extrapolating below about 20 rpm returns a NEGATIVE wind speed and
+        a stopped fan reads −0.42 m/s on the dashboard tile. The tunnel has
+        one flow direction; a negative reading is the fit being used outside
+        the range it was measured over, not a measurement.
+
+        Clamped at zero rather than raising, because this is on the display
+        path for a live tile and refusing to render is worse than rendering a
+        floor. It is a floor on the OUTPUT only — the coefficients are
+        untouched, so nothing that fits or inverts against them changes.
+        """
         self._require_hz_domain()
-        return np.polyval(self.coeffs, np.asarray(hz, dtype=float))
+        v = np.polyval(self.coeffs, np.asarray(hz, dtype=float))
+        return np.maximum(v, 0.0)
 
     def _require_hz_domain(self):
         domain = getattr(self, "domain", "hz")

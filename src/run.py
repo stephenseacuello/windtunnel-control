@@ -31,7 +31,7 @@ import gusts
 from acs550 import ACS550, DriveError, SW_BITS
 from calibration import Calibration, TO_MPS, to_mps
 from characterize import freq_response, step_response
-from config import TunnelConfig
+from config import TunnelConfig, DEFAULT_PATH as _DEFAULT_CONFIG
 import feedforward as ff
 import selftest as _selftest
 from simulator import SimulatedACS550
@@ -233,6 +233,36 @@ def mode_verify(drive, a):
         a.cfg.set("calibration_status", "VERIFIED at one point").save()
         return
 
+    # ── refuse on an rpm-native calibration ──────────────────────────────
+    # This whole branch corrects a Hz→RPM stage. On this rig the drive
+    # commands SPEED, so that stage does not exist and there is nothing to
+    # rescale. The dashboard already refuses here (controller.py); the CLI
+    # did not, and it writes the same file. Once DEFAULT_PATH was fixed to
+    # resolve, that file is the real one.
+    unit = (a.cfg.get("drive_reference") or {}).get("unit", "Hz")
+    if unit.lower() == "rpm" or getattr(cal, "domain", "") == "rpm":
+        raise SystemExit(
+            "\n  This calibration is rpm-native and the drive commands speed,\n"
+            "  so there is no Hz→RPM stage to correct. A disagreement here\n"
+            "  means the rpm→velocity fit itself is off, or the anemometer is.\n"
+            "  Refit from measured points with `run.py calibrate` rather than\n"
+            "  rescaling a drive map that does not exist.\n")
+
+    # Back it up first. This is the only measured calibration in the project,
+    # and a previous version of this path destroyed it and stamped the result
+    # "VERIFIED and corrected" — after which every velocity lookup raised and
+    # the wind-speed readouts silently became dashes.
+    try:
+        import json as _json
+        bak = Path(a.cfg.path).with_suffix(".json.bak")
+        bak.write_text(_json.dumps(
+            {"calibration": a.cfg.get("calibration"),
+             "saved": time.strftime("%Y-%m-%dT%H:%M:%S")}, indent=2) + "\n")
+        print(f"  previous calibration backed up to {bak.name}")
+    except Exception as e:
+        raise SystemExit(f"\n  refusing to overwrite the calibration — could "
+                         f"not write a backup first: {e}\n")
+
     # Velocity is affine in RPM, so scaling rpm_per_hz is not exactly a scale
     # on velocity. Solve for the rpm_per_hz that makes the prediction land on
     # the measurement at this frequency.
@@ -388,7 +418,31 @@ def mode_characterize(drive, a):
         # rising measurement with the falling one.
         key = "tau_down" if a.step < 0 else "tau"
         unit = (a.cfg.get("drive_reference") or {}).get("unit", "Hz")
-        a.cfg.set(key, round(float(tau), 3),
+
+        # ── do not silently replace an established value ──────────────────
+        # The stored tau is a mean of FOUR unclipped gust runs. This is one
+        # run. Overwriting a four-run mean with a single measurement is a
+        # downgrade even when the single measurement is good, and when it is
+        # bad — an E-stopped run once wrote 4.756, eight times the truth — it
+        # is silent: nothing downstream reads a tau and asks whether it is
+        # plausible, the bandwidth guard simply passes profiles it should
+        # refuse.
+        prev = a.cfg.get(key)
+        new = round(float(tau), 3)
+        if prev and not getattr(a, "force_tau", False) and \
+                abs(new - prev) > 0.30 * prev:
+            print(f"\n  ⚠ NOT SAVED. `{key}` is {prev:g} s and this run "
+                  f"measured {new:g} s —\n    a {100*(new/prev-1):+.0f}% "
+                  f"change, which is more likely a clipped or aborted run\n"
+                  f"    than a real change in the fan.")
+            print(f"\n    Check the run first: a step that hit the drive's "
+                  f"ramp limit\n    measures the RAMP, not the tunnel. "
+                  f"`python src/analyze.py` flags those.")
+            print(f"\n    If it is genuine:  "
+                  f"python src/run.py characterize --step {a.step:g} "
+                  f"--force-tau\n")
+            return
+        a.cfg.set(key, new,
                   note=f"step {a.base:g}→{a.base + a.step:g} {unit}").save()
         other = "tau" if key == "tau_down" else "tau_down"
         have = a.cfg.get(other)
@@ -868,7 +922,7 @@ def build_parser():
                    help="run against a simulated drive — no hardware, real "
                         "timing. Rehearse a long profile before committing a "
                         "session to it.")
-    p.add_argument("--config", default="tunnel.json",
+    p.add_argument("--config", default=str(_DEFAULT_CONFIG),
                    help="persistent tunnel config (tau, calibration, limits)")
 
     sub = p.add_subparsers(dest="mode", required=True)
@@ -927,6 +981,10 @@ def build_parser():
     m.set_defaults(func=mode_jog)
 
     m = sub.add_parser("characterize", help="step response, measures tau")
+    m.add_argument("--force-tau", action="store_true", dest="force_tau",
+                   help="save even if it disagrees with the stored value by "
+                        ">30%%. The stored 0.60 s is a four-run mean; one run "
+                        "should not replace it by accident.")
     m.add_argument("--base", type=float, default=20)
     m.add_argument("--step", type=float, default=10)
     m.add_argument("--settle", type=float, default=30)
@@ -1017,7 +1075,7 @@ def main():
 
     # Config first, so tau and the calibration are available without being
     # retyped. A guard that is easy to forget is a guard that does nothing.
-    a.cfg = TunnelConfig.load(a.config)
+    a.cfg = TunnelConfig.load(a.config, readonly=bool(getattr(a, "dry_run", False)))
 
     if not a.port:
         import glob

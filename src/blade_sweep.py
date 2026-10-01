@@ -37,12 +37,16 @@ settings are not two data points, and across a dozen rotors that is very easy
 to do by accident. `summarise.py`-style analysis should refuse to compare runs
 whose fingerprints differ.
 
-**What this does NOT give you is Cp or λ.** Those need rotor RPM, and rotor
-RPM comes from the DAQ. Without it you have P_max(v) per blade — a real
-comparison, but one that cannot separate a blade that is aerodynamically
-better from a blade whose runaway speed happens to sit closer to the
-generator's sweet spot. Wire the DAQ channel in before the campaign, not
-after, or every blade gets re-run.
+**Whether this gives you Cp or λ depends on the rotor sensor.** Those need
+rotor RPM, which now comes from a proximity sensor on the PMC (firmware 5.7,
+ENC0 index) and is written to the `turbine_rpm` column when it produces
+pulses — not from the DAQ. The sensor currently bounces 2–3 counts per magnet
+pass, variably, so check any run with `src/check_rotor.py` before trusting λ.
+Without usable rotor speed you have P_max(v) per blade — a real comparison,
+but one that cannot separate a blade that is aerodynamically better from a
+blade whose runaway speed happens to sit closer to the generator's sweet
+spot. Get the sensor clean before the campaign, not after, or every blade
+gets re-run.
 
 THE INTERLOCK
 ════════════════════════════════════════════════════════════════════════════
@@ -82,7 +86,8 @@ from sweep_core import (ceiling_for, step_for, settle_wind, estimate,
                         protocol as protocol_meta_shared,
                         interp_at, rotor_rpm_between, summary_row, point_rows,
                         SUMMARY_HEADER, POINTS_HEADER, ROTOR_RADIUS_M,
-                        archive_existing, ambient_meta,
+                        archive_existing, ambient_meta, actuals_meta,
+                        check_instrument,
                         RPM_PULSES_PER_REV)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -119,6 +124,9 @@ class SimulatedDrive:
 
     def actuals(self):
         return self._rpm, 0.0
+
+    def actual_signals(self):
+        return 103, 104           # what a correctly-configured drive holds
 
     def is_faulted(self):
         return False
@@ -191,11 +199,33 @@ class DriveWatch:
     than the ones that were commanded.
     """
 
-    def __init__(self, drive, interval=1.0):
+    def __init__(self, drive, interval=0.05, keepalive_every=1.0):
+        """
+        `interval` must be MUCH shorter than the dwell, or rotor speed is
+        smeared across operating points.
+
+        At the old 1.0 s against a 1.0 s dwell there was usually exactly ONE
+        sample in the window, so `rotor_rpm_between` had to bracket outside
+        the dwell to return anything at all — and the rpm attributed to a step
+        then included the previous step's conditions. The rotor slows as
+        current is drawn, so that is not noise, it is a systematic pull toward
+        the lighter load, and it grows exactly where the ladder steps hardest.
+
+        At 0.05 s a 1 s dwell holds ~20 samples, so the window sits INSIDE the
+        dwell while still spanning ~0.95 s of pulses — tight windowing and a
+        large pulse count at the same time, not a trade between them.
+
+        Keepalive is deliberately NOT tied to this. The PMC host watchdog is
+        5 s; poking it 20x a second would trade drive telemetry bandwidth for
+        nothing.
+        """
         import threading
         self.drive = drive
         self.tp = getattr(drive, "transport", None)
         self.interval = interval
+        self.keepalive_every = keepalive_every
+        self._last_ka = 0.0
+        self.achieved_hz = 0.0
         self.rpm = self.amps = 0.0
         self.ticks = self.errors = 0
         # Every tick is KEPT, not just the latest. The docstring above always
@@ -209,10 +239,20 @@ class DriveWatch:
         self._t = threading.Thread(target=self._loop, daemon=True)
 
     def _loop(self):
-        while not self._stop.wait(self.interval):
+        t_first = None
+        while True:
+            # Deadline-based, not sleep-based. `wait(interval)` slept a fixed
+            # time AFTER the work, so the real period was interval + work and
+            # the rate silently sagged under load with nothing reporting it.
+            t_next = time.monotonic() + self.interval
+            if self._stop.is_set():
+                break
             try:
-                if self.tp is not None:
+                now = time.monotonic()
+                if self.tp is not None and \
+                        now - self._last_ka >= self.keepalive_every:
                     self.tp.keepalive_tick()
+                    self._last_ka = now
                 self.rpm, self.amps = self.drive.actuals()
                 pulses = last_us = None
                 try:
@@ -230,8 +270,17 @@ class DriveWatch:
                     self._samples.append((time.time(), self.rpm, self.amps,
                                           pulses, last_us))
                 self.ticks += 1
+                if t_first is None:
+                    t_first = time.monotonic()
+                else:
+                    el = time.monotonic() - t_first
+                    if el > 0:
+                        self.achieved_hz = (self.ticks - 1) / el
             except Exception:
                 self.errors += 1
+            slack = t_next - time.monotonic()
+            if self._stop.wait(slack if slack > 0 else 0):
+                break
 
     # The core's `rig` protocol names these fan_rpm / motor_amps, so that one
     # settle implementation serves both callers. Aliases rather than renames:
@@ -291,6 +340,7 @@ def run_sweep(a):
     print(f"  estimate: {est / 60:.0f} min of continuous tunnel time")
 
     drive, load = open_rig(a)
+    cfg = TunnelConfig.load(a.config)
 
     rng = a.range if a.range != "auto" else ChromaLoad.pick_range(
         ceiling_for(a.stop_rpm, a), CC_FULL_SCALE)
@@ -318,7 +368,20 @@ def run_sweep(a):
     if _moved:
         print(f"  earlier run archived as {', '.join(_moved)}")
 
-    air_start = ambient_meta(node)
+    # Guard the relationship that makes rotor speed mean anything.
+    if a.poll > a.dwell / 4.0:
+        print(f"\n  ⚠ --poll {a.poll:g}s is not much shorter than --dwell "
+              f"{a.dwell:g}s.\n    Each dwell needs several samples INSIDE "
+              f"it or rotor speed is read from\n    a window that spans the "
+              f"previous step, which loads differently.\n    Use --poll "
+              f"{a.dwell/20:.3f} or smaller.\n")
+
+    air_start = check_instrument(load, cfg,
+                                 getattr(a, "allow_instrument_change", False))
+    air_start.update(ambient_meta(node))
+    # Which drive signal the fan-speed readback came from. Not in the profile,
+    # so not restored with it — and the two banked runs demonstrably differ.
+    air_start.update(actuals_meta(drive))
     rows, summary, dead = [], [], 0
     interlock = TurbineInterlock(drive, load, min_amps=0.0,
                                  spindown_timeout=a.spindown_timeout)
@@ -326,7 +389,8 @@ def run_sweep(a):
         # ── load on FIRST, then wind. Not negotiable. ────────────────────
         interlock.arm(initial_amps=max(a.unload_amps, a.step_amps * 0.5))
         print(f"\n  load ON — the fan may now be started\n")
-        watch = _watch = DriveWatch(drive, interval=a.keepalive)
+        watch = _watch = DriveWatch(drive, interval=a.poll,
+                                    keepalive_every=a.keepalive)
         _watch.__enter__()
 
         for n, rpm in enumerate(rpms, 1):
@@ -433,6 +497,14 @@ def run_sweep(a):
         print(f"  {len(summary)} completed point(s) are already on disk")
     finally:
         try:
+            # Hand the raw series to the writer, and say whether the poll
+            # rate actually held. A sag here is not cosmetic: it widens every
+            # rotor window back toward the smearing this rate exists to fix.
+            try:
+                a._trace = list(_watch.series())
+                a._poll_hz = _watch.achieved_hz
+            except Exception:
+                a._trace, a._poll_hz = None, 0.0
             _watch.__exit__()
             print(f"\n  watchdog: {watch.ticks} ticks, {watch.errors} failed")
         except Exception:
@@ -533,6 +605,33 @@ def write_out(a, rows, summary, meta):
         print(f"\n  ⚠ {len(dirty)} point(s) did not stop on the power roll-off. "
               f"Their peaks may\n    be truncated — check the limited_by column "
               f"before using them.")
+    # The raw telemetry series, at the full poll rate. points.csv keeps ONE
+    # row per dwell because compare_blades and cp_lambda are built on that
+    # shape; this is the 0.05 s time base beside it, not instead of it.
+    tr = getattr(a, "_trace", None)
+    if tr:
+        import csv as _csv
+        tp = Path(str(stem) + "_trace.csv")
+        with open(tp, "w", newline="") as f:
+            w = _csv.writer(f)
+            for k, v in meta.items():
+                w.writerow([f"# {k}", v])
+            w.writerow(["t_unix", "t_rel_s", "fan_rpm_actual", "motor_amps",
+                        "rpm_pulses", "rpm_last_us"])
+            t0 = tr[0][0] if tr else 0
+            for t, rpm, amps, pulses, last_us in tr:
+                w.writerow([f"{t:.3f}", f"{t-t0:.3f}", f"{rpm:.1f}",
+                            f"{amps:.2f}",
+                            "" if pulses is None else pulses,
+                            "" if last_us is None else last_us])
+        hz = getattr(a, "_poll_hz", 0.0)
+        print(f"  wrote {tp}  ({len(tr)} samples, {hz:.1f} Hz achieved)")
+        if hz and hz < 0.6 / max(a.poll, 1e-9):
+            print(f"    ⚠ asked for {1/a.poll:.0f} Hz and got {hz:.1f}. The "
+                  f"link could not keep up,\n      so rotor windows are wider "
+                  f"than intended — check turbine_rpm with\n      "
+                  f"src/check_rotor.py before trusting λ.")
+
     print(f"\n  protocol fingerprint: {meta['protocol']}")
     print(f"  Only compare blades whose fingerprint matches this one.")
     return 0
@@ -542,11 +641,14 @@ def main():
     p = argparse.ArgumentParser(
         description="one blade, 500 to 1800 rpm, load ramped to the power "
                     "roll-off at each speed",
-        epilog="Cp and lambda need rotor RPM from the DAQ; this gives P_max(v).")
+        epilog="Cp and lambda need a clean rotor-speed sensor (check with "
+               "src/check_rotor.py); without one this gives P_max(v).")
     p.add_argument("--blade", required=True, help="which rotor this is")
     p.add_argument("--notes", default=None, help="material, finish, anything "
                                                  "that distinguishes it")
-    p.add_argument("--config", default="data/tunnel.json")
+    # Repo-anchored, not cwd-relative: "data/tunnel.json" only resolved when
+    # the command happened to be run from the repo root.
+    p.add_argument("--config", default=str(REPO / "data" / "tunnel.json"))
     p.add_argument("--port", default=None,
                    help="PMC serial port; default comes from tunnel.json, then autodetect")
     p.add_argument("--out", default=None, help="path stem for the two CSVs")
@@ -580,6 +682,18 @@ def main():
                    help="skip the ambient node even if it is connected")
     w.add_argument("--node-port", default=None,
                    help="serial port of the tunnel node; autodetected if absent")
+    w.add_argument("--allow-instrument-change", action="store_true",
+                   dest="allow_instrument_change",
+                   help="sweep even though the connected load is not the one "
+                        "tunnel.json records. The run is then not comparable "
+                        "to the banked campaign.")
+    w.add_argument("--poll", type=float, default=0.05,
+                   help="seconds between drive/rotor telemetry samples. Must "
+                        "be MUCH shorter than --dwell: at 1.0 s against a "
+                        "1.0 s dwell there was one sample per window, so "
+                        "rotor speed had to be read from outside the dwell "
+                        "and carried the previous step's conditions. 0.05 "
+                        "puts ~20 samples inside each dwell.")
     w.add_argument("--keepalive", type=float, default=0.25,
                    help="seconds between PMC watchdog ticks. Must stay well "
                         "under tunnel.json transport.host_watchdog_ms, or the "

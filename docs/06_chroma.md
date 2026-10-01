@@ -244,7 +244,7 @@ python src/load_ramp.py --simulate --fan-rpm 1800 --max-amps 0.8 --dwell 0
 
 # real, one wind speed
 python src/load_ramp.py --mode peak --fan-rpm 1800 --max-amps 0.8 \
-                        --volt-off 0.5 --dwell 4 --csv logs/peak_1800.csv
+                        --volt-off 0.5 --dwell 4 --csv logs/peak_1800_new.csv
 ```
 
 ### Three things it enforces, and why
