@@ -1,0 +1,30 @@
+# blade,v1_Ra20_repeat_20261001
+# notes,"Ra20, fuzzy 0.050 mm, 1 Oct mount 2"
+# fan_rpm,500
+# wind_mps,10.24
+# instrument,"Chroma,63004-150-60,630041501113,2.01"
+# protocol,94bed28333f7
+# protocol_detail,scaling=v2;step=0.02000;frac=0.0000;dwell=1.00;voff=0.500;range=low;floor=0.00000;operate=80.0;collapse=0.700;confirm=2
+# clock,2026-10-01T17:34:59-0400
+# clock_unix,1790890499.724
+# _clock_note,host wall clock at run start. Every row carries t_unix so a DAQ record can be joined to it — check the two machines agree to better than a dwell before trusting the join.
+# protocol_extra,min_step_amps=0.002;stop_rpm=1800;start_rpm=500;rpm_step=100;settle_min=2;settle_max=20;settle_poll=0.5;settle_tol=0.01;settle_confirm=3;rpm_tol_abs=10;rpm_tol_frac=0.02;unload_amps=0
+# protocol_full,b5ac081ac5c0
+# instrument_check,ok
+# air,not recorded — no tunnel node connected
+# drive_actual_signals,5310=103;5311=104
+fan_rpm_cmd,fan_rpm_actual,wind_mps,blade,p_max_fit_w,i_at_pmax_fit_a,p_max_raw_w,i_at_pmax_raw_a,v_at_pmax_v,i_last_a,limited_by,clean,steps,stopped_by,turbine_rpm_at_pmax,tsr_at_pmax
+500,501,10.26,v1_Ra20_repeat_20261001,0.0306,0.0171,0.0317,0.0180,1.7612,0.0240,power-rolloff,1,13,power fell to 74% of its peak (0.0234 W vs 0.0317 W) at 0.0240 A,,
+600,600,12.37,v1_Ra20_repeat_20261001,0.0624,0.0284,0.0633,0.0297,2.1304,0.0446,load-cutout,0,24,"rollover — under v_floor at 0.0489 A (0.0489 A measured, 0.325 V, was 0.465 V)",,
+700,700,14.50,v1_Ra20_repeat_20261001,0.1128,0.0438,0.1153,0.0438,2.6321,0.0613,power-rolloff,1,22,power fell to 75% of its peak (0.0862 W vs 0.1153 W) at 0.0613 A,,
+800,800,16.63,v1_Ra20_repeat_20261001,0.1711,0.0572,0.1794,0.0576,3.1145,0.0883,power-rolloff,1,24,power fell to 56% of its peak (0.1011 W vs 0.1794 W) at 0.0883 A,,
+900,900,18.76,v1_Ra20_repeat_20261001,0.2659,0.0699,0.2644,0.0733,3.6077,0.1124,power-rolloff,1,24,power fell to 50% of its peak (0.1314 W vs 0.2644 W) at 0.1124 A,,
+1000,1000,20.90,v1_Ra20_repeat_20261001,0.4030,0.0838,0.4044,0.0909,4.4485,0.1334,power-rolloff,1,23,power fell to 69% of its peak (0.2797 W vs 0.4044 W) at 0.1334 A,,
+1100,1101,23.05,v1_Ra20_repeat_20261001,0.6514,0.1072,0.6572,0.1031,6.3741,0.1694,power-rolloff,1,24,power fell to 69% of its peak (0.4560 W vs 0.6572 W) at 0.1694 A,,
+1200,1200,25.16,v1_Ra20_repeat_20261001,0.9543,0.1554,0.9642,0.1582,6.0950,0.2197,power-rolloff,1,26,power fell to 60% of its peak (0.5751 W vs 0.9642 W) at 0.2197 A,,
+1300,1300,27.29,v1_Ra20_repeat_20261001,1.2845,0.1990,1.2875,0.2069,6.2226,0.2689,power-rolloff,1,27,power fell to 66% of its peak (0.8560 W vs 1.2875 W) at 0.2689 A,,
+1400,1400,29.42,v1_Ra20_repeat_20261001,1.6194,0.2068,1.6184,0.2044,7.9180,0.3246,power-rolloff,1,28,power fell to 69% of its peak (1.1228 W vs 1.6184 W) at 0.3246 A,,
+1500,1500,31.56,v1_Ra20_repeat_20261001,1.9986,0.2654,2.0236,0.2627,7.7030,0.3595,power-rolloff,1,27,power fell to 77% of its peak (1.5589 W vs 2.0236 W) at 0.3595 A,,
+1600,1600,33.69,v1_Ra20_repeat_20261001,2.5133,0.2713,2.5259,0.2837,8.9034,0.4097,power-rolloff,1,27,power fell to 69% of its peak (1.7461 W vs 2.5259 W) at 0.4097 A,,
+1700,1700,35.82,v1_Ra20_repeat_20261001,3.0544,0.3059,3.0700,0.3207,9.5727,0.4810,power-rolloff,1,28,power fell to 67% of its peak (2.0502 W vs 3.0700 W) at 0.4810 A,,
+1800,1800,37.95,v1_Ra20_repeat_20261001,3.7185,0.3292,3.7517,0.3200,11.7241,0.5200,power-rolloff,1,27,power fell to 71% of its peak (2.6609 W vs 3.7517 W) at 0.5200 A,,

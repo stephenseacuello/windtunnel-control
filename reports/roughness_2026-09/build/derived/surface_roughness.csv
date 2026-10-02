@@ -1,0 +1,5 @@
+rotor,fuzzy_skin_mm,scans,profiles,Pa_um,Ra_lc025_um,dominant_wavelength_um,Pa_scan_spread_um,Ra_scan_spread_um
+v1_smooth,0,1,1036,19.01,12.74,203,,
+v1_Ra20,0.05,1,1035,13.92,9.376,101.5,,
+v1_Ra40,0.101,1,1037,13.18,8.21,101.7,,
+v1_Ra80,0.202,2,2085,28.66,10.34,257,4.818,1.968
