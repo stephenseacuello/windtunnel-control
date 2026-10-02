@@ -26,12 +26,12 @@ small vertical-axis wind turbine rotor"** (S. Eacuello, 1 Oct 2026), included as
 | `v1_Ra20` | 0.050 mm | 20 Aug, 1 Oct 2026 | rig | 1 + 2 runs |
 | `v1_Ra40` | 0.101 mm | 1 Sep, 1 Oct 2026 | rig | 1 + 2 runs |
 | `v1_Ra80` | 0.202 mm | 26 Aug, 1 Oct 2026 | rig | 1 + 2 runs |
+| no texture | none | 27 Jul 2026 | Jeong-lab DAQ | 16 fan settings |
+| initial reference | — | 5 Jun 2026 | Jeong-lab DAQ | 13 fan settings |
 
 **On 1 Oct each rotor was mounted once and swept twice without being removed.** The two runs
 measure run-to-run repeatability. Mounting variation comes from the Aug/Sep runs, each a
-separate mounting (report Section 2.3).
-| no texture | none | 27 Jul 2026 | Jeong-lab DAQ | 16 fan settings |
-| initial reference | — | 5 Jun 2026 | Jeong-lab DAQ | 13 fan settings |
+separate mounting (report Section 2.3). The run notes' "mount 1" / "mount 2" mean run 1 and run 2.
 
 - **The Ra values are names, not measurements.** Use fuzzy-skin thickness as the texture
   variable. The measured Pa and Ra are in `4_derived/surface_roughness.csv`.
@@ -51,7 +51,7 @@ README.md, DATA_DICTIONARY.md, MANIFEST.csv
 2_jeong_lab/       raw: the lab's tables, raw 360 Hz export and plots, as e-mailed
 3_surface_scans/   raw: Keyence VR-6000 height maps (CSV) and screenshots (PNG), 1 Oct
 4_derived/         generated: analysis-ready tables used in the report
-5_reference/       rotor geometry (JSON) and the blade mesh (one blade, STL, metres)
+5_reference/       rotor geometry (JSON), the blade mesh (one blade, STL, metres), slicer summary
 6_figures/         report figures (PNG)
 7_code/            the analysis code (Python 3 with numpy, scipy, pandas, matplotlib)
 ```
@@ -85,8 +85,9 @@ README.md, DATA_DICTIONARY.md, MANIFEST.csv
    the columns are empty on 1 Oct. `Measured_RPM` in the July table is usable only up to
    1900 rpm.
 7. **Run notes are not reliable for print settings.** See `DATA_DICTIONARY.md`. The slicer
-   project `turbine_default.3mf` (60 MB, report Section 1) is not in this package; it is
-   available on request.
+   project `turbine_default.3mf` (60 MB) is not in this package; its settings are summarised in
+   `5_reference/turbine_default_summary.json` (report Section 1, written by `7_code/slicer.py`),
+   and the file is available on request.
 
 ## Integrity and reproducibility
 

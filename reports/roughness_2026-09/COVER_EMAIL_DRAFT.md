@@ -44,13 +44,13 @@ full report is attached; your part is Section 4 and Appendix C.
 2. **Current sensor.** What are its part number and range, and how is its zero set? This is the
    one number that decides whether the July gap is real.
 3. **Rotor pulse.** What generates it? It tracked cleanly to 1900 rpm, better than our reed
-   switch, and drops about one revolution in eight at 2000 rpm.
+   switch, and drops about one revolution in nine at 2000 rpm.
 4. **Processing.** Did the 5 June table use 50-sample averages? Could you share the 5 June raw
    export, and your processing script if that's easy, so I can put June on the same basis?
 5. **Rotors.**
    - Was the 27 July no-texture rotor the same blade set we ran on Thursday as the baseline?
    - Do you know who printed it, and with what settings? Our scans show 0.2 mm layers on it,
-     against 0.1 mm on the textured sets.
+     against about 0.1 mm on the Ra 20 and Ra 40 sets.
    - Was the 5 June rotor the original, pre-replica rotor?
 6. **Next session.** Could we run your DAQ in parallel with the Chroma for one sweep? That would
    calibrate your current channel against the Chroma and give the rig the rotor speed it is
@@ -88,7 +88,8 @@ power:
 - It is highest (13 µm) on the un-textured set, whose 0.2 mm layer lines are a regular texture of
   their own.
 
-Fuzzy-skin thickness is the variable that orders the power.
+In the point estimates, power rises with fuzzy-skin thickness, not with measured Ra (only one of
+the three steps in thickness is statistically resolved).
 
 **Caveats.**
 - Each rotor was mounted once on 1 October, and the rotors were run in order of increasing
@@ -99,18 +100,19 @@ Fuzzy-skin thickness is the variable that orders the power.
 - The rig measures electrical power, not the aerodynamic power coefficient.
 
 **Your open requests.**
-- *Dr. Jeong, comparison with the initial test:* Section 4. The 5 June values sit mostly within
-  the band of the textured rotors. The rotor and processing differ, so this is a consistency
-  check.
-- *Dr. Jahangiri, which blade exactly:* Table 2 lists what is recorded and measured for each set,
-  including the slicer file.
+- *Dr. Jeong, comparison with the initial test:* Section 4. The 5 June values fall inside the
+  band of the textured rotors at half the set points (5 of 10). The rotor and processing differ, so
+  this is a consistency check.
+- *Dr. Jahangiri, which blade exactly:* Table 2 lists what is recorded and measured for each set.
+  The slicer file holds one blade per plate for the 0.101 and 0.202 mm sets (0.2 mm nozzle,
+  0.10 mm layers, PLA); it conflicts with the run notes on material.
 - *Fault-testing plan:* Section 6.1 proposes a starting point. Could we find a time to agree on it
   before any fault blades are printed?
 
 **Attached.**
 - `URI_VAWT_Roughness_Report_2026-10-01.pdf` (12 pages)
-- `URI_VAWT_Roughness_Data_2026-10-01.zip`: every raw file unmodified, the surface scans, a data
-  dictionary, checksums and the analysis code. One script regenerates every number in the report.
+- `URI_VAWT_Roughness_Data_2026-10-01.zip`: every raw file, the surface scans, a data dictionary,
+  checksums and the analysis code. One script regenerates every result in the report.
 
 Slides will follow once we have discussed the results.
 

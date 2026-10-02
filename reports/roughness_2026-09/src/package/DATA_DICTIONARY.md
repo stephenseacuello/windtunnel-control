@@ -16,7 +16,7 @@ example, `pandas.read_csv(path, comment="#")`.
 | key | in | meaning |
 |---|---|---|
 | `blade` | all | Run name. The 20 Aug run was first logged as `v2_Ra20` and relabelled `v1_Ra20` on 25 Aug to match the geometry tested; only the label and line endings changed. |
-| `notes` | all | Free text typed by the operator. **Not reliable for print settings.** "PETG", "0.2mm layer" and "0.2mm nozzle" conflict with the slicer file (PLA, 0.10 mm layers, 0.2 mm nozzle) and the printer's account (0.4 mm nozzle); "0.2mm" is not the fuzzy-skin thickness. Measured layer periods are in `4_derived/surface_roughness.csv`. |
+| `notes` | all | Free text typed by the operator. **Not reliable for print settings.** "PETG" and "0.2mm layer" conflict with the slicer file (PLA, 0.10 mm layers); "0.2mm nozzle" agrees with it but conflicts with the printer's account (0.4 mm); "0.2mm" is not the fuzzy-skin thickness. On 1 Oct, "mount 1" / "mount 2" mean run 1 and run 2 on the same mounting; no rotor was removed. Measured layer periods are in `4_derived/surface_roughness.csv`. |
 | `fan_rpm`, `wind_mps` | all | The first set point of the run (500 rpm). Not a run-wide value; ignore. |
 | `instrument` | all | Electronic-load identity string (Chroma 63004-150-60, serial, firmware). |
 | `protocol` | all | Fingerprint of every setting that changes what a number means. **`94bed28333f7` in every run.** |
@@ -209,3 +209,22 @@ rows with `usable_for_rig_comparison` = 1.**
 
 These values are **derived**, not the lab's own numbers. The lab's current scale (2 A/V) is
 unverified, and every lab power scales with it.
+
+---
+
+## 5_reference/
+
+- `rotor_geometry.json`: rotor and blade dimensions used in the report.
+- `blade_v1.stl`: one blade, metres, in its own coordinates.
+- `turbine_default_summary.json`: summary of the slicer project `turbine_default.3mf` (Bambu
+  Studio, saved 17 Aug), written by `7_code/slicer.py`. The project itself (60 MB) is not shipped.
+
+| key | meaning |
+|---|---|
+| `printer_profile`, `print_profile`, `filament_profile` | Bambu Studio profiles in the project. |
+| `nozzle_mm`, `layer_height_mm`, `material`, `wall_loops` | Print settings. |
+| `fuzzy_skin_global`, `fuzzy_skin_mode`, `fuzzy_point_distance_mm` | Global fuzzy-skin settings. `none` globally: fuzzy skin is applied by painting instead. |
+| `plates_total`, `plates_not_reported` | Plates in the project, and how many hold a set not in the report. |
+| `plates[]` | Per reported plate: name, fuzzy-skin thickness (mm), object size (mm; one blade), triangle count, the share of triangles and of surface area painted with fuzzy skin, and the unpainted area (mm²) split into end caps and the rest (mainly the square edges). |
+
+The project records settings, not which prints were made from it.

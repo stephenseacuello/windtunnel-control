@@ -32,9 +32,9 @@
 more peak electrical power over \vlo–\vhi\,\si{m/s}. Allowing for mounting variation,
 estimated from the earlier runs, the 95\% intervals are $[\dlomB,\ \dhimB]\%$ and
 $[\dlomC,\ \dhimC]\%$: both gains are resolved. The \SI{0.050}{mm} rotor's $\dlvlA\%$ is not. The gain sits in the open-circuit voltage,
-consistent with the rotor turning faster in the same wind; rotor speed was not measured. Power follows fuzzy-skin
-thickness, not measured roughness: Ra is \sRaB–\sRaC\,\si{\micro m} on the three textured
-rotors and \sRaS\,\si{\micro m} on the un-textured one.
+consistent with the rotor turning faster in the same wind; rotor speed was not measured. In the point estimates power
+rises with fuzzy-skin thickness, not with measured roughness: Ra is \sRaB–\sRaC\,\si{\micro m} on
+the three textured rotors and \sRaS\,\si{\micro m} on the un-textured one.
 \end{keybox}
 
 \begin{table}[h]
@@ -51,8 +51,9 @@ Rotor & Fuzzy-skin & Pa & Ra & Run 1 / 2 & Change, 95\% CI$^a$ & Run-to-run$^b$ 
 \end{tabular}\\[2pt]
 \begin{minipage}{0.97\linewidth}\footnotesize
 Change: geometric mean over the \dnsp{} fan set points of the ratio to the un-textured rotor,
-averaged over the rotor's two runs. Each rotor was mounted once and swept twice back to back.
-$^a$Allows for mounting variation, estimated from the August–September runs ($\sigma=\dsigmam\%$,
+averaged over the rotor's two runs. Each rotor was mounted once and swept twice (back to back,
+except the no-texture runs, \dsmoothgap{} minutes apart). $^a$Allows for mounting variation,
+estimated from the August–September runs ($\sigma_m=\dsigmam\%$,
 \ddofm{} degrees of freedom; \secref{sec:analysis}). $^b$Run-to-run repeatability only
 ($\sigma=\dsigma\%$, \ddof{} degrees of freedom). Pa, Ra: Keyence VR-6000 profilometer
 (\secref{sec:surface}).
@@ -60,17 +61,15 @@ $^a$Allows for mounting variation, estimated from the August–September runs ($
 \end{table}
 
 \begin{itemize}[leftmargin=1.2em]
-  \item \textbf{Steps.} No texture to \SI{0.050}{mm}: $\dstepSA\%$ $[\dsteplomSA,\ \dstephimSA]$.
-        \SI{0.050}{} to \SI{0.101}{mm}: $\dstepAB\%$ $[\dsteplomAB,\ \dstephimAB]$. \SI{0.101}{} to
-        \SI{0.202}{mm}: $\dstepBC\%$ $[\dsteplomBC,\ \dstephimBC]$. Only the middle step is
-        resolved. \Ra{80} was above \Ra{40} on both test days, but by less than mounting variation
-        can produce. \Ra{40} and \Ra{80} are above the un-textured rotor at all \dnsp{} wind speeds.
+  \item \textbf{Steps.} Of the three steps in thickness, only \SI{0.050}{} to \SI{0.101}{mm} is
+        resolved (its 95\% interval excludes zero): $\dstepAB\%$ $[\dsteplomAB,\ \dstephimAB]$
+        (\secref{sec:results}). \Ra{40} and \Ra{80} are above the un-textured rotor at all
+        \dnsp{} wind speeds.
   \item \textbf{Mechanism.} Open-circuit voltage, a proxy for free-running rotor speed, rises by
         $\dvocB\%$ and $\dvocC\%$ for \Ra{40} and \Ra{80}, while source resistance shows no
         detectable change. Squared, the voltage change implies $\dvocsqB\%$ and $\dvocsqC\%$ in power.
-  \item \textbf{Reproducibility.} Each textured rotor's 1 October level is within
-        $\xdA\%$, $\xdB\%$ and $\xdC\%$ of its single run of 20 August–1 September, made in a
-        different order.
+  \item \textbf{Reproducibility.} Each textured rotor's 1 October level is $\xdA\%$, $\xdB\%$
+        and $\xdC\%$ above its single run of 20 August–1 September, made in a different order.
   \item \textbf{Caveats.} Each rotor was mounted once on 1 October, so mounting variation comes
         from the earlier runs. The rotors were run in order of increasing texture
         (\secref{sec:drift} gives the evidence against drift). The un-textured rotor was printed
@@ -81,10 +80,8 @@ $^a$Allows for mounting variation, estimated from the August–September runs ($
 
 \textbf{Responses to open requests.}
 \begin{itemize}[leftmargin=1.2em]
-  \item \emph{Comparison with the initial test (Prof.\ Jeong).} At 800–1700 rpm the 5 June values
-        differ from the rig's un-textured rotor by $\djunlo\%$ to $\djunhi\%$ (geometric mean
-        $\djunmid\%$). The rotor and processing differ, so this is a consistency check
-        (\secref{sec:jeong}).
+  \item \emph{Comparison with the initial test (Prof.\ Jeong).} \secref{sec:jeong}: the printed
+        rotors perform roughly like the initial reference; the rotor and processing differ.
   \item \emph{Which blade exactly (Prof.\ Jahangiri).} \tabref{tab:specimens} lists what is
         recorded and what was measured for each set.
   \item \emph{Fault-testing plan (Prof.\ Jeong).} \secref{sec:faults} proposes a starting point to
@@ -120,20 +117,23 @@ notes record intent and are not reliable for print settings.}\label{tab:specimen
 Rotor & Fuzzy skin & Layer period & Record \\
 \midrule
 No texture & none & \SI{\spitchS}{\micro m} & No fuzzy skin; the period implies \SI{0.2}{mm} layers. Probably the set tested in the Jeong lab on 27 July (to be confirmed). One blade broke at the end of the second run; $\pmax$ at 1800 rpm matches the first run to within \dbreak\%. \\
-\Ra{20} & \SI{0.050}{mm} & \SI{\spitchA}{\micro m} & Not in the slicer file read so far. Printer's account: garage Bambu, \SI{0.4}{mm} nozzle, \SI{0.08}{mm} layers. Run notes: ``PETG, 0.2mm''. The period indicates about \SI{0.1}{mm} layers. \\
-\Ra{40} & \SI{0.101}{mm} & \SI{\spitchB}{\micro m} & Slicer file: plate ``40 RA''. Printer's account: same batch as \Ra{20}. Run notes: ``PETG, 0.2mm layer''. Carried a small magnet on one blade for a reed-switch sensor on 1 September. \\
+\Ra{20} & \SI{0.050}{mm} & \SI{\spitchA}{\micro m} & Not in the slicer file. Printer's account: garage Bambu, \SI{0.4}{mm} nozzle, \SI{0.08}{mm} layers. Run notes: ``PETG, 0.2mm''. The period indicates about \SI{0.1}{mm} layers. \\
+\Ra{40} & \SI{0.101}{mm} & \SI{\spitchB}{\micro m} & Slicer file: plate ``40 RA''. Printer's account: same batch as \Ra{20}. Run notes: ``PETG, 0.2mm layer''. Carried a small magnet on one blade for a reed-switch sensor on 1 September (not recorded for 1 October). \\
 \Ra{80} & \SI{0.202}{mm} & — & Slicer file: plate ``80 RA''. Run notes: ``PETG, 0.2mm layer, 0.2mm nozzle''. No distinct layer period; the fuzz dominates. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\textbf{Slicer file.} One of three slicer project files has been read (\texttt{turbine\_default.3mf},
-saved 17 August). It holds the \SI{0.101}{} and \SI{0.202}{mm} settings (plates ``40 RA'' and
-``80 RA'') on a Bambu Lab P1S profile with a \SI{0.2}{mm} nozzle, \SI{0.10}{mm} layers and PLA,
-with fuzzy skin painted over 99.9\% of each model's surface at a \SI{0.2}{mm} point distance. The
-\SI{0.10}{mm} layers match the measured period of \Ra{40}. The nozzle and material conflict with
-the printer's account and the run notes, and the file does not record which sets were printed from
-it. The other two files have not yet been read.
+\textbf{Slicer file.} The slicer project \texttt{turbine\_default.3mf} (Bambu Studio, saved
+\slsaved) holds \slplates{} plates, each with one blade ($\slsize$\,mm, the \texttt{v1} blade; a
+rotor takes three). Two are reported sets: \SI{0.101}{} and \SI{0.202}{mm} (plates ``40 RA'' and
+``80 RA''); the third holds a set not reported here. The profile is a \slprinter{} with a
+\SI{\slnozzle}{mm} nozzle, \SI{\sllayer}{mm} layers and \slmaterial. Fuzzy skin is painted on both
+faces of each blade (\slpaint\% of the surface area; the square edges and end caps are plain) at a
+\SI{\slpoint}{mm} point distance. The \SI{\sllayer}{mm} layers match the measured period of
+\Ra{40}. The file holds no \SI{0.050}{mm} or un-textured blade. Its material (\slmaterial)
+conflicts with the run notes (PETG), and its nozzle with the printer's account (\SI{0.4}{mm}); it
+does not record which prints were made from it.
 
 \subsection{Surface measurement}\label{sec:surface}
 On 1 October each set was scanned with a Keyence VR-6000: one \sfieldx\,×\,\sfieldy\,mm field
@@ -187,7 +187,7 @@ Each rotor was mounted once and swept twice without being removed, in the order 
 \Ra{20}, \Ra{40}, \Ra{80}, from \dtfirst{} to \dtlast{} (first to last load step). The two
 no-texture runs started \dsmoothgap{} minutes apart; the other pairs ran back to back. \dclean{} of \dtotal{} set points ended on the roll-off rule. The other two ended on the
 load's voltage-floor cut-out after power had already fallen well below its peak: \dcutlist{} of
-peak. Every $\pmax$ is therefore a bracketed maximum. Air temperature and pressure were not
+peak. In every ladder power fell after the peak, so every $\pmax$ lies inside the ladder. Air temperature and pressure were not
 recorded.
 
 \subsection{Analysis}\label{sec:analysis}
@@ -200,8 +200,9 @@ recorded.
         rotors, is \dsigma\% (\ddof{} degrees of freedom). No rotor was remounted, so this is
         repeatability only.
   \item \textbf{Mounting variation} is estimated from the August–September runs, each a separate
-        mounting: their differences from the 1 October means give $\sigma=\dsigmam\%$
-        (\ddofm{} degrees of freedom), which also absorbs any day-to-day change. The headline
+        mounting: their differences from the 1 October means imply a mounting standard deviation
+        $\sigma_m=\dsigmam\%$ (\ddofm{} degrees of freedom), which also absorbs any day-to-day
+        change. It is assumed the same for the no-texture rotor, which has no earlier run. The headline
         95\% intervals include it (\appref{app:methods}). Print-to-print variation is not
         included.
   \item \textbf{Thévenin decomposition.} At each set point the ladder follows
@@ -215,7 +216,7 @@ recorded.
 
 \subsection{Peak power}
 Every run of every textured rotor lies above both no-texture runs, and the two runs of any rotor
-differ by less than 1\% (\figref{fig:day}). The August–September runs, each on another mounting
+differ by less than 1\% (\figref{fig:day}, \tabref{tab:data}). The August–September runs, each on another mounting
 and day, differ from the 1 October means by \dxdlo–\dxdhi\%. Allowing for that mounting variation, the
 changes between neighbouring thicknesses are:
 \begin{itemize}
@@ -223,10 +224,12 @@ changes between neighbouring thicknesses are:
   \item \SI{0.050}{} to \SI{0.101}{mm}: $\dstepAB\%$ $[\dsteplomAB,\ \dstephimAB]$;
   \item \SI{0.101}{} to \SI{0.202}{mm}: $\dstepBC\%$ $[\dsteplomBC,\ \dstephimBC]$.
 \end{itemize}
-Only the middle step is resolved. \Ra{80} was above \Ra{40} on both test days ($\lvlBCraw\%$ in
-August–September, $\dstepBC\%$ on 1 October), but by less than mounting variation can produce. The
-\Ra{20}-to-\Ra{40} step is the cleanest texture comparison in the data: those two sets share a
-print batch and a layer period, and differ otherwise only by the magnet on one \Ra{40} blade.
+Only the middle step is resolved, meaning its 95\% interval excludes zero. \Ra{80} was above
+\Ra{40} in both campaigns ($\lvlBCraw\%$ in August–September, $\dstepBC\%$ on 1 October), but the
+1 October interval includes zero. The
+\Ra{20}-to-\Ra{40} step is the cleanest texture comparison in the data: by the printer's account
+the two sets share a print batch, they share a measured layer period, and they differ otherwise only
+by the magnet on one \Ra{40} blade.
 
 \begin{figure}[h]
   \centering
@@ -289,8 +292,8 @@ percent.
         \SI{0.1}{A} count of the drive's reading (\SI{\dmotorhi}{A} at 1800 rpm). Fan load
         depends on air density, so a large density change is unlikely. This is not a calibrated
         density measurement.
-  \item The textured rotors reproduce their August–September single runs to within $\xdA\%$,
-        $\xdB\%$ and $\xdC\%$. Those runs were made over 12 days in the order \Ra{20}, \Ra{80},
+  \item The textured rotors are $\xdA\%$, $\xdB\%$ and $\xdC\%$ above their August–September
+        single runs. Those runs were made over 12 days in the order \Ra{20}, \Ra{80},
         \Ra{40}, and put \Ra{40} and \Ra{80} $\lvlABraw\%$ and $\lvlACraw\%$ above \Ra{20},
         against $\dstepAB\%$ and $\dstepAC\%$ on 1 October.
 \end{enumerate}
@@ -312,7 +315,7 @@ un-textured rotor at matched fan set point.
         collect current-sensor noise (about $\SI{0.11}{A}\times V$). At 500–700 rpm there was no
         load current (\appref{app:jeong}). Reprocessed on the rig's basis, the July values differ
         from the rig's un-textured rotor by $\djullo\%$ to $\djulhi\%$, below it at all \djuln{}
-        usable set points. That gap is not a rotor difference that can be interpreted. The load was held
+        usable set points. The gap cannot be read as a rotor difference. The load was held
         below the power peak, so the July values are lower bounds, and the current scale cannot
         be checked from the file. The free-running voltages, which need no current calibration,
         differ by at most \dvfreemax\%: \dvlabFiveZeroZero, \dvlabSixZeroZero{} and
@@ -368,7 +371,7 @@ Limitation & Effect on the conclusions & Resolved by \\
 Run order equals texture order & Drift would mimic texture; the evidence rules out a large drift, not a few percent (\secref{sec:drift}) & Interleaved order with reference re-runs \\
 Rotors not remounted on 1 October & Mounting variation estimated from three earlier runs only (\ddofm{} degrees of freedom), which widens the intervals & Remount each rotor between runs, on more than one day \\
 Reference printed with \SI{0.2}{mm} layers & The no-texture comparison mixes texture with layer height & Reprint at \SI{0.1}{mm} layers \\
-One print per texture level & Mass, wall, edges and the \Ra{40} magnet may co-vary with texture & Second print set; weigh blades; read slicer files \\
+One print per texture level & Mass, wall, edges and the \Ra{40} magnet may co-vary with texture & Second print set; weigh blades; record print settings for every set \\
 One small field per surface & Pa and Ra uncertain; texture longer than \sfieldy\,mm not captured & Several fields per set; profiles of \SI{4}{mm} or more \\
 No rotor speed & Electrical power only; no $\lambda$ or $C_p(\lambda)$ & Lab pulse in parallel, or a Hall sensor \\
 No ambient air or independent wind & Density bounded only by fan current; wind from the fan-speed calibration & Tunnel node and anemometer on every run \\
@@ -394,7 +397,8 @@ Prof.\ Jeong asked for a fault-testing plan agreed before the next round. The ca
 starting point.
 \begin{itemize}
   \item \textbf{What the rig offers.} An automated sweep takes \dminutes{} minutes, with a
-        run-to-run repeatability of \dsigma\% and mounting variation of about \dsigmam\%. The Thévenin decomposition helps separate
+        run-to-run repeatability of \dsigma\% and a mounting-plus-day variation estimated at \dsigmam\%
+        from three comparisons. The Thévenin decomposition helps separate
         rotor-side faults, which move $V_\mathrm{oc}$, from electrical ones, which move
         $R_\mathrm{int}$; rotor-side drag can move $R_\mathrm{int}$ too. The tunnel node's accelerometer adds vibration spectra.
   \item \textbf{Candidate faults.} A tip mass on one blade (imbalance); a chipped, shortened or
@@ -445,7 +449,9 @@ $\operatorname{Var}(x)=2\sigma_m^2+1.5\sigma^2$. Treating the three $x_r$ as zer
 counts any common day offset as mounting variation, gives
 $\sigma_m^2=(\overline{x^2}-1.5\sigma^2)/2$ with \ddofm{} degrees of freedom. A 1 October
 comparison of two rotors, each mounted once, then has
-$\mathrm{SE}^2=2\sigma_m^2+\sigma^2(1/n_a+1/n_b)$, with $t_{0.975,\ddofm}$.
+$\mathrm{SE}^2=2\sigma_m^2+\sigma^2(1/n_a+1/n_b)$, with $t_{0.975,\ddofm}$ (the Satterthwaite
+approximation gives 2.8 degrees of freedom, which changes no conclusion). The no-texture rotor has
+no August–September run; its mounting variation is assumed equal to the textured rotors'.
 
 \textbf{Thévenin fit.} At each set point, $V=V_\mathrm{oc}-IR_\mathrm{int}$ by least squares over
 all tracking dwells. Each rotor's curve is the geometric mean of its two runs. The interval on
@@ -471,7 +477,7 @@ was inferred from the data and should be confirmed against the lab's wiring.
   \item \textbf{ch1:} DC bus voltage through a 4:1 divider.
   \item \textbf{ch2:} Hall-effect current sensor, \SI{2}{A/V} about a mid-rail zero.
   \item \textbf{ch3:} once-per-revolution rotor pulse. It tracks cleanly up to 1900 rpm and misses
-        about one revolution in eight at 2000 rpm.
+        about one revolution in nine at 2000 rpm.
 \end{itemize}
 
 \textbf{Rebuilding \texttt{Summary\_Table.csv}.} With $L=\lfloor127208/17\rfloor=7482$, window
@@ -524,7 +530,7 @@ The accompanying archive contains:
 \end{itemize}
 \texttt{README.md} explains the layout, \texttt{DATA\_DICTIONARY.md} defines every column, and
 \texttt{MANIFEST.csv} gives each file's SHA-256 checksum. Running
-\texttt{python3 7\_code/build\_report.py} regenerates every number, table and data figure in this
+\texttt{python3 7\_code/build\_report.py} regenerates every result, table and data figure in this
 report from the raw files. The August–September files record fan speed differently from each other;
 use the commanded speed (\texttt{README.md}).
 

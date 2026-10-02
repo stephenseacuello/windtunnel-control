@@ -30,7 +30,7 @@ RIG = [  # (run, test date, [files]). The unconfirmed v1_unk set is not shipped.
 KEYENCE = REPO / "keyence readings 20261001"
 SCAN_FILES = ["baseline_Height.csv", "20 1_Height.csv", "40 1_Height.csv", "801_Height.csv",
               "80 2_Height.csv", "baseline.png", "20.png", "40.png", "80 1.png", "80 2.png"]
-CODE = ["build_report.py", "figures.py", "style.py", "day.py", "keyence.py"]
+CODE = ["build_report.py", "figures.py", "style.py", "day.py", "keyence.py", "slicer.py"]
 JL = ROOT / "inputs" / "jeong_lab"
 
 
@@ -127,6 +127,11 @@ def main():
     desc[PKG / "5_reference" / "rotor_geometry.json"] = "Rotor and blade geometry used in the report."
     copy(REPO / "blades" / "v1.stl", PKG / "5_reference" / "blade_v1.stl")
     desc[PKG / "5_reference" / "blade_v1.stl"] = "Blade mesh: one blade, metres, own coordinates."
+    copy(ROOT / "inputs" / "slicer" / "turbine_default_summary.json", PKG / "5_reference" / "turbine_default_summary.json")
+    desc[PKG / "5_reference" / "turbine_default_summary.json"] = (
+        "Summary of the slicer project turbine_default.3mf (Bambu Studio): "
+        "printer, nozzle, layer, material, and per reported plate the blade size and painted fuzzy-skin share. "
+        "Written by 7_code/slicer.py.")
     for stem in ("fig_surface", "fig_day", "fig_day_curves", "fig_day_thevenin", "fig_jeong_context"):
         copy(BUILD / "fig" / f"{stem}.png", PKG / "6_figures" / f"{stem}.png")
         desc[PKG / "6_figures" / f"{stem}.png"] = "Report figure (PNG); see README for which figure it is."
@@ -141,7 +146,8 @@ def main():
             "build_report.py": "Regenerates every number, table and data figure in the report (run: python3 7_code/build_report.py).",
             "figures.py": "Figure code, called by build_report.py.",
             "style.py": "Figure style (palette, markers).",
-            "day.py": "The 1 Oct two-mounting comparison, called by build_report.py.",
+            "day.py": "The 1 Oct same-day comparison (two runs per rotor, one mounting) and the mounting-variance interval, called by build_report.py.",
+            "slicer.py": "Writes 5_reference/turbine_default_summary.json from the slicer project (.3mf, not shipped).",
             "keyence.py": "Surface parameters from the Keyence height maps, called by build_report.py.",
         }[f]
 

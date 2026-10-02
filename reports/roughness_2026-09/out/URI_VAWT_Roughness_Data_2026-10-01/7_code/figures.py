@@ -38,7 +38,7 @@ def kwp(b, **over):
 
 def series(names, repeats):
     """Main figures show one primary run per specimen. Every mounting appears in
-    fig_mounts and the tables; plotting a dozen near-identical curves here would
+    the tables; plotting a dozen near-identical curves here would
     hide the comparison."""
     return list(names)
 
@@ -249,41 +249,6 @@ def fig_jeong(J, JUNE, rec, DX=None):
     save(fig, "fig_jeong_processing")
 
 
-def fig_mounts(MA, names):
-    """Every mounting as one point: filled = original run, hollow = remount."""
-    fig, ax = plt.subplots(figsize=(3.3, 2.75), constrained_layout=True)
-    names = [b for b in names if SPECIMENS[b]["fuzz_mm"] == SPECIMENS[b]["fuzz_mm"]]   # drop NaN (unconfirmed texture)
-    xs = {b: (SPECIMENS[b]["fuzz_mm"] if SPECIMENS[b]["fuzz_mm"] > 0 else 0.0125) for b in names}
-    for b in names:
-        c = style.SERIES[b]
-        prov = not SPECIMENS[b]["confirmed"]
-        for j, v in enumerate(MA["Y"][b]):
-            ax.plot([xs[b] * (1 + 0.06 * (j - 0.5 * (len(MA["Y"][b]) - 1)))], [100 * np.expm1(v)],
-                    marker=c["marker"], markersize=6, linestyle="none", color=c["color"],
-                    markerfacecolor=c["color"] if (j == 0 and not prov) else "white",
-                    markeredgecolor=c["color"] if (j > 0 or prov) else "white", markeredgewidth=1.0)
-        ax.plot([xs[b] / 1.12, xs[b] * 1.12], [100 * np.expm1(np.mean(MA["Y"][b]))] * 2,
-                color=c["color"], linewidth=1.2, marker=None)
-    if "trend" in MA:
-        tr = MA["trend"]
-        tex = [b for b in names if SPECIMENS[b]["fuzz_mm"] > 0 and SPECIMENS[b]["confirmed"]]
-        lx = [math.log(SPECIMENS[b]["fuzz_mm"]) for b in tex for _ in MA["Y"][b]]
-        ly = [v for b in tex for v in MA["Y"][b]]
-        a = np.mean(ly) - tr["beta"] * np.mean(lx)
-        xx = np.geomspace(min(SPECIMENS[b]["fuzz_mm"] for b in tex), max(SPECIMENS[b]["fuzz_mm"] for b in tex), 40)
-        ax.plot(xx, 100 * np.expm1(a + tr["beta"] * np.log(xx)), color=style.INK, linewidth=1.0)
-    ax.axhline(0, color=style.INK_3, linewidth=0.8)
-    ax.set_xscale("log", base=2)
-    ticks = sorted(xs.values())
-    ax.set_xticks(ticks)
-    ax.set_xticklabels(["none" if v == 0.0125 else f"{v:g}" for v in ticks])
-    ax.xaxis.set_minor_formatter(NullFormatter())
-    ax.set_xlim(min(ticks) / 1.3, max(ticks) * 1.3)
-    ax.set_xlabel("Fuzzy-skin thickness (mm, log scale)")
-    ax.set_ylabel("Mean $P_{\\max}$ vs first Ra 20 run (%)")
-    save(fig, "fig_mounts")
-
-
 
 # ------------------------------------------------------------ 1 Oct campaign --
 DAY_ORDER = ["v1_smooth", "v1_Ra20", "v1_Ra40", "v1_Ra80"]
@@ -397,7 +362,7 @@ def fig_surface(folder, clip=60.0):
     save(fig, "fig_surface")
 
 
-def make_all(rec, P, PL, TR, TH, runs, names, repeats, J, JUNE, MA=None, DX=None):
+def make_all(rec, P, PL, TR, TH, runs, names, repeats, J, JUNE, DX=None):
     fig_pmax(rec, PL, names, repeats)
     fig_ratio(P, names, repeats)
     fig_trend(rec, TR, names)
@@ -411,5 +376,3 @@ def make_all(rec, P, PL, TR, TH, runs, names, repeats, J, JUNE, MA=None, DX=None
     if DX and DX.get("SURF"):
         from build_report import KEYENCE_DIR, PACKAGED, ROOT
         fig_surface(ROOT / "3_surface_scans" if PACKAGED else KEYENCE_DIR)
-    if MA:
-        fig_mounts(MA, names)

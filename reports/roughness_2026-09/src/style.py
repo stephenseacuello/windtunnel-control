@@ -76,12 +76,12 @@ def apply():
 
 def kw(key, **over):
     """Line/marker kwargs for a condition, e.g. ax.plot(x, y, **kw('v1_Ra40')).
-    A remount ('v1_Ra20_repeat') wears its parent's colour with hollow markers."""
+    A repeat run (v1_Ra20_repeat) wears its parent's colour with hollow markers."""
     import re
     parent = re.sub(r"(_(repeat\d*|r\d+))?(_\d{8})?$", "", key)
     s = SERIES[parent]
     if parent != key:
-        d = dict(color=s["color"], marker=s["marker"], label=s["label"].split(" (")[0] + " remount",
+        d = dict(color=s["color"], marker=s["marker"], label=s["label"].split(" (")[0] + " repeat",
                  markerfacecolor=SURFACE, markeredgecolor=s["color"], markeredgewidth=1.0,
                  linewidth=1.0, linestyle=(0, (4, 2)))
         d.update(over)

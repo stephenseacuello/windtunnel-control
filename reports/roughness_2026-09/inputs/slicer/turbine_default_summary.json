@@ -1,0 +1,51 @@
+{
+  "file": "turbine_default.3mf",
+  "saved": "2026-08-17",
+  "application": "02.07.01.62",
+  "printer_profile": "Bambu Lab P1S 0.2 nozzle",
+  "print_profile": "0.10mm Standard @BBL X1C 0.2 nozzle",
+  "nozzle_mm": 0.2,
+  "layer_height_mm": 0.1,
+  "material": "PLA",
+  "filament_profile": "Bambu PLA Basic @BBL X1C 0.2 nozzle",
+  "fuzzy_skin_global": "none",
+  "fuzzy_skin_mode": "displacement",
+  "fuzzy_point_distance_mm": 0.2,
+  "wall_loops": 4,
+  "plates_total": 3,
+  "plates_not_reported": 1,
+  "plates": [
+    {
+      "plate": "40 RA",
+      "fuzz_mm": 0.101,
+      "size_mm": [
+        24.46,
+        48.03,
+        245.11
+      ],
+      "triangles": 1305578,
+      "painted_triangle_fraction": 0.9987,
+      "painted_area_fraction": 0.9646,
+      "unpainted_area_mm2": {
+        "end_caps": 272.8,
+        "other": 955.5
+      }
+    },
+    {
+      "plate": "80 RA",
+      "fuzz_mm": 0.202,
+      "size_mm": [
+        24.46,
+        48.03,
+        245.11
+      ],
+      "triangles": 1305578,
+      "painted_triangle_fraction": 0.9987,
+      "painted_area_fraction": 0.9646,
+      "unpainted_area_mm2": {
+        "end_caps": 272.8,
+        "other": 955.5
+      }
+    }
+  ]
+}

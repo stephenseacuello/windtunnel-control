@@ -26,11 +26,11 @@
 Steps: Ra20→Ra40 +10.8% [+4, +19] resolved; Ra40→Ra80 +3.0% [−4, +10] not resolved.
 
 ## Slicer file (read 1 Oct)
-`inputs/slicer/turbine_default.3mf` (saved 17 Aug; 60 MB, in the repo, not in the zip):
-Bambu P1S profile, 0.2 mm nozzle, 0.10 mm layers, PLA; plates "10 RA" (0.025), "40 RA" (0.101),
-"80 RA" (0.202); fuzzy skin painted over 99.9% of each model, point distance 0.2 mm. No 0.050 mm
-or no-texture object. The other two files (turbines_threeFuzzySettings_06mm*.3mf) are still not
-downloaded.
+`inputs/slicer/turbine_default.3mf` (saved 17 Aug; 60 MB, in the repo, not in the zip; summary
+JSON from `src/slicer.py` ships in 5_reference/): Bambu P1S profile, 0.2 mm nozzle, 0.10 mm
+layers, PLA; three plates "10 RA" (0.025), "40 RA" (0.101), "80 RA" (0.202), ONE BLADE each
+(24.46 x 48.03 x 245.11 mm); fuzzy skin painted over 99.87% of each blade, point distance 0.2 mm.
+No 0.050 mm or no-texture blade.
 
 ## Rebuild
 ```bash
@@ -42,12 +42,21 @@ python3 src/build_package.py                # zip (copies report/report.pdf)
 ## Open items for Stephen
 1. Send the Taegu draft (Gmail Drafts, attach report.pdf), then the group email
    (`COVER_EMAIL_DRAFT.md` §2).
-2. **Download the other two .3mf files** (turbines_threeFuzzySettings_06mm.3mf,
-   turbines_threeFuzzySettings_06mm_plate_2.gcode.3mf); the gcode one shows what was printed.
+2. **Print records.** `turbine_default.3mf` is the only slicer project (Stephen, 1 Oct). It holds
+   one blade per plate for 0.025/0.101/0.202 mm only, so the 0.050 mm and no-texture print
+   settings are still unknown: ask whoever printed them. `src/slicer.py` summarises any new
+   project into JSON.
 3. **Reprint the no-texture set** (a blade broke on 1 Oct), at the textured sets' ~0.1 mm layer
    height to remove the layer-height confound.
 4. Next session: interleaved run order with reference re-runs; tunnel node connected (ambient
    air); lab DAQ in parallel for rotor speed and current calibration.
+
+## Audit log
+- 1 Oct, round 1 (independent verifier): every number recomputed from raw logs — pass; 18 wording
+  fixes applied.
+- 1 Oct, round 2 (after the no-remount change): mounting-variance intervals recomputed
+  independently — pass; painted share corrected to area (96.5%, was a triangle count), no-texture
+  mounting assumption disclosed, stale zip rebuilt, remount macros/code removed, email fixes.
 
 ## Notes
 - The header `clock` in every rig file is written at the END of the run (~8 s after the last

@@ -42,6 +42,7 @@ if PACKAGED:            # running from the unzipped data package (7_code/)
     LOGS = ROOT / "1_rig_sweeps"
     JL = ROOT / "2_jeong_lab"
     KEYENCE_PKG = ROOT / "3_surface_scans"
+    SLICER_PKG = ROOT / "5_reference" / "turbine_default_summary.json"
     BUILD = ROOT / "rebuilt"
 FIG = BUILD / "fig"
 TAB = BUILD / "tables"
@@ -64,6 +65,7 @@ SPECIMENS = {
 # Sets run but not reported: print settings could not be confirmed.
 EXCLUDED = {"v1_unk": "print settings unconfirmed; not reported"}
 KEYENCE_DIR = REPO / "keyence readings 20261001"
+SLICER_JSON = ROOT / "inputs" / "slicer" / "turbine_default_summary.json"   # from src/slicer.py
 ALIASES = {"v1_Ra0": "v1_smooth", "v1_notexture": "v1_smooth"}   # other names for the same specimen
 BASE = "v1_Ra20"
 CORE = ["v1_Ra20", "v1_Ra40", "v1_Ra80"]
@@ -103,8 +105,8 @@ def parse_name(name):
 
 def discover():
     """One PRIMARY run per specimen (the oldest that is not marked repeat) and every
-    other run of that specimen as an additional MOUNTING. Primary runs are keyed by
-    the specimen name (v1_Ra20); mountings by their own file name."""
+    other run of that specimen as an additional RUN (repeats may share a mounting).
+    Primary runs are keyed by the specimen name (v1_Ra20); others by their file name."""
     found, skipped = {}, []
     for f in sorted(LOGS.rglob("sweep_v1_*_summary.csv")):
         name = f.name[len("sweep_"):-len("_summary.csv")]
@@ -266,54 +268,6 @@ def roughness_trend(rec, names, col):
     return dict(beta=b, lo=b - t * se, hi=b + t * se, dof=dof, mono=mono, n_sp=len(levels),
                 n_levels=len(tex), doubling=2 ** b - 1, doubling_lo=2 ** (b - t * se) - 1,
                 doubling_hi=2 ** (b + t * se) - 1)
-
-
-def mount_analysis(rec, names, repeats, col="p_raw", only=None):
-    """Each MOUNTING is one observation, so uncertainty includes mount-to-mount
-    variation. y_run = mean over the set points common to every run considered of
-    ln(P_run / P_ref), ref = the first Ra20 mounting in the set. sigma_mount is the
-    pooled within-specimen SD of y (dof = sum of (mountings - 1)). `only` restricts
-    to a subset of run keys (e.g. one day's runs)."""
-    groups = {b: [b] + [rp for rp, par in repeats.items() if par == b] for b in names}
-    if only is not None:
-        groups = {b: [r for r in g if r in only] for b, g in groups.items()}
-    groups = {b: g for b, g in groups.items() if g}
-    if BASE not in groups:
-        return None
-    allruns = [r for g in groups.values() for r in g]
-    common = sorted(set.intersection(*[set(rec[r].fan_rpm_cmd) for r in allruns]))
-    ref = rec[groups[BASE][0]].set_index("fan_rpm_cmd")[col].reindex(common)
-    y = {r: float(np.mean(np.log(rec[r].set_index("fan_rpm_cmd")[col].reindex(common) / ref)))
-         for r in allruns}
-    Y = {b: [y[r] for r in g] for b, g in groups.items()}
-    ss = sum(sum((v - np.mean(vs)) ** 2 for v in vs) for vs in Y.values())
-    dof = sum(len(vs) - 1 for vs in Y.values())
-    if dof == 0:
-        return None
-    sig = math.sqrt(ss / dof)
-    t = stats.t.ppf(0.975, dof)
-    out = dict(k=dof, sigma=sig, Y=Y, groups=groups, n_common=len(common),
-               n_mounts={b: len(v) for b, v in Y.items()}, cmp={},
-               diffs={r: y[r] - y[groups[b][0]] for b, g in groups.items() for r in g[1:]})
-    for c in groups:
-        if c == BASE:
-            continue
-        d = np.mean(Y[c]) - np.mean(Y[BASE])
-        se = sig * math.sqrt(1 / len(Y[c]) + 1 / len(Y[BASE]))
-        out["cmp"][c] = dict(level=math.expm1(d), lo=math.expm1(d - t * se), hi=math.expm1(d + t * se),
-                             survives=bool(d - t * se > 0 or d + t * se < 0), se=se)
-    xs, ys = [], []
-    for b in groups:
-        f = SPECIMENS[b]["fuzz_mm"]
-        if f == f and f > 0 and SPECIMENS[b]["confirmed"]:
-            for v in Y[b]:
-                xs.append(math.log(f)); ys.append(v)
-    if len(set(xs)) >= 2 and len(xs) >= 3:
-        res = stats.linregress(xs, ys)
-        tt = stats.t.ppf(0.975, len(xs) - 2) if len(xs) > 2 else float("nan")
-        out["trend"] = dict(beta=res.slope, lo=res.slope - tt * res.stderr, hi=res.slope + tt * res.stderr,
-                            n=len(xs), doubling=2 ** res.slope - 1)
-    return out
 
 
 def thevenin(run):
@@ -532,11 +486,7 @@ def main():
     # smallest absolute P difference between Ra40 and Ra20 (resolution check)
     dd = (rec["v1_Ra40"].set_index("fan_rpm_cmd").p_raw - rec[BASE].set_index("fan_rpm_cmd").p_raw)
     N["ra40_tie_rpm"] = int(dd.abs().idxmin()); N["ra40_tie_mw"] = float(1000 * dd.abs().min())
-    MA = mount_analysis(rec, names, repeats)
-    last = max(runs[r]["date"] for r in runs)
-    day = [r for r in runs if runs[r]["date"] == last]
-    MD = mount_analysis(rec, names, repeats, only=set(day)) if len({(repeats.get(r, r)) for r in day}) >= 2 else None
-    N["sameday_date"] = last
+    N["sameday_date"] = max(runs[r]["date"] for r in runs)
 
     for c in others:
         m = rec[BASE].merge(rec[c], on="fan_rpm_cmd", suffixes=("_b", "_c"))
@@ -656,10 +606,10 @@ def main():
     write_derived(rec, P, PL, TH, J, runs, names, repeats, DAYX)
 
 
-    write_macros(N, P, PL, TR, TC, rec, SENS, J, JN, names, repeats, MA, EXTRA, MD, DAYX)
+    write_macros(N, P, PL, TR, TC, rec, SENS, J, JN, names, repeats, EXTRA, DAYX)
     write_tables(rec, P, PL, TH, names, J, DAYX)
     import figures
-    figures.make_all(rec, P, PL, TR, TH, runs, names, repeats, J, JUNE, MA, DAYX)
+    figures.make_all(rec, P, PL, TR, TH, runs, names, repeats, J, JUNE, DAYX)
     print("levels:", names, "repeats:", repeats, "skipped:", skipped)
     print("built:", BUILD)
 
@@ -688,7 +638,7 @@ def pct(x, nd=1, sign=True):
     return s.replace("-", "\\ensuremath{-}")
 
 
-# macro keys: A = Ra20, B = Ra40, C = Ra80, S = no texture, T = unconfirmed set, R = Ra20 remount
+# macro keys: A = Ra20, B = Ra40, C = Ra80, S = no texture, T = unconfirmed set, R = Ra20 repeat
 SHORT = {"v1_Ra20": "A", "v1_Ra40": "B", "v1_Ra80": "C", "v1_smooth": "S", "v1_unk": "T",
          "v1_Ra20_repeat": "R", "v1_Ra40_repeat": "RB", "v1_Ra80_repeat": "RC",
          "v1_smooth_repeat": "RS", "v1_unk_repeat": "RT"}
@@ -698,7 +648,7 @@ def short(b):
     return SHORT.get(b, _name(b))
 
 
-def write_macros(N, P, PL, TR, TC, rec, SENS, J, JN, names, repeats, MA=None, EX=None, MD=None, DX=None):
+def write_macros(N, P, PL, TR, TC, rec, SENS, J, JN, names, repeats, EX=None, DX=None):
     M = {}
     if DX and DX["DC"]:
         DC, DT, XD, SURF, G = DX["DC"], DX["DT"], DX["XD"], DX["SURF"], DX["G"]
@@ -779,6 +729,19 @@ def write_macros(N, P, PL, TR, TC, rec, SENS, J, JN, names, repeats, MA=None, EX
             for c, d in X["vfree"].items():
                 k = _name(str(c))
                 M[f"dvlab{k}"] = f"{d['lab']:.2f}"; M[f"dvrig{k}"] = f"{d['rig']:.2f}"
+        sj = globals().get("SLICER_PKG") if PACKAGED else SLICER_JSON
+        if sj and Path(sj).exists():
+            SL = json.load(open(sj))
+            import datetime as _dt
+            M["slsaved"] = _dt.date.fromisoformat(SL["saved"]).strftime("%-d %B")
+            M["slprinter"] = SL["printer_profile"].replace(f" {SL['nozzle_mm']:g} nozzle", "")
+            M["slnozzle"] = f"{SL['nozzle_mm']:.1f}"; M["sllayer"] = f"{SL['layer_height_mm']:.2f}"
+            M["slmaterial"] = SL["material"]; M["slpoint"] = f"{SL['fuzzy_point_distance_mm']:.1f}"
+            M["slpaint"] = f"{100 * min(p['painted_area_fraction'] for p in SL['plates']):.1f}"
+            sz = SL["plates"][0]["size_mm"]
+            M["slsize"] = " \\times ".join(f"{x:.1f}" for x in sorted(sz))
+            M["slplates"] = ["zero", "one", "two", "three", "four", "five", "six"][SL["plates_total"]] \
+                if SL["plates_total"] < 7 else f"{SL['plates_total']}"
         if SURF:
             sc = next(iter(SURF.values()))["scans"][0]
             M["sfieldx"] = f"{sc['field_um'][0] / 1000:.2f}"; M["sfieldy"] = f"{sc['field_um'][1] / 1000:.2f}"
@@ -944,49 +907,8 @@ def write_macros(N, P, PL, TR, TC, rec, SENS, J, JN, names, repeats, MA=None, EX
     M["jlspikelo"] = f"{J.i_spike_at_pmax_a.min():.3f}"
     M["jlspikehi"] = f"{J.i_spike_at_pmax_a.max():.3f}"
     M["jlunloadedmax"] = f"{1000 * J[J.setting_rpm <= 700].i_mean_zc_a.abs().max():.1f}"
-    flags = {"HaveRepeat": bool(repeats), "HaveRaTwentyRepeat": "v1_Ra20_repeat" in repeats,
-             "HaveRaTen": "v1_unk" in names, "HaveSmooth": "v1_smooth" in names,
-             "RaTenConfirmed": SPECIMENS["v1_unk"]["confirmed"],
-             "HaveMountTrend": bool(MA and "trend" in MA),
-             "AllRemounted": all(any(p == b for p in repeats.values()) for b in CORE)}
-    for k in ("A", "B", "C", "S", "T"):          # always defined, so LaTeX can skip them safely
-        flags[f"MountSurvives{k}"] = False
-        flags[f"DaySurvives{k}"] = False
-    flags["HaveSameDay"] = bool(MD)
-    if MD:
-        M["sdsigma"] = f"{100 * MD['sigma']:.1f}"
-        M["sddof"] = f"{MD['k']}"
-        M["sdncommon"] = f"{MD['n_common']}"
-        M["sdcmplist"] = "; ".join(f"{latex_label(c)} ${pct(r['level'])}\\%$ (95\\% CI $[{pct(r['lo'])},\\ {pct(r['hi'])}]$)"
-                                   for c, r in MD["cmp"].items())
-        for c, r in MD["cmp"].items():
-            flags[f"DaySurvives{short(c)}"] = r["survives"]
-    if MA:
-        lab = lambda b: latex_label(b)
-        M["mountdifflist"] = "; ".join(f"{lab(rp)} {pct(math.expm1(d))}\\%" for rp, d in MA["diffs"].items())
-        M["macmplist"] = "; ".join(f"{lab(c)} ${pct(r['level'])}\\%$ (95\\% CI $[{pct(r['lo'])},\\ {pct(r['hi'])}]$)"
-                                   for c, r in MA["cmp"].items())
-        M["nremounts"] = f"{MA['k']}"
-        M["sigmamount"] = f"{100 * MA['sigma']:.1f}"
-        for rp, d in MA["diffs"].items():
-            M[f"mountdiff{short(rp)}"] = pct(math.expm1(d))
-        for c, r in MA["cmp"].items():
-            k = short(c)
-            M[f"ma{k}"] = pct(r["level"]); M[f"ma{k}lo"] = pct(r["lo"]); M[f"ma{k}hi"] = pct(r["hi"])
-            flags[f"MountSurvives{k}"] = r["survives"]
-        if "trend" in MA:
-            M["mabeta"] = f"{MA['trend']['beta']:.3f}"
-            M["mabetalo"] = f"{MA['trend']['lo']:.3f}"
-            M["mabetahi"] = f"{MA['trend']['hi']:.3f}"
-            M["mabetan"] = f"{MA['trend']['n']}"
-            M["madbl"] = pct(MA["trend"]["doubling"])
-        parents = [latex_label(par) for par in dict.fromkeys(repeats.values())]
-        joined = parents[0] if len(parents) == 1 else ", ".join(parents[:-1]) + " and " + parents[-1]
-        M["remountlist"] = f"the {joined} rotor" + ("s" if len(parents) > 1 else "")
     with open(BUILD / "numbers.tex", "w") as f:
         f.write("% generated by src/build_report.py — do not edit\n")
-        for k, v in flags.items():
-            f.write(f"\\newif\\if{k}\\{k}{'true' if v else 'false'}\n")
         for k, v in sorted(M.items()):
             f.write(f"\\newcommand{{\\{_name(k)}}}{{{v}}}\n")
 
@@ -1085,7 +1007,7 @@ def latex_label(b):
     if pn:
         spec, is_rep, date = pn
         tag = f"{int(date[6:])} {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][int(date[4:6]) - 1]}" if date else ""
-        return latex_label(spec) + (" repeat" if is_rep else " remount") + (f" ({tag})" if tag else "")
+        return latex_label(spec) + (" repeat" if is_rep else " run") + (f" ({tag})" if tag else "")
     return b.replace("_", r"\_")
 
 def write_tables(rec, P, PL, TH, names, J, DX=None):
