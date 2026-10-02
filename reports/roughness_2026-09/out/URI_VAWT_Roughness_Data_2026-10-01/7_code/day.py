@@ -1,10 +1,12 @@
-"""The 1 October campaign: every rotor mounted twice on one day, compared with
-the un-textured rotor. Called by build_report.main().
+"""The 1 October campaign: every rotor swept twice, back to back, on one mounting,
+compared with the un-textured rotor. Called by build_report.main().
 
-Each MOUNTING is one observation. For run j, y_j = mean over the set points
-common to every run of ln(P_j / P_ref), where P_ref is the per-set-point
-geometric mean of the reference rotor's mountings. The mount-to-mount SD is
-pooled within rotors; intervals use t with its degrees of freedom.
+For run j, y_j = mean over the set points common to every run of ln(P_j / P_ref),
+where P_ref is the per-set-point geometric mean of the reference rotor's runs.
+compare() pools the run-to-run SD within rotors: repeatability only, because no
+rotor was remounted. with_mounting() widens the intervals by the mounting (and
+day) variation seen between each textured rotor's Aug/Sep run, a separate
+mounting, and its 1 Oct mean.
 """
 import math
 
@@ -60,7 +62,7 @@ def compare(rec, G, col="p_raw"):
     out["curve"] = {r: np.exp(np.mean([lg[k] for k in ks], axis=0)) for r, ks in G.items()}
     out["ratio_curve"] = {r: np.exp(np.mean([lg[k] for k in ks], axis=0) - ref) - 1 for r, ks in G.items()}
     out["p_top"] = {r: float(out["curve"][r][-1]) for r in G}
-    # mountings that agree with each other: largest within-rotor difference
+    # runs that agree with each other: largest within-rotor difference
     out["max_pair_diff"] = max(abs(math.expm1(vs[1] - vs[0])) for vs in Y.values() if len(vs) > 1)
     return out
 
@@ -105,3 +107,41 @@ def cross_day(rec, G, col="p_raw"):
         today = np.mean([np.log(rec[k].set_index("fan_rpm_cmd")[col].reindex(sp).values) for k in G[r]], axis=0)
         out[r] = math.expm1(float(np.mean(today - first)))
     return out
+
+
+def earlier(rec, DC, rotors=("v1_Ra20", "v1_Ra40", "v1_Ra80")):
+    """Each textured rotor's Aug/Sep run on the same scale as y: mean log-ratio to
+    the 1 Oct reference curve (so it carries any day-to-day difference too)."""
+    ref = np.log(DC["curve"][REF])
+    return {r: float(np.mean(np.log(rec[r].set_index("fan_rpm_cmd")["p_raw"].reindex(DC["sp"]).values) - ref))
+            for r in rotors if r in rec and r in DC["Y"]}
+
+
+def with_mounting(DC, XD):
+    """Intervals that allow for mounting variation, which 1 Oct did not sample.
+
+    x_r = ln(1 + XD[r]) compares rotor r's 1 Oct mean (two runs, one mounting) with
+    its Aug/Sep run (another mounting, another day): Var(x) = 2 s_m^2 + 1.5 s_run^2.
+    Treating the x_r as zero-mean is conservative: a common day offset is counted
+    as mounting variation. s_m then has len(XD) degrees of freedom, and a 1 Oct
+    comparison of two rotors (one mounting each) has
+    SE^2 = 2 s_m^2 + s_run^2 (1/n_a + 1/n_b)."""
+    x = np.log1p(np.array(list(XD.values())))
+    s_run2 = DC["sigma"] ** 2
+    s_m2 = max(float(np.mean(x ** 2)) - 1.5 * s_run2, 0.0) / 2
+    dof = len(x)
+    t = stats.t.ppf(0.975, dof)
+
+    def ci(a, b):
+        d = np.mean(DC["Y"][a]) - np.mean(DC["Y"][b])
+        se = math.sqrt(2 * s_m2 + s_run2 * (1 / len(DC["Y"][a]) + 1 / len(DC["Y"][b])))
+        return dict(level=math.expm1(d), lo=math.expm1(d - t * se), hi=math.expm1(d + t * se),
+                    resolved=bool(d - t * se > 0 or d + t * se < 0))
+
+    steps = {}
+    for key in DC["steps"]:
+        a, b = key.split("|")
+        steps[key] = ci(b, a)
+    return dict(sigma_m=math.sqrt(s_m2), dof=dof,
+                vs_ref={r: ci(r, REF) for r in DC["Y"] if r != REF}, steps=steps)
+

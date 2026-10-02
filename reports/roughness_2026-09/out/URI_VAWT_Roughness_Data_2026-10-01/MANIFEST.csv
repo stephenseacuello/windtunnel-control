@@ -48,23 +48,23 @@ path,bytes,data_rows,sha256,description
 3_surface_scans/baseline.png,1051137,,8eaa8db9f9b4885939749d24f7a899ec4985b1e70b61fa5047961299660ceef0,Keyence VR-6000 screenshot of the same field. VERBATIM.
 3_surface_scans/baseline_Height.csv,6795992,792,acd87e3003102eb6a27be6b79d75025d21153019e56b4551f0fcd687f4fac040,"Keyence VR-6000 height map (mm), 1.853 um/px. VERBATIM."
 4_derived/jeong_0727_reprocessed_by_setting.csv,2774,16,366ffedc65ebdf0807c0ea58c00b37d9a9b28f20643245c6be38c884467347d6,"27 Jul no-texture test reprocessed from the raw export (report Section 4, Appendix C). Derived; not the lab's own numbers. Use only rows with usable_for_rig_comparison = 1."
-4_derived/oct1_by_mounting.csv,513,8,ae2a2e9ee49ec7eb081d14bf5542b0db1af87260f3279d4727ea6ac2846ffe84,1 Oct: every mounting as one observation (report Fig. 3).
-4_derived/oct1_vs_no_texture.csv,184,3,b3bb4b8735b416c55ac428f0600fca3760116e60dc50634743a320ab41a362c3,"1 Oct: each textured rotor against the no-texture rotor, both mountings (report Table 1)."
-4_derived/peak_power_all_rotors.csv,20761,154,03bacdac120bdda5c7c3ab637a817ae44a73a59c5f8598700d4a971742819715,"Peak power per run and fan set point, both estimators, recomputed from the points files with the rig's own rule."
+4_derived/oct1_by_run.csv,511,8,7b0ac892986bf0c020c0a4213659ec078b44ac01a64c4e999ecf895ad561e0dc,1 Oct: every run as one observation (report Fig. 3).
+4_derived/oct1_vs_no_texture.csv,290,3,aa55a59ebd04a4e727ec05046f3fb383dbb71dcc06ab6571739a4785b5312450,"1 Oct: each textured rotor against the no-texture rotor, with and without mounting variation (report Table 1)."
+4_derived/peak_power_all_rotors.csv,20764,154,c9bd0b9a6234bcdc9caedeb821d32067536179387c9dd6a1e473cae6ac64b5fa,"Peak power per run and fan set point, both estimators, recomputed from the points files with the rig's own rule."
 4_derived/surface_roughness.csv,278,4,6b2e5b2cd4370459483aaa57cf6dcabeb4be0b63268641b1a1c3c07181aa0beb,"Pa, Ra and layer period per blade set from the Keyence scans (report Section 1.1)."
-4_derived/thevenin_by_setpoint.csv,12901,154,5fa4e1ec816d1461d77aa1ff03d02bb72783d1ed3fa28bfc948c772e49a6e101,Per run and set point: V = V_oc - I*R_int fitted over the load ladder.
+4_derived/thevenin_by_setpoint.csv,12904,154,478d94d709005d1eb44af281d77b3cdd134a5dd420185365d4d9ce26d9783557,Per run and set point: V = V_oc - I*R_int fitted over the load ladder.
 5_reference/blade_v1.stl,1352884,,f51518aa05717b5979a617485ba7289a245835bed3abfeadcb964e0fc8abcae6,"Blade mesh: one blade, metres, own coordinates."
 5_reference/rotor_geometry.json,782,,df07f60bc3a3cd6ac9b0ab265ca3ea6618725821259c8ada002bfd9438a2fcaa,Rotor and blade geometry used in the report.
-6_figures/fig_day.png,41304,,bacb6981b8826f108e62f83cddc97406502fa2070dfabbe907d57ecbf2fd354c,Report figure (PNG); see README for which figure it is.
+6_figures/fig_day.png,55662,,3701a5c9d6b2e791fc93ab22a439141a904fdebbcfb1d1a07b197cdbf28dbbd4,Report figure (PNG); see README for which figure it is.
 6_figures/fig_day_curves.png,119026,,5802b215a303dcc890fd8fbe60891a7245f094c58bde45fb12b668f787c6d348,Report figure (PNG); see README for which figure it is.
 6_figures/fig_day_thevenin.png,94106,,d69b0abd34b0637a9889275477613c4b56edf1764fc74663e11b55dbd7421d5d,Report figure (PNG); see README for which figure it is.
 6_figures/fig_jeong_context.png,80257,,d9e8367f7f2f7d489d5812337fb3851e5741a68d36a691c5370f3db206179d23,Report figure (PNG); see README for which figure it is.
 6_figures/fig_surface.png,284184,,28ff12cfef6e04ad9a049907c761c4d8dfcda437b646584eba77fe3a0e09b2c6,Report figure (PNG); see README for which figure it is.
-7_code/build_report.py,60584,,8f3e5ede5ea2f83b52cc176f62c6990460cbbc29e0c128faf66762a865c1b74b,"Regenerates every number, table and data figure in the report (run: python3 7_code/build_report.py)."
-7_code/day.py,4815,,beffee741212f3174bdd5ad1eae7c35310179bb8e138a43816f843d0e4c91c48,"The 1 Oct two-mounting comparison, called by build_report.py."
-7_code/figures.py,19454,,977529ebd1ecf73b2f32539b63d220cf525ee2dd9cb6d89681681026097351a9,"Figure code, called by build_report.py."
+7_code/build_report.py,61515,,14775cfb2c581a73824e6c6fb8ead0707c0c8485d27572a5191073afe9c4e4cd,"Regenerates every number, table and data figure in the report (run: python3 7_code/build_report.py)."
+7_code/day.py,6686,,e12ab79bd8c9e9e3fa3371537fa6c701bdebe7a40a4981ab4b9376a39554ae74,"The 1 Oct two-mounting comparison, called by build_report.py."
+7_code/figures.py,20602,,70cb8158200f7752d84df2f604e9406d939e3b1d3c0cda42aecc672120e5ed33,"Figure code, called by build_report.py."
 7_code/keyence.py,5588,,7ba9ba3a66561dd6709b063365cce07fd8b3b604e8eb1bde3728aab94f35a090,"Surface parameters from the Keyence height maps, called by build_report.py."
 7_code/style.py,3567,,e168d7b58e3862648e282fc8518fc153a548885a1ac2be6c7144cdb160320830,"Figure style (palette, markers)."
-DATA_DICTIONARY.md,13342,,d2ed17300496c51ec16de1badc25867cbddbe27ddbc9a149d4a9f376b93d52f5,
-README.md,5093,,f2ca8adde2c3ae77968bc08ec3157af321a7b49836ee794c66ecaf29a86680a3,
-URI_VAWT_Roughness_Report_2026-10-01.pdf,765448,,1017c1e8540722024fe14e4592c4ef56b6f07ba835f45ab0a47b9e652c5f5e1e,The report this package accompanies.
+DATA_DICTIONARY.md,13633,,389c630293d6f39d3054fe05d0b61089815b5e92e548f2c82ea688a2b65e16dd,
+README.md,5395,,0ed909edab6b72a0ef028660c8d7c96326a258ffde5b2eee0b7774d446bb5bdf,
+URI_VAWT_Roughness_Report_2026-10-01.pdf,779695,,e190390f72a18d83cc1bf831346e825f8a4e4eb186e09e6dd5729cb3e23f3dd9,The report this package accompanies.

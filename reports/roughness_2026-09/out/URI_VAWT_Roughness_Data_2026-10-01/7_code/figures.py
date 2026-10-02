@@ -294,7 +294,9 @@ def _lab(r):
 
 
 def fig_day(DX):
-    DC = DX["DC"]
+    """Every 1 Oct run as one point, with each textured rotor's Aug/Sep run (another
+    mounting, another day) and the interval that allows for mounting variation."""
+    DC, DM = DX["DC"], DX.get("DM")
     fig, ax = plt.subplots(figsize=(W, 2.5), constrained_layout=True)
     ax.axhline(0, color=style.INK_3, linewidth=0.8)
     rots = [r for r in DAY_ORDER if r in DC["Y"]]
@@ -305,15 +307,28 @@ def fig_day(DX):
             ax.plot(i + (j - 0.5) * 0.12, y, marker=c["marker"], markersize=6, linestyle="none",
                     color=c["color"], markerfacecolor=c["color"] if j == 0 else "white",
                     markeredgecolor=c["color"], markeredgewidth=1.1, zorder=3)
+        if r in DC.get("first", {}):
+            ax.plot(i - 0.33, 100 * math.expm1(DC["first"][r]), marker="x", markersize=6,
+                    linestyle="none", color=style.INK, markeredgecolor=style.INK,
+                    markeredgewidth=1.3, zorder=3)
         if r in DC["vs_ref"]:
             v = DC["vs_ref"][r]
             ax.plot([i - 0.22, i + 0.22], [100 * v["level"]] * 2, color=style.INK, linewidth=1.2, zorder=2)
-            ax.plot([i + 0.3] * 2, [100 * v["lo"], 100 * v["hi"]], color=style.INK_2, linewidth=1.0)
+            iv = DM["vs_ref"][r] if DM else v
+            ax.plot([i + 0.3] * 2, [100 * iv["lo"], 100 * iv["hi"]], color=style.INK_2, linewidth=1.0)
+            ax.plot([i + 0.3] * 2, [100 * v["lo"], 100 * v["hi"]], color=style.INK, linewidth=3.0,
+                    solid_capstyle="butt")
             ax.text(i + 0.36, 100 * v["level"], f"{100 * v['level']:+.1f}%", va="center",
                     fontsize=7.5, color=style.INK)
+    ax.plot([], [], marker="o", linestyle="none", color=style.INK_2, label="1 Oct, run 1 (filled), run 2 (hollow)")
+    ax.plot([], [], marker="x", linestyle="none", color=style.INK, markeredgecolor=style.INK,
+            markeredgewidth=1.3, label="Aug–Sep run (another mounting)")
+    ax.plot([], [], color=style.INK, linewidth=3.0, label="95% CI, run-to-run")
+    ax.plot([], [], color=style.INK_2, linewidth=1.0, label="95% CI, with mounting")
+    ax.legend(loc="upper left", fontsize=6.5, frameon=False)
     ax.set_xticks(range(len(rots)))
     ax.set_xticklabels([_lab(r).replace(" (", "\n(") for r in rots])
-    ax.set_xlim(-0.5, len(rots) - 0.3)
+    ax.set_xlim(-0.55, len(rots) - 0.3)
     ax.set_ylabel("Peak power vs no texture (%)")
     ax.grid(axis="x", visible=False)
     save(fig, "fig_day")

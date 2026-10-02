@@ -99,8 +99,8 @@ def main():
     # 4 — derived tables, written by build_report.py
     d = PKG / "4_derived"
     DESC4 = {
-        "oct1_vs_no_texture.csv": "1 Oct: each textured rotor against the no-texture rotor, both mountings (report Table 1).",
-        "oct1_by_mounting.csv": "1 Oct: every mounting as one observation (report Fig. 3).",
+        "oct1_vs_no_texture.csv": "1 Oct: each textured rotor against the no-texture rotor, with and without mounting variation (report Table 1).",
+        "oct1_by_run.csv": "1 Oct: every run as one observation (report Fig. 3).",
         "surface_roughness.csv": "Pa, Ra and layer period per blade set from the Keyence scans (report Section 1.1).",
         "peak_power_all_rotors.csv": "Peak power per run and fan set point, both estimators, recomputed from the points files with the rig's own rule.",
         "thevenin_by_setpoint.csv": "Per run and set point: V = V_oc - I*R_int fitted over the load ladder.",

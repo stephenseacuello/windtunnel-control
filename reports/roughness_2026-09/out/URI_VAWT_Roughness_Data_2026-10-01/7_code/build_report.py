@@ -517,9 +517,12 @@ def main():
     DCf = _day.compare(rec, G, col="p_fit") if DC else None       # robustness: the other estimator
     DTc, DT = _day.thevenin_compare(TH, G) if DC else (None, None)
     XD = _day.cross_day(rec, G) if DC else {}
+    DM = _day.with_mounting(DC, XD) if DC and XD else None
+    if DC:
+        DC["first"] = _day.earlier(rec, DC)
     kdir = globals().get("KEYENCE_PKG") if PACKAGED else KEYENCE_DIR
     SURF = _key.by_rotor(kdir) if kdir and Path(kdir).exists() else {}
-    DAYX = dict(G=G, DC=DC, DCf=DCf, DTc=DTc, DT=DT, XD=XD, SURF=SURF,
+    DAYX = dict(G=G, DC=DC, DCf=DCf, DM=DM, DTc=DTc, DT=DT, XD=XD, SURF=SURF,
                 # first and last dwell, local time (the header clock is written at the END of a run)
                 times={k: str(runs[k]["points"].t_local.min())[11:16] for ks in G.values() for k in ks},
                 ends={k: str(runs[k]["points"].t_local.max())[11:16] for ks in G.values() for k in ks})
@@ -716,6 +719,16 @@ def write_macros(N, P, PL, TR, TC, rec, SENS, J, JN, names, repeats, MA=None, EX
             a, b = key.split("|")
             k = short(a) + short(b)
             M[f"dstep{k}"] = pct(c["level"]); M[f"dsteplo{k}"] = pct(c["lo"]); M[f"dstephi{k}"] = pct(c["hi"])
+        DM = DX.get("DM")
+        if DM:
+            M["dsigmam"] = f"{100 * DM['sigma_m']:.1f}"; M["ddofm"] = f"{DM['dof']}"
+            for r, c in DM["vs_ref"].items():
+                k = short(r)
+                M[f"dlom{k}"] = pct(c["lo"], 0); M[f"dhim{k}"] = pct(c["hi"], 0)
+            for key, c in DM["steps"].items():
+                a, b = key.split("|")
+                k = short(a) + short(b)
+                M[f"dsteplom{k}"] = pct(c["lo"], 0); M[f"dstephim{k}"] = pct(c["hi"], 0)
         DCf = DX.get("DCf")
         if DCf:
             M["dsigmafit"] = f"{100 * DCf['sigma']:.1f}"
@@ -746,7 +759,7 @@ def write_macros(N, P, PL, TR, TC, rec, SENS, J, JN, names, repeats, MA=None, EX
             M["dminutes"] = f"{X['minutes']:.0f}"
             M["dcutlist"] = " and ".join(
                 f"{'the no-texture rotor' if c['rotor'] == 'v1_smooth' else latex_label(c['rotor'])}"
-                f" mounting~{c['mounting']} at {c['rpm']} rpm "
+                f" run~{c['mounting']} at {c['rpm']} rpm "
                 f"({100 * c['frac']:.0f}\\%)" for c in X["cut"]) or "none"
             M["dmotorrange"] = f"{X['motor_range_a']:.2f}"
             M["dmotorhi"] = f"{X['motor_1800_a']:.1f}"
@@ -986,7 +999,7 @@ def write_derived(rec, P, PL, TH, J, runs, names, repeats, DX=None):
     spec = lambda b: SPECIMENS[repeats.get(b, b)]
     date = lambda b: runs[b]["meta"].get("clock", "")[:10] or {"v1_Ra20": "2026-08-20"}.get(b, "")
     iso = lambda b: f"{runs[b]['date'][:4]}-{runs[b]['date'][4:6]}-{runs[b]['date'][6:]}"
-    # mounting number within the run's own test date (1 Oct: 1 and 2; Aug/Sep: 1)
+    # run number within its test date (1 Oct: 1 and 2, same mounting; Aug/Sep: 1)
     order = sorted(rec, key=lambda b: (repeats.get(b, b), runs[b]["date"], runs[b]["meta"].get("clock", "")))
     mnt, seen = {}, {}
     for b in order:
@@ -996,14 +1009,14 @@ def write_derived(rec, P, PL, TH, J, runs, names, repeats, DX=None):
     frames = []
     for b in rec:
         t = rec[b].copy()
-        t.insert(0, "mounting", mnt[b])
+        t.insert(0, "run_on_date", mnt[b])
         t.insert(0, "test_date", iso(b))
         t.insert(0, "fuzzy_skin_mm", spec(b)["fuzz_mm"])
         t.insert(0, "ra_label_um", spec(b)["ra"])
         t.insert(0, "rotor", runs[b]["stem"])
         frames.append(t)
     pk = pd.concat(frames)[[
-        "rotor", "ra_label_um", "fuzzy_skin_mm", "test_date", "mounting", "fan_rpm_cmd",
+        "rotor", "ra_label_um", "fuzzy_skin_mm", "test_date", "run_on_date", "fan_rpm_cmd",
         "fan_rpm_actual", "wind_mps_nominal", "wind_mps_logged", "p_raw", "i_raw", "v_raw",
         "p_fit", "i_fit", "fit_points", "v_light", "i_light", "n_steps", "limited_by", "clean"]]
     pk.rename(columns={"fan_rpm_actual": "fan_rpm_logged", "p_raw": "p_max_raw_w",
@@ -1015,7 +1028,7 @@ def write_derived(rec, P, PL, TH, J, runs, names, repeats, DX=None):
     for b in rec:
         t = TH[b].copy()
         t.insert(0, "fuzzy_skin_mm", spec(b)["fuzz_mm"])
-        t.insert(0, "mounting", mnt[b])
+        t.insert(0, "run_on_date", mnt[b])
         t.insert(0, "test_date", iso(b))
         t.insert(0, "rotor", runs[b]["stem"])
         th.append(t)
@@ -1046,11 +1059,14 @@ def write_derived(rec, P, PL, TH, J, runs, names, repeats, DX=None):
         for r, ks in DX["G"].items():
             for i, k in enumerate(ks):
                 rows.append(dict(rotor=r, fuzzy_skin_mm=SPECIMENS[r]["fuzz_mm"], run=runs[k]["stem"],
-                                 mounting=i + 1, run_start=DX["times"][k], run_end=DX["ends"][k],
+                                 repeat=i + 1, run_start=DX["times"][k], run_end=DX["ends"][k],
                                  change_vs_no_texture_pct=100 * math.expm1(DC["y"][k])))
-        pd.DataFrame(rows).to_csv(D / "oct1_by_mounting.csv", index=False, float_format="%.4g")
-        rows = [dict(rotor=r, mountings=len(DC["Y"][r]),
-                     change_vs_no_texture_pct=100 * c["level"], ci95_lo_pct=100 * c["lo"], ci95_hi_pct=100 * c["hi"],
+        pd.DataFrame(rows).to_csv(D / "oct1_by_run.csv", index=False, float_format="%.4g")
+        DM = DX["DM"]
+        rows = [dict(rotor=r, runs=len(DC["Y"][r]), change_vs_no_texture_pct=100 * c["level"],
+                     ci95_with_mounting_lo_pct=100 * DM["vs_ref"][r]["lo"],
+                     ci95_with_mounting_hi_pct=100 * DM["vs_ref"][r]["hi"],
+                     ci95_run_to_run_lo_pct=100 * c["lo"], ci95_run_to_run_hi_pct=100 * c["hi"],
                      p_max_1800rpm_w=DC["p_top"][r]) for r, c in DC["vs_ref"].items()]
         pd.DataFrame(rows).to_csv(D / "oct1_vs_no_texture.csv", index=False, float_format="%.4g")
         if SURF:
@@ -1159,11 +1175,12 @@ def write_tables(rec, P, PL, TH, names, J, DX=None):
             ys = DC["Y"][r]
             mounts = " / ".join(pct(math.expm1(v)) for v in ys)
             if r == "v1_smooth":
-                chg = "reference"
+                chg, chg_run = "reference", "—"
             else:
-                c = DC["vs_ref"][r]
-                chg = f"${pct(c['level'])}$ $[{pct(c['lo'])},\\ {pct(c['hi'])}]$"
-            lines.append(" & ".join([latex_label(r), thick, pa, ra, mounts, chg,
+                c, cm = DC["vs_ref"][r], DX["DM"]["vs_ref"][r]
+                chg_run = f"$[{pct(c['lo'])},\\ {pct(c['hi'])}]$"
+                chg = f"${pct(c['level'])}$ $[{pct(cm['lo'], 0)},\\ {pct(cm['hi'], 0)}]$"
+            lines.append(" & ".join([latex_label(r), thick, pa, ra, mounts, chg, chg_run,
                                      f"{DC['p_top'][r]:.2f}"]) + r" \\")
         (TAB / "day_rows.tex").write_text("\n".join(lines) + "\n")
         # appendix: every 1 Oct run, raw arg max per set point

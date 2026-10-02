@@ -1,4 +1,4 @@
-rotor,ra_label_um,fuzzy_skin_mm,test_date,mounting,fan_rpm_cmd,fan_rpm_logged,wind_mps_nominal,wind_mps_logged,p_max_raw_w,i_at_p_max_raw_a,v_at_p_max_raw_v,p_max_fit_w,i_at_p_max_fit_a,fit_points,v_first_step_v,i_first_step_a,n_steps,limited_by,clean
+rotor,ra_label_um,fuzzy_skin_mm,test_date,run_on_date,fan_rpm_cmd,fan_rpm_logged,wind_mps_nominal,wind_mps_logged,p_max_raw_w,i_at_p_max_raw_a,v_at_p_max_raw_v,p_max_fit_w,i_at_p_max_fit_a,fit_points,v_first_step_v,i_first_step_a,n_steps,limited_by,clean
 v1_smooth_20261001,,0,2026-10-01,1,500,499,10.236,10.21,0.0294,0.016,1.835,0.028625,0.0168769,5,2.839,0.001,17,load-cutout,0
 v1_smooth_20261001,,0,2026-10-01,1,600,600,12.368,12.37,0.0658,0.0297,2.2146,0.0658,0.0297,0,4.4994,0.0011,21,power-rolloff,1
 v1_smooth_20261001,,0,2026-10-01,1,700,700,14.5,14.5,0.114,0.0409,2.7876,0.110323,0.0395847,5,5.6106,0.0015,20,power-rolloff,1

@@ -11,8 +11,8 @@ small vertical-axis wind turbine rotor"** (S. Eacuello, 1 Oct 2026), included as
 ## Start here
 
 - **The result.** `4_derived/oct1_vs_no_texture.csv`: each textured rotor against the
-  un-textured rotor, same day, two mountings each (report Table 1).
-- **Every mounting.** `4_derived/oct1_by_mounting.csv` (report Fig. 3).
+  un-textured rotor, same day, two runs each (report Table 1).
+- **Every run.** `4_derived/oct1_by_run.csv` (report Fig. 3).
 - **Surface roughness.** `4_derived/surface_roughness.csv` (report Section 1.1).
 - **Peak power per wind speed, every run.** `4_derived/peak_power_all_rotors.csv`.
 - **Every load step.** `1_rig_sweeps/<date>/sweep_<run>_points.csv`.
@@ -22,10 +22,14 @@ small vertical-axis wind turbine rotor"** (S. Eacuello, 1 Oct 2026), included as
 
 | rotor | fuzzy-skin thickness | tested | where | runs |
 |---|---|---|---|---|
-| `v1_smooth` (no texture) | none | 1 Oct 2026 | rig | 2 mountings |
-| `v1_Ra20` | 0.050 mm | 20 Aug, 1 Oct 2026 | rig | 1 + 2 mountings |
-| `v1_Ra40` | 0.101 mm | 1 Sep, 1 Oct 2026 | rig | 1 + 2 mountings |
-| `v1_Ra80` | 0.202 mm | 26 Aug, 1 Oct 2026 | rig | 1 + 2 mountings |
+| `v1_smooth` (no texture) | none | 1 Oct 2026 | rig | 2 runs |
+| `v1_Ra20` | 0.050 mm | 20 Aug, 1 Oct 2026 | rig | 1 + 2 runs |
+| `v1_Ra40` | 0.101 mm | 1 Sep, 1 Oct 2026 | rig | 1 + 2 runs |
+| `v1_Ra80` | 0.202 mm | 26 Aug, 1 Oct 2026 | rig | 1 + 2 runs |
+
+**On 1 Oct each rotor was mounted once and swept twice without being removed.** The two runs
+measure run-to-run repeatability. Mounting variation comes from the Aug/Sep runs, each a
+separate mounting (report Section 2.3).
 | no texture | none | 27 Jul 2026 | Jeong-lab DAQ | 16 fan settings |
 | initial reference | — | 5 Jun 2026 | Jeong-lab DAQ | 13 fan settings |
 
@@ -55,7 +59,7 @@ README.md, DATA_DICTIONARY.md, MANIFEST.csv
 | figure file | report figure |
 |---|---|
 | `fig_surface.png` | Fig. 1, Keyence height maps |
-| `fig_day.png` | Fig. 3, every 1 Oct mounting against the un-textured rotor |
+| `fig_day.png` | Fig. 3, every run against the un-textured rotor |
 | `fig_day_curves.png` | Fig. 4, peak power against wind speed |
 | `fig_day_thevenin.png` | Fig. 5, open-circuit voltage and source resistance |
 | `fig_jeong_context.png` | Fig. 6, Jeong-lab tests relative to the rig |
@@ -80,7 +84,9 @@ README.md, DATA_DICTIONARY.md, MANIFEST.csv
 6. **Unusable columns.** `turbine_rpm` and `tsr_at_pmax`: the reed switch bounced on 1 Sep, and
    the columns are empty on 1 Oct. `Measured_RPM` in the July table is usable only up to
    1900 rpm.
-7. **Run notes are not reliable for print settings.** See `DATA_DICTIONARY.md`.
+7. **Run notes are not reliable for print settings.** See `DATA_DICTIONARY.md`. The slicer
+   project `turbine_default.3mf` (60 MB, report Section 1) is not in this package; it is
+   available on request.
 
 ## Integrity and reproducibility
 

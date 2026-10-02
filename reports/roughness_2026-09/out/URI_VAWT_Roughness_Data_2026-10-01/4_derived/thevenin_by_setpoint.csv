@@ -1,4 +1,4 @@
-rotor,test_date,mounting,fuzzy_skin_mm,fan_rpm_cmd,wind_mps_nominal,v_oc_v,r_int_ohm,r2,n_steps_fitted,p_thevenin_match_w
+rotor,test_date,run_on_date,fuzzy_skin_mm,fan_rpm_cmd,wind_mps_nominal,v_oc_v,r_int_ohm,r2,n_steps_fitted,p_thevenin_match_w
 v1_smooth_20261001,2026-10-01,1,0,500,10.236,3.20028,93.4652,0.982547,17,0.0273947
 v1_smooth_20261001,2026-10-01,1,0,600,12.368,4.57533,85.8951,0.993985,21,0.060928
 v1_smooth_20261001,2026-10-01,1,0,700,14.5,5.80281,76.7012,0.995743,20,0.109753

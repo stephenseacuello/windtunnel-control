@@ -1,38 +1,63 @@
 # Drafts. Not sent. Edit freely.
 
-Attachments for both: `report/report.pdf` (ship as `URI_VAWT_Roughness_Report_2026-10-01.pdf`)
-and `out/URI_VAWT_Roughness_Data_2026-10-01.zip` (12.4 MB; already contains the PDF).
+Attachments: `report/report.pdf` (send as `URI_VAWT_Roughness_Report_2026-10-01.pdf`) and, for
+the group, `out/URI_VAWT_Roughness_Data_2026-10-01.zip` (12.4 MB; already contains the PDF).
+Draft 1 is also saved in Gmail Drafts, without the attachment.
 
 ---
 
 ## 1. To Taegu first (before the full distribution)
 
 **To:** taegu.kang@uri.edu
-**Subject:** Your 27 July data in the roughness write-up. Could you check one section?
+**Subject:** Roughness write-up: your July data (Section 4, Appendix C) and a few questions
 
 Hi Taegu,
 
-Thanks again for bringing the Chroma load down for yesterday's session. Before I send the
-roughness write-up to the professors, could you look over Section 4 and Appendix C? They use the
-raw export from our 27 July test, and I would rather you correct anything I have inferred than
-have it go out wrong.
+Thanks again for bringing the Chroma load down on Thursday. Before the roughness write-up goes to
+Professors Jahangiri, Jeong and Sodhi, I'd like you to check the part that uses your data. The
+full report is attached; your part is Section 4 and Appendix C.
 
-To put the July numbers on the same basis as the rig, I rebuilt `Summary_Table.csv` from
-`0727windturbine.csv`. The recipe in Appendix C reproduces all 64 values exactly, but parts of it
-are inferred:
+**What the report says about the lab tests**
 
-1. **Channels.** Is the map right? I have ch1 = DC voltage through a 4:1 divider, ch2 = current
-   (2 A/V), and ch3 = a once-per-revolution pulse.
-2. **Current sensor.** What are the part number, range and zero?
-3. **Pulse.** How is the rotor pulse generated? It tracked cleanly up to 1900 rpm, which is better
-   than the reed switch on the rig.
-4. **June table.** Did the 5 June table use 50-sample averages?
+1. I rebuilt `Summary_Table.csv` from `0727windturbine.csv`, and all 64 values reproduce exactly:
+   - The record is cut into 17 equal slices, and the middle half of each of the first 16 is used
+     (3,742 samples, 10.4 s).
+   - V = 4 × ch1 and I = 2 × (ch2 − 2.5).
+   - Vdc_max, Idc_max and Pdc_max are the separate maxima of V, I and V·I over that window.
+2. Because Pdc_max is a maximum of raw 360 Hz samples, it picks up current-sensor noise (about
+   31 mA rms), which adds roughly 0.11 A × V. At 500–700 rpm the load was off, so the power
+   tabulated there is noise.
+3. I reprocessed the July data on the rig's basis: a 1 s mean, with the current zero taken after
+   load-off.
+   - On that basis the July values are 5–33% below the rig's un-textured rotor from Thursday.
+   - The report says plainly that this is not a rotor difference. Your load was held below the
+     power peak, so those values are lower bounds, and the current scale can't be checked from the
+     file.
+   - The free-running voltages, which need no current calibration, agree within 15%.
+4. The 5 June values differ from the rig's un-textured rotor by −5% to +35% (geometric mean
+   +9%). The report treats that as a consistency check only.
 
-The report now compares July with the rig's un-textured rotor from yesterday. The reprocessed
-July values come out 5–33% lower, and I say plainly that this can't be read as a rotor
-difference: the load was below the power peak and the current scale can't be checked from the
-file. If you have time at the next session, running your DAQ in parallel with the Chroma on one
-sweep would settle the current scale and give the rig the rotor speed it is missing.
+**What I need from you**
+
+1. **Channel map.** Is ch1 the DC bus through a 4:1 divider, ch2 a Hall current sensor at 2 A/V
+   about a 2.5 V zero, and ch3 a once-per-revolution pulse? What is ch1's input range?
+2. **Current sensor.** What are its part number and range, and how is its zero set? This is the
+   one number that decides whether the July gap is real.
+3. **Rotor pulse.** What generates it? It tracked cleanly to 1900 rpm, better than our reed
+   switch, and drops about one revolution in eight at 2000 rpm.
+4. **Processing.** Did the 5 June table use 50-sample averages? Could you share the 5 June raw
+   export, and your processing script if that's easy, so I can put June on the same basis?
+5. **Rotors.**
+   - Was the 27 July no-texture rotor the same blade set we ran on Thursday as the baseline?
+   - Do you know who printed it, and with what settings? Our scans show 0.2 mm layers on it,
+     against 0.1 mm on the textured sets.
+   - Was the 5 June rotor the original, pre-replica rotor?
+6. **Next session.** Could we run your DAQ in parallel with the Chroma for one sweep? That would
+   calibrate your current channel against the Chroma and give the rig the rotor speed it is
+   missing. I'd also like to rerun with each rotor remounted between runs and test a reprinted
+   no-texture set, so we would need the Chroma again.
+
+Please correct anything I have inferred wrongly. I'd rather fix it before it goes out.
 
 Thanks,
 Stephen
@@ -48,32 +73,42 @@ Dear Professors, and Taegu,
 
 Attached are the write-up of the surface-texture wind-tunnel tests and the complete data package.
 
-**Result.** On 1 October we ran all four blade sets on the same day, mounting each one twice.
-Against the un-textured rotor, the 0.101 mm and 0.202 mm fuzzy-skin rotors produced 12.8% and
-16.2% more peak electrical power over 10–38 m/s. The two mountings of each rotor agreed to within
-1%, so both gains are well resolved. The 0.050 mm rotor's gain, 1.8%, is marginal. The gain sits in
-the open-circuit voltage, consistent with the rotor turning faster in the same wind (rotor speed
-was not measured). The August–September single runs reproduce to within 1–3%.
+**Result.** On 1 October we ran all four blade sets on the same day, each swept twice.
+
+- Against the un-textured rotor, the 0.101 mm and 0.202 mm fuzzy-skin rotors produced 12.8% and
+  16.2% more peak electrical power over 10–38 m/s.
+- Allowing for mounting variation, estimated from the August–September runs, the 95% intervals are
+  +5 to +21% and +9 to +24%. Both gains are resolved; the 0.050 mm rotor's 1.8% is not.
+- The gain sits in the open-circuit voltage. That is consistent with the rotor turning faster in
+  the same wind, but rotor speed was not measured.
 
 **Surface measurement.** Keyence scans show that measured Ra does not follow the labels or the
-power. Ra is 8–10 µm on all three textured sets, and highest (13 µm) on the un-textured set,
-whose 0.2 mm layer lines are a regular texture of their own. Fuzzy-skin thickness is the variable
-that orders the power.
+power:
+- Ra is 8–10 µm on all three textured sets.
+- It is highest (13 µm) on the un-textured set, whose 0.2 mm layer lines are a regular texture of
+  their own.
 
-**Caveats.** The rotors were run in order of increasing texture; Section 3.4 gives the evidence
-against drift. The un-textured set was printed with 0.2 mm layers against about 0.1 mm for the
-Ra 20 and Ra 40 sets, so it differs in more than texture. There is one print per texture level. The rig measures
-electrical power, not the aerodynamic power coefficient.
+Fuzzy-skin thickness is the variable that orders the power.
+
+**Caveats.**
+- Each rotor was mounted once on 1 October, and the rotors were run in order of increasing
+  texture. Section 3.4 gives the evidence against drift.
+- The un-textured set was printed with 0.2 mm layers, against about 0.1 mm for the Ra 20 and
+  Ra 40 sets, so it differs in more than texture.
+- There is one print per texture level.
+- The rig measures electrical power, not the aerodynamic power coefficient.
 
 **Your open requests.**
 - *Dr. Jeong, comparison with the initial test:* Section 4. The 5 June values sit mostly within
-  the band of the textured rotors; the rotor and processing differ, so it is a consistency check.
-- *Dr. Jahangiri, which blade exactly:* Table 2 lists what is recorded and measured for each set.
-- *Fault-testing plan:* Section 6.1 proposes a starting point. Could we find a time to agree it
+  the band of the textured rotors. The rotor and processing differ, so this is a consistency
+  check.
+- *Dr. Jahangiri, which blade exactly:* Table 2 lists what is recorded and measured for each set,
+  including the slicer file.
+- *Fault-testing plan:* Section 6.1 proposes a starting point. Could we find a time to agree on it
   before any fault blades are printed?
 
 **Attached.**
-- `URI_VAWT_Roughness_Report_2026-10-01.pdf` (11 pages)
+- `URI_VAWT_Roughness_Report_2026-10-01.pdf` (12 pages)
 - `URI_VAWT_Roughness_Data_2026-10-01.zip`: every raw file unmodified, the surface scans, a data
   dictionary, checksums and the analysis code. One script regenerates every number in the report.
 
