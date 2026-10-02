@@ -16,13 +16,13 @@
 \usepackage{enumitem}
 \usepackage{float}
 \usepackage{fancyhdr}
-\usepackage{titlesec}
+\usepackage[nobottomtitles*]{titlesec}
+\renewcommand{\bottomtitlespace}{0.12\textheight}
 \usepackage{textcomp}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta}
 \usepackage[hidelinks]{hyperref}
-\hypersetup{pdftitle={Printed surface texture and the electrical output of a small VAWT rotor},
-  pdfauthor={Stephen Eacuello}}
+\hypersetup{pdfauthor={Stephen Eacuello}}
 \widowpenalty=10000 \clubpenalty=10000
 \hyphenation{time-stamps}
 
@@ -47,7 +47,7 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\sffamily\footnotesize\color{ink2}Printed surface texture and VAWT electrical output}
+\fancyhead[L]{\sffamily\footnotesize\color{ink2}Fuzzy-skin texture and VAWT peak electrical output}
 \fancyhead[R]{\sffamily\footnotesize\color{ink2}\ReportDate}
 \fancyfoot[C]{\sffamily\footnotesize\color{ink2}\thepage}
 \renewcommand{\headrulewidth}{0.4pt}

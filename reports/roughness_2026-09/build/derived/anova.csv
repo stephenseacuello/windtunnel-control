@@ -1,0 +1,26 @@
+analysis,source,df,ss,ms,F,df_den,p
+"ln P_max, all rotors",rotor,3,0.465448,0.155149,324.484,4,3.13572e-05
+"ln P_max, all rotors",set point,13,243.485,18.7296,54427.9,52,1.32513e-102
+"ln P_max, all rotors",rotor x set point,39,0.123714,0.00317215,9.21819,52,6.35657e-13
+"ln P_max, all rotors",run within rotor,4,0.00191257,0.000478141,1.38947,52,0.250464
+"ln P_max, all rotors",residual,52,0.0178941,0.000344118,,,
+"ln P_max, textured rotors only",rotor,2,0.271351,0.135676,271.756,3,0.000406708
+"ln P_max, textured rotors only",set point,13,184.212,14.1701,38310,39,8.452e-76
+"ln P_max, textured rotors only",rotor x set point,26,0.0726327,0.00279356,7.55262,39,1.37405e-08
+"ln P_max, textured rotors only",run within rotor,3,0.00149777,0.000499256,1.34978,39,0.272346
+"ln P_max, textured rotors only",residual,39,0.0144253,0.00036988,,,
+"ln P_max, without 500 and 900 rpm",rotor,3,0.435399,0.145133,2830.51,4,4.15597e-07
+"ln P_max, without 500 and 900 rpm",set point,11,161.48,14.68,108889,44,9.5704e-94
+"ln P_max, without 500 and 900 rpm",rotor x set point,33,0.105426,0.00319474,23.697,44,6.19282e-19
+"ln P_max, without 500 and 900 rpm",run within rotor,4,0.000205098,5.12745e-05,0.380329,44,0.82147
+"ln P_max, without 500 and 900 rpm",residual,44,0.00593191,0.000134816,,,
+"ln R_int, all rotors",rotor,3,0.000100791,3.35971e-05,0.184366,4,0.901867
+"ln R_int, all rotors",set point,13,10.3752,0.798095,3969.57,52,4.71644e-73
+"ln R_int, all rotors",rotor x set point,39,0.044863,0.00115033,5.72153,52,6.03117e-09
+"ln R_int, all rotors",run within rotor,4,0.000728921,0.00018223,0.906377,52,0.467152
+"ln R_int, all rotors",residual,52,0.0104548,0.000201053,,,
+"ln V_oc, all rotors",rotor,3,0.128058,0.0426859,512.881,4,1.25955e-05
+"ln V_oc, all rotors",set point,13,39.6949,3.05345,81585,52,3.56522e-107
+"ln V_oc, all rotors",rotor x set point,39,0.028818,0.000738924,19.7432,52,3.36165e-20
+"ln V_oc, all rotors",run within rotor,4,0.00033291,8.32276e-05,2.22375,52,0.0790698
+"ln V_oc, all rotors",residual,52,0.00194619,3.74267e-05,,,

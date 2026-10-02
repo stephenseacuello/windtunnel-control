@@ -1,0 +1,5 @@
+term,estimate_pct,ci95_lo_pct,ci95_hi_pct,dof
+drift per hour,0.80967,-1.71,3.3294,3
+"FS 0.05 vs Plain, drift-adjusted",0.92924,-2.2515,4.2135,3
+"FS 0.10 vs Plain, drift-adjusted",11.485,7.0347,16.12,3
+"FS 0.20 vs Plain, drift-adjusted",14.5,8.8963,20.391,3

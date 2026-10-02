@@ -1,0 +1,23 @@
+{
+  "units": "metres unless stated",
+  "rotor": {
+    "n_blades": 3,
+    "radius_m": 0.1016,
+    "radius_definition": "axis of rotation to blade attachment",
+    "span_m": 0.2451,
+    "swept_area_definition": "2 * radius * span (an H-rotor sweeps a cylinder)"
+  },
+  "blade_section": {
+    "chord_mm": 48.0,
+    "depth_mm": 24.46,
+    "wall_mm": 1.79,
+    "arc_deg": 183,
+    "twist_deg": 0.0,
+    "edges": "square cut",
+    "description": "circular-arc section of constant wall, close to a semicircular cup; prismatic along the span"
+  },
+  "mesh": {
+    "file": "blade_v1.stl",
+    "content": "one blade in its own coordinates, metres"
+  }
+}
