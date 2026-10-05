@@ -55,21 +55,21 @@ path,bytes,data_rows,sha256,description
 5_reference/rotor_geometry.json,644,,70f11ab486a08bc400e26d97e2006b35866e9426990a7c725f5f73f257c00575,Rotor and blade geometry; the code reads these values.
 5_reference/tunnel_calibration_test1.csv,267,11,6fbddfc65cd7f3c0b4e1044405e6dbdab9761fe7e7de5b2c57f9e67d07deb61c,Tunnel calibration Test 1 (13 Feb 2026): air speed vs fan rpm; 'measured' or 'possible trendline read'. Verbatim.
 5_reference/turbine_default_summary.json,1180,,71162af7874dbd2879e9130f137fb7ccb0c9af967075f89b8cb65098d0d34990,"Summary of the slicer project turbine_default.3mf, written by 7_code/slicer.py."
-6_figures/fig_calibration.png,52567,,cbe77358dfa6add9771c8d42b87be2e304c4a03511212103d5032f8cfdc043cb,Report Fig. 9 (PNG).
-6_figures/fig_gain.png,99646,,f79d427ffff1d73bc20420f758ce5b9a5caecd191af8c2418283563bd638330c,Report Fig. 6 (PNG).
-6_figures/fig_ladders.png,139402,,4620a62e8d83e7c255d6879564180e601799057bcc727598ccf3444558357005,Report Fig. 3 (PNG).
-6_figures/fig_power.png,110507,,dfe1406c7e9d73848ffc680ea242fcf3b44cc950536388c6b110249c991d6a4d,Report Fig. 4 (PNG).
-6_figures/fig_runs.png,34462,,55b5717851dcd95b5c3055bea7025fa34dd6ef0cb3c208e240c13055887ad8f0,Report Fig. 5 (PNG).
-6_figures/fig_speed.png,150834,,182592b089c642be6dd398384a607987aef0b34d16fd3222abd232756effde1f,Report Fig. 8 (PNG).
-6_figures/fig_surface.png,290315,,03446d6ced17c8a68452af7a09f6dc02ba709ff98a50e17f7b4247be6e26d1d0,Report Fig. 1 (PNG).
-6_figures/fig_thevenin.png,108273,,363914846e66b0278405608cedb2441c6ad5f04ef931ad24c528585794855353,Report Fig. 7 (PNG).
+6_figures/fig_calibration.png,62592,,6fe994c8f8ba0c9157cdaaa462d5ca5559b93761751a70bedc9c77e8ec5f26cb,Report Fig. 9 (PNG).
+6_figures/fig_gain.png,124359,,7109cba8f7d5460d91741e5143b4625354cb55879803b840c8186b29fa22bfa8,Report Fig. 6 (PNG).
+6_figures/fig_ladders.png,174320,,442b33afc7957edfc5a4b110f485ce79cfce0597338e742d2dd0190732cd6c9b,Report Fig. 3 (PNG).
+6_figures/fig_power.png,125783,,1150d04d6063f17231f39e09d41f6106e3db7b78b3c42802ed8f4e882de553a9,Report Fig. 4 (PNG).
+6_figures/fig_runs.png,41966,,6c284187be3c54f9a3be9187cf1ac827f48c5c5ea3fea73d9e1444f1e396d05d,Report Fig. 5 (PNG).
+6_figures/fig_speed.png,196862,,d03863226f9a56b0a095316d7f54ad0d4704f5532ea854f622dbbcb76885b715,Report Fig. 8 (PNG).
+6_figures/fig_surface.png,732000,,03f9aca951d89ea05b5994934be5d93a71d69030e6746b859aea3fd88c81c312,Report Fig. 1 (PNG).
+6_figures/fig_thevenin.png,128612,,9e02023db18afaac3b20245a5934681400ebbbd4705bfb593feb7bb5ca625bed,Report Fig. 7 (PNG).
 7_code/analysis.py,12492,,3ecc7d25d021172136c30be3b57aa20d30217cb87564c11553f895fb2bca3f09,"Statistics: Tukey comparisons, nested ANOVA, permutation test, drift model, rotor speed."
 7_code/build_report.py,37298,,cadc64df6dca83e26bef4206ee62f9f204cced687bf254419860dbfad37d4384,"Regenerates every number, table and data figure in the report: python3 7_code/build_report.py"
 7_code/data.py,9904,,3dcc28a4edb2c78abb40c6cc0eef966bdfa9485d534273b38224aec258c172a5,"Loads the run and rotor-speed files and reduces each load ladder (peak power, Thevenin fit)."
-7_code/figures.py,11232,,ed49d185d185a291e53528828f884d515ea8ac1f321266281e686e17cb02826f,Report figures.
+7_code/figures.py,11304,,d9d08f918c376de2881284ec65df3f7f961872afacdb429c432380a4a6b360ae,Report figures.
 7_code/keyence.py,5767,,854c1625e35d453002d95fabe3fd845db8968a17ca7582a242786d96afe01eaa,"Surface parameters (Pa, Ra, layer period) from the profilometer height maps."
 7_code/slicer.py,5005,,708880fa38d6e1e4924bd578ad6ff5f9d4253379c6a4dea540c9ec613d99370e,Summarises the slicer project (not shipped) into the JSON shipped as 5_reference/turbine_default_summary.json.
-7_code/style.py,2364,,8e9d44d76d56a93176321b10e9338af87ea055081eeab20f2eb9894a46020701,"Figure style (colours, markers)."
+7_code/style.py,2359,,72a736c3ca167fe589eb233893fe54c5cfafdd570d6f438828b2ed58e71040f9,"Figure style (colours, markers)."
 DATA_DICTIONARY.md,16588,,ef97c3360be8a67ae081aac705976abbb208ec60bfe30902e5ec059a69b1ce93,"Every data file, header key and column."
 README.md,5255,,18a9f92e609ae59bfb5a6aeb849873d19dbdf19f075f0b82ebcc817f58652fa1,"Start here: what was tested, layout, caveats, how to reproduce."
-URI_VAWT_Texture_Report_2026-10-01.pdf,922617,,099131d0527bd2a1faefa86633b019c3e98b27fe675186281d9fbdc25b0e72d1,The report this package accompanies.
+URI_VAWT_Texture_Report_2026-10-01.pdf,1441373,,67ed17237db88dccaa22218194ca9bdefc0b53f43765d87531ff0c70fb5fe954,The report this package accompanies.

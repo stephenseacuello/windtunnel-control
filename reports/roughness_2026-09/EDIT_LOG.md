@@ -353,3 +353,13 @@ data dictionary, email)**
 - §3.1: the rest of the calibration paragraph (extrapolation above 700 rpm, the 2.8–4.6% offset at
   500–700 rpm, the measured-points-only line, and the note that rotor comparisons are unaffected).
   These remain in Table 6 and Appendix D. §6.3 now refers to Table 6 for the calibration uncertainty.
+
+**30. Roughness ranking needs more surface analysis (abstract, §7, conclusion 4, Recommendation 4)**
+- Requested by Stephen.
+- Each place now states that testing whether surface roughness ranks power requires more surface
+  measurement (Recommendation 4).
+
+**31. Figures enlarged**
+- Fonts are 9–10 pt (were 7.5–8.5 pt), with larger markers and taller figures.
+- The surface maps are now a 2 × 2 grid.
+- The speed figure now has panels (a) and (b) above a full-width (c).
