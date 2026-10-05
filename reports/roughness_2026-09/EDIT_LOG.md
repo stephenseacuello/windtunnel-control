@@ -402,3 +402,15 @@ These passages served none of the four research questions or duplicated another 
 - Tachometer: Stephen confirmed it is a proximity sensor triggered by a magnet glued to one blade
   of each rotor. One pulse per revolution is now stated as fact, and the FS 0.10 "sensor magnet"
   caveat is removed (every rotor carried one).
+
+**35. Mechanical setup (raised by Stephen)**
+- The report now describes the mount: the rotor is inserted into the mount's cylindrical shaft, and
+  the same mount, generator and bearings were used for every rotor.
+- The tachometer magnet glued to one blade adds an unbalanced mass; its mass and position were not
+  recorded.
+- The rotor wobbled visibly at higher wind speeds. This was not measured.
+- Both are named in the Discussion as candidate causes of a lower resisting torque, and in
+  Limitations and conclusion 5.
+- New recommendation 2: extend the mount's shaft, balance the magnet (or move it to the shaft), and
+  log vibration with the tunnel node.
+- The fault plan notes that the reference rotor must be balanced first.

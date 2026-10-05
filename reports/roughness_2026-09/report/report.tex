@@ -87,6 +87,8 @@ The rotor has three straight blades attached at $R=\SI{\geoR}{m}$ from the axis,
 $H=\SI{\geoH}{m}$ (design values). Each blade is a thin curved plate, not an airfoil: it turns
 through \SI{\geoArc}{\degree}, with \SI{\geoChord}{mm} chord, \SI{\geoWall}{mm} wall and square
 edges. The swept area $A=2RH=\SI{\areaSw}{m^2}$ is nominal and is used only to normalise power.
+Each rotor is held by a mount we made: the rotor is inserted into the mount's cylindrical shaft.
+The same mount, generator and bearings were used for every rotor.
 
 \tabref{tab:specimens} lists the four blade sets. A set mounted on the rig is called a rotor and
 named after the set. The College of Engineering's I$^2$(s) Print Lab printed all sets from one CAD
@@ -134,7 +136,8 @@ the same instrument and settings.
 
 \textbf{Rotor speed.}\label{sec:rpm} The rig's own speed input recorded nothing on 1 October.
 T.~Kang recorded rotor speed with a proximity sensor triggered by a small magnet glued to one blade
-of each rotor, giving one pulse per revolution, sampled at \SI{\tachoFs}{Hz}. His script
+of each rotor, giving one pulse per revolution, sampled at \SI{\tachoFs}{Hz}. The magnet adds an
+unbalanced mass to that blade; its mass and position on each rotor were not recorded. His script
 (\texttt{RPM.m}, in the data package) reports for each set point the most frequent speed over
 single revolutions, $n_0$, resolved to \resMin--\resHi\%. The load is at \SI{0}{A} while the fan
 settles, so we take $n_0$ as the light-load speed. The rig's data support this: the voltage at the
@@ -163,7 +166,8 @@ Each rotor was mounted once and run twice without removal, in the order Plain, F
 FS~0.20, from \tFirst{} to \tLast{} (\tabref{tab:session}). \nClean{} of the \nSweeps{} ladders
 ended on the power roll-off; the other \nCut{} ended after the peak, when the voltage fell below
 \SI{\vOff}{V}. One Plain blade broke at the end of run~2; its last ladder still matched run~1
-within \breakDiff\%.
+within \breakDiff\%. The rotor wobbled visibly on the mount at higher wind speeds. The wobble was
+not measured, and whether it differed between rotors was not recorded.
 
 \begin{table}[h]
 \centering\small
@@ -350,9 +354,11 @@ interval.
 because they turn faster: the voltage per rpm is the same for all rotors to within \keBound\%. With
 the same source resistance, they also turn faster at equal load current, that is, at about equal
 generator torque. The data do not show whether this comes from more aerodynamic torque or less
-resisting torque. All rotors used the same generator and bearings, so less resisting torque would
-have to come from the blade sets themselves (mass, balance or mounting, none measured) or from a
-change in the shared parts during the session.
+resisting torque. All rotors used the same mount, generator and bearings, so less resisting torque
+would have to come from the blade sets themselves (mass, balance or mounting, none measured) or from
+a change in the shared parts during the session. Two mechanical effects are candidates: the
+tachometer magnet unbalances one blade, and the rotor wobbled at higher wind speeds. Either could
+change the resisting torque and differ between mountings.
 
 \textbf{Why the gains depend on wind speed.} The gains peak at chord Reynolds numbers of
 $\reBandLo$--$\reBandHi\times10^4$, and the textured rotors' power rises most steeply at a lower wind
@@ -363,7 +369,7 @@ so this remains a hypothesis.
 \textbf{Roughness does not explain the ranking yet.} Ra and Pa from one field per set may not
 represent the blades, may not capture the surface property that matters for this flow, or the power
 differences may not come from texture at all. More surface measurement is needed to test whether
-roughness ranks power (Recommendation~4).
+roughness ranks power (Recommendation~5).
 
 % ================================================================ 6 LIMITS ==
 \section{Limitations}\label{sec:limits}
@@ -376,6 +382,9 @@ roughness ranks power (Recommendation~4).
         over the session ($\driftRate\%$ per hour, $[\driftLo,\ \driftHi]$) leaves FS~0.10 and
         FS~0.20 resolved from Plain ($\cdB\%$ and $\cdC\%$) but could explain the FS~0.05
         difference. A step change between rotors cannot be separated from a rotor effect.
+  \item \textbf{Mechanical.} The tachometer magnet on one blade unbalances each rotor, and the rotor
+        wobbled on the mount at higher wind speeds. Neither was measured, so neither can be
+        excluded as a cause of the differences.
   \item \textbf{Other.} Rotor speed is known only at light load. Wind speed comes from the tunnel
         calibration (\appref{app:cal}), which affects absolute wind speed and $C_{P,\mathrm{el}}$
         but not the comparison between rotors, made at identical fan speeds. Air density was not
@@ -394,8 +403,9 @@ roughness ranks power (Recommendation~4).
         infer that they arise in the rotor, not in the generator.
   \item Ra and Pa from one field per set did not rank the rotors by power; more surface measurement
         is needed to test whether roughness does.
-  \item With one print and one mounting per texture, a fixed run order, and coarser layers on Plain,
-        the gains cannot yet be attributed to fuzzy skin alone.
+  \item With one print and one mounting per texture, a fixed run order, coarser layers on Plain and
+        unmeasured mechanical effects (magnet imbalance, wobble), the gains cannot yet be attributed
+        to fuzzy skin alone.
 \end{enumerate}
 
 % ================================================================= 8 NEXT ==
@@ -404,6 +414,10 @@ roughness ranks power (Recommendation~4).
   \item \textbf{Replicate and randomise.} Print at least two sets per thickness, Plain included,
         from one saved project with \SI{0.1}{mm} layers. Weigh and label every blade. Mount each
         set twice, run in an interleaved order, and re-run Plain after every third rotor.
+  \item \textbf{Stiffen and balance the mount.} Extend the cylindrical shaft that the rotor is
+        inserted into, to reduce the wobble at higher wind speeds. Balance the tachometer magnet
+        with equal masses on the other two blades, or move it to the shaft. Connect the rig's
+        tunnel node, which logs vibration and ambient air, on every run.
   \item \textbf{Log rotor speed at every step,} on the rig's own pulse input or on T.~Kang's
         acquisition synchronised to the rig clock. This gives the power coefficient against
         tip-speed ratio along each ladder. A spin-down test of each mounted rotor would separate
@@ -420,7 +434,8 @@ Prof.\ Jeong asked for a fault-testing plan agreed before the next round. The ri
 automated sweep of about \runMin{} minutes, with a run-to-run repeatability of \sigRun\% in the run
 mean and \sigE\% at a single set point. Blade sets printed with different settings differed by up to
 $\cPC\%$, so fault blades and their reference set should be printed from one saved project, with
-the reference re-run between fault cases. Candidate faults are a tip mass on one blade (imbalance),
+the reference re-run between fault cases. The reference rotor should be balanced first, because the tachometer magnet already unbalances
+one blade. Candidate faults are a tip mass on one blade (imbalance),
 a chipped, shortened or missing blade, added bearing drag, and an open or high-resistance generator
 phase. Whether $V_\mathrm{oc}$ and $R_\mathrm{int}$ can tell rotor faults from electrical ones is
 untested; the first cases should test this with rotor speed logged at every step. We propose a short
@@ -451,7 +466,6 @@ ISO 21920-3:2021.
 \end{thebibliography}}
 
 % ============================================================= APPENDICES ==
-\clearpage
 \appendix
 
 \section{Statistical details}\label{app:stats}
