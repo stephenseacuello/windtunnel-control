@@ -346,3 +346,7 @@ data dictionary, email)**
   the thickness, so its other settings are not confirmed for the printed sets." (This reverses part
   of entry 21.)
 - §2.3: the scan times (13:07–13:22). They were also removed from the data dictionary.
+- §3.1: "Of these points, eight were measured, from 0 to 700 rpm (up to 14.0 m/s); the calibration
+  file marks the other three (1400–2400 rpm) as possibly read from the trend line of the original
+  record, and the Test 1 instrument is not documented." The next sentence now names 700 rpm as the
+  highest measured calibration point, so that it stands alone.

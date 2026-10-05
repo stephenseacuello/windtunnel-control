@@ -170,11 +170,9 @@ Machine Control over Modbus (\figref{fig:rig}). Wind speed $v$ is calculated fro
 speed $N$ with the tunnel's calibration (Test~1, 13 February 2026), a least-squares line through
 \calN{} points (\appref{app:cal}):
 \[ v = \calA\,N - \calB \qquad (\si{m/s};\ N \text{ in rpm}). \]
-Of these points, \calNmeas{} were measured, from 0 to \calMeasRpm~rpm (up to \SI{\calMeasV}{m/s});
-the calibration file marks the other \calNtrend{} (\calTrendLo--\calTrendHi~rpm) as possibly read
-from the trend line of the original record, and the Test~1 instrument is not documented. The wind
-speeds assigned to the \nSPabove{} set points above \calMeasRpm~rpm (\vAboveLo--\SI{\vHi}{m/s})
-therefore rest on the assumption that air speed stays linear in fan speed. At \spLo--\calMeasRpm~rpm the line is \calLowLo--\calLowHi\% above
+The wind speeds assigned to the \nSPabove{} set points above \calMeasRpm~rpm, the highest measured
+calibration point (\vAboveLo--\SI{\vHi}{m/s}), rest on the assumption that air speed stays linear
+in fan speed. At \spLo--\calMeasRpm~rpm the line is \calLowLo--\calLowHi\% above
 the measured speeds; a line through the measured points alone gives \SI{\calMeasTop}{m/s} at
 1800~rpm, \calDiffTop\% below the adopted value. The calibration affects absolute wind speed and
 $C_{P,\mathrm{el}}$, not the comparison between rotors, which are compared at identical fan speed.
