@@ -350,3 +350,6 @@ data dictionary, email)**
   file marks the other three (1400–2400 rpm) as possibly read from the trend line of the original
   record, and the Test 1 instrument is not documented." The next sentence now names 700 rpm as the
   highest measured calibration point, so that it stands alone.
+- §3.1: the rest of the calibration paragraph (extrapolation above 700 rpm, the 2.8–4.6% offset at
+  500–700 rpm, the measured-points-only line, and the note that rotor comparisons are unaffected).
+  These remain in Table 6 and Appendix D. §6.3 now refers to Table 6 for the calibration uncertainty.

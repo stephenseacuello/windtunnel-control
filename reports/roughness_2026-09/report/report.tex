@@ -170,12 +170,6 @@ Machine Control over Modbus (\figref{fig:rig}). Wind speed $v$ is calculated fro
 speed $N$ with the tunnel's calibration (Test~1, 13 February 2026), a least-squares line through
 \calN{} points (\appref{app:cal}):
 \[ v = \calA\,N - \calB \qquad (\si{m/s};\ N \text{ in rpm}). \]
-The wind speeds assigned to the \nSPabove{} set points above \calMeasRpm~rpm, the highest measured
-calibration point (\vAboveLo--\SI{\vHi}{m/s}), rest on the assumption that air speed stays linear
-in fan speed. At \spLo--\calMeasRpm~rpm the line is \calLowLo--\calLowHi\% above
-the measured speeds; a line through the measured points alone gives \SI{\calMeasTop}{m/s} at
-1800~rpm, \calDiffTop\% below the adopted value. The calibration affects absolute wind speed and
-$C_{P,\mathrm{el}}$, not the comparison between rotors, which are compared at identical fan speed.
 
 The median fan-motor current at each set point agreed across the \nRunsWord{} runs within
 \SI{\fanRange}{A}, the drive's reading resolution (\SI{\fanTop}{A} at 1800~rpm), so the fan
@@ -409,7 +403,7 @@ $\ln\pmax$ against $\ln v$ (resolution \SI{\spDv}{m/s}, one set-point spacing) l
 \SI{\stepVC}{m/s} for FS~0.20 and \SI{\stepVB}{m/s} for FS~0.10 in both runs, at
 \stepVA\,\si{m/s} for FS~0.05 and at \stepVP\,\si{m/s} for Plain. The power of FS~0.10 and FS~0.20
 therefore rises most steeply at a lower wind speed than in either Plain run; that of FS~0.05
-overlaps Plain's. The wind speeds carry the calibration uncertainty of \secref{sec:wind}; the
+overlaps Plain's. The wind speeds carry the calibration uncertainty of \tabref{tab:limits}; the
 ratios do not.
 
 \begin{figure}[h]

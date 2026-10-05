@@ -72,4 +72,4 @@ path,bytes,data_rows,sha256,description
 7_code/style.py,2364,,8e9d44d76d56a93176321b10e9338af87ea055081eeab20f2eb9894a46020701,"Figure style (colours, markers)."
 DATA_DICTIONARY.md,16588,,ef97c3360be8a67ae081aac705976abbb208ec60bfe30902e5ec059a69b1ce93,"Every data file, header key and column."
 README.md,5255,,18a9f92e609ae59bfb5a6aeb849873d19dbdf19f075f0b82ebcc817f58652fa1,"Start here: what was tested, layout, caveats, how to reproduce."
-URI_VAWT_Texture_Report_2026-10-01.pdf,923126,,86de0fffdb5f875c712946747c147342a1de93d86c30c2fd0f2b402c29a161f6,The report this package accompanies.
+URI_VAWT_Texture_Report_2026-10-01.pdf,922617,,099131d0527bd2a1faefa86633b019c3e98b27fe675186281d9fbdc25b0e72d1,The report this package accompanies.
