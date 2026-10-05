@@ -174,8 +174,8 @@ speed $N$ with the tunnel's calibration (Test~1, 13 February 2026), a least-squa
 
 The median fan-motor current at each set point agreed across the \nRunsWord{} runs within
 \SI{\fanRange}{A}, the drive's reading resolution (\SI{\fanTop}{A} at 1800~rpm), so the fan
-operating point did not change measurably. Air temperature and pressure were not recorded. No
-blockage correction is applied; blockage is assumed to act alike on rotors of one geometry.
+operating point did not change measurably. Air temperature and pressure were not recorded, and no
+blockage correction is applied (\tabref{tab:limits}).
 
 \subsection{Electrical measurement}
 The rotor shaft drives a three-phase generator whose output passes through a three-phase bridge
@@ -276,9 +276,7 @@ the maximum and up to two dwells on either side (the rig software's rule) gives 
 in \nFallback{} ladders the fit is not concave or its vertex lies outside those dwells, and the
 maximum is used. The two estimators resolve the same pairs (\tabref{tab:pairs}). Because dwells
 last \SI{\dwellS}{s} and speed was not recorded per dwell, rotor equilibrium within a dwell is not
-shown. At \spLo~rpm, which settles with the load at
-\SI{\loadArmmA}{mA}, the terminal voltage rose between the first two dwells in \nRise{} of
-\nRunsWord{} runs, so the rotor was still accelerating when the ladder began. $\pmax$ is the peak of this ramp protocol.
+shown. $\pmax$ is the peak of this ramp protocol.
 
 \textbf{Rotor comparison.} Differences are analysed as ratios, on $\ln\pmax$. For each run, $y$ is the
 mean over the \nSP{} set points of $\ln(\pmax/P_\text{ref})$, with $P_\text{ref}$ the geometric mean
@@ -344,8 +342,7 @@ losses and is not the aerodynamic power coefficient.
 Peak electrical power (geometric mean of each rotor's two runs) rises from
 \pLowMin--\SI{\pLowMax}{W} at \SI{\vLo}{m/s} to \pTopP--\SI{\pTopC}{W} at \SI{\vHi}{m/s}
 (\figref{fig:power}a), and $C_{P,\mathrm{el}}$ rises with wind speed for every rotor, from \cpLo\%
-to \cpHi\% (\figref{fig:power}b). With the measured-points-only calibration, $C_{P,\mathrm{el}}$ at
-\SI{\vHi}{m/s} would be \calCpUnc\% higher.
+to \cpHi\% (\figref{fig:power}b).
 
 \begin{figure}[h]
   \centering
@@ -361,8 +358,7 @@ Averaged over wind speed, FS~0.10 and FS~0.20 produced $\cPB\%$ $[\cPBlo,\ \cPBh
 $[\cPClo,\ \cPChi]$ more peak power than Plain, and FS~0.05 $\cPA\%$ $[\cPAlo,\ \cPAhi]$
 (\tabref{tab:pairs}, \figref{fig:runs}). The rotor effect exceeds run-to-run variation
 ($F_{3,\dofRun}=\Frot$,~$p\pRot$; permutation $p=\permP$). Each rotor's two run means agree within
-\maxPair\%, and their scatter is not detectably larger than the point-to-point scatter within runs
-($F_{\dfRunA,\dfRunB}=\Frun$,~$p\pRun$). \nResolvedCap{} of the six pairwise differences are
+\maxPair\%. \nResolvedCap{} of the six pairwise differences are
 resolved; FS~0.05 vs Plain is not. The smallest resolved difference, FS~0.20 over FS~0.10 ($\cBC\%$
 $[\cBClo,\ \cBChi]$), keeps a lower limit of only $\fBClo\%$ with the parabolic-fit estimator
 ($p\pfBC$). These intervals measure repeatability on one mounting. The differences of FS~0.10 and
@@ -460,7 +456,7 @@ Rotor & $V_\mathrm{oc}$ & $R_\mathrm{int}$ & $n_0$ & $C_{P,\mathrm{el}}$ (\%) & 
 \subsection{Rotor speed}\label{sec:speed}
 From \vSpdLo{} to \SI{\vHi}{m/s} the light-load speed rises from \spdLowMin--\spdLowMax{} to
 \spdTopMin--\spdTopMax~rpm (rotor means; \tabref{tab:speed}) and $\lambda_0$ from
-\lamLowMin--\lamLowMax{} to \lamTopMin--\lamTopMax, a rise of \lamRiseLo--\lamRiseHi\%
+\lamLowMin--\lamLowMax{} to \lamTopMin--\lamTopMax
 (\figref{fig:speed}a). Averaged over wind speed, FS~0.10 and FS~0.20 turn $\spdPB\%$
 $[\spdPBlo,\ \spdPBhi]$ and $\spdPC\%$ $[\spdPClo,\ \spdPChi]$ faster than Plain (rotor effect
 $F_{3,\dofRun}=\FrotSpd$,~$p\pRotSpd$; \tabref{tab:rotor}), and FS~0.20 turns $\spdBC\%$
@@ -557,22 +553,6 @@ setting; one field per set may not resolve it; Pa and Ra may not capture the sur
 matters for this flow; or the power differences may not come from texture. Separating these needs
 more surface analysis (Recommendation~4). With one print per level, the agreement between power and
 nominal thickness is an association (\secref{sec:limits}).
-
-\textbf{Operating regime and losses.} The light-load tip-speed ratio does not exceed \lamMaxAll{}
-(\secref{sec:speed}). A blade driven by drag alone stops producing driving force when it moves as
-fast as the wind, so this range is consistent with drag-driven operation. $\lambda_0$ also rises by
-\lamRiseLo--\lamRiseHi\% between \vSpdLo{} and \SI{\vHi}{m/s}. If the aerodynamic torque
-coefficient depended on $\lambda$ alone, a rotor without resisting torque would run unloaded at a
-fixed $\lambda$. The rise is therefore consistent with a resisting torque (bearings and generator
-no-load losses) that is a larger share of the aerodynamic torque at low wind speed; a dependence of
-the aerodynamic torque on Reynolds number could also contribute. The largest $C_{P,\mathrm{el}}$,
-\cpHi\%, is \akwaLo--\akwaHi{} times below the maximum averaged power coefficients of about
-0.05--0.30 reported for Savonius rotors~\cite{akwa}. The comparison is indicative only: this rotor
-differs from a Savonius rotor in geometry, and $C_{P,\mathrm{el}}$ includes generator and rectifier
-losses. If those losses were equal for all rotors at a given wind speed, a fractional change in
-aerodynamic power would appear magnified in $\pmax$, and the measured gains would overstate the
-aerodynamic change. Speed-dependent losses would, however, be larger for the faster textured rotors,
-which acts the other way; the data do not separate the two.
 
 % ================================================================ 8 LIMITS ==
 \section{Uncertainty and limitations}\label{sec:limits}
@@ -715,9 +695,6 @@ Profile method --- Rules and procedures for the assessment of surface texture}; 
 ISO 21920-3:2021.
 \bibitem{mohan} N.~Mohan, T.~M. Undeland and W.~P. Robbins, \emph{Power Electronics: Converters,
 Applications, and Design}, 3rd ed., Wiley, 2003.
-\bibitem{akwa} J.~V. Akwa, H.~A. Vielmo and A.~P. Petry, ``A review on the performance of Savonius
-wind turbines,'' \emph{Renewable and Sustainable Energy Reviews}, 16(5), 3054--3064, 2012,
-doi:10.1016/j.rser.2012.02.056.
 \end{thebibliography}}
 
 % ============================================================= APPENDICES ==

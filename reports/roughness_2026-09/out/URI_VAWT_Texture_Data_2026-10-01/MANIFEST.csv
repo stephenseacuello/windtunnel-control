@@ -57,7 +57,7 @@ path,bytes,data_rows,sha256,description
 5_reference/turbine_default_summary.json,1180,,71162af7874dbd2879e9130f137fb7ccb0c9af967075f89b8cb65098d0d34990,"Summary of the slicer project turbine_default.3mf, written by 7_code/slicer.py."
 6_figures/fig_calibration.png,62592,,6fe994c8f8ba0c9157cdaaa462d5ca5559b93761751a70bedc9c77e8ec5f26cb,Report Fig. 9 (PNG).
 6_figures/fig_gain.png,124359,,7109cba8f7d5460d91741e5143b4625354cb55879803b840c8186b29fa22bfa8,Report Fig. 6 (PNG).
-6_figures/fig_ladders.png,174320,,442b33afc7957edfc5a4b110f485ce79cfce0597338e742d2dd0190732cd6c9b,Report Fig. 3 (PNG).
+6_figures/fig_ladders.png,222607,,4ee855b7566985493a98ed237073488fee8261d9cb86a5d1301239c06379e735,Report Fig. 3 (PNG).
 6_figures/fig_power.png,125783,,1150d04d6063f17231f39e09d41f6106e3db7b78b3c42802ed8f4e882de553a9,Report Fig. 4 (PNG).
 6_figures/fig_runs.png,41966,,6c284187be3c54f9a3be9187cf1ac827f48c5c5ea3fea73d9e1444f1e396d05d,Report Fig. 5 (PNG).
 6_figures/fig_speed.png,196862,,d03863226f9a56b0a095316d7f54ad0d4704f5532ea854f622dbbcb76885b715,Report Fig. 8 (PNG).
@@ -66,10 +66,10 @@ path,bytes,data_rows,sha256,description
 7_code/analysis.py,12492,,3ecc7d25d021172136c30be3b57aa20d30217cb87564c11553f895fb2bca3f09,"Statistics: Tukey comparisons, nested ANOVA, permutation test, drift model, rotor speed."
 7_code/build_report.py,37298,,cadc64df6dca83e26bef4206ee62f9f204cced687bf254419860dbfad37d4384,"Regenerates every number, table and data figure in the report: python3 7_code/build_report.py"
 7_code/data.py,9904,,3dcc28a4edb2c78abb40c6cc0eef966bdfa9485d534273b38224aec258c172a5,"Loads the run and rotor-speed files and reduces each load ladder (peak power, Thevenin fit)."
-7_code/figures.py,11304,,d9d08f918c376de2881284ec65df3f7f961872afacdb429c432380a4a6b360ae,Report figures.
+7_code/figures.py,11660,,8ad43d449f861cad8f30eb69c94f1527211a4d45e4c2c72135f2722b63e85da5,Report figures.
 7_code/keyence.py,5767,,854c1625e35d453002d95fabe3fd845db8968a17ca7582a242786d96afe01eaa,"Surface parameters (Pa, Ra, layer period) from the profilometer height maps."
 7_code/slicer.py,5005,,708880fa38d6e1e4924bd578ad6ff5f9d4253379c6a4dea540c9ec613d99370e,Summarises the slicer project (not shipped) into the JSON shipped as 5_reference/turbine_default_summary.json.
 7_code/style.py,2359,,72a736c3ca167fe589eb233893fe54c5cfafdd570d6f438828b2ed58e71040f9,"Figure style (colours, markers)."
 DATA_DICTIONARY.md,16588,,ef97c3360be8a67ae081aac705976abbb208ec60bfe30902e5ec059a69b1ce93,"Every data file, header key and column."
 README.md,5255,,18a9f92e609ae59bfb5a6aeb849873d19dbdf19f075f0b82ebcc817f58652fa1,"Start here: what was tested, layout, caveats, how to reproduce."
-URI_VAWT_Texture_Report_2026-10-01.pdf,1441373,,67ed17237db88dccaa22218194ca9bdefc0b53f43765d87531ff0c70fb5fe954,The report this package accompanies.
+URI_VAWT_Texture_Report_2026-10-01.pdf,1441307,,fe816223a079a4bc7a30c8b88243db40881ea13f75eadc77e098f592448f325a,The report this package accompanies.

@@ -363,3 +363,19 @@ data dictionary, email)**
 - Fonts are 9–10 pt (were 7.5–8.5 pt), with larger markers and taller figures.
 - The surface maps are now a 2 × 2 grid.
 - The speed figure now has panels (a) and (b) above a full-width (c).
+
+**32. Figure 3 (load ladders)**
+- The figure is now a 2 × 2 grid: three ladders and a legend panel. Each ladder panel is about twice
+  as wide as before.
+
+**33. Cuts (requested by Stephen: remove text that does not matter)**
+These passages served none of the four research questions or duplicated another passage:
+- §7 "Operating regime and losses": the drag-driven tip-speed-ratio argument, the Savonius C_P
+  comparison and the loss-magnification argument. None changed a conclusion. The Akwa et al.
+  reference went with it.
+- §6.1: the C_P,el sensitivity to the measured-points-only calibration. It referred to text deleted
+  from §3.1 and is covered in Table 6.
+- §6.2: the run-scatter F test. It is in Table 9.
+- §6.5: "a rise of 61–81%". Only the deleted paragraph used it.
+- §5: the 500 rpm acceleration sentence. It is in Table 6 (ramp dynamics).
+- §3.1: the blockage assumption now points to Table 6 instead of being restated.

@@ -195,24 +195,31 @@ def fig_speed(A):
 
 # ------------------------------------------------------- raw load ladders --
 def fig_ladders(runs, stems, points=(700, 1200, 1800)):
-    fig, axes = plt.subplots(1, len(points), figsize=(W, 3.2), constrained_layout=True)
-    for ax, cmd in zip(axes, points):
+    fig, grid = plt.subplots(2, 2, figsize=(W, 5.4), constrained_layout=True)
+    axes = grid.ravel()
+    for i, (ax, cmd) in enumerate(zip(axes, points)):
         for spec in D.ORDER:
             for j, stem in enumerate(stems[spec]):
                 p = runs[stem]["points"]
                 lad = p[(p.fan_rpm == cmd) & (p.tracking == 1) & (p.amps > 0)]
                 k = int(np.argmax(lad.watts.values))
-                ax.plot(1000 * lad.amps, lad.watts, markersize=3.8, linewidth=1.1,
+                ax.plot(1000 * lad.amps, lad.watts, markersize=4.2, linewidth=1.2,
                         linestyle="-" if j == 0 else (0, (3, 2)),
                         **style.kw(spec, run=j + 1, label=lab(spec) if j == 0 else "_nolegend_"))
-                ax.plot(1000 * lad.amps.values[k], lad.watts.values[k], marker="*", markersize=10,
+                ax.plot(1000 * lad.amps.values[k], lad.watts.values[k], marker="*", markersize=11,
                         color=style.INK, linestyle="none", zorder=4, label="_nolegend_")
         ax.set_xlabel("Load current (mA)")
-        tag(ax, f"{float(D.wind(cmd)):.1f} m/s")
+        ax.set_ylabel("Electrical power (W)")
+        tag(ax, f"({'abc'[i]}) {float(D.wind(cmd)):.1f} m/s")
         ax.set_ylim(0, None)
-    axes[0].set_ylabel("Electrical power (W)")
-    axes[0].plot([], [], marker="*", color=style.INK, linestyle="none", label="$P_{\\max}$")
-    axes[0].legend(loc="lower center", fontsize=8)
+    # the fourth panel carries the legend
+    leg = axes[3]
+    leg.axis("off")
+    h, l = axes[0].get_legend_handles_labels()
+    h += [plt.Line2D([], [], color=style.INK_2, marker="o", markerfacecolor="white", linestyle=(0, (3, 2))),
+          plt.Line2D([], [], marker="*", color=style.INK, linestyle="none", markersize=11)]
+    l += ["run 2 (dashed, hollow)", "$P_{\\max}$ of each ladder"]
+    leg.legend(h, l, loc="center", fontsize=10, handlelength=3)
     save(fig, "fig_ladders")
 
 
