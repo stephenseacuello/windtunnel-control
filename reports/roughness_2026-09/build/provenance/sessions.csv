@@ -14,4 +14,4 @@ date,time_EDT,what,who,rotor,evidence,data_located
 2026-08-29 (Sat),10:56-11:32,seven fan step_up runs,Stephen,not recorded,logs/20260829_*_step_up.csv,yes
 2026-08-31,10:18,drive dashboard + fullscan snapshots (bench),Stephen,n/a,data/snapshots/20260831_101809_*,yes
 2026-09-01,15:04:25-15:12:50 (calendar 14:00-15:00),sweep v1_Ra40 (with node ambient + trace),Stephen; Taegu invited (calendar response still needsAction - attendance not confirmed),v1_Ra40,logs/sweep_v1_Ra40_*; Calendar _8l2k8gpm8d33cba470oj6b9k6h1j6b9p710jgba16co3ghhj84rk6ga560,yes
-2026-10-01,15:00-16:00 (SCHEDULED),"'Wind Tunnel Testing' - future, not yet run",Stephen + Taegu (accepted 2026-09-30 via kjt23081@gmail.com),not stated,Calendar _652k4h9k6l1j8b9k60ojab9k651k4b9o8913eb9g8h0j4cho6ss38dq568; Gmail 1a0f42d7b20f01d9,n/a (future)
+2026-10-01,15:00-16:00 (SCHEDULED),"'Wind Tunnel Testing' - future, not yet run",Stephen + Taegu (accepted 2026-09-30 via his personal Gmail),not stated,Calendar _652k4h9k6l1j8b9k60ojab9k651k4b9o8913eb9g8h0j4cho6ss38dq568; Gmail 1a0f42d7b20f01d9,n/a (future)

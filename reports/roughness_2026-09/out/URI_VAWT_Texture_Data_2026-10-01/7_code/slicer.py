@@ -3,7 +3,7 @@
     python3 src/slicer.py inputs/slicer/turbine_default.3mf
 
 Writes inputs/slicer/<stem>_summary.json next to the project. The .3mf itself
-(60 MB) stays out of the data package; the summary ships in 4_reference/.
+(60 MB) stays out of the data package; the summary ships in 5_reference/.
 
 What it records, per plate: plate name, the object on it, that object's
 fuzzy-skin thickness, its bounding box (to tell a blade from a rotor), its

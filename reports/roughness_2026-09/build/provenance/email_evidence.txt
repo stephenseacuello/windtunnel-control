@@ -143,4 +143,4 @@ Times are as the Gmail API reports them (UTC, 'Z'); EDT = UTC-4.
      discussing (fuzzy texture slicing settings) will have to be without supports."
   1a03f982745b324e 2026-08-26T19:42Z Stephen -> Taegu "Wind Tunnel Logs": sweep_v1_Ra20_{summary,points}.csv,
      sweep_v1_Ra80_{summary,points}.csv (the only email in which 'PETG' appears, inside the CSV headers)
-  1a0f42d7b20f01d9 2026-09-30T21:16Z Taegu (kjt23081@gmail.com) accepted "Wind Tunnel Testing" Thu 2026-10-01 3-4 PM.
+  1a0f42d7b20f01d9 2026-09-30T21:16Z Taegu (his personal Gmail) accepted "Wind Tunnel Testing" Thu 2026-10-01 3-4 PM.

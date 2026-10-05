@@ -6,6 +6,9 @@ analysis.py does the statistics and build_report.py writes the report inputs.
 Run files: sweep_v1_<label>[_repeat]_20261001_{summary,points,trace}.csv, each a
 block of '#' header lines followed by a CSV table. <label> names the blade set
 (SPECIMENS); '_repeat' marks the second run of the same mounting.
+
+Rotor speed: T. Kang's per-run summaries (RPM_DIR), one row per fan set point,
+made by his RPM.m from a tachometer record the rig did not have.
 """
 import json
 import re
@@ -19,17 +22,19 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 REPO = ROOT.parent.parent
 
-# Inputs: the repository layout, or the unzipped data package (6_code/ next to 1_rig_sweeps/).
+# Inputs: the repository layout, or the unzipped data package (7_code/ next to 1_rig_sweeps/).
 PACKAGED = (ROOT / "1_rig_sweeps").is_dir()
 if PACKAGED:
     LOGS = ROOT / "1_rig_sweeps"
-    SCANS = ROOT / "2_surface_scans"
-    CAL_CSV = ROOT / "4_reference" / "tunnel_calibration_test1.csv"
-    SLICER_JSON = ROOT / "4_reference" / "turbine_default_summary.json"
-    GEOMETRY = ROOT / "4_reference" / "rotor_geometry.json"
+    RPM_DIR = ROOT / "2_rotor_speed"
+    SCANS = ROOT / "3_surface_scans"
+    CAL_CSV = ROOT / "5_reference" / "tunnel_calibration_test1.csv"
+    SLICER_JSON = ROOT / "5_reference" / "turbine_default_summary.json"
+    GEOMETRY = ROOT / "5_reference" / "rotor_geometry.json"
     BUILD = ROOT / "rebuilt"
 else:
     LOGS = REPO / "logs"
+    RPM_DIR = ROOT / "inputs" / "taegu_rpm_20261001" / "processed"
     SCANS = REPO / "keyence readings 20261001"
     CAL_CSV = REPO / "data" / "test1_rpm_velocity.csv"
     SLICER_JSON = ROOT / "inputs" / "slicer" / "turbine_default_summary.json"
@@ -164,7 +169,7 @@ def peaks(run):
             p_fit_w=p_fit, i_at_p_fit_a=i_fit, fit_points=nfit,
             v_first_v=float(every.volts.values[0]), i_first_a=float(every.amps.values[0]),
             dwells=int(len(every)), stop=str(srow.limited_by), clean=int(srow.clean),
-            # after the peak, how far power had fallen at the last dwell before any cut-out
+            # after the peak, how far power had fallen at the last dwell above the voltage floor
             last_frac=float(_last_before_cutout(every) / w.max()),
             logged_p_max_w=float(srow.p_max_raw_w), logged_p_fit_w=float(srow.p_max_fit_w),
             fan_motor_a=float(every.motor_amps.median()),
@@ -182,8 +187,8 @@ def _last_before_cutout(every):
 
 def thevenin(run):
     """Per set point, V = V_oc - I*R_int by least squares over the tracking dwells
-    with V, I > 0, excluding dwells flagged 'under v_floor' (the load's cut-out
-    region after the peak, where the rotor is stalling)."""
+    with V, I > 0, excluding dwells flagged 'under v_floor' (at or below the host's
+    voltage floor, after the peak)."""
     p = run["points"]
     out = []
     for cmd, g in p[p.tracking == 1].groupby("fan_rpm"):
@@ -208,6 +213,27 @@ def first_dwell_rise(run, cmd):
 def times(run):
     t = run["points"].t_local.astype(str)
     return t.min()[11:16], t.max()[11:16]
+
+
+# ------------------------------------------------------------ rotor speed --
+
+def tacho_fs():
+    """Sampling rate (Hz) of T. Kang's tachometer record, as set in his RPM.m."""
+    m = re.search(r"^\s*Fs\s*=\s*([0-9.]+)\s*;", (RPM_DIR / "RPM.m").read_text(encoding="utf-8"), re.M)
+    return float(m.group(1))
+
+
+def rotor_speed(stem):
+    """T. Kang's summary for one run, one row per fan set point: rotor_rpm is the
+    most frequent per-revolution speed at that set point (rounded to 1 rpm), and
+    pulses the tachometer pulses counted. One file is named without '_RPM'."""
+    hits = [RPM_DIR / f"sweep_{stem}{s}_summary.csv" for s in ("_RPM", "")]
+    hits = [h for h in hits if h.is_file()]
+    if len(hits) != 1:
+        raise FileNotFoundError(f"rotor speed for {stem}: {len(hits)} files under {RPM_DIR}")
+    t = pd.read_csv(hits[0])
+    return t.rename(columns={"Setting_RPM": "fan_rpm_cmd", "Measured_RPM": "rotor_rpm",
+                             "Pulse_Count": "pulses"})
 
 
 def calibration():

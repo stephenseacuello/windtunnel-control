@@ -19,6 +19,7 @@
   \node[box, left=of gen] (rect) {\textbf{Rectifier}\\3-phase bridge};
   \node[box, left=of rect] (load) {\textbf{Chroma 63004}\\DC electronic load (constant current)};
   \node[box, left=of load, text width=30mm] (note) {\textbf{Recorded per 1 s dwell}\\terminal $V$, $I$, $P=VI$;\\commanded fan speed};
+  \node[box, below=5mm of gen, text width=24mm, densely dashed] (tach) {\textbf{Tachometer}\\1 pulse/rev, T.~Kang's acquisition, \tachoFs{} Hz};
   % arrows
   \draw[ctl] (host) -- node[above, lab] {USB} (pmc);
   \draw[ctl] (pmc) -- node[above, lab] {RS-485} (vfd);
@@ -29,4 +30,5 @@
   \draw[pwr] (rect) -- node[above, lab] {DC} (load);
   \draw[ctl] (load.north) |- ++(0,4mm) -| node[pos=0.25, above, lab] {USB (SCPI): set current, read $V$, $I$} (host.south);
   \draw[densely dotted, ink2] (load) -- (note);
+  \draw[ctl, densely dashed] (gen) -- node[right, lab] {rotor speed} (tach);
 \end{tikzpicture}

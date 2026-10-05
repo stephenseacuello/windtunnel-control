@@ -16,6 +16,11 @@ Pairwise comparisons use Tukey's HSD on the run means (all six pairs, family-wis
 print-to-print variation are NOT in these intervals; tipping_point() reports how
 much mounting variation each difference could absorb, and drift_model() refits
 the run means with a linear time term.
+
+speed() treats T. Kang's light-load rotor speed (one value per set point) the
+same way, and checks it against the rig's own record: if it is the light-load
+speed and the set points are matched, the terminal voltage at the first load
+step divided by it is the generator constant, the same everywhere.
 """
 import itertools
 import math
@@ -209,4 +214,53 @@ def analyse(P, T, stems, sp, t_start_h):
                     for r in D.ORDER]).reshape(-1, len(sp))
     A["fan_range_a"] = float((fan.max(axis=0) - fan.min(axis=0)).max())
     A["fan_top_a"] = float(np.median(fan[:, -1]))
+    return A
+
+
+def speed(S, P, stems, sp, T):
+    """S: T. Kang's per-run rotor speed frames keyed by stem; P: the peak frames
+    (for the first-step voltage V1). The protocol releases the load (0 A) while the
+    fan settles, except at the first set point, which settles with the load armed:
+    n0 there is not a light-load speed, so the analysis uses sp[1:]. Light-load
+    speed n0 is compared between rotors as P_max is; lam is the light-load
+    tip-speed ratio; ke = V1/n0 (V per rpm)."""
+    A = {}
+    N_all = np.exp(cube(S, stems, "rotor_rpm", sp))           # every set point, for tables
+    V1_all = np.exp(cube(P, stems, "v_first_v", sp))
+    A["n_all"], A["v1_all"] = N_all, V1_all
+    use = sp[1:]
+    A["sp"], v = use, D.wind(use)
+    Y = np.log(N_all[:, :, 1:])
+    ref = Y[0].mean(axis=0)
+    A["Y"], A["yrj"] = Y, (Y - ref).mean(axis=2)
+    A["tk"] = tukey(A["yrj"])
+    A["oneway"] = oneway(A["yrj"])
+    A["perm"] = permutation(A["yrj"])
+    A["anova"] = nested_anova(Y)
+    A["gain_run"] = np.expm1(Y - ref)                        # [r, j, s]
+    A["gain"] = np.expm1(Y.mean(axis=1) - ref)               # [r, s]
+    A["n"], A["curve"] = np.exp(Y), np.exp(Y.mean(axis=1))   # rpm; geometric mean of runs
+    omega_r = lambda n: 2 * math.pi * n / 60 * D.R_M        # blade speed at R (m/s)
+    A["lam"], A["lam_curve"] = omega_r(A["n"]) / v, omega_r(A["curve"]) / v
+    A["lam_all"] = omega_r(N_all) / D.wind(sp)
+    V1 = V1_all[:, :, 1:]
+    A["v1"], A["ke"] = V1, V1 / A["n"]
+    lk = np.log(A["ke"])
+    A["tk_ke"] = tukey((lk - lk[0].mean(axis=0)).mean(axis=2))     # does V1/n0 differ between rotors?
+    # V_oc on the same set points: its change, V_oc/n0 between rotors, and V_oc against V1
+    Voc = np.exp(cube(T, stems, "v_oc_v", use))
+    A["tk_voc"] = tukey((np.log(Voc) - np.log(Voc[0]).mean(axis=0)).mean(axis=2))
+    lv = np.log(Voc / A["n"])
+    A["tk_vocn"] = tukey((lv - lv[0].mean(axis=0)).mean(axis=2))
+    A["voc_below_v1"] = 1 - Voc / V1                                  # [r, j, s]
+    # V1 is continuous, so it is the check on calls that the quantised n0 makes
+    A["tk_v1"] = tukey((np.log(V1) - np.log(V1[0]).mean(axis=0)).mean(axis=2))
+    # repeat runs that give the same quantised n0 share its quantisation error
+    A["n_same"] = int((np.abs(Y[:, 0] - Y[:, 1]) < 1e-12).sum())
+    A["n_pairs"] = int(Y.shape[0] * Y.shape[2])
+    x, y = A["n"].ravel(), V1.ravel()
+    slope, icept = np.polyfit(x, y, 1)
+    A["fit"] = dict(slope=slope, icept=icept)
+    # first set point: n0 against the speed V1 implies on that line
+    A["first_gap"] = (V1_all[:, :, 0] - icept) / slope / N_all[:, :, 0] - 1     # [r, j]
     return A

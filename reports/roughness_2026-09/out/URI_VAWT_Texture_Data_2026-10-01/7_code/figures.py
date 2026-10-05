@@ -151,6 +151,44 @@ def fig_thevenin(A, sp):
     save(fig, "fig_thevenin")
 
 
+# ------------------------------------------------------------- rotor speed --
+def fig_speed(A):
+    sa = A["spd"]
+    v = D.wind(sa["sp"])
+    fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(W, 2.45), constrained_layout=True)
+    a2.axhline(0, color=style.INK_3, linewidth=0.8)
+    for r, spec in enumerate(D.ORDER):
+        color = style.SERIES[spec]["color"]
+        for j in range(sa["n"].shape[1]):
+            a1.plot(v, sa["lam"][r, j], linestyle="none", markersize=3.4,
+                    **style.kw(spec, run=j + 1, label=lab(spec) if j == 0 else "_nolegend_"))
+            a3.plot(sa["n"][r, j], 1000 * sa["ke"][r, j], linestyle="none", markersize=3.0,
+                    **style.kw(spec, run=j + 1, label="_nolegend_"))
+            if r:
+                a2.plot(v, 100 * sa["gain_run"][r, j], linestyle="none", markersize=3.4,
+                        **style.kw(spec, run=j + 1, label="_nolegend_"))
+        a1.plot(v, sa["lam_curve"][r], color=color, linewidth=0.9, zorder=1)
+        if r:
+            a2.plot(v, 100 * sa["gain"][r], color=color, linewidth=1.2)
+    x = np.linspace(0.95 * sa["n"].min(), 1.03 * sa["n"].max(), 100)
+    f = sa["fit"]
+    a3.plot(x, 1000 * (f["icept"] + f["slope"] * x) / x, color=style.INK_2, linewidth=0.9, zorder=0,
+            label=f"$V_1$ = {1000 * f['slope']:.1f} mV/rpm $\\times\\, n_0$ $-$ {-f['icept']:.2f} V")
+    a1.set_xlabel("Wind speed (m/s)"); a1.set_ylabel("Tip-speed ratio $\\lambda_0$ (on $R$)")
+    a1.set_ylim(0, None)
+    run_legend(a1, loc="lower right")
+    tag(a1, "(a) Light-load tip-speed ratio")
+    a2.set_xlabel("Wind speed (m/s)"); a2.set_ylabel("$n_0$ relative to Plain (%)")
+    tag(a2, "(b) Speed relative to Plain")
+    a3.set_xlabel("Light-load speed $n_0$ (rpm)"); a3.set_ylabel("$V_1/n_0$ (mV/rpm)")
+    a3.set_xlim(0, None)
+    lo_ = 1000 * sa["ke"].min()
+    a3.set_ylim(lo_ - 0.55, None)                           # room for the legend below the points
+    a3.legend(loc="lower right", fontsize=6.0)
+    tag(a3, "(c) Voltage per rpm")
+    save(fig, "fig_speed")
+
+
 # ------------------------------------------------------- raw load ladders --
 def fig_ladders(runs, stems, points=(700, 1200, 1800)):
     fig, axes = plt.subplots(1, len(points), figsize=(W, 2.3), constrained_layout=True)
@@ -176,7 +214,7 @@ def fig_ladders(runs, stems, points=(700, 1200, 1800)):
 
 # ----------------------------------------------------- wind calibration --
 def fig_calibration(cal, fits, sp):
-    fig, ax = plt.subplots(figsize=(W * 0.62, 2.5), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(W * 0.5, 1.95), constrained_layout=True)
     ax.axvspan(min(sp), max(sp), color=style.GRID, alpha=0.7, linewidth=0, label="1 Oct test range")
     m = cal[cal.source == "measured"]
     t = cal[cal.source != "measured"]
@@ -200,5 +238,6 @@ def make_all(A, runs, stems, sp, cal, fits):
     fig_runs(A)
     fig_gain(A, sp)
     fig_thevenin(A, sp)
+    fig_speed(A)
     fig_ladders(runs, stems)
     fig_calibration(cal, fits, sp)

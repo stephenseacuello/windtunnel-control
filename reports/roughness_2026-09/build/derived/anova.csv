@@ -24,3 +24,8 @@ analysis,source,df,ss,ms,F,df_den,p
 "ln V_oc, all rotors",rotor x set point,39,0.028818,0.000738924,19.7432,52,3.36165e-20
 "ln V_oc, all rotors",run within rotor,4,0.00033291,8.32276e-05,2.22375,52,0.0790698
 "ln V_oc, all rotors",residual,52,0.00194619,3.74267e-05,,,
+"ln n_0 (light-load rotor speed), all rotors, 600-1800 rpm",rotor,3,0.130171,0.0433904,295.897,4,3.76739e-05
+"ln n_0 (light-load rotor speed), all rotors, 600-1800 rpm",set point,12,27.2977,2.27481,17369,48,5.84276e-83
+"ln n_0 (light-load rotor speed), all rotors, 600-1800 rpm",rotor x set point,36,0.0316555,0.000879319,6.71392,48,1.47321e-09
+"ln n_0 (light-load rotor speed), all rotors, 600-1800 rpm",run within rotor,4,0.00058656,0.00014664,1.11965,48,0.35831
+"ln n_0 (light-load rotor speed), all rotors, 600-1800 rpm",residual,48,0.00628654,0.00013097,,,

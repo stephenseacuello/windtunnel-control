@@ -23,42 +23,53 @@ path,bytes,data_rows,sha256,description
 1_rig_sweeps/sweep_v1_smooth_repeat_20261001_points.csv,41216,329,1bd30eb489128c34cb3164d0266846d971ad1ade3e928d221305d0dbb40a52a6,"Plain, run 2: every load-ladder dwell. Verbatim."
 1_rig_sweeps/sweep_v1_smooth_repeat_20261001_summary.csv,3488,14,388c0ad8af9d42c36f707375c5b7dad9a361ffb1b7c4691a532e46304335b22a,"Plain, run 2: peak power per set point, as logged by the rig. Verbatim."
 1_rig_sweeps/sweep_v1_smooth_repeat_20261001_trace.csv,437886,8774,22641a2e132dc80830832e7e7a897942fba0bcc50da881f3243fc09292331f77,"Plain, run 2: fan telemetry through the run. Verbatim."
-2_surface_scans/20 1_Height.csv,6847506,769,146128e4ff54bf1a43a46677a0aa9dc4cc938ff52c1c47533881701e6b35c4d1,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
-2_surface_scans/20.png,1115520,,7694194ea7eca2cf3a33667909cc491cc961c043396c43fac1ccf5e41b524cbe,Keyence VR-6000 screenshot of the same field. Verbatim.
-2_surface_scans/40 1_Height.csv,6855347,771,1d65d1256f31dd737ebb70e265fe4d642af55b8a0a4b1248d7c227c8c9688d68,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
-2_surface_scans/40.png,1115072,,86b2c60d15ceaef5abcdda5522ea21c292260468416d2e8a935c57d617fb554a,Keyence VR-6000 screenshot of the same field. Verbatim.
-2_surface_scans/80 1.png,1039287,,df9086ff2cc1f078839857e9300d8ac331acd13c48f03710c81ca415b0ddecdb,Keyence VR-6000 screenshot of the same field. Verbatim.
-2_surface_scans/80 2.png,1054852,,b3e2e5463fff2a56c42ec69f0dd5148824e69ddfa84f68ba17d215abdc86df17,Keyence VR-6000 screenshot of the same field. Verbatim.
-2_surface_scans/80 2_Height.csv,7025977,771,f01315d7424128c1b689df0e79c484e6cec3f917aa521c40e17596a4df379d15,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
-2_surface_scans/801_Height.csv,7006525,773,e42c00d83ffb1028b2790653a554b53fa44f4e0e853d2246d43169118984e815,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
-2_surface_scans/baseline.png,1051137,,8eaa8db9f9b4885939749d24f7a899ec4985b1e70b61fa5047961299660ceef0,Keyence VR-6000 screenshot of the same field. Verbatim.
-2_surface_scans/baseline_Height.csv,6795992,771,acd87e3003102eb6a27be6b79d75025d21153019e56b4551f0fcd687f4fac040,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
-3_derived/anova.csv,2038,25,bba12dc067844e40921cb530c6d498f639e0627bf659913b792bdf8102fcce8a,"Analyses of variance of ln P_max (with two sensitivity analyses), ln R_int and ln V_oc (report Appendix B)."
-3_derived/comparisons.csv,665,6,1f441299910a2e7d83aee5ed2fb62fd55e0bd2a1ba65d54f2325564bab489a46,"All six pairwise rotor comparisons of peak power: Tukey 95% intervals, parabolic-fit sensitivity, mounting tipping points (report Table 4, Section 5)."
-3_derived/drift_model.csv,257,4,a8faf75d3058a32ecd3c2657681f3cc417c07179ba4ebf15ba10ba9cfb0c6730,Run means refitted with a linear time term: drift per hour and drift-adjusted changes vs Plain (report Section 7).
-3_derived/peak_power_by_run.csv,14192,112,1e7eb9721d01c6de8315c04726252253a97c119036a1c287072ad951c6c88eb3,"Peak electrical power per run and set point, both estimators (report Appendix A)."
-3_derived/rotor_by_wind_speed.csv,5431,56,84b6ad314d2d2531fe6f101d066c7331c89b774c116f140ec455ddf32c58e55b,"Per rotor and set point: geometric-mean peak power, C_P,el, Thevenin parameters, changes vs Plain (report Figs 4, 6 and 7)."
-3_derived/run_summary.csv,827,8,de606e67d98d5bb4467199d7834609bf0e47fac9354aab8554a8a1580e413894,"One row per run: change vs Plain in peak power, V_oc and R_int; steepest-rise wind speed (report Table 3)."
-3_derived/surface_roughness.csv,292,4,573cb1445ccbab68e48f683ff5d752e00c7d11aacf6901b8b44719188b63eff5,"Pa, Ra and layer period per blade set (report Section 2.3)."
-3_derived/thevenin_by_run.csv,9497,112,0389e7f92b38b94e731076af4374dc589d9452eb517f4fa407a108bd4b040c49,V = V_oc - I*R_int fitted per run and set point (report Section 6.4).
-4_reference/blade_v1.stl,1352884,,f51518aa05717b5979a617485ba7289a245835bed3abfeadcb964e0fc8abcae6,"Blade mesh: one blade, metres, own coordinates."
-4_reference/rotor_geometry.json,644,,70f11ab486a08bc400e26d97e2006b35866e9426990a7c725f5f73f257c00575,Rotor and blade geometry; the code reads these values.
-4_reference/tunnel_calibration_test1.csv,267,11,6fbddfc65cd7f3c0b4e1044405e6dbdab9761fe7e7de5b2c57f9e67d07deb61c,Tunnel calibration Test 1 (13 Feb 2026): air speed vs fan rpm; 'measured' or 'possible trendline read'. Verbatim.
-4_reference/turbine_default_summary.json,1180,,71162af7874dbd2879e9130f137fb7ccb0c9af967075f89b8cb65098d0d34990,"Summary of the slicer project turbine_default.3mf, written by 6_code/slicer.py."
-5_figures/fig_calibration.png,59558,,7e26d30e5edea3c8200d329f223e55c4e0b313c025dbe7321dfdb031c17c0653,Report figure (PNG).
-5_figures/fig_gain.png,99646,,f79d427ffff1d73bc20420f758ce5b9a5caecd191af8c2418283563bd638330c,Report figure (PNG).
-5_figures/fig_ladders.png,139402,,4620a62e8d83e7c255d6879564180e601799057bcc727598ccf3444558357005,Report figure (PNG).
-5_figures/fig_power.png,110507,,dfe1406c7e9d73848ffc680ea242fcf3b44cc950536388c6b110249c991d6a4d,Report figure (PNG).
-5_figures/fig_runs.png,34462,,55b5717851dcd95b5c3055bea7025fa34dd6ef0cb3c208e240c13055887ad8f0,Report figure (PNG).
-5_figures/fig_surface.png,290315,,03446d6ced17c8a68452af7a09f6dc02ba709ff98a50e17f7b4247be6e26d1d0,Report figure (PNG).
-5_figures/fig_thevenin.png,108273,,363914846e66b0278405608cedb2441c6ad5f04ef931ad24c528585794855353,Report figure (PNG).
-6_code/analysis.py,9534,,5bf8e895bcfe759064a6f2a2bd1d5ab0aeaf9dc0d4d542a45cf935d09161557e,"Statistics: Tukey comparisons, nested ANOVA, exponents, power coefficient."
-6_code/build_report.py,26703,,4b058267c0f6e59980ed8cf6f3ca0a93a8843125bdf596f2337b8b3dcba230fd,"Regenerates every number, table and data figure in the report: python3 6_code/build_report.py"
-6_code/data.py,8679,,19e7088ec5b14b497ba3a51847f2e69477415173f5b9ee6c288323245f874a54,"Loads the run files and reduces each load ladder (peak power, Thevenin fit)."
-6_code/figures.py,9165,,48214abb982c2b57fcbdf851e8a8945a58775b9e321b752c6228f0a8babefd4b,Report figures.
-6_code/keyence.py,5767,,854c1625e35d453002d95fabe3fd845db8968a17ca7582a242786d96afe01eaa,"Surface parameters (Pa, Ra, layer period) from the profilometer height maps."
-6_code/slicer.py,5005,,ca6eb88c96d4ab759039c02bbc8ad9b399e914121532c32be05f6fc16cdff1b1,Writes 4_reference/turbine_default_summary.json from the slicer project (not shipped).
-6_code/style.py,2364,,8e9d44d76d56a93176321b10e9338af87ea055081eeab20f2eb9894a46020701,"Figure style (colours, markers)."
-DATA_DICTIONARY.md,11873,,2dcec82e0e81349942ef2b20bec7696809fe1c5e1108296490d677949531bdb1,"Every file, header key and column."
-README.md,3994,,955836652cc748bc50cc38c673225c0de145b3f9bee39d0d0a2f2bffb883079b,"Start here: what was tested, layout, caveats, how to reproduce."
-URI_VAWT_Texture_Report_2026-10-01.pdf,856610,,1780a5dc84d4801feee8812e5f4bbf8e4c5eb96c6c0227bea57f6c6585c23666,The report this package accompanies.
+2_rotor_speed/RPM.m,10392,,1c6cb1c344d826474bb3c22491cb3a545765e1410b5779330c3fdf98944bb6c5,T. Kang's MATLAB script that made the summaries from his tachometer record (record not included). Verbatim.
+2_rotor_speed/sweep_v1_Ra20_20261001_RPM_summary.csv,223,14,ebc160ff3e81aa135a6ab9395232f7297c72a3b73505516eab55f2f29ebb1ef6,"FS 0.05, run 1: T. Kang's rotor speed per set point, taken as light-load from 600 rpm (RPM.m output). Verbatim."
+2_rotor_speed/sweep_v1_Ra20_repeat_20261001_RPM_summary.csv,223,14,81ad0742bb5e5f90b95e62fe6a640bd48eeba3f7312f445750996db89f117a51,"FS 0.05, run 2: T. Kang's rotor speed per set point, taken as light-load from 600 rpm (RPM.m output). Verbatim."
+2_rotor_speed/sweep_v1_Ra40_20261001_RPM_summary.csv,224,14,af95aa0e737fbb56628c508dc34e3ea2c155cfdfae2187c56173d93d3161ec93,"FS 0.10, run 1: T. Kang's rotor speed per set point, taken as light-load from 600 rpm (RPM.m output). Verbatim."
+2_rotor_speed/sweep_v1_Ra40_repeat_20261001_RPM_summary.csv,225,14,63f2f4f22f560ba44ba58ea78307fdbd7ea3000b0414736a2b4333388240b377,"FS 0.10, run 2: T. Kang's rotor speed per set point, taken as light-load from 600 rpm (RPM.m output). Verbatim."
+2_rotor_speed/sweep_v1_Ra80_20261001_RPM_summary.csv,225,14,d546278a9574a6e99aaa49f6822f1920c38da11939db574d931b6f45d0bcf06f,"FS 0.20, run 1: T. Kang's rotor speed per set point, taken as light-load from 600 rpm (RPM.m output). Verbatim."
+2_rotor_speed/sweep_v1_Ra80_repeat_20261001_RPM_summary.csv,223,14,7f1f90f165da70943aae47eb4f33aec8a9a86ad4e1b05e3038f6ac4e6537eee9,"FS 0.20, run 2: T. Kang's rotor speed per set point, taken as light-load from 600 rpm (RPM.m output). Verbatim."
+2_rotor_speed/sweep_v1_smooth_20261001_RPM_summary.csv,224,14,1b1cfb62668d913348a40a173ed3d097748453fa40db93b79949cfec74777abf,"Plain, run 1: T. Kang's rotor speed per set point, taken as light-load from 600 rpm (RPM.m output). Verbatim."
+2_rotor_speed/sweep_v1_smooth_repeat_20261001_summary.csv,224,14,10279a4641b3d35061212a4f46da3c11a971915322d3880bffed7e43832b75d9,"Plain, run 2: T. Kang's rotor speed per set point, taken as light-load from 600 rpm (RPM.m output). Verbatim."
+3_surface_scans/20 1_Height.csv,6847506,769,146128e4ff54bf1a43a46677a0aa9dc4cc938ff52c1c47533881701e6b35c4d1,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
+3_surface_scans/20.png,1115520,,7694194ea7eca2cf3a33667909cc491cc961c043396c43fac1ccf5e41b524cbe,Keyence VR-6000 screenshot of the same field. Verbatim.
+3_surface_scans/40 1_Height.csv,6855347,771,1d65d1256f31dd737ebb70e265fe4d642af55b8a0a4b1248d7c227c8c9688d68,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
+3_surface_scans/40.png,1115072,,86b2c60d15ceaef5abcdda5522ea21c292260468416d2e8a935c57d617fb554a,Keyence VR-6000 screenshot of the same field. Verbatim.
+3_surface_scans/80 1.png,1039287,,df9086ff2cc1f078839857e9300d8ac331acd13c48f03710c81ca415b0ddecdb,Keyence VR-6000 screenshot of the same field. Verbatim.
+3_surface_scans/80 2.png,1054852,,b3e2e5463fff2a56c42ec69f0dd5148824e69ddfa84f68ba17d215abdc86df17,Keyence VR-6000 screenshot of the same field. Verbatim.
+3_surface_scans/80 2_Height.csv,7025977,771,f01315d7424128c1b689df0e79c484e6cec3f917aa521c40e17596a4df379d15,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
+3_surface_scans/801_Height.csv,7006525,773,e42c00d83ffb1028b2790653a554b53fa44f4e0e853d2246d43169118984e815,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
+3_surface_scans/baseline.png,1051137,,8eaa8db9f9b4885939749d24f7a899ec4985b1e70b61fa5047961299660ceef0,Keyence VR-6000 screenshot of the same field. Verbatim.
+3_surface_scans/baseline_Height.csv,6795992,771,acd87e3003102eb6a27be6b79d75025d21153019e56b4551f0fcd687f4fac040,"Keyence VR-6000 height map (mm), 1.853 um/px. Verbatim."
+4_derived/anova.csv,2600,30,c26b3694e5a53af0bb5151a4ae1d637c3a27c37e278040088e0264702240f14d,"Analyses of variance of ln P_max (with two sensitivity analyses), ln R_int, ln V_oc and ln n_0 (report Appendix B)."
+4_derived/comparisons.csv,1322,6,b1b123ee8a9795681b7a17fd6dcf57e21adb7b8f9a529c85630188b30d1cc1ba,"All six pairwise rotor comparisons of peak power (Tukey 95% intervals, parabolic-fit sensitivity, mounting tipping points), V_oc, R_int and light-load rotor speed (report Tables 3 and 4, Section 6.2)."
+4_derived/drift_model.csv,257,4,a8faf75d3058a32ecd3c2657681f3cc417c07179ba4ebf15ba10ba9cfb0c6730,Run means refitted with a linear time term: drift per hour and drift-adjusted changes vs Plain (report Section 8).
+4_derived/peak_power_by_run.csv,14192,112,1e7eb9721d01c6de8315c04726252253a97c119036a1c287072ad951c6c88eb3,"Peak electrical power per run and set point, both estimators (report Appendix A)."
+4_derived/rotor_by_wind_speed.csv,6588,56,62fc0b022f53367e8d8b5ddb831b93515a2d84a35793fd94a191b80fdb96f1ec,"Per rotor and set point: geometric-mean peak power, C_P,el, Thevenin parameters, rotor speed, tip-speed ratio, changes vs Plain (report Figs 4, 6, 7 and 8)."
+4_derived/rotor_speed_by_run.csv,10037,112,95bb4f5cc4fed659d3ccbe1fc92e8d9a619e162803dd8c060477b0d535bc050a,"T. Kang's rotor speed per run and set point (taken as light-load from 600 rpm), with tip-speed ratio and the first-step voltage check (report Sections 3.3 and 6.5, Appendix A)."
+4_derived/run_summary.csv,915,8,4af427277c10a77d86cd52879d0e6575e301ba57bc06400cfab88b75074ba97b,"One row per run: change vs Plain in peak power, V_oc, R_int and rotor speed; steepest-rise wind speed (report Table 2)."
+4_derived/surface_roughness.csv,292,4,573cb1445ccbab68e48f683ff5d752e00c7d11aacf6901b8b44719188b63eff5,"Pa, Ra and layer period per blade set (report Sections 2.3 and 6.6, Table 5)."
+4_derived/thevenin_by_run.csv,9497,112,0389e7f92b38b94e731076af4374dc589d9452eb517f4fa407a108bd4b040c49,V = V_oc - I*R_int fitted per run and set point (report Section 6.4).
+5_reference/blade_v1.stl,1352884,,f51518aa05717b5979a617485ba7289a245835bed3abfeadcb964e0fc8abcae6,"Blade mesh: one blade, metres, own coordinates."
+5_reference/rotor_geometry.json,644,,70f11ab486a08bc400e26d97e2006b35866e9426990a7c725f5f73f257c00575,Rotor and blade geometry; the code reads these values.
+5_reference/tunnel_calibration_test1.csv,267,11,6fbddfc65cd7f3c0b4e1044405e6dbdab9761fe7e7de5b2c57f9e67d07deb61c,Tunnel calibration Test 1 (13 Feb 2026): air speed vs fan rpm; 'measured' or 'possible trendline read'. Verbatim.
+5_reference/turbine_default_summary.json,1180,,71162af7874dbd2879e9130f137fb7ccb0c9af967075f89b8cb65098d0d34990,"Summary of the slicer project turbine_default.3mf, written by 7_code/slicer.py."
+6_figures/fig_calibration.png,52567,,cbe77358dfa6add9771c8d42b87be2e304c4a03511212103d5032f8cfdc043cb,Report Fig. 9 (PNG).
+6_figures/fig_gain.png,99646,,f79d427ffff1d73bc20420f758ce5b9a5caecd191af8c2418283563bd638330c,Report Fig. 6 (PNG).
+6_figures/fig_ladders.png,139402,,4620a62e8d83e7c255d6879564180e601799057bcc727598ccf3444558357005,Report Fig. 3 (PNG).
+6_figures/fig_power.png,110507,,dfe1406c7e9d73848ffc680ea242fcf3b44cc950536388c6b110249c991d6a4d,Report Fig. 4 (PNG).
+6_figures/fig_runs.png,34462,,55b5717851dcd95b5c3055bea7025fa34dd6ef0cb3c208e240c13055887ad8f0,Report Fig. 5 (PNG).
+6_figures/fig_speed.png,150834,,182592b089c642be6dd398384a607987aef0b34d16fd3222abd232756effde1f,Report Fig. 8 (PNG).
+6_figures/fig_surface.png,290315,,03446d6ced17c8a68452af7a09f6dc02ba709ff98a50e17f7b4247be6e26d1d0,Report Fig. 1 (PNG).
+6_figures/fig_thevenin.png,108273,,363914846e66b0278405608cedb2441c6ad5f04ef931ad24c528585794855353,Report Fig. 7 (PNG).
+7_code/analysis.py,12492,,3ecc7d25d021172136c30be3b57aa20d30217cb87564c11553f895fb2bca3f09,"Statistics: Tukey comparisons, nested ANOVA, permutation test, drift model, rotor speed."
+7_code/build_report.py,37298,,cadc64df6dca83e26bef4206ee62f9f204cced687bf254419860dbfad37d4384,"Regenerates every number, table and data figure in the report: python3 7_code/build_report.py"
+7_code/data.py,9904,,3dcc28a4edb2c78abb40c6cc0eef966bdfa9485d534273b38224aec258c172a5,"Loads the run and rotor-speed files and reduces each load ladder (peak power, Thevenin fit)."
+7_code/figures.py,11232,,ed49d185d185a291e53528828f884d515ea8ac1f321266281e686e17cb02826f,Report figures.
+7_code/keyence.py,5767,,854c1625e35d453002d95fabe3fd845db8968a17ca7582a242786d96afe01eaa,"Surface parameters (Pa, Ra, layer period) from the profilometer height maps."
+7_code/slicer.py,5005,,708880fa38d6e1e4924bd578ad6ff5f9d4253379c6a4dea540c9ec613d99370e,Summarises the slicer project (not shipped) into the JSON shipped as 5_reference/turbine_default_summary.json.
+7_code/style.py,2364,,8e9d44d76d56a93176321b10e9338af87ea055081eeab20f2eb9894a46020701,"Figure style (colours, markers)."
+DATA_DICTIONARY.md,16558,,60b355c09faaba657d82b70be0f099f36b5cf95ee6b00c1e8b83e0bda74b6128,"Every data file, header key and column."
+README.md,5255,,18a9f92e609ae59bfb5a6aeb849873d19dbdf19f075f0b82ebcc817f58652fa1,"Start here: what was tested, layout, caveats, how to reproduce."
+URI_VAWT_Texture_Report_2026-10-01.pdf,922833,,b706528cf3bcfdd67ab979784f587beb78ce0187b831834577367711b04e54e2,The report this package accompanies.
