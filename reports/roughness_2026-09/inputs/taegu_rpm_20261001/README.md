@@ -42,7 +42,9 @@ On 2 October (16:34 EDT) he also shared nine per-run records as Google Drive lin
 ## What `RPM.m` does
 
 1. Reads column F, the tachometer, of a per-run record sampled at 359.97 Hz. A pulse is a rise
-   through −0.75 V (baseline about −1.5 V, pulse about 0 V), and one pulse is one revolution.
+   through −0.75 V (baseline about −1.5 V, pulse about 0 V), and one pulse is one revolution. The
+   sensor is a proximity sensor triggered by a magnet glued to one blade of each rotor
+   (S. Eacuello, 5 Oct).
 2. Counts pulses in 5 s windows. It keeps the windows from the first one above 40 rpm to the
    fastest one.
 3. Splits those windows into the 14 fan set points (500–1800 rpm) at rises of more than 40 rpm

@@ -41,20 +41,20 @@ CODE = {
     "slicer.py": "Summarises the slicer project (not shipped) into the JSON shipped as 5_reference/turbine_default_summary.json.",
 }
 DERIVED = {
-    "comparisons.csv": "All six pairwise rotor comparisons of peak power (Tukey 95% intervals, parabolic-fit sensitivity, mounting tipping points), V_oc, R_int and light-load rotor speed (report Tables 3 and 4, Section 6.2).",
-    "drift_model.csv": "Run means refitted with a linear time term: drift per hour and drift-adjusted changes vs Plain (report Section 8).",
+    "comparisons.csv": "All six pairwise rotor comparisons of peak power (Tukey 95% intervals, parabolic-fit sensitivity, mounting tipping points), V_oc, R_int and light-load rotor speed (report Tables 3 and 4, Section 4.1).",
+    "drift_model.csv": "Run means refitted with a linear time term: drift per hour and drift-adjusted changes vs Plain (report Section 6).",
     "run_summary.csv": "One row per run: change vs Plain in peak power, V_oc, R_int and rotor speed; steepest-rise wind speed (report Table 2).",
-    "peak_power_by_run.csv": "Peak electrical power per run and set point, both estimators (report Appendix A).",
-    "thevenin_by_run.csv": "V = V_oc - I*R_int fitted per run and set point (report Section 6.4).",
-    "rotor_by_wind_speed.csv": "Per rotor and set point: geometric-mean peak power, C_P,el, Thevenin parameters, rotor speed, tip-speed ratio, changes vs Plain (report Figs 4, 6, 7 and 8).",
-    "rotor_speed_by_run.csv": "T. Kang's rotor speed per run and set point (taken as light-load from 600 rpm), with tip-speed ratio and the first-step voltage check (report Sections 3.3 and 6.5, Appendix A).",
-    "anova.csv": "Analyses of variance of ln P_max (with two sensitivity analyses), ln R_int, ln V_oc and ln n_0 (report Appendix B).",
-    "surface_roughness.csv": "Pa, Ra and layer period per blade set (report Sections 2.3 and 6.6, Table 5).",
+    "peak_power_by_run.csv": "Peak electrical power per run and set point, both estimators (report Figs 4 and 5, Table 3).",
+    "thevenin_by_run.csv": "V = V_oc - I*R_int fitted per run and set point (report Section 4.3, Table 4).",
+    "rotor_by_wind_speed.csv": "Per rotor and set point: geometric-mean peak power, C_P,el, Thevenin parameters, rotor speed, tip-speed ratio, changes vs Plain (report Figs 4, 6 and 7).",
+    "rotor_speed_by_run.csv": "T. Kang's rotor speed per run and set point (taken as light-load from 600 rpm), with tip-speed ratio and the first-step voltage check (report Sections 2.2 and 4.3, Fig. 7).",
+    "anova.csv": "Analyses of variance of ln P_max (with two sensitivity analyses), ln R_int, ln V_oc and ln n_0 (report Appendix A).",
+    "surface_roughness.csv": "Pa, Ra and layer period per blade set (report Sections 2.4 and 4.4, Table 5).",
 }
-FIGURES = ["fig_surface", "fig_ladders", "fig_power", "fig_runs", "fig_gain", "fig_thevenin",
-           "fig_speed", "fig_calibration"]
-FIGNUM = dict(fig_surface=1, fig_ladders=3, fig_power=4, fig_runs=5, fig_gain=6, fig_thevenin=7,
-              fig_speed=8, fig_calibration=9)                    # Fig. 2 is the TikZ rig diagram
+FIGURES = ["fig_ladders", "fig_surface", "fig_power", "fig_runs", "fig_gain", "fig_speed",
+           "fig_calibration"]
+FIGNUM = dict(fig_ladders=2, fig_surface=3, fig_power=4, fig_runs=5, fig_gain=6, fig_speed=7,
+              fig_calibration=8)                                 # Fig. 1 is the TikZ rig diagram
 
 
 def sha256(p):

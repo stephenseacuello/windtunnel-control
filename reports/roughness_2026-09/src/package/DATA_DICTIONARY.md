@@ -74,8 +74,9 @@ with, for example, `pandas.read_csv(path, comment="#")`.
 
 ## 2_rotor_speed/: T. Kang's rotor-speed summaries (raw, as received)
 
-T. Kang recorded rotor speed during the session on his own acquisition: a tachometer, one pulse
-per revolution, sampled at 359.97 Hz. The rig did not log rotor speed. These are the summaries he
+T. Kang recorded rotor speed during the session on his own acquisition: a proximity sensor
+triggered by a magnet glued to one blade of each rotor (one pulse per revolution), sampled at
+359.97 Hz. His recordings started with the rig's runs. The rig did not log rotor speed. These are the summaries he
 sent, byte for byte. His per-sample records are not included.
 
 | file | content |
@@ -147,7 +148,7 @@ is relative to the geometric mean of the two Plain runs at the same set point.
 | `r_int_change_pct`, `r_int_tukey95_lo_pct`, `r_int_tukey95_hi_pct` | The same for the apparent source resistance. |
 | `rotor_rpm_change_pct`, `rotor_rpm_tukey95_lo_pct`, `rotor_rpm_tukey95_hi_pct`, `p_tukey_rotor_rpm` | The same for light-load rotor speed, 600–1800 rpm (`rotor_speed_by_run.csv`). |
 
-### `drift_model.csv`: run means refitted with a linear time term (report Section 8)
+### `drift_model.csv`: run means refitted with a linear time term (report Section 6)
 
 | column | meaning |
 |---|---|
@@ -164,7 +165,7 @@ is relative to the geometric mean of the two Plain runs at the same set point.
 | `rotor_rpm_change_vs_plain_pct` | The same for light-load rotor speed, over fan set points 600–1800 rpm. |
 | `steepest_rise_mps` | Midpoint wind speed of the steepest segment of ln P_max against ln v (resolution one set-point spacing, 2.1 m/s). |
 
-### `peak_power_by_run.csv`: one row per run and set point (report Appendix A)
+### `peak_power_by_run.csv`: one row per run and set point (report Figs 4 and 5)
 
 | column | meaning |
 |---|---|
@@ -183,12 +184,12 @@ flagged `under v_floor` are excluded.
 | column | meaning |
 |---|---|
 | `fan_rpm_cmd`, `wind_mps` | Fan set point and the calibrated wind speed. |
-| `v_oc_v` | Zero-current intercept (V), an extrapolated open-circuit voltage, not a measured one. V_oc/n0 shows no resolved difference between rotors (largest −0.4%; report Section 6.5). |
-| `r_int_ohm` | Apparent source resistance (Ω): winding, rectifier (incl. commutation and diode incremental resistance), wiring, and the rotor slowing as load rises (report Section 5). |
+| `v_oc_v` | Zero-current intercept (V), an extrapolated open-circuit voltage, not a measured one. V_oc/n0 shows no resolved difference between rotors (largest −0.4%; report Section 4.3). |
+| `r_int_ohm` | Apparent source resistance (Ω): winding, rectifier (incl. commutation and diode incremental resistance), wiring, and the rotor slowing as load rises (report Section 3). |
 | `r2`, `dwells_fitted` | Fit quality, and the number of dwells fitted. |
 | `p_matched_w` | V_oc² / 4R_int (W). |
 
-### `rotor_speed_by_run.csv`: one row per run and set point (report Sections 3.3 and 6.5, Appendix A)
+### `rotor_speed_by_run.csv`: one row per run and set point (report Sections 2.2 and 4.3)
 
 | column | meaning |
 |---|---|
@@ -197,9 +198,9 @@ flagged `under v_floor` are excluded.
 | `light_load` | 1 from 600 rpm. 0 at 500 rpm, where the fan settles with the load at 10 mA; the report does not use those rows. |
 | `tip_speed_ratio` | λ0 = 2π n0 R / (60 v), with R = 0.1016 m, the attachment radius (the outer radius is larger). |
 | `v_first_v`, `i_first_a` | Terminal voltage and current at the first load step (1–10 mA), from the rig. |
-| `v_first_per_rpm_mv` | v_first_v / rotor_rpm (mV/rpm), terminal voltage per rpm at light load. Over the 104 rows with `light_load` = 1 it is 31.5 mV/rpm (coefficient of variation 1.7%) and shows no resolved difference between rotors (largest +0.7%; report Section 6.5). |
+| `v_first_per_rpm_mv` | v_first_v / rotor_rpm (mV/rpm), terminal voltage per rpm at light load. Over the 104 rows with `light_load` = 1 it is 31.5 mV/rpm (coefficient of variation 1.7%) and shows no resolved difference between rotors (largest +0.7%; report Section 4.3). |
 
-### `rotor_by_wind_speed.csv`: one row per rotor and set point (report Figs 4, 6, 7 and 8)
+### `rotor_by_wind_speed.csv`: one row per rotor and set point (report Figs 4, 6 and 7)
 
 | column | meaning |
 |---|---|
@@ -213,7 +214,7 @@ flagged `under v_floor` are excluded.
 | `v_oc_change_vs_plain_pct`, `r_int_change_vs_plain_pct` | Thévenin changes relative to Plain. |
 | `rotor_rpm_change_vs_plain_pct` | Change of light-load rotor speed relative to Plain. |
 
-### `anova.csv`: analyses of variance (report Appendix B)
+### `anova.csv`: analyses of variance (report Appendix A)
 
 The table has six blocks, identified by `analysis`:
 1. ln P_max, all rotors;
@@ -229,7 +230,7 @@ The table has six blocks, identified by `analysis`:
 | `df`, `ss`, `ms` | Degrees of freedom, sum of squares, mean square. |
 | `F`, `df_den`, `p` | F ratio, denominator degrees of freedom and p-value. The rotor is tested against run within rotor; the other sources against the residual. |
 
-### `surface_roughness.csv`: report Sections 2.3 and 6.6, Table 5
+### `surface_roughness.csv`: report Sections 2.4 and 4.4, Table 5
 
 | column | meaning |
 |---|---|

@@ -1,14 +1,10 @@
 # Email drafts (5 Oct 2026)
 
-Both drafts are in Gmail (seacuello@uri.edu), not sent.
-
-1. **To Profs Sodhi, Jahangiri and Jeong, cc Taegu.** Subject: "Wind-tunnel report and data:
-   peak power of the small VAWT with fuzzy-skin blades (1 October tests)". Attach by hand:
-   - `out/URI_VAWT_Texture_Data_2026-10-01/URI_VAWT_Texture_Report_2026-10-01.pdf` (20 pages)
-   - `out/URI_VAWT_Texture_Data_2026-10-01.zip` (10.5 MB)
-
-   Both files are also copied to `~/Desktop/VAWT_report_attachments/`.
-2. **To Taegu (his Gmail), a reply in his "Accepted: Wind Tunnel Testing" thread.** It asks him to
-   approve the Drive access requests, or attach the eight per-sample `*_RPM.csv` files (not unk).
-   It also asks whether the files carry clock time and what the tachometer sensor and its pulses per
-   revolution are.
+1. **To Profs Sodhi, Jahangiri and Jeong, cc Taegu: a draft in Gmail (seacuello@uri.edu), not sent.**
+   Subject: "Wind-tunnel report and data: peak power of the small VAWT with fuzzy-skin blades
+   (1 October tests)". Attach by hand, from `~/Desktop/VAWT_report_attachments/`:
+   - `URI_VAWT_Texture_Report_2026-10-01.pdf` (13 pages)
+   - `URI_VAWT_Texture_Data_2026-10-01.zip` (11.5 MB)
+2. **To Taegu: sent on 5 Oct**, asking for the eight per-sample `*_RPM.csv` files. Stephen has
+   since confirmed that the recordings started with the rig's runs, and that the tachometer is a
+   proximity sensor with a magnet glued to one blade (one pulse per revolution).

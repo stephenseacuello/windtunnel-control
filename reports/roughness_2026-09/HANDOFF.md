@@ -36,7 +36,7 @@
   - Results are observed and derived only; interpretation sits in the new Discussion (§7).
 
 ## Status
-- **Report:** `report/report.pdf`, 20 pages. Every number is a macro in `build/numbers.tex` (381).
+- **Report:** `report/report.pdf`, 13 pages. Every number is a macro in `build/numbers.tex` (381).
 - **Pipeline:**
   - `src/data.py`: loading, peak power, Thévenin fits, calibration fitted from the CSV, geometry,
     and `rotor_speed()` / `tacho_fs()` for T. Kang's files;

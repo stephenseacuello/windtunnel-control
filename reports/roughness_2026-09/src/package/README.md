@@ -48,7 +48,7 @@ README.md, DATA_DICTIONARY.md, MANIFEST.csv
 3_surface_scans/   raw: Keyence VR-6000 height maps (CSV) and screenshots (PNG)
 4_derived/         generated: the analysis-ready tables behind the report
 5_reference/       rotor geometry, blade mesh, wind-speed calibration points, slicer summary
-6_figures/         the report's data figures, Figs 1 and 3–9 (PNG)
+6_figures/         the report's data figures, Figs 2–8 (PNG)
 7_code/            analysis code (Python 3 with numpy, scipy, pandas, matplotlib)
 ```
 

@@ -379,3 +379,26 @@ These passages served none of the four research questions or duplicated another 
 - §6.5: "a rise of 61–81%". Only the deleted paragraph used it.
 - §5: the 500 rpm acceleration sentence. It is in Table 6 (ramp dynamics).
 - §3.1: the blockage assumption now points to Table 6 instead of being restated.
+
+**34. Simplified for the professors' update (13 pages, was 20)**
+- Requested by Stephen.
+- Structure:
+  - Sections 2–4 were merged into one "Test setup" section, and the Methods were condensed into a
+    short "Analysis" section.
+  - The Results now have four subsections, one per research question.
+  - The Discussion and Limitations are short paragraphs and bullets.
+- Removed:
+  - the Thévenin figure;
+  - the uncertainty table (its content is in the Limitations bullets);
+  - the appendix tables of peak power and rotor speed for every run (they are in `4_derived/`);
+  - the Mohan reference;
+  - the R_int-versus-wind-speed detail and the diode discussion.
+- Kept:
+  - every headline number and interval;
+  - the four research questions;
+  - the rotor-side inference;
+  - the confounds (one print, one mounting, run order, Plain's layers);
+  - the fault-plan outline.
+- Tachometer: Stephen confirmed it is a proximity sensor triggered by a magnet glued to one blade
+  of each rotor. One pulse per revolution is now stated as fact, and the FS 0.10 "sensor magnet"
+  caveat is removed (every rotor carried one).

@@ -30,160 +30,99 @@ with rotor speed and surface roughness}\\[1.0em]
 % --------------------------------------------------------------- abstract --
 \section*{Abstract}
 
-Fuzzy skin is a slicer setting that displaces the outer wall of a 3D print by a random distance up
-to a set thickness~\cite{prusa}; it changes a printed blade's surface texture without changing its
-CAD model. If texture changes a printed rotor's output, print settings must be controlled whenever
-rotors are compared. Roughness degrades the lift of airfoil sections~\cite{wilcox} and lowers the
-Reynolds number at which a circular cylinder's drag falls~\cite{achenbach}; neither result predicts
-its effect on the thin curved-plate blades of the small vertical-axis rotor studied here. We tested
-this rotor in the URI wind tunnel on 1 October 2026, fitted in turn with four blade sets: without
-fuzzy skin (Plain) and with fuzzy-skin thicknesses of \SIlist{0.050;0.101;0.202}{mm} (FS~0.05,
-FS~0.10, FS~0.20). Each rotor was swept twice through \nSP{} fan speeds (\vLo--\SI{\vHi}{m/s} by
-the tunnel calibration) with an automated constant-current load; light-load rotor speed and surface
-roughness were also measured. Averaged over wind speed, FS~0.10 and FS~0.20 produced $\cPB\%$
-$[\cPBlo,\ \cPBhi]$ and $\cPC\%$ $[\cPClo,\ \cPChi]$ more peak electrical power than Plain (Tukey
-simultaneous 95\% intervals); the FS~0.05 difference, $\cPA\%$ $[\cPAlo,\ \cPAhi]$, was not
-resolved, its interval including zero. The gains were largest at \bandLo--\SI{\bandHi}{m/s}.
-Averaged over wind speed, they came with a higher extrapolated open-circuit voltage and no resolved
-change in apparent source resistance; where they were largest, a lower source resistance also
-contributed. At light load, averaged over \vSpdLo--\SI{\vHi}{m/s}, FS~0.10 and FS~0.20 turned
-$\spdPB\%$ and $\spdPC\%$ faster than Plain, with no resolved difference in voltage per rpm; we
-infer that the gains arise in the rotor, not in the generator. Measured roughness (Ra, Pa) did not
-rank the sets by power; more surface measurement is needed to test whether roughness ranks
-power. Each setting was one print, mounted once and tested in order of increasing
-thickness, and Plain also has a coarser layer period (\SI{\pitchP}{mm} against \SI{\pitchA}{mm}),
-so attributing the differences to fuzzy skin requires replicate prints, remounting and an
-interleaved run order. Until then, rotors compared on this rig, including in the planned fault
-tests, should be printed from one recorded set of print settings.
+Fuzzy skin is a 3D-printing setting that roughens a part's outer surface by displacing its outer
+wall at random, up to a set thickness~\cite{prusa}. Roughness is known to change the performance
+of airfoils~\cite{wilcox} and cylinders~\cite{achenbach}, but not of the thin curved-plate blades
+of the small vertical-axis rotor studied here. We fitted this rotor in turn with four printed blade
+sets: one without fuzzy skin (Plain) and three with fuzzy-skin thicknesses of
+\SIlist{0.050;0.101;0.202}{mm} (FS~0.05, FS~0.10, FS~0.20). Each rotor was swept twice through
+\nSP{} wind speeds from \vLo{} to \SI{\vHi}{m/s} in the URI wind tunnel on 1 October 2026, with an
+electronic load measuring peak electrical power. Averaged over wind speed, FS~0.10 and FS~0.20
+produced $\cPB\%$ $[\cPBlo,\ \cPBhi]$ and $\cPC\%$ $[\cPClo,\ \cPChi]$ more peak power than Plain
+(Tukey simultaneous 95\% intervals). The FS~0.05 difference, $\cPA\%$ $[\cPAlo,\ \cPAhi]$, was not
+resolved. The gains were largest at \bandLo--\SI{\bandHi}{m/s}. At light load FS~0.10 and FS~0.20
+also turned $\spdPB\%$ and $\spdPC\%$ faster than Plain, while the generator's voltage per rpm
+showed no resolved difference, so we infer that the gain arises in the rotor, not in the
+generator. Measured roughness (Ra, Pa) did not rank the sets by power; more surface measurement is
+needed to test whether it does. Each setting was one print, mounted once and run in order of
+increasing thickness, and Plain also had coarser layers (\SI{0.2}{mm} against \SI{0.1}{mm}). The
+gains therefore cannot yet be attributed to fuzzy skin alone; replicate prints, remounting and an
+interleaved run order would settle this. Until then, rotors compared on this rig, including in the
+planned fault tests, should be printed with one recorded set of print settings.
 
 % ================================================================ 1 INTRO ==
 \section{Introduction}\label{sec:scope}
 
 Printed blades carry surface texture even without fuzzy skin: the Plain set tested here has
-\SI{\pitchP}{mm} layer lines (\secref{sec:roughness}). If texture changes rotor output, print
-settings must be controlled in any experiment that compares rotors, including the fault tests
-planned for this rig (\secref{sec:faults}), and texture becomes a design variable. Fuzzy skin makes
-the texture adjustable without changing the CAD geometry. In PrusaSlicer it resamples each
-outer-wall path with a random step size and shifts each new point inside or outside the wall by a
-random distance up to the fuzzy-skin thickness~\cite{prusa}; the Bambu Studio project used for
-these blades stores the same two parameters, thickness and point distance (\secref{sec:sets}).
+\SI{\pitchP}{mm} layer lines. If texture changes rotor output, print settings must be controlled
+whenever rotors are compared, including in the fault tests planned for this rig
+(\secref{sec:faults}), and texture becomes a design variable. Fuzzy skin makes the texture
+adjustable without changing the CAD model: the slicer moves points of the outer wall in or out by a
+random distance up to the set thickness~\cite{prusa}.
 
-On airfoil blade sections at Reynolds numbers of 1.6--4.0$\times10^6$, increasing roughness height
-and density decreases the maximum lift, lift-curve slope and lift-to-drag ratio~\cite{wilcox}. On a
-circular cylinder, roughness lowers the critical Reynolds number, at which the drag falls, leaves
-the subcritical drag unchanged and raises the transcritical drag~\cite{achenbach}. The blades tested
-here are thin curved plates with square edges at chord Reynolds numbers of $\reLo\times10^4$ to
-$\reHi\times10^5$ (\secref{sec:rotor}). Neither result predicts the sign or size of a texture effect
-on such blades, so it was measured.
-
-One rotor was fitted in turn with the four blade sets and tested at \nSP{} wind speeds, twice per
-set, to answer four questions:
+Roughness lowers the maximum lift and lift-to-drag ratio of airfoil sections~\cite{wilcox} and
+moves the drop in a circular cylinder's drag to a lower Reynolds number~\cite{achenbach}. The blades
+tested here are thin curved plates with square edges, at chord Reynolds numbers of
+$\reLo\times10^4$ to $\reHi\times10^5$. Neither result predicts the effect on such blades, so it
+was measured. The tests address four questions:
 \begin{enumerate}
-  \item Does peak electrical power differ between the sets? Tukey simultaneous intervals on run
-        means~\cite{montgomery} (\secref{sec:comparison}; conclusion~1).
-  \item Do the differences depend on wind speed? Rotor $\times$ set point interaction
-        (\secref{sec:windspeed}; conclusion~2).
-  \item Does a difference arise in the rotor or in the generator? A Thévenin fit of each load
-        ladder, light-load rotor speed and voltage per rpm (Sections~\ref{sec:thevenin}
-        and~\ref{sec:speed}; conclusion~3).
-  \item Does measured surface roughness order the sets by power? Profilometer Pa and Ra
-        (\secref{sec:roughness}; conclusion~4).
+  \item Does peak electrical power differ between the blade sets? (\secref{sec:comparison},
+        conclusion~1)
+  \item Do the differences depend on wind speed? (\secref{sec:windspeed}, conclusion~2)
+  \item Does a difference arise in the rotor or in the generator? (\secref{sec:source},
+        conclusion~3)
+  \item Does measured surface roughness rank the sets by power? (\secref{sec:roughness},
+        conclusion~4)
 \end{enumerate}
-The report covers the 1 October 2026 session only; earlier laboratory (June--July) and rig
-(August--September) tests are outside its scope. A fifth blade set run that day is excluded because
-its run log records its texture as unknown. The report also responds to two earlier requests: blade
-identity (\tabref{tab:specimens}) and an outline for a fault-testing plan (\secref{sec:faults}).
-Data and code accompany it (\appref{app:package}).
+The report covers the 1 October 2026 session only. A fifth blade set run that day is excluded
+because its run log records its texture as unknown. The report also responds to two earlier
+requests: blade identity (\tabref{tab:specimens}) and an outline for a fault-testing plan
+(\secref{sec:faults}).
 
-% ============================================================ 2 SPECIMENS ==
-\section{Test articles}\label{sec:specimens}
+% ================================================================ 2 SETUP ==
+\section{Test setup}\label{sec:setup}
 
-\subsection{Rotor}\label{sec:rotor}
-The rotor has three straight, untwisted blades attached at $R=\SI{\geoR}{m}$ from the axis, with
-span $H=\SI{\geoH}{m}$. The blade section is a thin curved plate that turns through
-\SI{\geoArc}{\degree} (\SI{\geoChord}{mm} chord, \SI{\geoDepth}{mm} depth, \SI{\geoWall}{mm} wall,
-square edges); it is not an airfoil. These are design values; the printed blades were not measured.
-The outer swept radius is larger than $R$ and was not documented, so the nominal swept area
-$A=2RH=\SI{\areaSw}{m^2}$ is used only to normalise power. Chord Reynolds numbers use the wind speed
-and assume air at \SI{20}{\celsius}; air temperature was not recorded.
+\subsection{Rotor and blade sets}\label{sec:rotor}
+The rotor has three straight blades attached at $R=\SI{\geoR}{m}$ from the axis, with span
+$H=\SI{\geoH}{m}$ (design values). Each blade is a thin curved plate, not an airfoil: it turns
+through \SI{\geoArc}{\degree}, with \SI{\geoChord}{mm} chord, \SI{\geoWall}{mm} wall and square
+edges. The swept area $A=2RH=\SI{\areaSw}{m^2}$ is nominal and is used only to normalise power.
 
-\subsection{Blade sets}\label{sec:sets}
-\tabref{tab:specimens} lists the sets. A set mounted on the rig is called a rotor and named after the
-set. According to the project's correspondence, the College of Engineering's I$^2$(s) Print Lab
-printed all sets from one CAD model of the blade. By design they differ in fuzzy-skin thickness;
-Plain also differs in layer period. The earlier labels identify the files: Plain's runs are
-labelled smooth and its scan baseline, and Ra~20/40/80 are names, not measured Ra values.
+\tabref{tab:specimens} lists the four blade sets. A set mounted on the rig is called a rotor and
+named after the set. The College of Engineering's I$^2$(s) Print Lab printed all sets from one CAD
+model. Its Bambu Studio project specifies PLA on a \slPrinter{} with a \SI{\slNozzle}{mm} nozzle,
+\SI{\slLayer}{mm} layers and \slWalls{} wall loops; fuzzy skin is painted on both faces of each
+blade at a \SI{\slPoint}{mm} point distance, and only its thickness changes between sets. Plain has
+no slicer record; its measured layer period indicates \SI{0.2}{mm} layers.
 
 \begin{table}[h]
 \centering\small
-\caption{Blade sets. Layer period: dominant spanwise wavelength of the measured surface
-(\appref{app:surface}). $^*$FS~0.20 was printed with \SI{\slLayer}{mm} layers, but its texture
-leaves no spectral peak between 60 and \SI{320}{\micro m}, so its period is not measured.}\label{tab:specimens}
-\begin{tabularx}{\linewidth}{@{}l l l c >{\raggedright\arraybackslash}X@{}}
+\caption{Blade sets. Layer height from the measured layer period (\appref{app:surface}), except
+FS~0.20, whose texture hides the layer lines.}\label{tab:specimens}
+\begin{tabularx}{\linewidth}{@{}l l c l >{\raggedright\arraybackslash}X@{}}
 \toprule
-Rotor & Fuzzy skin & Earlier label & Layer period & Print record \\
+Rotor & Fuzzy skin & Layer height & Earlier label & Source of the settings \\
 \midrule
-Plain   & none & smooth, baseline & \SI{\pitchP}{mm} & No slicer record; the layer period indicates \SI{0.2}{mm} layers. \\
-FS 0.05 & \SI{0.050}{mm} & Ra 20 & \SI{\pitchA}{mm} & Not in the slicer project; thickness from the 1 October run log. \\
-FS 0.10 & \SI{0.101}{mm} & Ra 40 & \SI{\pitchB}{mm} & Matches plate ``40 RA'' of the slicer project. \\
-FS 0.20 & \SI{0.202}{mm} & Ra 80 & \SI{\slLayer}{mm}$^*$ & Matches plate ``80 RA'' of the slicer project. \\
+Plain   & none           & \SI{0.2}{mm} & smooth, baseline & Run log (``no fuzzy skin''); no slicer record. \\
+FS 0.05 & \SI{0.050}{mm} & \SI{0.1}{mm} & Ra 20 & 1 October run log; not in the slicer project. \\
+FS 0.10 & \SI{0.101}{mm} & \SI{0.1}{mm} & Ra 40 & Slicer project, plate ``40 RA''. \\
+FS 0.20 & \SI{0.202}{mm} & \SI{0.1}{mm} & Ra 80 & Slicer project, plate ``80 RA''. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The Print Lab's slicer project (\texttt{turbine\_default.3mf}, Bambu Studio, saved \slSaved) holds
-\slPlates{} single-blade plates ($\slSize$\,mm); two match FS~0.10 and FS~0.20, and none matches
-FS~0.05. It specifies a \slPrinter{} with a \SI{\slNozzle}{mm} nozzle, \SI{\slLayer}{mm} layers,
-\slMaterial{} and \slWalls{} wall loops. Fuzzy skin is painted on both faces of each blade at a
-\SI{\slPoint}{mm} point distance and covers \slPaint\% of the surface; the square edges, end caps
-and two mounting-hole bores are unpainted. Only the fuzzy-skin thickness differs between plates.
-The \SI{\pitchA}{mm} layer period measured on FS~0.05 and FS~0.10 matches the project's layer
-height. FS~0.20 was also printed with \SI{\slLayer}{mm} layers; its texture leaves no measurable
-layer period.
-
-\subsection{Surface measurement}\label{sec:surface}
-Each set was scanned on 1 October before the runs with a Keyence VR-6000
-optical profilometer (VR-6100 head, $\times$160): one field of about \fieldX\,$\times$\,\fieldY\,mm
-on one blade per set, two on FS~0.20, at \SI{\pixel}{\micro m} per pixel (\figref{fig:surface}).
-Field locations on the blades were not recorded. Each spanwise profile (across the layer lines) is
-levelled. Pa is the arithmetic mean deviation of the levelled profile; Ra is that of the roughness
-profile, the levelled profile minus its Gaussian mean line (ISO~16610-21~\cite{iso16610},
-$\lambda_c=\SI{0.25}{mm}$), over a \evalLo--\SI{\evalHi}{mm} evaluation length, shorter than the
-default of five cut-off lengths (\SI{1.25}{mm})~\cite{iso4288}; \appref{app:surface} gives the
-details. Each value is the mean over a field's pixel columns; adjacent columns are correlated, so the
-field is the sampling unit.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{fig_surface}
-  \caption{Profilometer height maps, one field per blade set, each column levelled. Layer lines run
-  horizontally (chordwise); the Pa and Ra profiles run vertically (spanwise). Colour is clipped at
-  $\pm\SI{60}{\micro m}$, which FS~0.20 exceeds over \clipShareC\% of its area.}
-  \label{fig:surface}
-\end{figure}
-
-% ============================================================== 3 FACILITY ==
-\section{Facility and instrumentation}\label{sec:facility}
-
-\subsection{Wind speed}\label{sec:wind}
-The tunnel fan is driven by an ABB ACS550 variable-frequency drive, commanded in rpm by a Portenta
-Machine Control over Modbus (\figref{fig:rig}). Wind speed $v$ is calculated from the commanded fan
-speed $N$ with the tunnel's calibration (Test~1, 13 February 2026), a least-squares line through
-\calN{} points (\appref{app:cal}):
+\subsection{Wind tunnel and measurements}\label{sec:wind}
+The tunnel fan runs on an ABB ACS550 drive, commanded in rpm over Modbus (\figref{fig:rig}). Wind
+speed $v$ is calculated from the fan speed $N$ with the tunnel's calibration (\appref{app:cal}):
 \[ v = \calA\,N - \calB \qquad (\si{m/s};\ N \text{ in rpm}). \]
+The fan-motor current at each set point agreed across all runs within \SI{\fanRange}{A}, so the fan
+operating point did not change. Air temperature and pressure were not recorded, and no blockage
+correction is applied.
 
-The median fan-motor current at each set point agreed across the \nRunsWord{} runs within
-\SI{\fanRange}{A}, the drive's reading resolution (\SI{\fanTop}{A} at 1800~rpm), so the fan
-operating point did not change measurably. Air temperature and pressure were not recorded, and no
-blockage correction is applied (\tabref{tab:limits}).
-
-\subsection{Electrical measurement}
-The rotor shaft drives a three-phase generator whose output passes through a three-phase bridge
-rectifier to a Chroma 63004-150-60 DC electronic load in constant-current mode. The generator's
-make, model and winding resistance were not recorded. A Python host sets the load current and
-records the terminal voltage $V$ and current $I$ that the load reports at the end of each dwell;
-electrical power is $P=VI$. All rotors were measured with the same instrument at the same settings,
-so an instrument gain error cancels in the ratios between rotors.
+The generator's three-phase output is rectified and drawn by a Chroma 63004-150-60 electronic load
+in constant-current mode. A Python host sets the current and records the terminal voltage $V$ and
+current $I$ at the end of each \SI{\dwellS}{s} step; power is $P=VI$. All rotors were measured with
+the same instrument and settings.
 
 \begin{figure}[h]
   \centering
@@ -193,62 +132,43 @@ so an instrument gain error cancels in the ratios between rotors.
   \label{fig:rig}
 \end{figure}
 
-\subsection{Rotor speed}\label{sec:rpm}
-The rig's rotor-speed input counted no pulses on 1 October. T.~Kang recorded rotor speed on a
-separate data acquisition system from a tachometer signal sampled at $f_s=\SI{\tachoFs}{Hz}$; the
-sensor type and target were not recorded. His script (\texttt{RPM.m}, in the data package) treats
-each pulse as one revolution, splits each run into \nSP{} segments at rises in the \SI{5}{s} mean
-speed, assigns them to the set points in order, and reports for each the most frequent
-per-revolution speed $n_0$, rounded to 1~rpm. The summaries carry no time stamps. Because a pulse
-interval is a whole number of samples, $n_0$ is resolved to the larger of 1~rpm and
-$n_0^2/(60f_s)$, that is \resMin--\resHi\% of $n_0$.
+\textbf{Rotor speed.}\label{sec:rpm} The rig's own speed input recorded nothing on 1 October.
+T.~Kang recorded rotor speed with a proximity sensor triggered by a small magnet glued to one blade
+of each rotor, giving one pulse per revolution, sampled at \SI{\tachoFs}{Hz}. His script
+(\texttt{RPM.m}, in the data package) reports for each set point the most frequent speed over
+single revolutions, $n_0$, resolved to \resMin--\resHi\%. The load is at \SI{0}{A} while the fan
+settles, so we take $n_0$ as the light-load speed. The rig's data support this: the voltage at the
+first load step, $V_1$, follows $n_0$ closely ($V_1/n_0=\SI{\keMean}{mV/rpm}$, coefficient of
+variation \keCV\% over \nSpdPoints{} values). At \spLo~rpm the load is already at
+\SI{\loadArmmA}{mA} while the fan settles, so that set point is not used for speed. Speed during
+the load steps was not recorded in the summaries.
 
-We take $n_0$ as the light-load speed, the rotor speed with the generator unloaded: the load is held
-at \SI{0}{A} while the fan settles (\secref{sec:procedure}), and the rotor then turns at its highest
-and steadiest speed of the set point. From \spdSpLo~rpm the rig's record supports this and the
-matching of set points. The terminal voltage at the first load step (\iFirstLo--\SI{\iFirstHi}{mA}),
-$V_1$, follows the least-squares line $V_1=\SI{\keSlope}{mV/rpm}\times n_0-\SI{\keIcept}{V}$ over
-the \nSpdPoints{} rotor, run and set-point values (\figref{fig:speed}c), and $V_1/n_0$ averages
-\SI{\keMean}{mV/rpm} with a coefficient of variation of \keCV\%. At the first set point, \spLo~rpm,
-the fan settles with the load at \SI{\loadArmmA}{mA} instead, and the speed that $V_1$ implies on
-this line exceeds $n_0$ by \gapLo--\gapHi\%; \spLo~rpm is therefore not used for speed. Rotor speed
-at each load dwell was not recorded.
-
-% ============================================================= 4 PROCEDURE ==
-\section{Test procedure}\label{sec:procedure}
-
-\subsection{Sweep protocol}
-Each run (sweep) visits \nSP{} fan set points from \spLo{} to \spHi~rpm in 100~rpm steps. At each
-set point the host waits until the fan speed is within the larger of \rpmTolAbs~rpm and
-\rpmTolPct\% of the command, then until the generator's terminal voltage changes by no more than
-\settleTolPct\% (or \SI{0.02}{V}, whichever is larger) over each of \settleConfirm{} successive
-\SI{\settlePoll}{s} intervals; the voltage wait lasts at least \SI{\settleMin}{s}, and each wait at
-most \SI{\settleMax}{s}. While the fan settles the load is at \SI{0}{A}, except at the first set
-point, where it stays at the \SI{\loadArmmA}{mA} set before the fan starts. The load then raises its
-current demand from half a step, in steps of \SI{\stepmA}{mA} at 1800~rpm scaled with $v^2$ at lower
-speeds (minimum \SI{\stepMinmA}{mA}), dwelling \SI{\dwellS}{s} per step, and stops after
-\stopConfirm{} consecutive dwells at or below \stopPct\% of the running maximum. The resulting
-ladders of \dwellLo--\dwellHi{} dwells trace the power--current curve through its maximum
-(\figref{fig:ladders}). A run takes about \runMin{} minutes; all runs used the same protocol
-(identifier \texttt{94bed28333f7}).
+\subsection{Test procedure}\label{sec:procedure}
+Each run visits \nSP{} fan set points, \spLo--\spHi~rpm in 100~rpm steps. At each set point the
+host waits for the fan speed and the generator voltage to settle. The load then raises its current
+in small steps (\SI{\stepmA}{mA} at 1800~rpm, scaled with $v^2$ below), holding each for
+\SI{\dwellS}{s}, until power has fallen below \stopPct\% of its maximum on \stopConfirm{} steps in a
+row. Each ladder of \dwellLo--\dwellHi{} steps traces power against current through its peak
+(\figref{fig:ladders}). A run takes about \runMin{} minutes.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{fig_ladders}
   \caption{Measured load ladders at three wind speeds, all \nRunsWord{} runs (solid: run~1; dashed,
-  hollow: run~2). Stars mark $\pmax$, the largest dwell power.}
+  hollow: run~2). Stars mark $\pmax$, the largest step power.}
   \label{fig:ladders}
 \end{figure}
 
-\subsection{Session}
-Each rotor was mounted once and swept twice without removal (\tabref{tab:session}), in the order
-Plain, FS~0.05, FS~0.10, FS~0.20, from \tFirst{} to \tLast. The two Plain runs started \plainGap{}
-minutes apart; the other pairs ran back to back.
+Each rotor was mounted once and run twice without removal, in the order Plain, FS~0.05, FS~0.10,
+FS~0.20, from \tFirst{} to \tLast{} (\tabref{tab:session}). \nClean{} of the \nSweeps{} ladders
+ended on the power roll-off; the other \nCut{} ended after the peak, when the voltage fell below
+\SI{\vOff}{V}. One Plain blade broke at the end of run~2; its last ladder still matched run~1
+within \breakDiff\%.
 
 \begin{table}[h]
 \centering\small
-\caption{Runs of 1 October 2026: local time of the first and last dwell, and the run mean of $\pmax$
-relative to the Plain rotor (\secref{sec:stats}).}\label{tab:session}
+\caption{Runs of 1 October 2026: local time of the first and last step, and the run mean of $\pmax$
+relative to Plain.}\label{tab:session}
 \begin{tabular}{@{}l c c c l@{}}
 \toprule
 Rotor & Run & Time & Change (\%) & Data file stem \\
@@ -258,126 +178,78 @@ Rotor & Run & Time & Change (\%) & Data file stem \\
 \end{tabular}
 \end{table}
 
-\subsection{Data quality}\label{sec:quality}
-Of the \nSweeps{} ladders, \nClean{} stopped on the power roll-off. The other \nCut{} stopped after
-the peak on the host's voltage floor: the terminal voltage fell below \SI{\vOff}{V} on
-\stopConfirm{} consecutive dwells while the current still followed the demand. In these two ladders,
-\cutList{}, the last dwell above the floor had already fallen below \stopPct\% of the maximum
-(percentages in parentheses), so the peak lies inside every ladder. Peak powers recomputed from the dwell records equal the values logged
-by the rig. One Plain blade broke at the end of run~2; at the last set point, 1800~rpm, $\pmax$
-agrees with run~1 within \breakDiff\%. One FS~0.10 blade carried a small sensor magnet in an earlier
-test; whether it was fitted on 1 October was not recorded.
+\subsection{Surface measurement}\label{sec:surface}
+Each set was scanned before the runs with a Keyence VR-6000 optical profilometer: one field of about
+\fieldX\,$\times$\,\fieldY\,mm on one blade per set, two on FS~0.20 (\figref{fig:surface}). Pa is the
+mean deviation of the levelled height profile across the layer lines; Ra is the same after a
+Gaussian filter (ISO~16610-21~\cite{iso16610}, cut-off \SI{0.25}{mm}) removes the longer
+wavelengths. \appref{app:surface} gives the details.
 
-% ============================================================ 5 REDUCTION ==
-\section{Data reduction and statistical analysis}\label{sec:stats}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{fig_surface}
+  \caption{Profilometer height maps, one field per blade set. Layer lines run horizontally. Colour
+  is clipped at $\pm\SI{60}{\micro m}$, which FS~0.20 exceeds over \clipShareC\% of its area.}
+  \label{fig:surface}
+\end{figure}
 
-\textbf{Peak power.} $\pmax$ is the largest dwell power in a ladder. A least-squares parabola through
-the maximum and up to two dwells on either side (the rig software's rule) gives a second estimate;
-in \nFallback{} ladders the fit is not concave or its vertex lies outside those dwells, and the
-maximum is used. The two estimators resolve the same pairs (\tabref{tab:pairs}). Because dwells
-last \SI{\dwellS}{s} and speed was not recorded per dwell, rotor equilibrium within a dwell is not
-shown. $\pmax$ is the peak of this ramp protocol.
+% ============================================================= 3 ANALYSIS ==
+\section{Analysis}\label{sec:stats}
 
-\textbf{Rotor comparison.} Differences are analysed as ratios, on $\ln\pmax$. For each run, $y$ is the
-mean over the \nSP{} set points of $\ln(\pmax/P_\text{ref})$, with $P_\text{ref}$ the geometric mean
-of the two Plain runs at that set point, so each wind speed carries equal weight. The pooled
-run-to-run standard deviation of $y$ is $\sigma=\sigRun\%$ (\dofRun{} degrees of freedom). The rotor
-effect is tested by one-way analysis of variance (ANOVA) on the \nRunsWord{} run means, and all six
-pairs are compared with Tukey's honestly significant difference procedure (simultaneous 95\%
-intervals; studentized range $q_{0.05;4,\dofRun}=\qTukey$)~\cite{montgomery}. A difference is
-resolved when its interval excludes zero. With two runs per rotor the $p$-values rest on a normal
-model and are reported down to 0.001; an exact permutation test of the rotor effect gives
-$p=\permP$, the smallest attainable. Because each rotor's two runs were consecutive, neither test
-separates a rotor effect from drift (\secref{sec:limits}).
+$\pmax$ is the largest step power in a ladder. Rotors are compared as ratios: for each run, the
+mean over the \nSP{} set points of $\ln(\pmax/P_\mathrm{ref})$, where $P_\mathrm{ref}$ is Plain's
+geometric mean at that set point. The eight run means are compared with one-way analysis of
+variance and Tukey's procedure for all six pairs~\cite{montgomery}. A difference is
+\emph{resolved} when its simultaneous 95\% interval excludes zero. Whether the differences change
+with wind speed is tested by the rotor $\times$ set point interaction against the scatter between
+repeated runs. Details are in \appref{app:stats}.
 
-\textbf{Mounting and drift.} The two runs of a rotor share its print and mounting, so the intervals
-measure repeatability on one mounting. Mounting-to-mounting variation $\tau$, the standard
-deviation of a rotor's mean power between mountings, was not measured. For each resolved difference
-the largest $\tau$ at which it would stay resolved by the Tukey criterion is calculated
-(\appref{app:stats}). Because the rotors were run in order of increasing texture, the run means are
-also refitted with a linear time term (\secref{sec:limits}).
+To locate the source of a power difference, a straight line $V=V_\mathrm{oc}-IR_\mathrm{int}$ is
+fitted to each ladder. $V_\mathrm{oc}$ is the extrapolated open-circuit voltage; $R_\mathrm{int}$ is
+an apparent source resistance, which includes the winding, rectifier and wiring and also the rotor
+slowing as the load rises. Both, and the light-load speed $n_0$, are compared between rotors as
+$\pmax$ is. The light-load tip-speed ratio is $\lambda_0=2\pi n_0R/(60\,v)$, and the electrical
+power coefficient is $C_{P,\mathrm{el}}=\pmax/(\tfrac12\rho A v^3)$ with standard air
+($\rho=\SI{\rhoStd}{kg/m^3}$); it includes generator and rectifier losses.
 
-\textbf{Dependence on wind speed.} A two-way ANOVA with runs nested in rotors tests the rotor
-$\times$ set point interaction against the residual (run $\times$ set point within rotor), that is,
-whether the ratio between rotors changes with wind speed by more than the scatter of repeated runs
-(\appref{app:stats}). The residual scatter differs between set points, so the $F$ test is
-approximate; it is repeated without the two set points with the largest scatter.
-
-\textbf{Open-circuit voltage and source resistance.} At each set point a straight line
-$V=V_\mathrm{oc}-IR_\mathrm{int}$ (a Thévenin equivalent) is fitted to the dwells above the voltage
-floor ($r^2\ge\thevRtwo$). The fit separates a change in generated voltage from a change in the
-voltage drop under load. $V_\mathrm{oc}$, the zero-current intercept, is an extrapolated
-open-circuit voltage, not a measured one: from \vocBelowFrom~rpm its mean over all runs lies
-\vocBelowMeanLo--\vocBelowMeanHi\% below $V_1$ (single runs up to \vocBelowMax\%), so the measured
-voltage falls faster over the first dwells than the fitted line. $R_\mathrm{int}$ is an apparent
-source resistance: it includes the winding, the rectifier with its commutation drop, the wiring, and
-the slowing of the rotor as the load rises. For Plain, $R_\mathrm{int}$ falls from
-\rintPlainLo\,$\Omega$ at \SI{\vLo}{m/s} to \rintPlainHi\,$\Omega$ at \SI{\vHi}{m/s}. A winding or
-wiring resistance does not fall with speed, and the commutation drop of a diode bridge rises with
-frequency~\cite[ch.~5]{mohan}. We therefore attribute the fall to the rotor slowing under load and
-to the diodes, whose incremental resistance falls as the ladder current rises; the diode type was
-not recorded, so the two are not separated. As a check of the linear model,
-$V_\mathrm{oc}^2/4R_\mathrm{int}$, the maximum power of the fitted source, is \matchLo--\matchHi{}
-times $\pmax$ over all ladders. Both parameters are compared between rotors as $\pmax$ is.
-
-\textbf{Rotor speed.} $\ln n_0$ at fan set points \spdSpLo--\spHi~rpm (\vSpdLo--\SI{\vHi}{m/s}) is
-compared between rotors as $\ln\pmax$ is
-($\sigma=\sigSpd\%$). Where both runs of a rotor give the same quantised value (\nSameQ{} of
-\nPairsQ{} cases), the quantisation error is shared and not in $\sigma$, so the $n_0$ intervals may
-be too narrow; $V_1$, which is continuous, resolves the same \nSpdResolved{} pairs. $\ln V_1$ and the
-voltage per rpm, $\ln(V_1/n_0)$ and $\ln(V_\mathrm{oc}/n_0)$, are compared in the same way. The
-light-load tip-speed ratio is
-$\lambda_0=2\pi n_0R/(60\,v)$ ($n_0$ in rpm, $R$ in m, $v$ in m/s). It exceeds the tip-speed ratio
-at peak power, where the load slows the rotor, and it uses the attachment radius $R$, so the ratio
-at the larger outer radius is higher.
-
-\textbf{Power coefficient.} $C_{P,\mathrm{el}}=\pmax/(\tfrac12\rho A v^3)$, with standard air
-($\rho=\SI{\rhoStd}{kg/m^3}$), normalises power for wind speed. It includes generator and rectifier
-losses and is not the aerodynamic power coefficient.
-
-% =============================================================== 6 RESULTS ==
+% =============================================================== 4 RESULTS ==
 \section{Results}\label{sec:results}
 
-\subsection{Power curves}
-Peak electrical power (geometric mean of each rotor's two runs) rises from
-\pLowMin--\SI{\pLowMax}{W} at \SI{\vLo}{m/s} to \pTopP--\SI{\pTopC}{W} at \SI{\vHi}{m/s}
-(\figref{fig:power}a), and $C_{P,\mathrm{el}}$ rises with wind speed for every rotor, from \cpLo\%
-to \cpHi\% (\figref{fig:power}b).
+\subsection{Peak power}\label{sec:comparison}
+Peak power rises from \pLowMin--\SI{\pLowMax}{W} at \SI{\vLo}{m/s} to \pTopP--\SI{\pTopC}{W} at
+\SI{\vHi}{m/s}, and $C_{P,\mathrm{el}}$ from \cpLo\% to \cpHi\% (\figref{fig:power}).
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{fig_power}
-  \caption{(a) Peak electrical power of every run on logarithmic axes (filled: run~1; hollow:
-  run~2); lines join the geometric means of the two runs. (b) Electrical power coefficient,
-  standard air density.}
+  \caption{(a) Peak electrical power of every run (filled: run~1; hollow: run~2); lines join the
+  geometric means of the two runs. (b) Electrical power coefficient, standard air.}
   \label{fig:power}
 \end{figure}
 
-\subsection{Rotor comparison}\label{sec:comparison}
 Averaged over wind speed, FS~0.10 and FS~0.20 produced $\cPB\%$ $[\cPBlo,\ \cPBhi]$ and $\cPC\%$
 $[\cPClo,\ \cPChi]$ more peak power than Plain, and FS~0.05 $\cPA\%$ $[\cPAlo,\ \cPAhi]$
-(\tabref{tab:pairs}, \figref{fig:runs}). The rotor effect exceeds run-to-run variation
-($F_{3,\dofRun}=\Frot$,~$p\pRot$; permutation $p=\permP$). Each rotor's two run means agree within
-\maxPair\%. \nResolvedCap{} of the six pairwise differences are
-resolved; FS~0.05 vs Plain is not. The smallest resolved difference, FS~0.20 over FS~0.10 ($\cBC\%$
-$[\cBClo,\ \cBChi]$), keeps a lower limit of only $\fBClo\%$ with the parabolic-fit estimator
-($p\pfBC$). These intervals measure repeatability on one mounting. The differences of FS~0.10 and
-FS~0.20 from Plain would stay resolved for a mounting variation $\tau$ up to \tauPB\% and \tauPC\%,
-those from FS~0.05 up to \tauAB\% and \tauAC\%, and FS~0.20 vs FS~0.10 only up to \tauBC\%.
+(\figref{fig:runs}, \tabref{tab:pairs}). The rotor effect is far larger than the run-to-run
+scatter ($F_{3,\dofRun}=\Frot$, $p\pRot$), and each rotor's two runs agree within \maxPair\%. Five of
+the six pairs are resolved; FS~0.05 vs Plain is not. The smallest resolved difference, FS~0.20 over
+FS~0.10 ($\cBC\%$ $[\cBClo,\ \cBChi]$), is only just resolved. The intervals measure repeatability on
+one mounting. The FS~0.10 and FS~0.20 gains over Plain would stay resolved for a
+mounting-to-mounting variation up to \tauPB\% and \tauPC\%; FS~0.20 over FS~0.10 only up to
+\tauBC\%.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{fig_runs}
-  \caption{Each run's mean $\pmax$ relative to the Plain rotor (filled: run~1; hollow: run~2). Bars:
-  rotor mean with the Tukey simultaneous 95\% interval for the difference from Plain.}
+  \caption{Each run's mean $\pmax$ relative to Plain (filled: run~1; hollow: run~2), with the Tukey
+  simultaneous 95\% interval for the difference from Plain.}
   \label{fig:runs}
 \end{figure}
 
 \begin{table}[h]
 \centering\small
 \caption{Pairwise comparisons of $\pmax$, geometric mean over wind speeds: Tukey simultaneous 95\%
-intervals and adjusted $p$-values. Last column: the same for the parabolic-fit
-estimator.}\label{tab:pairs}
+intervals and adjusted $p$-values. Last column: the same with a parabolic fit through the peak
+instead of the largest step.}\label{tab:pairs}
 \begin{tabular}{@{}l c c c c@{}}
 \toprule
 Comparison & Change (\%) & 95\% CI (\%) & $p$ & Parabolic fit (\%) \\
@@ -388,59 +260,40 @@ Comparison & Change (\%) & 95\% CI (\%) & $p$ & Parabolic fit (\%) \\
 \end{table}
 
 \subsection{Dependence on wind speed}\label{sec:windspeed}
-The rotor differences change with wind speed (\figref{fig:gain}). The rotor $\times$ set point
-interaction exceeds the scatter of repeated runs ($F_{\dfIntA,\dfIntB}=\Fint$,~$p\pInt$), also among
-the three textured rotors alone ($F_{\dfIntTexA,\dfIntTexB}=\FintTex$,~$p\pIntTex$) and without the
-two set points with the largest scatter, \trimDropped~rpm
-($F_{\dfIntTrimA,\dfIntTrimB}=\FintTrim$,~$p\pIntTrim$). The gains are largest at
-\bandLo--\SI{\bandHi}{m/s} (chord Reynolds number $\reBandLo$--$\reBandHi\times10^4$), the wind
-speeds at which FS~0.20 exceeds Plain by more than $\bandThr\%$: FS~0.20 peaks at $\gMaxC\%$ at
-\SI{\gMaxVC}{m/s}, and FS~0.10 at $\gMaxB\%$ at \SI{\gMaxVB}{m/s}. The steepest segment of
-$\ln\pmax$ against $\ln v$ (resolution \SI{\spDv}{m/s}, one set-point spacing) lies at
-\SI{\stepVC}{m/s} for FS~0.20 and \SI{\stepVB}{m/s} for FS~0.10 in both runs, at
-\stepVA\,\si{m/s} for FS~0.05 and at \stepVP\,\si{m/s} for Plain. The power of FS~0.10 and FS~0.20
-therefore rises most steeply at a lower wind speed than in either Plain run; that of FS~0.05
-overlaps Plain's. The wind speeds carry the calibration uncertainty of \tabref{tab:limits}; the
-ratios do not.
+The gains change with wind speed by more than the scatter between repeated runs
+($F_{\dfIntA,\dfIntB}=\Fint$, $p\pInt$; \figref{fig:gain}). They are largest at
+\bandLo--\SI{\bandHi}{m/s} (chord Reynolds number $\reBandLo$--$\reBandHi\times10^4$), where FS~0.20
+peaks at $\gMaxC\%$ and FS~0.10 at $\gMaxB\%$. The power of FS~0.10 and FS~0.20 also rises most
+steeply at a lower wind speed (\stepVB{} and \SI{\stepVC}{m/s}) than Plain's (\stepVP\,\si{m/s}).
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{fig_gain}
-  \caption{$\pmax$ of each textured rotor relative to the Plain rotor at each wind speed. Markers:
-  individual runs (filled: run~1; hollow: run~2); lines: geometric mean of the two runs; band: 95\%
-  interval of a single-wind-speed difference from run-to-run scatter. All curves share the Plain
-  reference, so features common to all three may come from it.}
+  \caption{$\pmax$ of each textured rotor relative to Plain at each wind speed. Markers: individual
+  runs (filled: run~1; hollow: run~2); lines: geometric mean; band: 95\% interval of a
+  single-wind-speed difference from run-to-run scatter.}
   \label{fig:gain}
 \end{figure}
 
-\subsection{Open-circuit voltage and source resistance}\label{sec:thevenin}
-Averaged over wind speed, $V_\mathrm{oc}$ of FS~0.05, FS~0.10 and FS~0.20 differs from Plain's by
-$\vocA\%$, $\vocB\%$ and $\vocC\%$, while $R_\mathrm{int}$ shows no resolved difference from Plain's
-($\rintA\%$, $\rintB\%$ and $\rintC\%$; \tabref{tab:rotor}, \figref{fig:thevenin}). At fixed
-$R_\mathrm{int}$ the peak power of the fitted source scales with $V_\mathrm{oc}^2$, so the
-$V_\mathrm{oc}$ changes alone correspond to power changes of $\vocSqA\%$, $\vocSqB\%$ and
-$\vocSqC\%$, against $\cPA\%$, $\cPB\%$ and $\cPC\%$ measured. $R_\mathrm{int}$ varies between rotors
-with wind speed ($F_{\dfIntRintA,\dfIntRintB}=\FintRint$,~$p\pIntRint$): for FS~0.20 it is
-$\rintMinC\%$ at \SI{\rintMinVC}{m/s} and $\rintMaxC\%$ at \SI{\rintMaxVC}{m/s} relative to Plain,
-below Plain's from \rintNegLo{} to \SI{\rintNegHi}{m/s} and above it from \SI{\rintPosLo}{m/s}.
-FS~0.10 has the same sign at all \rintSignN{} of these wind speeds, FS~0.05 at \rintSignA. Where the
-power gains are largest, the lower $R_\mathrm{int}$ supplies up to \rintShareMax\% of the gain in
-$\ln\pmax$.
+\subsection{Rotor or generator}\label{sec:source}
+Averaged over wind speed, $V_\mathrm{oc}$ of FS~0.10 and FS~0.20 is $\vocB\%$ and $\vocC\%$ higher
+than Plain's, while $R_\mathrm{int}$ shows no resolved difference (\tabref{tab:rotor}). Because the
+peak power of the fitted source scales with $V_\mathrm{oc}^2$, the higher $V_\mathrm{oc}$ alone
+accounts for the gains ($\vocSqB\%$ and $\vocSqC\%$ against $\cPB\%$ and $\cPC\%$ measured). Where
+the gains are largest, a lower $R_\mathrm{int}$ supplies up to \rintShareMax\% of the gain.
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{fig_thevenin}
-  \caption{Thévenin parameters relative to the Plain rotor (geometric mean of two runs).
-  (a) Extrapolated open-circuit voltage. (b) Apparent source resistance. All curves share the Plain
-  reference, so features common to all three may come from it.}
-  \label{fig:thevenin}
-\end{figure}
+At light load, FS~0.10 and FS~0.20 turn $\spdPB\%$ $[\spdPBlo,\ \spdPBhi]$ and $\spdPC\%$
+$[\spdPClo,\ \spdPChi]$ faster than Plain (\figref{fig:speed}). Each speed change matches the change
+in $V_1$ and $V_\mathrm{oc}$ within \spdVoltDiff{} percentage points, and the voltage per rpm shows
+no resolved difference between rotors (largest $\keDiff\%$ $[\keDifflo,\ \keDiffhi]$). The speed
+gain is larger from \SI{\spdSplitHi}{m/s}, where the band of largest power gains begins: \spdFromB\%
+and \spdFromC\%, against \spdBelowB\% and \spdBelowC\% below it.
 
 \begin{table}[h]
 \centering\small
 \caption{Thévenin parameters and light-load speed $n_0$ relative to Plain, geometric mean over wind
-speeds ($n_0$ at fan set points \spdSpLo--\spHi~rpm), with Tukey simultaneous 95\% intervals; $C_{P,\mathrm{el}}$
-(standard air) and $\lambda_0$ (on $R$) at \vHi\,m/s.}\label{tab:rotor}
+speeds ($n_0$ from \spdSpLo~rpm), with Tukey simultaneous 95\% intervals; $C_{P,\mathrm{el}}$ and
+$\lambda_0$ at \vHi\,m/s.}\label{tab:rotor}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}l c c c c c@{}}
 \toprule
@@ -453,56 +306,27 @@ Rotor & $V_\mathrm{oc}$ & $R_\mathrm{int}$ & $n_0$ & $C_{P,\mathrm{el}}$ (\%) & 
 \end{tabular}
 \end{table}
 
-\subsection{Rotor speed}\label{sec:speed}
-From \vSpdLo{} to \SI{\vHi}{m/s} the light-load speed rises from \spdLowMin--\spdLowMax{} to
-\spdTopMin--\spdTopMax~rpm (rotor means; \tabref{tab:speed}) and $\lambda_0$ from
-\lamLowMin--\lamLowMax{} to \lamTopMin--\lamTopMax
-(\figref{fig:speed}a). Averaged over wind speed, FS~0.10 and FS~0.20 turn $\spdPB\%$
-$[\spdPBlo,\ \spdPBhi]$ and $\spdPC\%$ $[\spdPClo,\ \spdPChi]$ faster than Plain (rotor effect
-$F_{3,\dofRun}=\FrotSpd$,~$p\pRotSpd$; \tabref{tab:rotor}), and FS~0.20 turns $\spdBC\%$
-$[\spdBClo,\ \spdBChi]$ faster than FS~0.10. FS~0.05 is only just resolved from Plain, $\spdPA\%$
-$[\spdPAlo,\ \spdPAhi]$; on the continuous $V_1$ its change is $\vfirstA\%$
-$[\vfirstAlo,\ \vfirstAhi]$. Over the same set points $V_1$ changes by
-$\vfirstA\%$, $\vfirstB\%$ and $\vfirstC\%$ and $V_\mathrm{oc}$ by $\vocsA\%$, $\vocsB\%$ and
-$\vocsC\%$; each speed change equals the corresponding $V_1$ and $V_\mathrm{oc}$ changes within
-\spdVoltDiff{} percentage points. Neither voltage per rpm shows a resolved difference between rotors:
-the largest difference is $\keDiff\%$ $[\keDifflo,\ \keDiffhi]$ in $V_1/n_0$ (\keDiffPair) and
-$\vocnDiff\%$ $[\vocnDifflo,\ \vocnDiffhi]$ in $V_\mathrm{oc}/n_0$ (\vocnDiffPair;
-\figref{fig:speed}c). The speed gain also changes with wind speed
-($F_{\dfIntSpdA,\dfIntSpdB}=\FintSpd$,~$p\pIntSpd$; \figref{fig:speed}b): up to
-\SI{\spdSplitLo}{m/s}, FS~0.10 and FS~0.20 are \spdBelowB\% and \spdBelowC\% faster than Plain;
-from \SI{\spdSplitHi}{m/s}, where the band of largest power gains begins, \spdFromB\% and
-\spdFromC\%.
-
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{fig_speed}
-  \caption{Light-load rotor speed $n_0$ from the tachometer at fan set points \spdSpLo--\spHi~rpm
-  (filled: run~1; hollow: run~2; lines: geometric mean of the two runs). (a) Tip-speed ratio $\lambda_0$ on the
-  attachment radius. (b) $n_0$ of each textured rotor relative to Plain; one quantisation step is
-  \resMin--\resHi\% of $n_0$. (c) First-step voltage per rpm, $V_1/n_0$, with the ratio implied by
-  the least-squares line $V_1=a+bn_0$.}
+  \caption{Light-load rotor speed $n_0$ from the tachometer, \spdSpLo--\spHi~rpm (filled: run~1;
+  hollow: run~2; lines: geometric mean). (a) Tip-speed ratio $\lambda_0$ at the attachment radius.
+  (b) $n_0$ relative to Plain. (c) First-step voltage per rpm, $V_1/n_0$, with the least-squares
+  line $V_1=a+bn_0$.}
   \label{fig:speed}
 \end{figure}
 
-\subsection{Surface roughness and power}\label{sec:roughness}
-Neither Pa nor Ra orders the rotors by peak power (\tabref{tab:roughness}). Plain, with a regular
-\SI{\pitchP}{mm} layer-line pattern, has the highest Ra (\SI{\RaP}{\micro m}) and the lowest mean
-power. FS~0.05 and FS~0.10 share a \SI{\pitchA}{mm} layer period and differ by
-\SI{\PaDiffAB}{\micro m} in Pa (\PaA{} and \SI{\PaB}{\micro m}) and \SI{\RaDiffAB}{\micro m} in Ra
-(\RaA{} and \SI{\RaB}{\micro m}), less than the two FS~0.20 fields differ from each other
-(\SI{\PaSpreadC}{\micro m} in Pa, \SI{\RaSpreadC}{\micro m} in Ra); yet their power differs by
-$\cAB\%$ $[\cABlo,\ \cABhi]$. Pa roughly doubles from FS~0.10 to FS~0.20 (ratio \PaRatioCB), as the
-thickness setting does, but not from FS~0.05 to FS~0.10 (ratio \PaRatioBA). Mean peak power follows
-the nominal fuzzy-skin thickness, although FS~0.05 is not resolved from Plain. Ra is also not
-directly comparable between sets of different spatial structure: the \SI{0.25}{mm} cut-off keeps
-about \transP\% of the amplitude of Plain's layer lines, and the cut-off recommended for FS~0.20
-exceeds the field (\appref{app:surface}).
+\subsection{Surface roughness}\label{sec:roughness}
+Neither Pa nor Ra ranks the rotors by power (\tabref{tab:roughness}). Plain has the highest Ra and
+the lowest power. FS~0.05 and FS~0.10 differ by only \SI{\PaDiffAB}{\micro m} in Pa and
+\SI{\RaDiffAB}{\micro m} in Ra, less than the two FS~0.20 fields differ from each other, yet their
+power differs by $\cAB\%$ $[\cABlo,\ \cABhi]$. Ra is also not like-for-like across the sets: the
+\SI{0.25}{mm} cut-off keeps only about \transP\% of Plain's coarser layer lines
+(\appref{app:surface}).
 
 \begin{table}[h]
 \centering\small
-\caption{Surface roughness and peak electrical power by rotor. Pa and Ra: profilometer
-(\secref{sec:surface}); FS~0.20 is the mean of two fields.}\label{tab:roughness}
+\caption{Surface roughness and peak power by rotor. FS~0.20: mean of two fields.}\label{tab:roughness}
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{@{}l c c c c c@{}}
 \toprule
@@ -513,164 +337,95 @@ Rotor & Fuzzy skin & Pa & Ra & $\pmax$ change$^a$ & $\pmax$ at \vHi\,m/s \\
 \bottomrule
 \end{tabular}\\[2pt]
 \begin{minipage}{0.97\linewidth}\footnotesize
-$^a$Geometric mean over wind speeds of the ratio to Plain, both runs, with the Tukey simultaneous
-95\% interval from run-to-run repeatability on one mounting. $\pmax$ at \vHi\,m/s: geometric mean of
-the two runs.
+$^a$Geometric mean over wind speeds of the ratio to Plain, with the Tukey simultaneous 95\%
+interval.
 \end{minipage}
 \end{table}
 
-% ============================================================ 7 DISCUSSION ==
+% ============================================================ 5 DISCUSSION ==
 \FloatBarrier
 \section{Discussion}\label{sec:discussion}
 
-\textbf{Where the power difference arises.} We infer that the power difference arises in the rotor,
-not in the generator. Averaged over wind speed, the gain comes with a higher $V_\mathrm{oc}$ and no
-resolved change in $R_\mathrm{int}$ (\secref{sec:thevenin}). The light-load speed rises by the same
-fraction as $V_\mathrm{oc}$, and neither voltage per rpm shows a resolved difference between rotors
-(\secref{sec:speed}). The generator therefore converts speed to voltage alike for every rotor, to
-within \keBound\%, and the textured rotors turn faster. With the same $V$--$I$ slope and a higher
-$V_\mathrm{oc}$, they also turn faster at equal load current, that is, at about equal generator
-torque. The data do not separate a higher aerodynamic torque from a lower resisting torque. All
-rotors used the same generator and shaft bearings, so a lower resisting torque would have to come
-from the blade sets (mass, balance or mounting, none measured; the only documented difference is the
-FS~0.10 sensor magnet of \secref{sec:quality}) or from a change in the shared parts between
-rotors, which the run order does not exclude (\secref{sec:limits}). The $R_\mathrm{int}$ pattern
-that FS~0.10 and FS~0.20 share (\secref{sec:thevenin}) may come from the Plain reference rather than
-from the texture.
+\textbf{The gain arises in the rotor.} The textured rotors produce a higher open-circuit voltage
+because they turn faster: the voltage per rpm is the same for all rotors to within \keBound\%. With
+the same source resistance, they also turn faster at equal load current, that is, at about equal
+generator torque. The data do not show whether this comes from more aerodynamic torque or less
+resisting torque. All rotors used the same generator and bearings, so less resisting torque would
+have to come from the blade sets themselves (mass, balance or mounting, none measured) or from a
+change in the shared parts during the session.
 
-\textbf{Wind-speed dependence.} The gains of FS~0.10 and FS~0.20 peak at chord Reynolds numbers of
-$\reBandLo$--$\reBandHi\times10^4$, their power rises most steeply at a lower wind speed than
-Plain's (\secref{sec:windspeed}), and their light-load speed gain is larger from
-\SI{\spdSplitHi}{m/s} (\secref{sec:speed}). A flow transition that depends on Reynolds number and
-that texture moves to a lower wind speed could produce this pattern. On a circular cylinder,
-roughness lowers the critical Reynolds number, leaves the subcritical drag unchanged and raises the
-transcritical drag~\cite{achenbach}, so its effect depends on the Reynolds-number range. The flow on
-these blades was not examined, so this remains a hypothesis.
+\textbf{Why the gains depend on wind speed.} The gains peak at chord Reynolds numbers of
+$\reBandLo$--$\reBandHi\times10^4$, and the textured rotors' power rises most steeply at a lower wind
+speed than Plain's. A flow transition that texture moves to a lower Reynolds number could produce
+this pattern, as roughness does on a circular cylinder~\cite{achenbach}. The flow was not examined,
+so this remains a hypothesis.
 
-\textbf{Measured roughness.} Ra and Pa do not rank the rotors by power (\secref{sec:roughness}).
-Four explanations remain open: the realised texture of FS~0.05 and FS~0.10 may not follow the
-setting; one field per set may not resolve it; Pa and Ra may not capture the surface property that
-matters for this flow; or the power differences may not come from texture. Separating these needs
-more surface analysis (Recommendation~4). With one print per level, the agreement between power and
-nominal thickness is an association (\secref{sec:limits}).
+\textbf{Roughness does not explain the ranking yet.} Ra and Pa from one field per set may not
+represent the blades, may not capture the surface property that matters for this flow, or the power
+differences may not come from texture at all. More surface measurement is needed to test whether
+roughness ranks power (Recommendation~4).
 
-% ================================================================ 8 LIMITS ==
-\section{Uncertainty and limitations}\label{sec:limits}
-
-The Tukey intervals contain only run-to-run repeatability on one mounting. Two further sources are
-confounded with texture:
+% ================================================================ 6 LIMITS ==
+\section{Limitations}\label{sec:limits}
 \begin{itemize}
-  \item \textbf{Print and mounting.} Each texture level is one print mounted once, so print-to-print
-        and mounting variation are confounded with texture; \secref{sec:comparison} gives the
-        mounting variation each difference could absorb. Plain also differs in layer period
-        (\SI{\pitchP}{mm} against \SI{\pitchA}{mm}) and has no slicer record. The three fuzzy-skin
-        sets share \SI{\slLayer}{mm} layers, so the comparisons among them, FS~0.10 and FS~0.20
-        over FS~0.05 ($\cAB\%$ $[\cABlo,\ \cABhi]$ and $\cAC\%$ $[\cAClo,\ \cAChi]$), are not
-        affected by layer height.
-  \item \textbf{Run order.} The rotors were run in order of increasing texture, so slow drift is
-        confounded with texture. A fit of the \nRunsWord{} run means with a rotor term and a linear
-        time term gives a drift of $\driftRate\%$ per hour (95\% interval $\driftLo\%$ to
-        $\driftHi\%$). With that term FS~0.10 and FS~0.20 remain resolved from Plain ($\cdB\%$
-        $[\cdBlo,\ \cdBhi]$ and $\cdC\%$ $[\cdClo,\ \cdChi]$; $t$ intervals, \driftDof{} degrees of
-        freedom), while FS~0.05 is $\cdA\%$ $[\cdAlo,\ \cdAhi]$. Under a linear-drift model the
-        FS~0.10 and FS~0.20 differences therefore persist, while the FS~0.05 difference could be
-        drift. The slope rests almost entirely (\driftShare\% of the leverage) on the two Plain runs,
-        the only pair an hour apart, and a change between rotors, rather than a steady drift, cannot
-        be separated from a rotor effect.
+  \item \textbf{One print, one mounting.} Each texture level is one print mounted once, so print and
+        mounting differences are confounded with texture. Plain also has coarser layers
+        (\SI{0.2}{mm}); the three fuzzy-skin sets share \SI{0.1}{mm} layers, so their comparisons
+        (FS~0.10 and FS~0.20 over FS~0.05: $\cAB\%$ and $\cAC\%$) are not affected by layer height.
+  \item \textbf{Run order.} The rotors ran in order of increasing texture. Fitting a linear drift
+        over the session ($\driftRate\%$ per hour, $[\driftLo,\ \driftHi]$) leaves FS~0.10 and
+        FS~0.20 resolved from Plain ($\cdB\%$ and $\cdC\%$) but could explain the FS~0.05
+        difference. A step change between rotors cannot be separated from a rotor effect.
+  \item \textbf{Other.} Rotor speed is known only at light load. Wind speed comes from the tunnel
+        calibration (\appref{app:cal}), which affects absolute wind speed and $C_{P,\mathrm{el}}$
+        but not the comparison between rotors, made at identical fan speeds. Air density was not
+        recorded, and no blockage correction is applied.
 \end{itemize}
-\tabref{tab:limits} lists the other sources and their effect.
 
-\begin{table}[h]
-\centering\small
-\caption{Other sources of uncertainty.}\label{tab:limits}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright}p{0.21\linewidth} >{\raggedright}p{0.3\linewidth} X@{}}
-\toprule
-Source & Size & Effect \\
-\midrule
-Run-to-run repeatability & $\sigma=\sigRun\%$ (run mean); \sigE\% per point & In every interval. \\
-Peak estimator & Changes within \fitMaxDiff{} percentage points & Same pairs resolved; FS~0.20 vs FS~0.10 keeps a lower limit of only \fBClo\% (\tabref{tab:pairs}). \\
-Ramp dynamics & \SI{\dwellS}{s} dwells, equilibrium not verified; at \spLo~rpm the voltage rose between the first two dwells in \nRise{} of \nRunsWord{} runs & Common protocol, but a bias that depends on rotor inertia or torque--speed slope would not cancel. \\
-Rotor speed & Light load only, not at \spLo~rpm; resolution \resMin--\resHi\% of $n_0$ & Partly in the $n_0$ intervals (only where repeat runs differ); $\lambda_0$ also carries the wind-speed calibration and uses $R$. \\
-Wind-speed calibration & \calLowLo--\calLowHi\% high at \calLowVLo--\SI{\calLowVHi}{m/s}; \calDiffTop\% above a line through the measured points only at \SI{\vHi}{m/s} (an extrapolation, not a bound) & None on the comparison (identical fan speeds); affects absolute $v$ and $C_{P,\mathrm{el}}$. \\
-Air density & Not recorded & Any change during the session is confounded with run order (above); $C_{P,\mathrm{el}}$ assumes standard air. \\
-Blockage & Not corrected & Assumed alike for rotors of one geometry; not quantified (test-section size not documented). \\
-Electrical measurement & Not quantified & A gain error cancels in the ratios between rotors (same instrument and settings). \\
-Surface measurement & One \fieldX\,$\times$\,\fieldY\,mm field per set (FS~0.20: two), location not recorded; one cut-off for all sets & Pa and Ra may not represent the blades; Ra understates Plain's layer lines and the FS~0.20 surface (\appref{app:surface}). \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-% =========================================================== 9 CONCLUSIONS ==
-\FloatBarrier
+% =========================================================== 7 CONCLUSIONS ==
 \section{Conclusions}\label{sec:conclusions}
 \begin{enumerate}
-  \item FS~0.10 and FS~0.20 produced $\cPB\%$ $[\cPBlo,\ \cPBhi]$ and $\cPC\%$ $[\cPClo,\ \cPChi]$ more
-        peak electrical power than Plain, averaged over \vLo--\vHi\,\si{m/s}. The FS~0.05
-        difference, $\cPA\%$ $[\cPAlo,\ \cPAhi]$, was not resolved and could result from session
-        drift.
-  \item The gains depended on wind speed and were largest at \bandLo--\SI{\bandHi}{m/s}, where
-        FS~0.20 reached $\gMaxC\%$. The power of FS~0.10 and FS~0.20 rose most steeply at
-        \SI{\stepVB}{m/s} and \SI{\stepVC}{m/s}, below Plain's \stepVP\,\si{m/s}.
-  \item Averaged over wind speed, the gains came with a higher extrapolated open-circuit voltage and
-        no resolved change in apparent source resistance; where they were largest, a lower source
-        resistance also contributed. At light load FS~0.10 and FS~0.20 turned $\spdPB\%$
-        $[\spdPBlo,\ \spdPBhi]$ and $\spdPC\%$ $[\spdPClo,\ \spdPChi]$ faster than Plain, with no
-        resolved difference in voltage per rpm. We infer that the difference arises in the rotor,
-        not in the generator.
-  \item Ra and Pa from one field per set did not rank the rotors by power and do not confirm that
-        the realised texture of FS~0.05 and FS~0.10 differs. Testing whether surface roughness
-        ranks power requires more surface measurement (Recommendation~4).
-  \item The intervals reflect repeatability on one print and one mounting per texture, and Plain
-        also differs in layer period. The FS~0.10 and FS~0.20 differences from Plain would remain
-        resolved for mounting variation up to \tauPB--\tauPC\% and under a linear-drift fit;
-        attributing them to fuzzy skin requires replicate prints, remounting and an interleaved run
-        order. The fuzzy-skin sets share \SI{\slLayer}{mm} layers, so FS~0.10 and FS~0.20 over
-        FS~0.05, $\cAB\%$ $[\cABlo,\ \cABhi]$ and $\cAC\%$ $[\cAClo,\ \cAChi]$, are not affected by
-        layer height.
+  \item FS~0.10 and FS~0.20 produced $\cPB\%$ $[\cPBlo,\ \cPBhi]$ and $\cPC\%$ $[\cPClo,\ \cPChi]$
+        more peak electrical power than Plain, averaged over \vLo--\vHi\,\si{m/s}. The FS~0.05
+        difference, $\cPA\%$ $[\cPAlo,\ \cPAhi]$, was not resolved.
+  \item The gains were largest at \bandLo--\SI{\bandHi}{m/s}, where FS~0.20 reached $\gMaxC\%$.
+  \item The gains came with a higher open-circuit voltage from faster rotation ($\spdPB\%$ and
+        $\spdPC\%$ at light load), with no resolved change in the generator's voltage per rpm. We
+        infer that they arise in the rotor, not in the generator.
+  \item Ra and Pa from one field per set did not rank the rotors by power; more surface measurement
+        is needed to test whether roughness does.
+  \item With one print and one mounting per texture, a fixed run order, and coarser layers on Plain,
+        the gains cannot yet be attributed to fuzzy skin alone.
 \end{enumerate}
 
-% ================================================================= 10 NEXT ==
+% ================================================================= 8 NEXT ==
 \section{Recommendations}\label{sec:next}
 \begin{enumerate}
-  \item \textbf{Replicate and randomise.} Print at least two sets per thickness, Plain included, from
-        one saved project (\SI{0.1}{mm} layers, \SI{0.2}{mm} nozzle, one printer and filament lot;
-        Print Lab or in house), in random order. Keep the project file and print record, and weigh
-        and label every blade, including the present sets, so that mass and balance, the alternative
-        to texture in \secref{sec:discussion}, are known. Mount each set twice and run in an
-        interleaved order, re-running Plain after every third rotor. This measures print and
-        mounting variation and breaks the run-order confound.
-  \item \textbf{Log rotor speed at every dwell.} Connect a once-per-revolution sensor to the rig's
-        pulse input, or put T.~Kang's acquisition on the rig clock, and compute speed as revolutions
-        over elapsed time rather than the mode of single-revolution speeds. T.~Kang's per-sample
-        records of the present runs, not yet retrieved, could give speed at every dwell if they can
-        be aligned to the rig's time stamps.
-        Per-dwell speed gives $C_{P,\mathrm{el}}(\lambda)$ along each ladder and separates the
-        electrical source impedance (winding, rectifier, commutation) from the rotor slowing. Also
-        log the settled \SI{0}{A} voltage, which the rig measures but does not save, measure the
-        generator's winding resistance and identify the rectifier diodes. Separating aerodynamic
-        from resisting torque also requires a spin-down or motored friction test of each mounted
-        rotor.
-  \item \textbf{Extend the wind calibration.} Measure air speed directly over the test range, record
-        air temperature and pressure on every run, and document the test-section dimensions for a
-        blockage estimate.
-  \item \textbf{Characterise the surfaces at fixed stations}: several fields per set on two blades
-        and both faces, profiles along and across the layer lines, and evaluation lengths of at
-        least five cut-off lengths. This is needed to test whether surface roughness ranks the rotors by
-        power.
+  \item \textbf{Replicate and randomise.} Print at least two sets per thickness, Plain included,
+        from one saved project with \SI{0.1}{mm} layers. Weigh and label every blade. Mount each
+        set twice, run in an interleaved order, and re-run Plain after every third rotor.
+  \item \textbf{Log rotor speed at every step,} on the rig's own pulse input or on T.~Kang's
+        acquisition synchronised to the rig clock. This gives the power coefficient against
+        tip-speed ratio along each ladder. A spin-down test of each mounted rotor would separate
+        aerodynamic from resisting torque.
+  \item \textbf{Extend the wind calibration} over the full test range, and record air temperature
+        and pressure on every run.
+  \item \textbf{Measure the surfaces more fully:} several fields per set, at fixed locations on two
+        blades and both faces, with evaluation lengths of at least five cut-offs. This is needed to
+        test whether roughness ranks the rotors by power.
 \end{enumerate}
 
 \subsection{Toward the fault-testing plan}\label{sec:faults}
-Prof.\ Jeong asked for a fault-testing plan agreed before the next round. The rig provides an
-automated sweep of about \runMin{} minutes with a run-to-run repeatability of \sigRun\% in the run
-mean and \sigE\% at a single set point, measured on repeat runs of one mounting. Blade sets printed
-with different settings differed by up to $\cPC\%$ in mean peak power (\secref{sec:comparison}),
-so fault blades and their reference set should be printed from one saved project, and the reference
-re-run between fault cases. Whether $V_\mathrm{oc}$ and $R_\mathrm{int}$ separate rotor-side from
-electrical faults is untested. $R_\mathrm{int}$ also reflects the rotor slowing under load
-(\secref{sec:stats}), so a rotor-side fault may change it as an electrical fault would; the first
-fault cases should test this with rotor speed logged at every dwell. Candidate faults are a tip mass on one blade (imbalance), a chipped, shortened or
-missing blade, added bearing drag, and an open or high-resistance generator phase. A short meeting
-to agree the fault list, severity levels and acceptance criteria should precede any fault prints.
+Prof.\ Jeong asked for a fault-testing plan agreed before the next round. The rig gives an
+automated sweep of about \runMin{} minutes, with a run-to-run repeatability of \sigRun\% in the run
+mean and \sigE\% at a single set point. Blade sets printed with different settings differed by up to
+$\cPC\%$, so fault blades and their reference set should be printed from one saved project, with
+the reference re-run between fault cases. Candidate faults are a tip mass on one blade (imbalance),
+a chipped, shortened or missing blade, added bearing drag, and an open or high-resistance generator
+phase. Whether $V_\mathrm{oc}$ and $R_\mathrm{int}$ can tell rotor faults from electrical ones is
+untested; the first cases should test this with rotor speed logged at every step. We propose a short
+meeting to agree the fault list, severity levels and acceptance criteria before any fault blades
+are printed.
 
 \section*{Acknowledgement}
 T.~Richards modelled the blade, A.~Muszynski helped set up the fuzzy-skin print settings, and the
@@ -693,41 +448,20 @@ doi:10.1017/S0022112071000569.
 \bibitem{iso4288} ISO 4288:1996, \emph{Geometrical product specifications (GPS) --- Surface texture:
 Profile method --- Rules and procedures for the assessment of surface texture}; superseded by
 ISO 21920-3:2021.
-\bibitem{mohan} N.~Mohan, T.~M. Undeland and W.~P. Robbins, \emph{Power Electronics: Converters,
-Applications, and Design}, 3rd ed., Wiley, 2003.
 \end{thebibliography}}
 
 % ============================================================= APPENDICES ==
 \clearpage
 \appendix
 
-\section{Peak power and rotor speed by run and set point}\label{app:data}
-\begin{table}[H]
-\centering\footnotesize
-\caption{Peak electrical power $\pmax$ (W), largest dwell, every run. Runs 1 and 2 share the rotor's
-mounting.}\label{tab:data}
-\setlength{\tabcolsep}{4pt}
-\input{../build/tables/data.tex}
-\end{table}
-\begin{table}[H]
-\centering\footnotesize
-\caption{Light-load rotor speed $n_0$ (rpm), every run: T.~Kang's most frequent per-revolution speed
-at each set point (\secref{sec:rpm}). At \spLo~rpm (in parentheses) the fan settled with the load at
-\SI{\loadArmmA}{mA}; those values are not used.}\label{tab:speed}
-\setlength{\tabcolsep}{4pt}
-\input{../build/tables/speed.tex}
-\end{table}
-
-\FloatBarrier
 \section{Statistical details}\label{app:stats}
 \textbf{Model.} With $y_{rjs}=\ln\pmax$ for rotor $r$ (4), run $j$ (2) and set point $s$ (14),
 \[ y_{rjs} = \mu + \alpha_r + \beta_s + (\alpha\beta)_{rs} + u_{rj} + e_{rjs}, \]
 where $u_{rj}$ is a run offset within the rotor and $e_{rjs}$ the residual~\cite{montgomery}. The
-rotor effect is tested against run within rotor, which is the one-way ANOVA on run means. The
-interaction $(\alpha\beta)_{rs}$ and the run term are tested against the residual
-(\tabref{tab:anova}). The run offsets $u_{rj}$ cancel from both the interaction and the residual
-mean squares, so the interaction test needs no assumption about them; it does assume equal residual
-variance, so it is approximate here.
+rotor effect is tested against run within rotor (the one-way ANOVA on run means), and the
+interaction against the residual (\tabref{tab:anova}). The interaction test assumes equal residual
+variance across set points, so it is approximate; it was repeated without the two set points with
+the largest scatter (\trimDropped~rpm), $F_{\dfIntTrimA,\dfIntTrimB}=\FintTrim$, $p\pIntTrim$.
 
 \begin{table}[H]
 \centering\footnotesize
@@ -741,45 +475,31 @@ Source & df & MS & $F$ & $p$ & Tested against \\
 \end{tabular}
 \end{table}
 
-\textbf{Comparisons.} With run means $\bar y_{rj}$, rotor means $\bar y_r$ and pooled
-$\sigma^2=\sum_r\sum_j(\bar y_{rj}-\bar y_r)^2/4$, Tukey's interval for rotors $a$ and $b$ is
-$\exp\!\big(\bar y_b-\bar y_a \pm q_{0.05;4,4}\,\sigma/\sqrt2\big)-1$, a half-width of \hwTukeyLog{}
-in $\ln\pmax$ (about \hwTukey\%). The same procedure is applied to $\ln V_\mathrm{oc}$ and
-$\ln R_\mathrm{int}$, and to $\ln n_0$, $\ln V_1$, $\ln(V_1/n_0)$ and $\ln(V_\mathrm{oc}/n_0)$ at
-fan set points \spdSpLo--\spHi~rpm. The
-permutation test enumerates all \permN{} ways of splitting the \nRunsWord{} run means into four
-pairs; for $\ln n_0$ it also gives $p=\permP$.
+\textbf{Comparisons.} With pooled run-to-run standard deviation $\sigma=\sigRun\%$ (\dofRun{}
+degrees of freedom), Tukey's interval for rotors $a$ and $b$ is
+$\exp\!\big(\bar y_b-\bar y_a \pm q_{0.05;4,4}\,\sigma/\sqrt2\big)-1$ with $q_{0.05;4,4}=\qTukey$, a
+half-width of about \hwTukey\%. An exact permutation test of the rotor effect over all \permN{}
+splits of the run means gives $p=\permP$. The parabolic-fit estimator changes the differences by at
+most \fitMaxDiff{} percentage points.
 
 \textbf{Mounting variation.} If each rotor's mean carried an independent mounting offset with
-standard deviation $\tau$, the difference of two rotor means would have variance $\sigma^2+2\tau^2$.
-It stays resolved by the Tukey criterion while
-$|\bar y_b-\bar y_a|>(q_{0.05;4,4}/\sqrt2)\sqrt{\sigma^2+2\tau^2}$, which gives the values of $\tau$
-in \secref{sec:stats}.
+standard deviation $\tau$, a difference would stay resolved while
+$|\bar y_b-\bar y_a|>(q_{0.05;4,4}/\sqrt2)\sqrt{\sigma^2+2\tau^2}$.
 
-\textbf{Drift.} The run means are fitted as $\bar y_{rj}=a_r+\beta t_{rj}$, with $t_{rj}$ the start
-time of the run in hours, by least squares (\driftDof{} residual degrees of freedom).
+\textbf{Drift.} The run means are fitted as $\bar y_{rj}=a_r+\beta t_{rj}$, with $t_{rj}$ the run
+start time in hours. The slope rests mostly (\driftShare\%) on the two Plain runs, the only pair an
+hour apart.
 
-\textbf{Residual scatter.} The per-point residual standard deviation is \sigE\% overall; it is
-largest at \sigEmaxRpm~rpm (\sigEmax\%) and smallest at \sigEminRpm~rpm (\sigEmin\%).
-
-\FloatBarrier
 \section{Surface analysis}\label{app:surface}
-The Keyence export is a height map in millimetres, quantised to \SI{1}{\micro m}; each image column
-is one spanwise profile. A column is dropped if more than 10\% of its points are missing, or more
-than 2\% between its first and last valid points: \rejLo\% of columns or fewer for Plain, FS~0.05 and
-FS~0.10, and \rejC\% for FS~0.20, where missing points concentrate on steep slopes, so its values
-may be understated. Remaining interior gaps are filled linearly, a least-squares line is removed,
-and the profiles of a field are cut to the length of the shortest. Pa is the mean absolute
-deviation of the levelled profile. For Ra, the levelled profile minus its Gaussian mean line
-(ISO~16610-21~\cite{iso16610}; $\alpha=\sqrt{\ln2/\pi}$, $\lambda_c=\SI{0.25}{mm}$) is evaluated
-with $\lambda_c/2$ discarded at each end, where the filter has end effects. The layer period is the peak of the mean power spectrum between 60 and
-\SI{320}{\micro m}. For periodic profiles ISO~4288~\cite{iso4288} selects $\lambda_c=\SI{0.25}{mm}$
-for spacings of 0.04--\SI{0.13}{mm}, which fits FS~0.05 and FS~0.10; the Plain set's \SI{0.2}{mm}
-period would call for \SI{0.8}{mm}, and the FS~0.20 profile, which shows no layer period (Ra above
-\SI{10}{\micro m}) for \SI{8}{mm}, both longer than the \fieldY\,mm field. The filter transmits
-50\% at $\lambda_c$, so Ra keeps about \transP\% of the amplitude of the Plain set's
-\SI{\pitchP}{mm} layer lines and \transA\% of the \SI{\pitchA}{mm} ones; Plain's Ra is therefore
-understated relative to FS~0.05 and FS~0.10. Pa is unfiltered.
+Each image column of the Keyence height map is one profile across the layer lines. Columns with too
+many missing points are dropped (\rejLo\% or fewer for Plain, FS~0.05 and FS~0.10; \rejC\% for
+FS~0.20, whose values may therefore be understated). Each profile is levelled; Pa is its mean
+absolute deviation. Ra uses the Gaussian mean line of ISO~16610-21~\cite{iso16610} with
+$\lambda_c=\SI{0.25}{mm}$ over a \evalLo--\SI{\evalHi}{mm} evaluation length. The layer period is the
+peak of the mean spectrum between 60 and \SI{320}{\micro m}. ISO~4288~\cite{iso4288} recommends
+this cut-off for the \SI{0.1}{mm} layer lines of FS~0.05 and FS~0.10, but longer ones for Plain's
+\SI{0.2}{mm} lines and for FS~0.20; both exceed the \fieldY\,mm field. Ra therefore keeps about
+\transP\% of Plain's layer-line amplitude and \transA\% of the \SI{0.1}{mm} ones.
 
 \section{Wind-speed calibration}\label{app:cal}
 \begin{figure}[H]
@@ -787,14 +507,13 @@ understated relative to FS~0.05 and FS~0.10. Pa is unfiltered.
   \begin{minipage}[b]{0.49\linewidth}
     \includegraphics[width=\linewidth]{fig_calibration}
     \caption{Tunnel calibration, Test~1 (13 February 2026). Filled: measured. Hollow: marked in the
-    calibration file as possibly read from the trend line of the original record (``trend line?''
-    in \tabref{tab:cal}). Shaded: the range of this test.}
+    calibration file as possibly read from the trend line of the original record. Shaded: the range
+    of this test.}
     \label{fig:cal}
   \end{minipage}\hfill
   \begin{minipage}[b]{0.47\linewidth}
     \centering\footnotesize
-    \captionof{table}{Calibration points and the adopted fit $v=\calA N-\calB$. A line through the
-    measured points alone has a residual standard deviation of \SI{\calMeasSd}{m/s}.}\label{tab:cal}
+    \captionof{table}{Calibration points and the adopted fit $v=\calA N-\calB$.}\label{tab:cal}
     \setlength{\tabcolsep}{4pt}
     \begin{tabular}{@{}r r l r r@{}}
     \toprule
@@ -807,15 +526,14 @@ understated relative to FS~0.05 and FS~0.10. Pa is unfiltered.
   \end{minipage}
 \end{figure}
 
-\section{Data package and reproducibility}\label{app:package}
+\section{Data package}\label{app:package}
 The accompanying archive holds the raw files of the \nRunsWord{} runs (\texttt{1\_rig\_sweeps/}),
-T.~Kang's rotor-speed summaries and his script \texttt{RPM.m} (\texttt{2\_rotor\_speed/}), the
-profilometer height maps (\texttt{3\_surface\_scans/}), the analysis-ready tables behind this report
-(\texttt{4\_derived/}), the rotor geometry, blade mesh, wind calibration and slicer summary
-(\texttt{5\_reference/}), the data figures, Figs~1 and 3--9 (\texttt{6\_figures/}), and the analysis code
-(\texttt{7\_code/}). \texttt{README.md} explains the layout, \texttt{DATA\_DICTIONARY.md} defines
-every column, and \texttt{MANIFEST.csv} gives each file's SHA-256 checksum.
-\texttt{7\_code/build\_report.py} (Python~3) regenerates every result, table and data figure in this
-report from the raw files.
+T.~Kang's rotor-speed summaries and \texttt{RPM.m} (\texttt{2\_rotor\_speed/}), the profilometer
+height maps (\texttt{3\_surface\_scans/}), the analysis-ready tables, including every run's peak
+power and rotor speed at every set point (\texttt{4\_derived/}), reference files
+(\texttt{5\_reference/}), the data figures (\texttt{6\_figures/}) and the analysis code
+(\texttt{7\_code/}). \texttt{README.md} explains the layout and \texttt{DATA\_DICTIONARY.md} every
+column. \texttt{7\_code/build\_report.py} regenerates every number in this report from the raw
+files.
 
 \end{document}
