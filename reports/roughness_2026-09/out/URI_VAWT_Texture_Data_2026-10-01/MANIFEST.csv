@@ -70,6 +70,6 @@ path,bytes,data_rows,sha256,description
 7_code/keyence.py,5767,,854c1625e35d453002d95fabe3fd845db8968a17ca7582a242786d96afe01eaa,"Surface parameters (Pa, Ra, layer period) from the profilometer height maps."
 7_code/slicer.py,5005,,708880fa38d6e1e4924bd578ad6ff5f9d4253379c6a4dea540c9ec613d99370e,Summarises the slicer project (not shipped) into the JSON shipped as 5_reference/turbine_default_summary.json.
 7_code/style.py,2364,,8e9d44d76d56a93176321b10e9338af87ea055081eeab20f2eb9894a46020701,"Figure style (colours, markers)."
-DATA_DICTIONARY.md,16558,,60b355c09faaba657d82b70be0f099f36b5cf95ee6b00c1e8b83e0bda74b6128,"Every data file, header key and column."
+DATA_DICTIONARY.md,16588,,ef97c3360be8a67ae081aac705976abbb208ec60bfe30902e5ec059a69b1ce93,"Every data file, header key and column."
 README.md,5255,,18a9f92e609ae59bfb5a6aeb849873d19dbdf19f075f0b82ebcc817f58652fa1,"Start here: what was tested, layout, caveats, how to reproduce."
-URI_VAWT_Texture_Report_2026-10-01.pdf,922833,,b706528cf3bcfdd67ab979784f587beb78ce0187b831834577367711b04e54e2,The report this package accompanies.
+URI_VAWT_Texture_Report_2026-10-01.pdf,923279,,3367e339761d35ea2495c9167e68e6738ccfbb7cdca768f02ac35aa34e82c3ff,The report this package accompanies.

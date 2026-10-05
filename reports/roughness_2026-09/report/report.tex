@@ -116,7 +116,8 @@ labelled smooth and its scan baseline, and Ra~20/40/80 are names, not measured R
 \begin{table}[h]
 \centering\small
 \caption{Blade sets. Layer period: dominant spanwise wavelength of the measured surface
-(\appref{app:surface}); —: no spectral peak between 60 and \SI{320}{\micro m}.}\label{tab:specimens}
+(\appref{app:surface}). $^*$FS~0.20 was printed with \SI{\slLayer}{mm} layers, but its texture
+leaves no spectral peak between 60 and \SI{320}{\micro m}, so its period is not measured.}\label{tab:specimens}
 \begin{tabularx}{\linewidth}{@{}l l l c >{\raggedright\arraybackslash}X@{}}
 \toprule
 Rotor & Fuzzy skin & Earlier label & Layer period & Print record \\
@@ -124,7 +125,7 @@ Rotor & Fuzzy skin & Earlier label & Layer period & Print record \\
 Plain   & none & smooth, baseline & \SI{\pitchP}{mm} & No slicer record; the layer period indicates \SI{0.2}{mm} layers. \\
 FS 0.05 & \SI{0.050}{mm} & Ra 20 & \SI{\pitchA}{mm} & Not in the slicer project; thickness from the 1 October run log. \\
 FS 0.10 & \SI{0.101}{mm} & Ra 40 & \SI{\pitchB}{mm} & Matches plate ``40 RA'' of the slicer project. \\
-FS 0.20 & \SI{0.202}{mm} & Ra 80 & — & Matches plate ``80 RA'' of the slicer project. \\
+FS 0.20 & \SI{0.202}{mm} & Ra 80 & \SI{\slLayer}{mm}$^*$ & Matches plate ``80 RA'' of the slicer project. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -135,13 +136,12 @@ FS~0.05. It specifies a \slPrinter{} with a \SI{\slNozzle}{mm} nozzle, \SI{\slLa
 \slMaterial{} and \slWalls{} wall loops. Fuzzy skin is painted on both faces of each blade at a
 \SI{\slPoint}{mm} point distance and covers \slPaint\% of the surface; the square edges, end caps
 and two mounting-hole bores are unpainted. Only the fuzzy-skin thickness differs between plates.
-The project does not record which prints were made from it, and the run logs record only the
-thickness, so its other settings are not confirmed for the printed sets. Of these settings, only
-the layer height can be checked: the \SI{\pitchA}{mm} layer period measured on FS~0.05 and FS~0.10
-matches it.
+The \SI{\pitchA}{mm} layer period measured on FS~0.05 and FS~0.10 matches the project's layer
+height. FS~0.20 was also printed with \SI{\slLayer}{mm} layers; its texture leaves no measurable
+layer period.
 
 \subsection{Surface measurement}\label{sec:surface}
-Each set was scanned on 1 October before the runs (\scanFirst--\scanLast) with a Keyence VR-6000
+Each set was scanned on 1 October before the runs with a Keyence VR-6000
 optical profilometer (VR-6100 head, $\times$160): one field of about \fieldX\,$\times$\,\fieldY\,mm
 on one blade per set, two on FS~0.20, at \SI{\pixel}{\micro m} per pixel (\figref{fig:surface}).
 Field locations on the blades were not recorded. Each spanwise profile (across the layer lines) is
@@ -588,9 +588,10 @@ confounded with texture:
   \item \textbf{Print and mounting.} Each texture level is one print mounted once, so print-to-print
         and mounting variation are confounded with texture; \secref{sec:comparison} gives the
         mounting variation each difference could absorb. Plain also differs in layer period
-        (\SI{\pitchP}{mm} against \SI{\pitchA}{mm}) and has no slicer record. FS~0.05 and FS~0.10
-        share a \SI{\pitchA}{mm} layer period, so their difference ($\cAB\%$ $[\cABlo,\ \cABhi]$) is
-        the comparison least affected by layer height.
+        (\SI{\pitchP}{mm} against \SI{\pitchA}{mm}) and has no slicer record. The three fuzzy-skin
+        sets share \SI{\slLayer}{mm} layers, so the comparisons among them, FS~0.10 and FS~0.20
+        over FS~0.05 ($\cAB\%$ $[\cABlo,\ \cABhi]$ and $\cAC\%$ $[\cAClo,\ \cAChi]$), are not
+        affected by layer height.
   \item \textbf{Run order.} The rotors were run in order of increasing texture, so slow drift is
         confounded with texture. A fit of the \nRunsWord{} run means with a rotor term and a linear
         time term gives a drift of $\driftRate\%$ per hour (95\% interval $\driftLo\%$ to
@@ -647,7 +648,8 @@ Surface measurement & One \fieldX\,$\times$\,\fieldY\,mm field per set (FS~0.20:
         also differs in layer period. The FS~0.10 and FS~0.20 differences from Plain would remain
         resolved for mounting variation up to \tauPB--\tauPC\% and under a linear-drift fit;
         attributing them to fuzzy skin requires replicate prints, remounting and an interleaved run
-        order. FS~0.10 over FS~0.05, $\cAB\%$ $[\cABlo,\ \cABhi]$, is the comparison least affected by
+        order. The fuzzy-skin sets share \SI{\slLayer}{mm} layers, so FS~0.10 and FS~0.20 over
+        FS~0.05, $\cAB\%$ $[\cABlo,\ \cABhi]$ and $\cAC\%$ $[\cAClo,\ \cAChi]$, are not affected by
         layer height.
 \end{enumerate}
 
@@ -799,7 +801,7 @@ deviation of the levelled profile. For Ra, the levelled profile minus its Gaussi
 with $\lambda_c/2$ discarded at each end, where the filter has end effects. The layer period is the peak of the mean power spectrum between 60 and
 \SI{320}{\micro m}. For periodic profiles ISO~4288~\cite{iso4288} selects $\lambda_c=\SI{0.25}{mm}$
 for spacings of 0.04--\SI{0.13}{mm}, which fits FS~0.05 and FS~0.10; the Plain set's \SI{0.2}{mm}
-period would call for \SI{0.8}{mm}, and the non-periodic FS~0.20 surface (Ra above
+period would call for \SI{0.8}{mm}, and the FS~0.20 profile, which shows no layer period (Ra above
 \SI{10}{\micro m}) for \SI{8}{mm}, both longer than the \fieldY\,mm field. The filter transmits
 50\% at $\lambda_c$, so Ra keeps about \transP\% of the amplitude of the Plain set's
 \SI{\pitchP}{mm} layer lines and \transA\% of the \SI{\pitchA}{mm} ones; Plain's Ra is therefore

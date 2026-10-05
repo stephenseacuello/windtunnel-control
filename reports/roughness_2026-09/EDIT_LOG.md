@@ -327,3 +327,22 @@ data dictionary, email)**
 - Results stated in Methods (τ, V₁/n₀ between rotors) falls under section discipline.
 - A log label taken as a description (`load-cutout`) falls under provenance.
 - An either/or that omits alternatives falls under argument and causal discipline.
+
+## Author corrections (5 Oct, after the third pass)
+
+**28. FS 0.20 layer height (Table 1, §2.2, §8, conclusion 5, Appendix C, data dictionary)**
+- Original: Table 1 gave FS 0.20's layer period as "—". §8 and conclusion 5 called FS 0.10 vs
+  FS 0.05 "the comparison least affected by layer height".
+- Problem: Stephen confirmed that FS 0.20 was printed with 0.10 mm layers. Its texture hides the
+  layer lines, so the scan shows no period, but the layer height is known.
+- Recommended:
+  - Table 1 gives 0.10 mm with a footnote: printed at 0.10 mm, period not measurable.
+  - §8 and conclusion 5 now say that all comparisons among the three fuzzy-skin sets are unaffected
+    by layer height.
+- Reason: correctness (author's record).
+
+**29. Deletions requested by Stephen**
+- §2.2: "The project does not record which prints were made from it, and the run logs record only
+  the thickness, so its other settings are not confirmed for the printed sets." (This reverses part
+  of entry 21.)
+- §2.3: the scan times (13:07–13:22). They were also removed from the data dictionary.

@@ -115,7 +115,7 @@ near 147 rpm and 4.0% at 864 rpm.
 | `801_Height.csv`, `80 1.png`; `80 2_Height.csv`, `80 2.png` | FS 0.20, two fields |
 
 Each CSV begins with quoted `key,value` lines, including:
-- `Measured date` (13:07–13:22 on 1 October, before the runs);
+- `Measured date` (1 October, before the runs);
 - `Measurement unit model` (VR-6100);
 - `Magnification` (160);
 - `XY Calibration` (1.853 µm per pixel);
@@ -236,7 +236,7 @@ The table has six blocks, identified by `analysis`:
 | `scans`, `columns`, `profiles` | Fields scanned, image columns, and columns kept as profiles (a column is dropped if more than 10% of its points are missing, or more than 2% between its first and last valid points). |
 | `Pa_um` | Mean absolute deviation of each levelled profile, averaged over profiles (µm). |
 | `Ra_lc025_um` | The same for the roughness profile: the levelled profile minus its ISO 16610-21 Gaussian mean line, λc = 0.25 mm (µm). |
-| `layer_period_um` | Peak of the mean profile spectrum between 60 and 320 µm; empty for FS 0.20, which has no distinct period. |
+| `layer_period_um` | Peak of the mean profile spectrum between 60 and 320 µm; empty for FS 0.20: it was printed with 0.10 mm layers, but its texture leaves no spectral peak. |
 | `Pa_scan_spread_um`, `Ra_scan_spread_um` | Difference between the two FS 0.20 fields. |
 
 ---
