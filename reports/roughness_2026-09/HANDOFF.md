@@ -88,6 +88,26 @@ Speed is at 600–1800 rpm.
   - speed, F(36,48) = 6.7: FS 0.20 is 1–6% faster up to 18.8 m/s and
     9–16% from 20.9 m/s.
 
+## Rotor speed at every load step (6 Oct; not yet in the report)
+- **Data.** T. Kang's per-sample tachometer records were shared on 6 Oct and are stored in
+  `inputs/taegu_rpm_20261001/raw/` (gzip, checksummed, README).
+- **Code.** `src/tacho.py` aligns them to the rig's dwells. The clock offset (0.9–1.9 s) comes from
+  his voltage channel alone, and the speed-model offset is kept as a cross-check. It also repairs
+  missed pulses and flags dwells where speed halves. `src/build_tacho.py` writes `build/tacho/`.
+- **Results.**
+  - Generator k = 31.3–31.5 mV/rpm and R = 19.7–19.9 Ω on every run.
+  - C_P,el against λ, and torque against speed.
+  - Within-dwell settling: median 0.9%; more than 2% in 15% of dwells.
+  - k falls about 0.6% over the session.
+- **Meeting.** `report/supplement.tex` is a one-page supplement for the 7 Oct meeting. A copy is on
+  the Desktop as `URI_VAWT_Rotor_Speed_Supplement_2026-10-07.pdf`.
+- **Background from Stephen (6 Oct).**
+  - The tachometer magnet was re-glued for each set.
+  - The wobble looked the same on all sets.
+  - The other DAQ channels are not an accelerometer; ask T. Kang what they are.
+  - Next round: redesigned base plate, Nano 33 BLE Sense.
+- **Revision 2 waits for the meeting.** The sent version is tagged `v1-sent-2026-10-05`.
+
 ## Rebuild
 ```bash
 python3 src/slicer.py inputs/slicer/turbine_default.3mf   # only if the .3mf changes
