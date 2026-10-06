@@ -30,14 +30,53 @@ Saved byte for byte from the attachments of his message "I finished processing t
 | `10279a4641b3d35061212a4f46da3c11a971915322d3880bffed7e43832b75d9` | `sweep_v1_smooth_repeat_20261001_summary.csv` |
 | `372adeb1ae8a25533414e19ba5659976b1eeedb858ccd49398141643b3c0d295` | `sweep_v1_unk_20261001_RPM_summary.csv` |
 
-## Not retrieved: the per-sample records
+## `raw/`: the per-sample records, shared 6 October 2026
 
-On 2 October (16:34 EDT) he also shared nine per-run records as Google Drive links:
-`sweep_v1_<run>_20261001_RPM.csv`, with Plain run 2 as `sweep_v1_smooth_repeat_20261001.csv`.
-- Opening them needs his sharing, so they were not retrieved.
-- They are the input to `RPM.m`.
-- With their clock matched to the rig's per-dwell `t_unix`, they would give rotor speed at every
-  load dwell.
+He shared these as Google Drive links on 2 October; access was granted to S. Eacuello on
+6 October, and the files were downloaded that day. They are stored gzip-compressed (`gzip -9 -n`)
+under their original names. `SHA256SUMS_uncompressed.txt` holds the checksums of the files as
+downloaded, and `SHA256SUMS_gz.txt` those of the stored copies. Every file decompresses to its
+original checksum.
+
+| file | run | size (MB) |
+|---|---|---|
+| `sweep_v1_smooth_20261001_RPM.csv.gz` | Plain, run 1 | 39.5 |
+| `sweep_v1_smooth_repeat_20261001.csv.gz` | Plain, run 2 (named without `_RPM`) | 17.5 |
+| `sweep_v1_Ra20_20261001_RPM.csv.gz` | FS 0.05, run 1 | 16.8 |
+| `sweep_v1_Ra20_repeat_20261001_RPM.csv.gz` | FS 0.05, run 2 | 16.9 |
+| `sweep_v1_Ra40_20261001_RPM.csv.gz` | FS 0.10, run 1 | 17.4 |
+| `sweep_v1_Ra40_repeat_20261001_RPM.csv.gz` | FS 0.10, run 2 | 17.6 |
+| `sweep_v1_Ra80_20261001_RPM.csv.gz` | FS 0.20, run 1 | 18.3 |
+| `sweep_v1_Ra80_repeat_20261001_RPM.csv.gz` | FS 0.20, run 2 | 18.5 |
+
+The `unk` record was not shared and is not needed.
+
+**Format.** Columns:
+- `Relative Time` (s, from the start of recording);
+- `Date`, `Time Stamp UTC`;
+- five channels in volts;
+- `Chn 1 Events`.
+
+The sampling rate is 359.97 Hz.
+
+**Channels.** Five voltage channels, called c1–c5 here.
+
+| channel | identity |
+|---|---|
+| c3 (sixth column) | The tachometer read by `RPM.m`: a proximity sensor triggered by a magnet glued to one blade of each rotor, one pulse per revolution. |
+| c1 | Tracks the rig's terminal voltage (r ≥ 0.995, about 0.25 × V). A divided generator voltage, inferred, not documented. |
+| c2, c4, c5 | Not documented. They correlate with voltage and speed (r 0.74–0.91). To be confirmed with T. Kang. |
+
+**Time base** (checked 6 Oct against the rig's per-dwell `t_unix`):
+- `Relative Time` is real time. Fitting the rig's dwell voltages with
+  V = k·n − R·I + b gives a clock drift within ±0.5%.
+- The `Time Stamp UTC` column advances about 8% faster than real time within a file. This is a
+  logging artefact; it gains 91 s over the 19-minute Plain run-1 file. Use it only at the first
+  sample of each recording segment.
+- Recording was paused and resumed in some files (`Resume` in `Chn 1 Events`). `Relative Time`
+  skips the pause, so each segment is anchored at its own first time stamp.
+- With that anchoring, the DAQ clock agrees with the rig clock within 1–4 s per run.
+- RPM.m's speeds use `Relative Time`, so the summaries are unaffected by the time-stamp drift.
 
 ## What `RPM.m` does
 
