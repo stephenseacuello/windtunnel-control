@@ -7,13 +7,16 @@ and an event column. Findings that the code relies on (checked 6 Oct 2026):
   logging artefact), so it is used only at the first sample of each recording segment.
 * Recording was sometimes paused; a "Resume" event starts a new segment, and Relative Time skips
   the pause. Each segment is anchored at its own first stamp.
-* Channel 3 (the sixth column) is the tachometer: a proximity sensor triggered by a magnet on one
-  blade, one pulse per revolution, rising through -0.75 V (as in RPM.m).
+* Channel 1 tracks the rig's terminal voltage (about 0.25 V/V); it aligns the clocks without any
+  speed or generator model.
+* Channel 3 (the sixth column) is the tachometer: a proximity sensor triggered by a magnet glued
+  to one blade, re-glued for each blade set; one pulse per revolution, rising through -0.75 V
+  (as in RPM.m).
 
-The residual clock offset between the DAQ and the rig host is fitted per run: the offset that
-makes the rig's dwell voltages best fit V = k*n - R*I + b with n the tachometer speed. With n
-measured, k is the generator constant and R the electrical source resistance, free of the rotor
-slowing that inflates the Thevenin R_int.
+The clock offset and drift between the DAQ and the rig host are fitted per run from channel 1
+alone. At that alignment, V = k*n - R*I + b gives the generator constant k and the electrical
+source resistance R, free of the rotor slowing that inflates the Thevenin R_int. The speed-model
+alignment (the offset that best fits that equation) is kept as a cross-check.
 """
 import numpy as np
 import pandas as pd
@@ -138,13 +141,62 @@ def fit_offset(tp, p):
     return best
 
 
+V_WINDOW_S = 0.3             # DAQ voltage window ending at the rig's measurement stamp
+
+
+def align_by_voltage(raw, p):
+    """Clock offset and drift from the DAQ voltage channel alone: the mapping of rig time to DAQ
+    time that maximises the correlation between the DAQ voltage (mean over V_WINDOW_S) and the
+    rig's measured terminal voltage over all dwells. Uses no speed or generator model."""
+    t, v = raw["t"], raw["v_daq"]
+    cs = np.r_[0.0, np.cumsum(v)]
+    t_rig = p.t_unix.to_numpy(float)
+    V = p.volts.to_numpy(float)
+    t0 = float(t_rig[0])
+    best = None
+    for stage in ("coarse", "fine"):
+        # drift fixed at zero: the voltage correlation is too flat to separate a drift from an
+        # offset, and the speed-model alignment finds |drift| <= 0.2% on every run
+        drifts = [0.0]
+        if stage == "coarse":
+            offs = np.arange(-10, 10.001, 0.1)
+        else:
+            offs = best["offset"] + np.arange(-0.2, 0.2001, 0.01)
+        for e in drifts:
+            for o in offs:
+                ends = t0 + (t_rig - t0) * (1 + e) + o
+                i1 = np.searchsorted(t, ends)
+                i0 = np.searchsorted(t, ends - V_WINDOW_S)
+                ok = (i1 > i0) & (i1 < len(t))
+                if ok.sum() < 0.9 * len(ends):
+                    continue
+                m = (cs[i1] - cs[i0])[ok] / (i1 - i0)[ok]
+                r = float(np.corrcoef(m, V[ok])[0, 1])
+                if best is None or r > best["r_voltage"]:
+                    best = dict(t0=t0, drift=float(e), offset=float(o), r_voltage=r)
+    return best
+
+
+def generator_fit(tp, p, fit):
+    """k, R, b of V = k n - R I + b at fan > 500 rpm, at a given alignment (robust, as _score)."""
+    q = p[p.fan_rpm > 500]
+    r = _score(tp, rig_to_daq(q.t_unix.to_numpy(float), fit), q.volts.to_numpy(float),
+               q.amps.to_numpy(float))
+    rms, c, n = r
+    return dict(k=float(c[0]), R=float(c[1]), b=float(c[2]), rms=rms, n_fit=n, n_dwells=len(q))
+
+
 def run_table(stem):
     """Per-dwell table for one run: rig measurements plus tachometer speed."""
     run = D.load(stem)
     p = dwells(run["points"])
-    tp, fixes = pulses(load_raw(stem))
-    fit = fit_offset(tp, p)
-    fit["pulse_repairs"] = fixes
+    raw = load_raw(stem)
+    tp, fixes = pulses(raw)
+    fit = align_by_voltage(raw, p)                      # primary: model-free
+    fit.update(generator_fit(tp, p, fit))
+    check = fit_offset(tp, p)                           # cross-check: speed-model alignment
+    fit.update(pulse_repairs=fixes, offset_speed_model=check["offset"],
+               drift_speed_model=check["drift"])
     ends = rig_to_daq(p.t_unix.to_numpy(float), fit)
     p["rotor_rpm"] = speed_at(tp, ends, WINDOW_S)
     p["rotor_rpm_early"] = speed_at(tp, ends - EARLY_S[1], EARLY_S[0] - EARLY_S[1])
@@ -154,6 +206,9 @@ def run_table(stem):
         lambda x: x.rolling(5, center=True, min_periods=3).median())
     p["speed_ok"] = (np.abs(p.rotor_rpm / ref - 1) <= 0.2) & p.rotor_rpm.notna()
     p.loc[~p.speed_ok, ["rotor_rpm", "rotor_rpm_early"]] = np.nan
+    # the early window can catch the same dropouts; a dwell cannot change speed by 20%
+    bad_early = np.abs(p.rotor_rpm_early / p.rotor_rpm - 1) > 0.2
+    p.loc[bad_early, "rotor_rpm_early"] = np.nan
     v = D.wind(p.fan_rpm.to_numpy(float))
     omega = 2 * np.pi * p.rotor_rpm / 60
     p["wind_mps"] = v

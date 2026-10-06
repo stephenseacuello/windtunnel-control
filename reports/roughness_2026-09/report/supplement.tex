@@ -1,0 +1,68 @@
+\documentclass[11pt]{article}
+\newcommand{\ReportDate}{7 October 2026}
+\input{preamble}
+\geometry{top=0.55in,bottom=0.6in,left=0.9in,right=0.9in,headsep=6pt}
+\input{../build/numbers}
+\input{../build/tacho/numbers}
+\graphicspath{{../build/tacho/}}
+\hypersetup{pdftitle={Rotor speed at every load step: supplement to the 5 October report},pdfauthor={Stephen Eacuello and Taegu Kang}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{flushleft}
+{\sffamily\small\color{ink2} SUPPLEMENT \quad·\quad 7 OCTOBER 2026 \quad·\quad FOR DISCUSSION}\\[0.4em]
+{\sffamily\Large\bfseries\color{navy} Rotor speed at every load step}\\[0.2em]
+{\sffamily\normalsize Supplement to the 5 October report, Stephen Eacuello and Taegu Kang}
+\end{flushleft}
+\vspace{-0.4em}
+{\color{rule}\hrule height 0.6pt}
+\vspace{0.4em}
+
+T.~Kang's tachometer records (360 samples per second) for the eight runs were shared on
+6 October. They are aligned to the rig's 1~s load steps using his generator-voltage channel alone:
+the two clocks differ by \tkOffLo--\SI{\tkOffHi}{s}, with no measurable drift. This gives rotor
+speed at all \tkDwells{} load steps (\tkRepairs{} missed pulses repaired, \tkFlagged{} steps excluded).
+
+\begin{enumerate}
+  \item \textbf{The generator is the same for every rotor, at every load step.} With speed measured,
+        $V=kn-RI+b$ gives $k=\tkKLo$--\SI{\tkKHi}{mV/rpm} and $R=\tkRLo$--\SI{\tkRHi}{\ohm} on all
+        eight runs. The report's inference that the gain
+        arises in the rotor, drawn from light-load data, now holds along every load ladder. Plain's
+        apparent source resistance in the report (\rintPlainHi--\SI{\rintPlainLo}{\ohm}) is about
+        \SI{20}{\ohm} of electrical resistance plus the rotor slowing under load.
+  \item \textbf{Power coefficient and torque} (\figref{fig:s1}). At \tkVmid{} and \SI{\vHi}{m/s},
+        FS~0.10 and FS~0.20 reach a higher $C_{P,\mathrm{el}}$ at a higher tip-speed ratio, and
+        their torque--speed curves sit at higher speed. Averaged over wind speed, peak power occurs at
+        $\lambda=\tkTsrP$ (Plain), \tkTsrA{} (FS~0.05), \tkTsrB{} (FS~0.10) and \tkTsrC{}
+        (FS~0.20). The generator's resistive loss barely changes the gains:
+        $\tkGenGainB\%$ and $\tkGenGainC\%$ at the generator input, against $\cPB\%$ and $\cPC\%$ at
+        the load.
+  \item \textbf{The 1~s steps are too short for full equilibrium.} Speed is still falling at the end
+        of a step (median \tkSettleMed\%; more than 2\% in \tkSettleTwo\% of steps), alike for all
+        rotors. Comparisons hold; absolute peak powers are slightly high.
+  \item \textbf{The generator constant fell} by \SI{\tkKDrift}{mV/rpm} per hour
+        $[\tkKDriftLo,\ \tkKDriftHi]$, \tkKDriftPct\% over the \SI{\tkSpanH}{h} session, probably as
+        the generator warmed. The textured rotors ran later, so this works slightly against them.
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.68\linewidth]{fig_supplement}
+  \caption{Electrical power coefficient against tip-speed ratio (a, b) and generator torque
+  $k_TI$ ($k_T=\SI{\tkKT}{N\,m/A}$) against rotor speed (c, d), all eight runs (solid: run~1;
+  dashed, hollow: run~2).}
+  \label{fig:s1}
+\end{figure}
+
+\vspace{-0.8em}
+{\small\textbf{Still open.} The data do not yet separate more aerodynamic torque from less resisting
+torque: a flow effect that depends on wind speed and losses that grow with speed both fit. The torque
+shown is the generator's electromagnetic torque, without bearing friction or the rotor's deceleration.
+The tachometer magnet was re-glued for each set; only Plain and FS~0.05 lost pulses at the highest
+speeds, consistent with a different magnet gap. Absolute $C_{P,\mathrm{el}}$ and $\lambda$ carry the
+wind-calibration uncertainty. \textbf{Next round:} a redesigned base plate with a longer shaft, a
+balanced tachometer target, longer load steps, and an Arduino Nano 33 BLE Sense logging air
+conditions and vibration.}
+
+\end{document}
