@@ -143,6 +143,9 @@ def main():
         "tkRLo": f"{F.R.min():.1f}", "tkRHi": f"{F.R.max():.1f}",
         "tkRmsLo": f"{F.rms.min():.2f}", "tkRmsHi": f"{F.rms.max():.2f}",
         "tkRepairs": str(int(F.pulse_repairs.sum())), "tkFlagged": str(int(F.flagged.sum())),
+        "tkRepairsPA": str(int(F[F.rotor.isin(["Plain", "FS 0.05"])].pulse_repairs.sum()
+                               + F[F.rotor.isin(["Plain", "FS 0.05"])].flagged.sum())),
+        "tkRepairsAll": str(int(F.pulse_repairs.sum() + F.flagged.sum())),
         "tkDwells": str(int(len(P))),
         "tkSettleMed": f"{-q.settle_pct.median():.1f}", "tkSettleTwo": f"{100 * (q.settle_pct.abs() > 2).mean():.0f}",
         "tkKDriftPct": f"{-100 * kdrift['slope'] * span_h / kdrift['k0']:.1f}", "tkSpanH": f"{span_h:.1f}",

@@ -414,3 +414,31 @@ These passages served none of the four research questions or duplicated another 
 - New recommendation 2: extend the mount's shaft, balance the magnet (or move it to the shaft), and
   log vibration with the tunnel node.
 - The fault plan notes that the reference rotor must be balanced first.
+
+## Revision 2 draft (7 Oct 2026): not sent; waiting for the meeting
+
+**36. Rotor speed at every load step**
+- Source: T. Kang's per-sample records, shared 6 Oct.
+- Title page: date "7 October 2026 (Revision 2, draft; first issued 5 October 2026)", with a
+  three-line revision note.
+- Abstract: the generator constants measured at every load step replace the light-load inference.
+  The gain "arises in the rotor and its mounting, not in the generator".
+- §2.2: a second rotor-speed paragraph covers:
+  - alignment from his voltage channel alone (clocks 0.9–1.9 s apart, no drift);
+  - speed over the last 0.6 s of each step;
+  - 55 tachometer faults (43 repaired, 12 steps excluded), 52 of them on Plain and FS 0.05;
+  - the magnet re-glued for each set.
+- §3: definitions of k, R, the generator torque k_T·I and λ per step.
+- §4.3: k = 31.3–31.5 mV/rpm and R = 19.7–19.9 Ω on all runs; the apparent R_int explained; λ at
+  P_max per rotor; generator-input gains. New figure: C_P,el against λ and torque against speed at
+  25.2 and 38.0 m/s.
+- Discussion, conclusion 3: the generator is measured identical, so the extra power reaches its
+  shaft. The aerodynamic and mechanical explanations are still not separated.
+- Limitations: a new "Measurement" bullet covers the settling within each step (median 0.9%; more
+  than 2% in 15% of steps), the generator constant falling 0.6% over the session, and torque that
+  excludes friction.
+- Recommendations: the Nano 33 BLE Sense on the redesigned base plate; speed logged on the rig
+  clock; longer load steps.
+- Appendix D: the Revision 2 package will add the raw records and a per-step table. This is not
+  built yet.
+- 16 pages (13 in v1). The sent version is tagged `v1-sent-2026-10-05`.

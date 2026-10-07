@@ -1,8 +1,9 @@
 \documentclass[11pt]{article}
-\newcommand{\ReportDate}{5 October 2026}
+\newcommand{\ReportDate}{7 October 2026}
 \input{preamble}
 \input{../build/numbers}
-\graphicspath{{../build/fig/}}
+\input{../build/tacho/numbers}
+\graphicspath{{../build/fig/}{../build/tacho/}}
 \hypersetup{pdftitle={Peak electrical power of a small vertical-axis wind turbine with 3D-printed textured blades},pdfauthor={Stephen Eacuello and Taegu Kang}}
 
 \begin{document}
@@ -20,12 +21,18 @@ with rotor speed and surface roughness}\\[1.0em]
 \textbf{Prepared by} & Stephen Eacuello and Taegu Kang \\
 \textbf{For}         & Prof.\ Vahid Jahangiri, Prof.\ Yeonho Jeong, Prof.\ Manbir Sodhi \\
 \textbf{Tests}       & 1 October 2026, URI wind tunnel \\
-\textbf{Date}        & \ReportDate \\
+\textbf{Date}        & \ReportDate{} (Revision~2, \textbf{draft}; first issued 5 October 2026) \\
 \textbf{Data}        & \texttt{URI\_VAWT\_Texture\_Data\_2026-10-01.zip} (accompanies this report)
 \end{tabular}}
 \end{flushleft}
 \vspace{0.2em}
 {\color{rule}\hrule height 0.6pt}
+\vspace{0.4em}
+{\small\noindent\textbf{Revision 2.} This revision adds rotor speed at every load step, from
+T.~Kang's per-sample tachometer records shared on 6 October (\secref{sec:wind}, \secref{sec:source}):
+the generator's constants measured along every load ladder, the power coefficient against tip-speed
+ratio, torque against speed, and the settling within each step. The peak-power results and
+conclusions 1, 2 and 4 are unchanged.}
 
 % --------------------------------------------------------------- abstract --
 \section*{Abstract}
@@ -41,8 +48,9 @@ electronic load measuring peak electrical power. Averaged over wind speed, FS~0.
 produced $\cPB\%$ $[\cPBlo,\ \cPBhi]$ and $\cPC\%$ $[\cPClo,\ \cPChi]$ more peak power than Plain
 (Tukey simultaneous 95\% intervals). The FS~0.05 difference, $\cPA\%$ $[\cPAlo,\ \cPAhi]$, was not
 resolved. The gains were largest at \bandLo--\SI{\bandHi}{m/s}. At light load FS~0.10 and FS~0.20
-also turned $\spdPB\%$ and $\spdPC\%$ faster than Plain, while the generator's voltage per rpm
-showed no resolved difference, so we infer that the gain arises in the rotor, not in the
+also turned $\spdPB\%$ and $\spdPC\%$ faster than Plain. Rotor speed measured at every load step
+gives the same generator constants for every rotor (\tkKLo--\SI{\tkKHi}{mV/rpm},
+\tkRLo--\SI{\tkRHi}{\ohm}), so the gain arises in the rotor and its mounting, not in the
 generator. Measured roughness (Ra, Pa) did not rank the sets by power; more surface measurement is
 needed to test whether it does. Each setting was one print, mounted once and run in order of
 increasing thickness, and Plain also had coarser layers (\SI{0.2}{mm} against \SI{0.1}{mm}). The
@@ -135,16 +143,22 @@ the same instrument and settings.
 \end{figure}
 
 \textbf{Rotor speed.}\label{sec:rpm} The rig's own speed input recorded nothing on 1 October.
-T.~Kang recorded rotor speed with a proximity sensor triggered by a small magnet glued to one blade
-of each rotor, giving one pulse per revolution, sampled at \SI{\tachoFs}{Hz}. The magnet adds an
-unbalanced mass to that blade; its mass and position on each rotor were not recorded. His script
-(\texttt{RPM.m}, in the data package) reports for each set point the most frequent speed over
-single revolutions, $n_0$, resolved to \resMin--\resHi\%. The load is at \SI{0}{A} while the fan
-settles, so we take $n_0$ as the light-load speed. The rig's data support this: the voltage at the
-first load step, $V_1$, follows $n_0$ closely ($V_1/n_0=\SI{\keMean}{mV/rpm}$, coefficient of
-variation \keCV\% over \nSpdPoints{} values). At \spLo~rpm the load is already at
-\SI{\loadArmmA}{mA} while the fan settles, so that set point is not used for speed. Speed during
-the load steps was not recorded in the summaries.
+T.~Kang recorded rotor speed with a proximity sensor triggered by a small magnet glued to one blade,
+re-glued for each set, giving one pulse per revolution, sampled at \SI{\tachoFs}{Hz}. The magnet
+adds an unbalanced mass to that blade; its mass and position were not recorded. His script
+(\texttt{RPM.m}) reports for each set point the most frequent speed over single revolutions,
+$n_0$, resolved to \resMin--\resHi\%. The load is at \SI{0}{A} while the fan settles, so we take
+$n_0$ as the light-load speed; the voltage at the first load step, $V_1$, follows it closely
+($V_1/n_0=\SI{\keMean}{mV/rpm}$, coefficient of variation \keCV\% over \nSpdPoints{} values). At
+\spLo~rpm the load is already at \SI{\loadArmmA}{mA} while the fan settles, so that set point is not
+used for $n_0$.
+
+His per-sample records give speed at every load step. They are aligned to the rig's steps using his
+generator-voltage channel alone, without any model: the two clocks differ by
+\tkOffLo--\SI{\tkOffHi}{s}, with no measurable drift. Speed is taken over the last \SI{0.6}{s} of
+each step from the pulse count. Of \tkRepairsAll{} tachometer faults, \tkRepairs{} missed pulses
+were repaired and \tkFlagged{} steps excluded where a run of missed pulses halved the apparent
+speed; \tkRepairsPA{} of the faults were on Plain and FS~0.05, at the highest speeds.
 
 \subsection{Test procedure}\label{sec:procedure}
 Each run visits \nSP{} fan set points, \spLo--\spHi~rpm in 100~rpm steps. At each set point the
@@ -215,6 +229,11 @@ slowing as the load rises. Both, and the light-load speed $n_0$, are compared be
 $\pmax$ is. The light-load tip-speed ratio is $\lambda_0=2\pi n_0R/(60\,v)$, and the electrical
 power coefficient is $C_{P,\mathrm{el}}=\pmax/(\tfrac12\rho A v^3)$ with standard air
 ($\rho=\SI{\rhoStd}{kg/m^3}$); it includes generator and rectifier losses.
+
+With speed $n$ at every step, $V=kn-RI+b$ is fitted to each run: $k$ is the generator constant and
+$R$ its electrical resistance, without the rotor slowing that $R_\mathrm{int}$ includes. The
+generator torque is $k_TI$, with $k_T=60k/(2\pi)$; it excludes bearing friction and the torque that
+decelerates the rotor during a step. The tip-speed ratio at each step is $\lambda=2\pi nR/(60\,v)$.
 
 % =============================================================== 4 RESULTS ==
 \section{Results}\label{sec:results}
@@ -293,6 +312,26 @@ no resolved difference between rotors (largest $\keDiff\%$ $[\keDifflo,\ \keDiff
 gain is larger from \SI{\spdSplitHi}{m/s}, where the band of largest power gains begins: \spdFromB\%
 and \spdFromC\%, against \spdBelowB\% and \spdBelowC\% below it.
 
+Measured at every load step, the generator is the same for every rotor: $k=\tkKLo$--\SI{\tkKHi}{mV/rpm}
+and $R=\tkRLo$--\SI{\tkRHi}{\ohm} on all eight runs, with $V$ fitted within
+\tkRmsLo--\SI{\tkRmsHi}{V}. Plain's apparent $R_\mathrm{int}$ (\rintPlainHi--\SI{\rintPlainLo}{\ohm})
+is therefore about \SI{20}{\ohm} of electrical resistance plus the rotor slowing under load. At
+\tkVmid{} and \SI{\vHi}{m/s}, FS~0.10 and FS~0.20 reach a higher $C_{P,\mathrm{el}}$ at a higher
+tip-speed ratio, and at equal speed they deliver more generator torque (\figref{fig:cptsr}).
+Averaged over wind speed, peak power occurs at $\lambda=\tkTsrP$ (Plain), \tkTsrA{} (FS~0.05),
+\tkTsrB{} (FS~0.10) and \tkTsrC{} (FS~0.20). The generator's resistive loss barely changes the
+gains: $\tkGenGainB\%$ and $\tkGenGainC\%$ at the generator input, against $\cPB\%$ and $\cPC\%$ at
+the load.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{fig_supplement}
+  \caption{Electrical power coefficient against tip-speed ratio (a, b) and generator torque $k_TI$
+  ($k_T=\SI{\tkKT}{N\,m/A}$) against rotor speed (c, d), from the speed at every load step; all
+  eight runs (solid: run~1; dashed, hollow: run~2).}
+  \label{fig:cptsr}
+\end{figure}
+
 \begin{table}[h]
 \centering\small
 \caption{Thévenin parameters and light-load speed $n_0$ relative to Plain, geometric mean over wind
@@ -350,14 +389,14 @@ interval.
 \FloatBarrier
 \section{Discussion}\label{sec:discussion}
 
-\textbf{Where the gain arises.} We infer that the textured rotors produce a higher open-circuit voltage
-because they turn faster: the voltage per rpm is the same for all rotors to within \keBound\%. With
-the same source resistance, they also turn faster at equal load current, that is, at about equal
-generator torque. The data do not show whether this comes from more aerodynamic torque or less
+\textbf{Where the gain arises.} The generator behaves identically for every rotor along every load
+ladder (\secref{sec:source}), so the extra power reaches its shaft: the textured rotors turn faster
+and, at equal speed, deliver more torque. The data do not show whether this comes from more aerodynamic torque or less
 resisting torque. All rotors used the same mount, generator and bearings, so less resisting torque
 would have to come from the blade sets themselves (mass, balance or mounting, none measured) or from
 a change in the shared parts during the session. Two mechanical effects are candidates: the
-tachometer magnet unbalances one blade, and the rotor wobbled at higher wind speeds. Either could
+tachometer magnet, re-glued for each set, unbalances one blade, and the rotor wobbled at higher wind
+speeds. Either could
 change the resisting torque and differ between mountings.
 
 \textbf{Why the gains depend on wind speed.} The gains peak at chord Reynolds numbers of
@@ -385,7 +424,12 @@ roughness ranks power (Recommendation~5).
   \item \textbf{Mechanical.} The tachometer magnet on one blade unbalances each rotor, and the rotor
         wobbled on the mount at higher wind speeds. Neither was measured, so neither can be
         excluded as a cause of the differences.
-  \item \textbf{Other.} Rotor speed is known only at light load. Wind speed comes from the tunnel
+  \item \textbf{Measurement.} The \SI{1}{s} load steps are too short for full equilibrium: speed is
+        still falling at the end of a step (median \tkSettleMed\%, more than 2\% in \tkSettleTwo\% of
+        steps), alike for all rotors, so absolute peak powers are slightly high. The generator
+        constant fell \tkKDriftPct\% over the session, probably as the generator warmed; this works
+        slightly against the later, textured rotors. The generator torque excludes bearing friction.
+  \item \textbf{Other.} Wind speed comes from the tunnel
         calibration (\appref{app:cal}), which affects absolute wind speed and $C_{P,\mathrm{el}}$
         but not the comparison between rotors, made at identical fan speeds. Air density was not
         recorded, and no blockage correction is applied.
@@ -398,9 +442,9 @@ roughness ranks power (Recommendation~5).
         more peak electrical power than Plain, averaged over \vLo--\vHi\,\si{m/s}. The FS~0.05
         difference, $\cPA\%$ $[\cPAlo,\ \cPAhi]$, was not resolved.
   \item The gains were largest at \bandLo--\SI{\bandHi}{m/s}, where FS~0.20 reached $\gMaxC\%$.
-  \item The gains came with a higher open-circuit voltage from faster rotation ($\spdPB\%$ and
-        $\spdPC\%$ at light load), with no resolved change in the generator's voltage per rpm. We
-        infer that they arise in the rotor, not in the generator.
+  \item The gains came with faster rotation ($\spdPB\%$ and $\spdPC\%$ at light load) and more
+        torque at equal speed, while the generator's constants, measured at every load step, were the
+        same for every rotor. They arise in the rotor and its mounting, not in the generator.
   \item Ra and Pa from one field per set did not rank the rotors by power; more surface measurement
         is needed to test whether roughness does.
   \item With one print and one mounting per texture, a fixed run order, coarser layers on Plain and
@@ -416,11 +460,12 @@ roughness ranks power (Recommendation~5).
         set twice, run in an interleaved order, and re-run Plain after every third rotor.
   \item \textbf{Stiffen and balance the mount.} Extend the cylindrical shaft that the rotor is
         inserted into, to reduce the wobble at higher wind speeds. Balance the tachometer magnet
-        with equal masses on the other two blades, or move it to the shaft. Connect the rig's
-        tunnel node, which logs vibration and ambient air, on every run.
-  \item \textbf{Log rotor speed at every step,} on the rig's own pulse input or on T.~Kang's
-        acquisition synchronised to the rig clock. This gives the power coefficient against
-        tip-speed ratio along each ladder. A spin-down test of each mounted rotor would separate
+        with equal masses on the other two blades, or move it to the shaft. On the redesigned base
+        plate, connect the rig's tunnel node (an Arduino Nano 33 BLE Sense), which logs air
+        temperature, pressure and vibration, on every run.
+  \item \textbf{Log rotor speed at every step on the rig clock,} on the rig's own pulse input; this
+        revision aligned T.~Kang's records after the fact. Use longer load steps, since the
+        \SI{1}{s} steps did not settle. A spin-down test of each mounted rotor would separate
         aerodynamic from resisting torque.
   \item \textbf{Extend the wind calibration} over the full test range, and record air temperature
         and pressure on every run.
@@ -546,7 +591,8 @@ T.~Kang's rotor-speed summaries and \texttt{RPM.m} (\texttt{2\_rotor\_speed/}), 
 height maps (\texttt{3\_surface\_scans/}), the analysis-ready tables, including every run's peak
 power and rotor speed at every set point (\texttt{4\_derived/}), reference files
 (\texttt{5\_reference/}), the data figures (\texttt{6\_figures/}) and the analysis code
-(\texttt{7\_code/}). \texttt{README.md} explains the layout and \texttt{DATA\_DICTIONARY.md} every
+(\texttt{7\_code/}). The Revision~2 package also holds T.~Kang's per-sample records and a table of
+speed at every load step. \texttt{README.md} explains the layout and \texttt{DATA\_DICTIONARY.md} every
 column. \texttt{7\_code/build\_report.py} regenerates every number in this report from the raw
 files.
 
