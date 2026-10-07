@@ -155,3 +155,40 @@ These come from the v1 report and the supplement:
 Still open:
 - ask T. Kang what his three undocumented channels are;
 - Revision 2 of the report is drafted and waits for the professors' comments.
+
+## Follow-up (7 Oct, after the meeting)
+
+**Naming.** Stephen confirms "Ra 320" is the label for FS 0.805 mm, following the label pattern;
+it is not a measured Ra.
+
+**Email to Cam drafted.** A Gmail draft to Cam Amaral, I²(s) Print Lab, via coe3d@etal.uri.edu. It
+asks:
+- which nozzle, printer and spool were used for each tested set;
+- the source of the "Ra 20" (0.050 mm) set;
+- the plain set's settings;
+- the August "40 µm" reprints;
+- the sliced files;
+- time and cost per blade, and whether a shorter span helps;
+- whether "Ra 320" (0.805 mm) and "Ra 160" (0.40 mm) are feasible;
+- a quote for 12 sets (two per level).
+
+**From the email history**
+- Stephen's 1 Oct note to Prof. Sodhi raised doubts about layer heights and labels on the printed
+  blades.
+- Andrew Muszynski's August blades were printed without a 0.2 mm nozzle (0.08 mm layers).
+- The ISE printer never received a 0.2 mm nozzle; 0.4 mm nozzles were delivered instead.
+- The slicer project specifies a 0.2 mm nozzle, but no email confirms which nozzle was mounted for
+  each tested set.
+- Tim Richards relayed in July that a blade takes about 2 h to print.
+- Prof. Sodhi wrote in July that 0.5–0.8 mm fuzzy skin gives a texture "you can really feel".
+
+**From the slicer file**
+- The unused third plate is "10 RA" at 0.025 mm. The label pattern is Ra ≈ 400 × thickness, with
+  Ra in µm and thickness in mm.
+- The blade mesh gives a wall of about 1.85 mm against 1.79 mm in `rotor_geometry.json`. Check
+  which is right before Revision 2 and before the CFD.
+
+**Nano 33 BLE Sense.** It can measure vibration and wobble, and shedding frequency at 400 Hz or
+faster. It cannot measure lift or drag; a cheap bar load cell with an HX711 board could.
+
+**CFD.** Planned in `cfd/PLAN.md` (OpenFOAM v2606 is installed). Not started.
