@@ -77,7 +77,7 @@ with, for example, `pandas.read_csv(path, comment="#")`.
 T. Kang recorded rotor speed during the session on his own acquisition: a proximity sensor
 triggered by a magnet glued to one blade of each rotor (one pulse per revolution), sampled at
 359.97 Hz. His recordings started with the rig's runs. The rig did not log rotor speed. These are the summaries he
-sent, byte for byte. His per-sample records are not included.
+sent, byte for byte. His per-sample records are in `raw/` (Revision 2).
 
 | file | content |
 |---|---|
@@ -105,6 +105,21 @@ about 147 rpm. The resolution is the larger of 1 rpm and n²/(60 × 359.97): 1.1
 near 147 rpm and 4.0% at 864 rpm.
 
 ---
+
+### `raw/sweep_<run>_RPM.csv.gz`: T. Kang's per-sample records (Revision 2)
+
+One gzip file per run, as shared on Google Drive (6 Oct 2026); Plain run 2 is named without `_RPM`.
+`SHA256SUMS_uncompressed.txt` and `SHA256SUMS_gz.txt` give the checksums of the files as shared and
+as stored.
+
+| column | meaning |
+|---|---|
+| `Relative Time` | Seconds from the start of recording, 359.97 Hz. Real time; skips paused intervals. |
+| `Date`, `Time Stamp UTC` | Wall clock at 1 s resolution. Runs about 8% fast within a file; use only at the first sample of a segment. |
+| `Volt` (1st) | Tracks the rig's terminal voltage (about 0.25 V/V); used to align the clocks. Not documented by T. Kang. |
+| `Volt` (2nd, 4th, 5th) | Not documented; not an accelerometer. |
+| `Volt` (3rd) | Tachometer: proximity sensor and a magnet on one blade, one pulse per revolution, rising through −0.75 V (RPM.m). |
+| `Chn 1 Events` | `Resume` where recording restarted after a pause; a new time-base segment starts there. |
 
 ## 3_surface_scans/: Keyence VR-6000 height maps (raw)
 
@@ -241,6 +256,33 @@ The table has six blocks, identified by `analysis`:
 | `Pa_scan_spread_um`, `Ra_scan_spread_um` | Difference between the two FS 0.20 fields. |
 
 ---
+
+### `rotor_speed_by_dwell.csv`: one row per load dwell (Revision 2; report Section 4.3, Fig. 8)
+
+| column | meaning |
+|---|---|
+| `rotor`, `run`, `run_name` | Blade set, run (1 or 2) and run file stem. |
+| `fan_rpm_cmd`, `wind_mps` | Fan set point and the calibrated wind speed. |
+| `t_unix`, `demand_a`, `volts`, `amps`, `watts` | The rig's dwell record (`1_rig_sweeps/sweep_<run>_points.csv`). |
+| `rotor_rpm` | Rotor speed over the last 0.6 s of the dwell, from the aligned tachometer record. |
+| `rotor_rpm_early` | Rotor speed 1.0–0.6 s before the dwell's stamp; with `rotor_rpm`, the settling within a dwell. |
+| `speed_ok` | False where a run of missed pulses halved the apparent speed; those speeds are blank. |
+| `tip_speed_ratio` | 2π n R / (60 v), on the attachment radius R. |
+| `cp_el` | watts / (½ ρ A v³), standard air. |
+| `torque_gen_nm` | Generator electromagnetic torque k_T × amps, k_T = 60 k / (2π) from the mean fitted k. Excludes bearing friction and rotor deceleration. |
+| `p_gen_in_w` | Power into the generator EMF: watts + I² R − b I, with the mean fitted R and b. |
+
+### `generator_by_run.csv`: one row per run (Revision 2; report Sections 2.2 and 4.3)
+
+| column | meaning |
+|---|---|
+| `clock_offset_s` | Seconds added to the rig's `t_unix` to reach the DAQ clock, from the voltage channel alone. |
+| `clock_offset_speed_model_s`, `clock_drift_speed_model` | The same from the speed model (cross-check), with a fitted clock-rate difference. |
+| `r_voltage` | Correlation of the DAQ voltage channel with the rig's terminal voltage at that offset. |
+| `k_v_per_rpm`, `r_ohm`, `b_v`, `fit_rms_v` | Fit of V = k n − R I + b over the dwells above 500 rpm (one robust refit). |
+| `n_fit`, `n_dwells` | Dwells kept in the fit, and available. |
+| `pulse_repairs`, `flagged` | Missed pulses filled; dwells with `speed_ok` = False. |
+| `start_h` | Run start, hours after the first run (for the generator-constant drift). |
 
 ## 5_reference/
 

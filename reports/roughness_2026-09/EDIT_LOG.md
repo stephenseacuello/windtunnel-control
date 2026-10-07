@@ -442,3 +442,16 @@ These passages served none of the four research questions or duplicated another 
 - Appendix D: the Revision 2 package will add the raw records and a per-step table. This is not
   built yet.
 - 16 pages (13 in v1). The sent version is tagged `v1-sent-2026-10-05`.
+
+**37. Revision 2 draft: layout and package (7 Oct)**
+- Figures share pages more readily. The float barrier moved from before the Discussion to before
+  the Limitations, so there are no near-empty figure pages. The report is now 14 pages.
+- Figure order follows the citations: Fig. 7 is light-load speed, Fig. 8 the power coefficient and
+  torque.
+- Revision 2 data package (`out/URI_VAWT_Texture_Data_2026-10-01_rev2.zip`, 88 files, 36.9 MB):
+  - adds `2_rotor_speed/raw/`, `4_derived/rotor_speed_by_dwell.csv`, `4_derived/generator_by_run.csv`
+    and `7_code/tacho.py` and `build_tacho.py`;
+  - reproduces exactly, including with numpy 1.26, scipy 1.12, pandas 2.2 and matplotlib 3.8.
+- The builder no longer deletes earlier revisions in `out/`, so the v1 package is kept.
+- The draft package is git-ignored until final.
+- The zip exceeds Gmail's 25 MB limit and must go by link or be split.

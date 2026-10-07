@@ -22,8 +22,9 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 REPO = ROOT.parent.parent
 BUILD = ROOT / "build"
-NAME = "URI_VAWT_Texture_Data_2026-10-01"
-REPORT = "URI_VAWT_Texture_Report_2026-10-01.pdf"
+REV = "rev2"                       # Revision 2; v1 (as sent 5 Oct) is tagged v1-sent-2026-10-05
+NAME = f"URI_VAWT_Texture_Data_2026-10-01_{REV}"
+REPORT = f"URI_VAWT_Texture_Report_2026-10-01_{REV}.pdf"
 PKG = ROOT / "out" / NAME
 
 sys.path.insert(0, str(HERE))
@@ -32,6 +33,8 @@ import data as D  # noqa: E402
 SCAN_FILES = ["baseline_Height.csv", "20 1_Height.csv", "40 1_Height.csv", "801_Height.csv",
               "80 2_Height.csv", "baseline.png", "20.png", "40.png", "80 1.png", "80 2.png"]
 CODE = {
+    "tacho.py": "Aligns T. Kang's raw tachometer records to the rig's load dwells; speed at every dwell.",
+    "build_tacho.py": "Speed-at-every-dwell results (Fig. 8, Section 4.3): python3 7_code/build_tacho.py after build_report.py",
     "build_report.py": "Regenerates every number, table and data figure in the report: python3 7_code/build_report.py",
     "data.py": "Loads the run and rotor-speed files and reduces each load ladder (peak power, Thevenin fit).",
     "analysis.py": "Statistics: Tukey comparisons, nested ANOVA, permutation test, drift model, rotor speed.",
@@ -47,14 +50,19 @@ DERIVED = {
     "peak_power_by_run.csv": "Peak electrical power per run and set point, both estimators (report Figs 4 and 5, Table 3).",
     "thevenin_by_run.csv": "V = V_oc - I*R_int fitted per run and set point (report Section 4.3, Table 4).",
     "rotor_by_wind_speed.csv": "Per rotor and set point: geometric-mean peak power, C_P,el, Thevenin parameters, rotor speed, tip-speed ratio, changes vs Plain (report Figs 4, 6 and 7).",
-    "rotor_speed_by_run.csv": "T. Kang's rotor speed per run and set point (taken as light-load from 600 rpm), with tip-speed ratio and the first-step voltage check (report Sections 2.2 and 4.3, Fig. 7).",
+    "rotor_speed_by_run.csv": "T. Kang's rotor speed per run and set point (taken as light-load from 600 rpm), with tip-speed ratio and the first-step voltage check (report Sections 2.2 and 4.3, Fig. 8).",
     "anova.csv": "Analyses of variance of ln P_max (with two sensitivity analyses), ln R_int, ln V_oc and ln n_0 (report Appendix A).",
     "surface_roughness.csv": "Pa, Ra and layer period per blade set (report Sections 2.4 and 4.4, Table 5).",
 }
 FIGURES = ["fig_ladders", "fig_surface", "fig_power", "fig_runs", "fig_gain", "fig_speed",
-           "fig_calibration"]
+           "fig_supplement", "fig_calibration"]
 FIGNUM = dict(fig_ladders=2, fig_surface=3, fig_power=4, fig_runs=5, fig_gain=6, fig_speed=7,
-              fig_calibration=8)                                 # Fig. 1 is the TikZ rig diagram
+              fig_supplement=8, fig_calibration=9)                    # Fig. 1 is the TikZ rig diagram
+DERIVED_TACHO = {
+    "rotor_speed_by_dwell.csv": "Rotor speed at every load dwell from T. Kang's raw records, with tip-speed ratio, "
+                                "C_P,el and generator torque (report Section 4.3, Fig. 8).",
+    "generator_by_run.csv": "Per run: clock alignment and the generator fit V = k n - R I + b (report Sections 2.2 and 4.3).",
+}
 
 
 def sha256(p):
@@ -85,9 +93,10 @@ def copy(src, dst):
 
 
 def main():
-    # remove this package and any older build output, so nothing stale can be sent by mistake
-    for old in list(PKG.parent.glob("URI_VAWT_*")) + list(PKG.parent.glob("report.pdf")):
-        shutil.rmtree(old) if old.is_dir() else old.unlink()
+    # replace this build only; earlier revisions in out/ are kept
+    for old in (PKG, PKG.with_suffix(".zip")):
+        if old.exists():
+            shutil.rmtree(old) if old.is_dir() else old.unlink()
     PKG.mkdir(parents=True)
     desc = {}
 
@@ -113,7 +122,13 @@ def main():
                                                       "per set point, taken as light-load from 600 rpm (RPM.m output). Verbatim.")
     copy(D.RPM_DIR / "RPM.m", PKG / "2_rotor_speed" / "RPM.m")
     desc[PKG / "2_rotor_speed" / "RPM.m"] = ("T. Kang's MATLAB script that made the summaries from his tachometer "
-                                             "record (record not included). Verbatim.")
+                                             "records (raw/). Verbatim.")
+    raw = D.RPM_DIR.parent / "raw"
+    for f in sorted(raw.iterdir()):
+        dst = PKG / "2_rotor_speed" / "raw" / f.name
+        copy(f, dst)
+        desc[dst] = ("T. Kang's per-sample record, 360 Hz (gzip -9 -n of the file as shared). Verbatim."
+                     if f.suffix == ".gz" else "SHA-256 checksums of the raw records.")
 
     # 3 - profilometer height maps, verbatim
     for fn in SCAN_FILES:
@@ -141,10 +156,15 @@ def main():
     copy(D.SLICER_JSON, ref / "turbine_default_summary.json")
     desc[ref / "turbine_default_summary.json"] = "Summary of the slicer project turbine_default.3mf, written by 7_code/slicer.py."
 
+    for fn, what in DERIVED_TACHO.items():
+        dst = PKG / "4_derived" / fn
+        copy(BUILD / "tacho" / "derived" / fn, dst)
+        desc[dst] = what
+
     # 6 - figures; the report itself
     for stem in FIGURES:
         dst = PKG / "6_figures" / f"{stem}.png"
-        copy(BUILD / "fig" / f"{stem}.png", dst)
+        copy((BUILD / "tacho" if stem == "fig_supplement" else BUILD / "fig") / f"{stem}.png", dst)
         desc[dst] = f"Report Fig. {FIGNUM[stem]} (PNG)."
     copy(ROOT / "report" / "report.pdf", PKG / REPORT)
     desc[PKG / REPORT] = "The report this package accompanies."
@@ -175,6 +195,14 @@ def main():
         assert sha256(BUILD / "derived" / fn) == sha256(PKG / "rebuilt" / "derived" / fn), f"{fn} does not reproduce"
     strip = lambda p: [l for l in open(p) if not l.startswith("%")]
     assert strip(BUILD / "numbers.tex") == strip(PKG / "rebuilt" / "numbers.tex"), "numbers.tex does not reproduce"
+    run = subprocess.run([sys.executable, str(PKG / "7_code" / "build_tacho.py")], capture_output=True, text=True,
+                         env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+    assert run.returncode == 0, run.stderr[-2000:]
+    for fn in DERIVED_TACHO:
+        assert sha256(BUILD / "tacho" / "derived" / fn) == sha256(PKG / "rebuilt" / "tacho" / "derived" / fn), \
+            f"{fn} does not reproduce"
+    assert strip(BUILD / "tacho" / "numbers.tex") == strip(PKG / "rebuilt" / "tacho" / "numbers.tex"), \
+        "tacho numbers.tex does not reproduce"
     shutil.rmtree(PKG / "rebuilt")
     assert not list(PKG.rglob("__pycache__")), "bytecode cache left in the package"
 

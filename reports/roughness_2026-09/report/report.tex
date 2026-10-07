@@ -4,6 +4,8 @@
 \input{../build/numbers}
 \input{../build/tacho/numbers}
 \graphicspath{{../build/fig/}{../build/tacho/}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}\setcounter{totalnumber}{4}\setcounter{topnumber}{3}
 \hypersetup{pdftitle={Peak electrical power of a small vertical-axis wind turbine with 3D-printed textured blades},pdfauthor={Stephen Eacuello and Taegu Kang}}
 
 \begin{document}
@@ -323,15 +325,6 @@ Averaged over wind speed, peak power occurs at $\lambda=\tkTsrP$ (Plain), \tkTsr
 gains: $\tkGenGainB\%$ and $\tkGenGainC\%$ at the generator input, against $\cPB\%$ and $\cPC\%$ at
 the load.
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{fig_supplement}
-  \caption{Electrical power coefficient against tip-speed ratio (a, b) and generator torque $k_TI$
-  ($k_T=\SI{\tkKT}{N\,m/A}$) against rotor speed (c, d), from the speed at every load step; all
-  eight runs (solid: run~1; dashed, hollow: run~2).}
-  \label{fig:cptsr}
-\end{figure}
-
 \begin{table}[h]
 \centering\small
 \caption{Thévenin parameters and light-load speed $n_0$ relative to Plain, geometric mean over wind
@@ -357,6 +350,15 @@ Rotor & $V_\mathrm{oc}$ & $R_\mathrm{int}$ & $n_0$ & $C_{P,\mathrm{el}}$ (\%) & 
   (b) $n_0$ relative to Plain. (c) First-step voltage per rpm, $V_1/n_0$, with the least-squares
   line $V_1=a+bn_0$.}
   \label{fig:speed}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{fig_supplement}
+  \caption{Electrical power coefficient against tip-speed ratio (a, b) and generator torque $k_TI$
+  ($k_T=\SI{\tkKT}{N\,m/A}$) against rotor speed (c, d), from the speed at every load step; all
+  eight runs (solid: run~1; dashed, hollow: run~2).}
+  \label{fig:cptsr}
 \end{figure}
 
 \subsection{Surface roughness}\label{sec:roughness}
@@ -386,7 +388,6 @@ interval.
 \end{table}
 
 % ============================================================ 5 DISCUSSION ==
-\FloatBarrier
 \section{Discussion}\label{sec:discussion}
 
 \textbf{Where the gain arises.} The generator behaves identically for every rotor along every load
@@ -411,6 +412,7 @@ differences may not come from texture at all. More surface measurement is needed
 roughness ranks power (Recommendation~5).
 
 % ================================================================ 6 LIMITS ==
+\FloatBarrier
 \section{Limitations}\label{sec:limits}
 \begin{itemize}
   \item \textbf{One print, one mounting.} Each texture level is one print mounted once, so print and

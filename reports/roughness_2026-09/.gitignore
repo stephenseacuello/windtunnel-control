@@ -1,7 +1,3 @@
-# LaTeX by-products
-report/*.aux
-report/*.fdb_latexmk
-report/*.fls
-report/*.log
-report/*.out
-report/*.toc
+# Revision 2 package drafts: rebuilt after the 7 Oct meeting; commit only the final build
+out/*_rev2/
+out/*_rev2.zip

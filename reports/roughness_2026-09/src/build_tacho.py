@@ -1,7 +1,7 @@
 """Speed at every load dwell from T. Kang's per-sample records: candidate results for a revision.
 
-Writes to build/tacho/ only; the v1 report build is untouched.
-    python3 src/build_tacho.py
+Writes build/tacho/ (figures, tables, numbers.tex for the report). Run after build_report.py.
+    python3 src/build_tacho.py      (in the data package: python3 7_code/build_tacho.py)
 """
 import math
 
@@ -73,6 +73,21 @@ def main():
     kdrift = dict(slope=coef[1], lo=coef[1] - tq * se, hi=coef[1] + tq * se, k0=coef[0])
 
     P.to_csv(OUT / "per_dwell.csv", index=False)
+    # tidy tables for the data package (4_derived/)
+    (OUT / "derived").mkdir(exist_ok=True)
+    tidy = P.rename(columns={"stem": "run_name", "fan_rpm": "fan_rpm_cmd", "tsr": "tip_speed_ratio"})[
+        ["rotor", "run", "run_name", "fan_rpm_cmd", "wind_mps", "t_unix", "demand_a", "volts", "amps",
+         "watts", "rotor_rpm", "rotor_rpm_early", "speed_ok", "tip_speed_ratio", "cp_el",
+         "torque_gen_nm", "p_gen_in_w"]]
+    tidy.to_csv(OUT / "derived" / "rotor_speed_by_dwell.csv", index=False, float_format="%.6g")
+    gen = F.rename(columns={"stem": "run_name", "offset": "clock_offset_s",
+                            "offset_speed_model": "clock_offset_speed_model_s",
+                            "drift_speed_model": "clock_drift_speed_model", "k": "k_v_per_rpm",
+                            "R": "r_ohm", "b": "b_v", "rms": "fit_rms_v"})[
+        ["rotor", "run", "run_name", "clock_offset_s", "clock_offset_speed_model_s",
+         "clock_drift_speed_model", "r_voltage", "k_v_per_rpm", "r_ohm", "b_v", "fit_rms_v", "n_fit",
+         "n_dwells", "pulse_repairs", "flagged", "start_h"]]
+    gen.to_csv(OUT / "derived" / "generator_by_run.csv", index=False, float_format="%.6g")
     F.drop(columns=["t0"]).to_csv(OUT / "run_fits.csv", index=False)
     pd.DataFrame([kdrift]).to_csv(OUT / "generator_drift.csv", index=False)
     S.to_csv(OUT / "peak_by_setpoint.csv", index=False)
