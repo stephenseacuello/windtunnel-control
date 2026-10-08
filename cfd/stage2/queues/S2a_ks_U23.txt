@@ -1,0 +1,22 @@
+# Stage 2 priority S2a (PLAN.md Stage 2b): sand-grain sweep at 23 m/s on the wall-function mesh.
+# kOmegaSST + nutkRoughWallFunction (Ks on the painted faces, 0 on the end faces, Cs 0.5);
+# Ks = 0 is the smooth reference on the same mesh. h0 = 0.88 mm: first cell centre 0.44 mm,
+# above the largest Ks (400 um). Columns: alpha_deg U_ms model wall [key=value ...]; ks in um.
+# Order: alpha 180 first (convex side into the wind: the boundary layer can separate before the
+# tips, so wall shear can move separation; at alpha 0 the square tips fix it), then 0, then 90.
+180  23.0  SST  wf  ks=0
+180  23.0  SST  wf  ks=50
+180  23.0  SST  wf  ks=100
+180  23.0  SST  wf  ks=200
+180  23.0  SST  wf  ks=400
+0    23.0  SST  wf  ks=0
+0    23.0  SST  wf  ks=50
+0    23.0  SST  wf  ks=100
+0    23.0  SST  wf  ks=200
+0    23.0  SST  wf  ks=400
+# alpha 90 (flow from tip A to tip B): the same cost as the others, so included last
+90   23.0  SST  wf  ks=0
+90   23.0  SST  wf  ks=50
+90   23.0  SST  wf  ks=100
+90   23.0  SST  wf  ks=200
+90   23.0  SST  wf  ks=400

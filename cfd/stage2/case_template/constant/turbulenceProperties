@@ -1,0 +1,51 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Stage 2 section case (cfd/stage2; copied from cfd/section2d). Numbers come from
+  system/caseParameters, which cfd/stage2/run_case.py writes for each case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+simulationType  RAS;
+
+RAS
+{
+    // kOmegaSST (fully turbulent) or kOmegaSSTLM (gamma-ReThetat transition)
+    model           $turbulenceModel;
+    turbulence      on;
+    printCoeffs     on;
+
+    // Only the <model>Coeffs dictionary of the selected model is read (RASModel.C:
+    // optionalSubDict(type + "Coeffs")); kOmegaSSTLM derives from kOmegaSST and reads
+    // the same decay-control entries from kOmegaSSTLMCoeffs.
+    kOmegaSSTCoeffs
+    {
+        // Free-stream decay control (Spalart and Rumsey 2007; kOmegaSSTBase.C, v2606):
+        // sources betaStar*omegaInf*kInf (k) and beta*omegaInf^2 (omega) balance the
+        // free-stream destruction, so k and omega keep their far-field values up to
+        // the section. With --decay control (default) kInf = kInlet and omegaInf =
+        // omegaInlet; with --decay precompensate it is off (kInf = omegaInf = 0).
+        decayControl    $freestreamDecayControl;
+        kInf            $kAmbient;
+        omegaInf        $omegaAmbient;
+    }
+
+    kOmegaSSTLMCoeffs
+    {
+        $kOmegaSSTCoeffs;
+        // The lambda (pressure-gradient) iteration for Re_theta,t0 runs to lambdaErr
+        // (1e-6) whatever this is; maxLambdaIter (default 10) only sets when the
+        // "Number of lambda iterations exceeds maxLambdaIter" warning is printed
+        // (kOmegaSSTLM.C, v2606).
+        maxLambdaIter   50;
+    }
+}
+
+// ************************************************************************* //

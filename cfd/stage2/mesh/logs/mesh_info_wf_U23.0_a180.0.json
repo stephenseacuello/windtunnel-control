@@ -1,0 +1,112 @@
+{
+ "n_points": 200184,
+ "n_cells": 103300,
+ "n_faces": 409992,
+ "n_internal_faces": 202817,
+ "n_wall_faces": 475,
+ "n_blade_faces": 459,
+ "n_bladeEnds_faces": 16,
+ "n_farfield_faces": 100,
+ "level": "wf",
+ "alpha_deg_wake": 180.0,
+ "params": {
+  "h0": 0.0008800000000000001,
+  "r_bl": 1.15,
+  "n_layers": 2,
+  "ds_max": 0.0003,
+  "ds_corner": 0.0002,
+  "ds_end_max": 0.00025,
+  "g_t": 1.12,
+  "s_near": 0.0003,
+  "d_near": 0.006,
+  "s_wake": 0.0006,
+  "s_wake2": 0.0012,
+  "g_out": 0.1,
+  "s_far": 0.08
+ },
+ "lambda_fan": 2.0,
+ "r_farfield_m": 1.296,
+ "c_ref_m": 0.048,
+ "dz_m": 0.001,
+ "wake_chords": {
+  "x_up": -0.6,
+  "x1": 4.0,
+  "x2": 8.0,
+  "w1": 0.75,
+  "w2": 1.5
+ },
+ "h0_m": 0.0008800000000000002,
+ "ring": {
+  "n_layers": 2,
+  "n_wall_nodes": 475,
+  "thickness_m": 0.001892,
+  "first_cell_m": 0.0008800000000000002,
+  "last_layer_m": 0.0010119999999999999,
+  "edge_spacing_m": {
+   "min": 0.00024337648262529,
+   "median": 0.0003089310879704968,
+   "max": 0.0005964156288227919
+  },
+  "quad_angle_deg": [
+   42.315469335679495,
+   146.0448922285306
+  ],
+  "aspect_max": 4.738656608352096,
+  "min_cell_area_m2": 2.2641092122127908e-07
+ },
+ "outer": {
+  "n_cells": 102350,
+  "n_tri": 6991,
+  "n_quad": 95359
+ },
+ "wall_vs_csv_max_m": 4.7777536655571815e-05,
+ "frame": {
+  "centroid_cad_m": [
+   0.017620123320014388,
+   0.03150692208442688
+  ],
+  "body_x_dir_deg_in_cad": -4.7636414938898834,
+  "body_y_dir_deg_in_cad": 85.23635850611012,
+  "wall_m": 0.0018542294841820239,
+  "area_m2": 0.0001270868709773303,
+  "corners_body_m": {
+   "B_outer": [
+    -0.012365198605818707,
+    0.01871864633298522
+   ],
+   "B_inner": [
+    -0.011232981943450628,
+    0.017250227996997134
+   ],
+   "A_inner": [
+    -0.013214477787764847,
+    -0.025791898077446557
+   ],
+   "A_outer": [
+    -0.012365198605818707,
+    -0.027440197762310575
+   ]
+  },
+  "note": "x_body = R (x_cad - centroid); R rows = (body x, body y) unit vectors in CAD"
+ },
+ "patches": {
+  "blade": "outer + inner surface (painted, fuzzy skin)",
+  "bladeEnds": "two square end faces (not painted)"
+ },
+ "generator": "cfd/stage2/mesh/make_mesh.py",
+ "wall_function": {
+  "U_design": 23.0,
+  "h0_m": 0.0008800000000000001,
+  "y_p_m": 0.00044000000000000007,
+  "u_tau_flat_plate": 1.3945388104371976,
+  "yplus_flat_plate": 40.474741200024205,
+  "yplus_target": 40.0,
+  "ks_max_m": 0.0004,
+  "yp_over_ks_min": 1.1,
+  "h0_max_m": 0.0013,
+  "x_flat_plate_m": 0.022305,
+  "ks_valid_max_m": 0.00044000000000000007,
+  "note": "nutkRoughWallFunction: keep Ks below y_p (first cell centre)"
+ },
+ "seconds": 50.9
+}

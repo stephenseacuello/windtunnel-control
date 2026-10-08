@@ -1,0 +1,51 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Stage 2 section case (cfd/stage2; copied from cfd/section2d). Numbers come from
+  system/caseParameters, which cfd/stage2/run_case.py writes for each case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      omega;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+dimensions      [0 0 -1 0 0 0 0];
+
+internalField   uniform $omegaInlet;
+
+boundaryField
+{
+    farfield
+    {
+        type            inletOutlet;
+        inletValue      uniform $omegaInlet;
+        value           uniform $omegaInlet;
+    }
+    blade
+    {
+        // v2606 default blending 'binomial', n 2 (omegaWallFunctionFvPatchScalarField.C: the
+        // dictionary constructor's default; the running Stage 1 case writes 'blending binomial;
+        // n 2;'): omega_P = sqrt(omega_vis^2 + omega_log^2), omega_vis = 6 nu/(beta1 y^2),
+        // omega_log = sqrt(k)/(Cmu^0.25 kappa y). omega_vis dominates on the low-Re texture mesh
+        // (y+ < 1, as Stage 1 and T3A); on the wall-function mesh omega_vis/omega_log is about
+        // 9.8/y* (0.85 at y* 11.53, 0.25 at y* 40). Unlike 'stepwise', the production G in the
+        // wall cell is set from the log law at every y*. Not roughness-aware: roughness enters
+        // through nut (nutkRoughWallFunction) and G, which this condition computes from nut_w.
+        type            omegaWallFunction;
+        value           uniform $omegaInlet;
+    }
+    bladeEnds
+    {
+        $blade;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

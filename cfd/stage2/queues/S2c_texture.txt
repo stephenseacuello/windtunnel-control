@@ -1,0 +1,31 @@
+# Stage 2 priority S2c (PLAN.md Stage 2, optional): resolved fuzzy-skin texture, 23 m/s, low-Re
+# texture mesh (h0 4.5 um, 40 um wall spacing), kOmegaSST (tripped) and kOmegaSSTLM (free transition).
+# t in mm; t = 0 is the smooth reference on the same mesh topology (texture meshes differ only in
+# the displacement). Seed 1 for all, so every t has the same pattern scaled by t.
+# Run length 80 c/U, averaged over the last 50 (Stage 1: 150 / 100): these cases cost about
+# 2-4 times a Stage 1 medium case per c/U (README section 6), so all S2c cases share the shorter run.
+# Order: alpha 180 first (convex side into the wind, where the boundary layer can separate before
+# the tips and tripping can move separation; at alpha 0 the square tips fix it), LM before SST
+# (LM can show tripping, SST is turbulent from the start), then the measured sets (0.20, 0.10, 0.05).
+180  23.0  LM   tex  t=0     nconv=80 navg=50
+180  23.0  LM   tex  t=0.2   nconv=80 navg=50
+180  23.0  LM   tex  t=0.1   nconv=80 navg=50
+180  23.0  LM   tex  t=0.05  nconv=80 navg=50
+180  23.0  SST  tex  t=0     nconv=80 navg=50
+180  23.0  SST  tex  t=0.2   nconv=80 navg=50
+180  23.0  SST  tex  t=0.1   nconv=80 navg=50
+180  23.0  SST  tex  t=0.05  nconv=80 navg=50
+0    23.0  LM   tex  t=0     nconv=80 navg=50
+0    23.0  LM   tex  t=0.2   nconv=80 navg=50
+0    23.0  LM   tex  t=0.1   nconv=80 navg=50
+0    23.0  LM   tex  t=0.05  nconv=80 navg=50
+0    23.0  SST  tex  t=0     nconv=80 navg=50
+0    23.0  SST  tex  t=0.2   nconv=80 navg=50
+0    23.0  SST  tex  t=0.1   nconv=80 navg=50
+0    23.0  SST  tex  t=0.05  nconv=80 navg=50
+# Planned rougher sets FS 0.40 and FS 0.80 (t = 0.40, 0.805 mm): NOT RUNNABLE with this mesher.
+# The linear texture at 0.2 mm has facets up to 76 / 83 deg; checkMesh of t = 0.40 (8 Oct): max
+# skewness 8.66 (1019 faces > 4), 5410 faces above 70 deg non-orthogonality (fails the relaxed
+# texture criterion); t = 0.805 gives 65 inverted ring cells (the generator stops). README section 5.
+# 180  23.0  LM   tex  t=0.4    nconv=80 navg=50
+# 180  23.0  LM   tex  t=0.805  nconv=80 navg=50

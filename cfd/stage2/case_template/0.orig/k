@@ -1,0 +1,45 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Stage 2 section case (cfd/stage2; copied from cfd/section2d). Numbers come from
+  system/caseParameters, which cfd/stage2/run_case.py writes for each case.
+  WALL-FUNCTION version (wall wf). The low-Re version is ../0.lowRe/k.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      k;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform $kInlet;
+
+boundaryField
+{
+    farfield
+    {
+        type            inletOutlet;
+        inletValue      uniform $kInlet;
+        value           uniform $kInlet;
+    }
+    blade
+    {
+        // high-Re wall: zero gradient (the first-cell k sets u* in the nut and omega conditions)
+        type            kqRWallFunction;
+        value           uniform $kInlet;
+    }
+    bladeEnds
+    {
+        $blade;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

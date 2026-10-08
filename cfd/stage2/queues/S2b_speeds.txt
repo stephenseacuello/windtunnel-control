@@ -1,0 +1,9 @@
+# Stage 2 priority S2b (PLAN.md Stage 2b): speed dependence of the rough-wall effect, alpha 0.
+# Each speed has its own wall-function mesh (h0 from U: 1.30 mm at 10.2 m/s, 0.88 mm at 38 m/s;
+# first cell centre above 200 um at both), so compare Ks against Ks = 0 within a speed.
+0    10.2  SST  wf  ks=0
+0    10.2  SST  wf  ks=100
+0    10.2  SST  wf  ks=200
+0    38.0  SST  wf  ks=0
+0    38.0  SST  wf  ks=100
+0    38.0  SST  wf  ks=200

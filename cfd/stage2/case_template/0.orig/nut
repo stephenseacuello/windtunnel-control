@@ -1,0 +1,55 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Stage 2 section case (cfd/stage2; copied from cfd/section2d). Numbers come from
+  system/caseParameters, which cfd/stage2/run_case.py writes for each case.
+  WALL-FUNCTION version (wall wf). The low-Re version is ../0.lowRe/nut.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      nut;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+dimensions      [0 2 -1 0 0 0 0];
+
+internalField   uniform $nutInlet;
+
+boundaryField
+{
+    farfield
+    {
+        type            calculated;
+        value           uniform $nutInlet;
+    }
+    blade
+    {
+        // Rough log law (v2606 nutkRoughWallFunctionFvPatchScalarField.C): u* = Cmu^0.25 sqrt(k_P),
+        // Ks+ = u* Ks/nu; E is divided by the roughness function fn(Ks+, Cs) for Ks+ > 2.25
+        // (transitional form below Ks+ 90, 1 + Cs Ks+ above). No y+ < 11.53 switch: nut_w is
+        // limited to 0.5-2x its previous value and so never falls below 0.5 nu.
+        // Ks = 0: same condition, smooth (the Stage 2b reference). Valid for Ks below the
+        // first-cell-centre height y_p (case.json: yP, KsOverYp).
+        type            nutkRoughWallFunction;
+        Ks              uniform $KsBlade;       // m, sand-grain height of the painted faces
+        Cs              uniform $Cs;            // roughness constant (0.5: uniform sand)
+        value           uniform 0;
+    }
+    bladeEnds
+    {
+        // square end faces: not painted (no fuzzy skin); Ks = KsEnds (0 by default)
+        type            nutkRoughWallFunction;
+        Ks              uniform $KsEnds;
+        Cs              uniform $Cs;
+        value           uniform 0;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

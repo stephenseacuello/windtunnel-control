@@ -1,0 +1,160 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Stage 2 section case (cfd/stage2; copied from cfd/section2d). Numbers come from
+  system/caseParameters, which cfd/stage2/run_case.py writes for each case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+application     pimpleFoam;
+
+startFrom       latestTime;     // resumes from the last write after an interruption
+startTime       0;
+stopAt          endTime;
+endTime         $endTime;       // nConv convective times c/U
+
+// maxCo 5 (README, smoke test of 7 Oct): the maximum sits in about 100 cells within
+// 0.2 mm of the square corners, where the separating shear layer crosses thin
+// near-wall cells; in the wake Co <= 0.35 (mean 0.08), so the shedding is resolved
+// with several thousand steps per period. maxCo 10 with 2 outer correctors diverged.
+deltaT          $deltaT0;
+adjustTimeStep  yes;
+maxCo           $maxCo;
+maxDeltaT       $maxDeltaT;
+
+// Fields every nconv/15 c/U (10 c/U by default), keeping the last 3 (restart
+// points and the averages);
+// the time histories are in postProcessing/.
+writeControl    adjustableRunTime;
+writeInterval   $writeInterval;
+purgeWrite      3;
+writeFormat     binary;
+writePrecision  8;
+writeCompression off;
+timeFormat      general;
+timePrecision   10;
+runTimeModifiable true;
+
+functions
+{
+    // Section loads. Coefficients: q = 0.5 Uinf^2 (kinematic), A = cRef*dz,
+    // Cd along dragDir (= free stream), Cl along liftDir (= z x dragDir).
+    // CmPitch is about e2 = liftDir x dragDir = -z through CofR (the section
+    // centroid), so CmPitch = -Cm_z; summaries report Cm_z (CCW positive).
+    forceCoeffs1
+    {
+        type            forceCoeffs;
+        libs            (forces);
+        patches         (blade bladeEnds);   // both walls
+        rho             rhoInf;
+        rhoInf          $rhoInf;
+        magUInf         $Uinf;
+        lRef            $cRef;
+        Aref            $Aref;
+        CofR            $CofR;
+        liftDir         $liftDir;
+        dragDir         $dragDir;
+        writeControl    runTime;
+        writeInterval   $sampleInterval;   // c/U / 50
+        log             false;
+    }
+
+    // Dimensional loads (N and N m for the cell depth dz; rho = rhoInf),
+    // global axes, moment about CofR.
+    forces1
+    {
+        type            forces;
+        libs            (forces);
+        patches         (blade bladeEnds);   // both walls
+        rho             rhoInf;
+        rhoInf          $rhoInf;
+        CofR            $CofR;
+        writeControl    runTime;
+        writeInterval   $sampleInterval;
+        log             false;
+    }
+
+    // y+ at the first cell centre (min, max, mean over the blade), once per c/U.
+    yPlus1
+    {
+        type            yPlus;
+        libs            (fieldFunctionObjects);
+        useWallFunction false;
+        writeFields     false;
+        executeControl  runTime;
+        executeInterval $yPlusInterval;   // 1 c/U (shorter for test runs)
+        writeControl    runTime;
+        writeInterval   $yPlusInterval;
+        log             false;
+    }
+
+    // Wall shear stress every step (needed by the average below); field and
+    // min/max written at write times. Separation points come from its mean.
+    wallShearStress1
+    {
+        type            wallShearStress;
+        libs            (fieldFunctionObjects);
+        patches         (blade bladeEnds);   // both walls
+        writeFields     true;
+        executeControl  timeStep;
+        executeInterval 1;
+        writeControl    writeTime;
+        log             false;
+    }
+
+    // Time averages over the last nAvg convective times.
+    fieldAverage1
+    {
+        type            fieldAverage;
+        libs            (fieldFunctionObjects);
+        timeStart       $averageStart;
+        restartOnRestart  false;
+        restartOnOutput   false;
+        periodicRestart   false;
+        writeControl    writeTime;
+        fields
+        (
+            U
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+            p
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+            wallShearStress
+            {
+                mean        on;
+                prime2Mean  off;
+                base        time;
+            }
+        );
+    }
+
+    // Wake probes (shedding frequency) and one upstream probe (free-stream Tu
+    // reaching the section). Locations are in caseParameters.
+    probes1
+    {
+        type            probes;
+        libs            (sampling);
+        fields          (U p k);
+        probeLocations  $probeLocations;
+        fixedLocations  true;
+        writeControl    runTime;
+        writeInterval   $sampleInterval;
+        log             false;
+    }
+}
+
+// ************************************************************************* //
