@@ -1,0 +1,104 @@
+{
+ "name": "B_sta_U23.0_th000.0_SST_medium",
+ "mode": "static",
+ "hypothesis": "B",
+ "U_ms": 23.0,
+ "model": "kOmegaSST",
+ "level": "medium",
+ "wall": "wf",
+ "n_cells": 79756,
+ "h0_m": 0.0008696781982136294,
+ "sense": "CCW",
+ "R_m": 0.1016,
+ "r_max_m": 0.1257759194751659,
+ "dz_m": 0.01,
+ "Tu_rotor_pct": 0.9999999999999999,
+ "maxCo": 2.0,
+ "nOuter": 2,
+ "nProcs": 2,
+ "wall_time_s": 420.0,
+ "n_steps": 2154,
+ "t_first": 1.19999303015e-06,
+ "t_last": 0.0224416463661,
+ "dt_mean_s": 1.0418591628412255e-05,
+ "dt_last_half_mean_s": 1.1159112257938718e-05,
+ "dt_min_s": 1.199993e-06,
+ "dt_max_s": 1.5557257e-05,
+ "Co_max_mean": 2.000021382745826,
+ "Co_max_max": 2.0271555,
+ "clock_s": 416.0,
+ "s_per_step_recent": 0.18414918414918416,
+ "s_per_step": 0.19330855018587362,
+ "omega_bounded_steps": 0,
+ "ami_log_sum_min": 1.0,
+ "ami_log_sum_max": 1.0,
+ "ami_log_n": 2,
+ "ami": {
+  "AMI1": {
+   "src_min": 1.0,
+   "src_max": 1.0,
+   "tgt_min": 1.0,
+   "tgt_max": 1.0,
+   "src_avg": 1.0,
+   "tgt_avg": 1.0,
+   "n": 2
+  }
+ },
+ "ami_weight_min": 1.0,
+ "ami_weight_max": 1.0,
+ "t_end": 0.0223096210373,
+ "n_samples": 102,
+ "theta_deg": 0.0,
+ "convTime_s": 0.010937036476101381,
+ "t_end_conv": 2.03982322689048,
+ "avg_window_conv": 2.019995707062522,
+ "avg_window_complete": false,
+ "CQ_mean": -0.1443352262350658,
+ "CQ_std": 0.1868071745070493,
+ "CQ_pressure_mean": -0.14413077088428522,
+ "Cx_mean": 0.8979940188436794,
+ "Cx_std": 0.17121763571878904,
+ "Cy_mean": 0.08616901852229045,
+ "Cy_std": 0.2813218094040955,
+ "CQ_blade_mean": [
+  0.04408744386184287,
+  0.08391326465173994,
+  -0.27233593473571793
+ ],
+ "f_peak_Hz": 90.50526551122259,
+ "St_D": 0.9898593901754819,
+ "yplus": {
+  "blade1": {
+   "min": 1.33194803,
+   "max": 58.1775382,
+   "mean_of_avg": 17.839909,
+   "n": 2
+  },
+  "blade2": {
+   "min": 0.794459079,
+   "max": 66.5425207,
+   "mean_of_avg": 25.62432725,
+   "n": 2
+  },
+  "blade3": {
+   "min": 1.6675554,
+   "max": 93.0350568,
+   "mean_of_avg": 38.0387912,
+   "n": 2
+  }
+ },
+ "yplus_mean": 27.167675816666662,
+ "yplus_max": 93.0350568,
+ "smoke_test": true,
+ "complete": false,
+ "timing_sessions": [
+  {
+   "start": "2026-10-07T22:17:12",
+   "wall_s": 420.0,
+   "t_start": 0.0,
+   "t_end": 0.0,
+   "rc": "timeout",
+   "np": 2
+  }
+ ]
+}

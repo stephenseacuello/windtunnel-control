@@ -1,0 +1,29 @@
+{
+ "U_cfd": 23.0,
+ "U_rig": 23.0293,
+ "rotor": "Plain",
+ "level": "medium",
+ "cfd": {},
+ "rig": {
+  "run1": {
+   "lam_peak_cp_el": 0.12022090235846486,
+   "cp_el_peak": 0.0016724511754244165,
+   "lam_peak_cp_gen_in": 0.0902806,
+   "cp_gen_in_peak": 0.0027631059718438954,
+   "lam_min_loaded": 0.0902806,
+   "lam_max_loaded": 0.16021
+  },
+  "run2": {
+   "lam_peak_cp_el": 0.12188115364164535,
+   "cp_el_peak": 0.0016479020167490845,
+   "lam_peak_cp_gen_in": 0.0900583,
+   "cp_gen_in_peak": 0.0027565519856285357,
+   "lam_min_loaded": 0.0900583,
+   "lam_max_loaded": 0.158156
+  },
+  "lam_light_load": [
+   0.158466,
+   0.158466
+  ]
+ }
+}

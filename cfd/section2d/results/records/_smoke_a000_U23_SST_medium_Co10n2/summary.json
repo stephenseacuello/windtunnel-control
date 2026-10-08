@@ -1,0 +1,123 @@
+{
+ "case": "_smoke_a000_U23_SST_medium_Co10n2",
+ "kind": "section",
+ "stage": "section2d",
+ "status": "finished",
+ "status_reason": "solver log ends with End",
+ "recorded_at": "2026-10-08T07:51:48",
+ "record_version": 1,
+ "source": "cfd/section2d/runs/_smoke_a000_U23_SST_medium_Co10n2",
+ "caseParameters_differ_from_case_json": {
+  "endTime": {
+   "case_json": 0.3130434782608696,
+   "caseParameters": 0.02086956522
+  },
+  "maxCo": {
+   "case_json": 5.0,
+   "caseParameters": 10.0
+  }
+ },
+ "case_json_caseName": "a000.0_U23.0_SST_medium_Tu1.0",
+ "source_log": {
+  "name": "log.pimpleFoam",
+  "bytes": 138869,
+  "mtime": "2026-10-07T19:37:54"
+ },
+ "mesh": {
+  "n_cells": 131061,
+  "first_cell_m": 4.5e-06,
+  "level": "medium"
+ },
+ "run": {
+  "n_steps": 77,
+  "t_first_s": 0.001240588149,
+  "t_last_s": 0.00142227697,
+  "t_last_nd": 0.6815077147916665,
+  "nd_unit": "t U / c",
+  "dt_mean_s": 2.3886167343376623e-06,
+  "dt_min_s": 1.0522637e-08,
+  "dt_last_s": 1.0522637e-08,
+  "Co_max_mean": 10.805095162337661,
+  "Co_max_max": 25.355127,
+  "cpu_s": 274.16,
+  "clock_s": 534.0,
+  "s_per_step_cpu": 3.560519480519481,
+  "sessions": [
+   {
+    "date": "Oct 07 2026",
+    "start": "19:29:00",
+    "nprocs": 4,
+    "n_steps": 77,
+    "t_first": 0.001240588149,
+    "t_last": 0.00142227697,
+    "cpu_s": 274.16,
+    "clock_s": 534.0,
+    "clock_over_cpu": 1.95
+   }
+  ],
+  "warnings": {
+   "--> FOAM Warning : allowSystemOperations : Allowing user-supplied system call operations.": 1,
+   "bounding k, min: 0 max: 187.98793 average: 3.8278697": 78
+  },
+  "endTime_s": 0.02086956522,
+  "fraction_of_endTime": 0.06815077147064781
+ },
+ "window": {
+  "t0_s": 0.001279238798,
+  "t1_s": 0.00140676372,
+  "t0_nd": 0.6129685907083333,
+  "t1_nd": 0.6740742824999999,
+  "intended_nd": 100,
+  "complete": false,
+  "unit": "t U / c"
+ },
+ "Cd_mean": 2.2072742825000002,
+ "Cd_std": 0.049974684586764274,
+ "Cd_drift": 0.08560661500000011,
+ "Cl_mean": 0.90704105675,
+ "Cl_std": 0.056573294684224985,
+ "Cl_drift": 0.06493394650000006,
+ "Cm_mean": 0.39213407075,
+ "Cm_std": 0.019562224472185048,
+ "Cm_drift": -0.018037390500000028,
+ "Cd_pressure_mean": 2.2224486709524225,
+ "Cd_viscous_mean": -0.015174386908948744,
+ "coefficients_csv_rows": 4,
+ "spectrum_note": "no spectrum: 4 samples in the averaging window (32 needed)",
+ "renders": {
+  "kept": "images from an earlier render (--no-render)",
+  "images": [
+   "mesh_cornerA_0p1mm.png",
+   "mesh_cornerA_0p8mm.png",
+   "mesh_cornerA_6mm.png",
+   "mesh_domain.png",
+   "mesh_near.png"
+  ],
+  "time_s": 0.0,
+  "read_as": "reconstructed",
+  "notes": [
+   "no field data: mesh images only"
+  ],
+  "yplus_inst": null,
+  "yplus_mean": null
+ },
+ "record_bytes": 1168009,
+ "files": [
+  "case.json",
+  "coefficients.csv",
+  "coefficients.png",
+  "fields/mesh_cornerA_0p1mm.png",
+  "fields/mesh_cornerA_0p8mm.png",
+  "fields/mesh_cornerA_6mm.png",
+  "fields/mesh_domain.png",
+  "fields/mesh_near.png",
+  "fields/render_log.txt",
+  "fields/render_manifest.json",
+  "log_excerpt.txt",
+  "mesh_info.json",
+  "residuals.csv",
+  "residuals.png",
+  "settings.txt",
+  "timestep.png"
+ ]
+}

@@ -1,0 +1,19 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  cfd/rotor2d case template (OpenFOAM v2606). Values come from caseParameters,
+  written by cfd/rotor2d/run_case.py: edit run_case.py, not the generated case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      decomposeParDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+numberOfSubdomains $nProcs;
+method          scotch;
+
+// ************************************************************************* //

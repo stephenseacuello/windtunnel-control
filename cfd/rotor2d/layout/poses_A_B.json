@@ -1,0 +1,190 @@
+{
+ "section": {
+  "source": "cfd/geometry/section_v1.json",
+  "wall_m": 0.0018542294841820239,
+  "area_m2": 0.00012708649904166953,
+  "holes_y_m": 0.029201156459748745,
+  "tipA_cad_m": [
+   0.0026641219325198614,
+   0.006044950627553246
+  ],
+  "tipB_cad_m": [
+   0.007355316105007608,
+   0.050409097734050896
+  ],
+  "chord_tip_to_tip_m": 0.04461148788429889,
+  "cup_opening_dir_cad": [
+   -0.9916723754328098,
+   0.12878625626769394
+  ]
+ },
+ "conventions": "(2D, metres): shaft axis at the origin, wind along +x, z = CAD +z\n(span, from the far end toward the near end, the end nearer the holes). The model\nis viewed from +z. If the near end is at the top on the rig, \"viewed from +z\" is\n\"viewed from above\"; if it is at the bottom, the model is the mirror image and the\nphysical rotation sense is the opposite of the model's.\n\nRotation sense s: +1 = counter-clockwise about +z, -1 = clockwise. Default rule\n(\"drag\"): the cup must open against the direction of motion, so the blade moving\ndownwind meets the wind with its concave face. The cup-opening direction is the\nmean fluid-side normal of the concave face, which is the inner-tip chord turned by\n+90 deg. With bolts radial it is only 6 deg off the radial line, so the rule rests\non that 6 deg; the mean static torque (stage 3a) is the real test.\n\nAzimuth theta (deg): blade 1's radial line (shaft -> attachment point) points\nupwind (-x) at theta = 0; theta increases in the direction of rotation; blade k\nsits at theta + 120 (k - 1). Torque Q is positive when it drives the rotor in its\nrotation sense s, i.e. Q = s * M_z.",
+ "poses": [
+  {
+   "name": "A",
+   "arm_face": "concave",
+   "source": "cfd/measurements/blade_section_cad.json hypothesis A (bolts radial, CAD), R = 101.6 mm",
+   "R_m": 0.1016,
+   "beta_deg": 83.96380866584273,
+   "sense": -1,
+   "sense_rule": "drag rule: concave face meets the wind on the downwind-moving blade",
+   "S_cad": [
+    -0.07914303465403955,
+    0.029201156459748745
+   ],
+   "e_r_cad": [
+    1.0,
+    0.0
+   ],
+   "P_att_cad": [
+    0.02245696534596045,
+    0.029201156459748745
+   ],
+   "r_tipA_m": 0.08502129578711945,
+   "r_tipB_m": 0.08906032482047999,
+   "r_min_m": 0.08445865482977429,
+   "r_max_m": 0.10641986662039699,
+   "r_centroid_m": 0.09679065826507342,
+   "cup_opening_radial": -0.9916723754328098,
+   "cup_opening_tangential_ccw": 0.12878625626769394,
+   "cup_opens": "toward the shaft",
+   "leading_tip": "A",
+   "tipA_rt_m": [
+    0.0818071565865594,
+    -0.0231562058321955
+   ],
+   "tipB_rt_m": [
+    0.08649835075904716,
+    0.02120794127430215
+   ],
+   "tipA_to_next_tipA_m": 0.14726120402863263
+  },
+  {
+   "name": "B",
+   "arm_face": "convex",
+   "source": "cfd/measurements/blade_section_cad.json hypothesis B (bolts radial, CAD), R = 101.6 mm",
+   "R_m": 0.1016,
+   "beta_deg": 83.96380866584273,
+   "sense": 1,
+   "sense_rule": "drag rule: concave face meets the wind on the downwind-moving blade",
+   "S_cad": [
+    0.12609788977734268,
+    0.029201156459748745
+   ],
+   "e_r_cad": [
+    -1.0,
+    0.0
+   ],
+   "P_att_cad": [
+    0.02449788977734269,
+    0.029201156459748745
+   ],
+   "r_tipA_m": 0.12558704118225186,
+   "r_tipB_m": 0.12062162150884961,
+   "r_min_m": 0.09971828883501953,
+   "r_max_m": 0.1257759194751659,
+   "r_centroid_m": 0.10850223631115836,
+   "cup_opening_radial": 0.9916723754328098,
+   "cup_opening_tangential_ccw": -0.12878625626769394,
+   "cup_opens": "away from the shaft",
+   "leading_tip": "A",
+   "tipA_rt_m": [
+    0.12343376784482282,
+    0.0231562058321955
+   ],
+   "tipB_rt_m": [
+    0.11874257367233507,
+    -0.02120794127430215
+   ],
+   "tipA_to_next_tipA_m": 0.21752313609990517
+  }
+ ],
+ "summary": [
+  {
+   "hypothesis": "A",
+   "arm_face": "concave",
+   "R_mm": 101.6,
+   "beta_deg": 83.96,
+   "r_tipA_mm": 85.02,
+   "r_tipB_mm": 89.06,
+   "r_min_mm": 84.46,
+   "r_max_mm": 106.42,
+   "r_centroid_mm": 96.79,
+   "tipA_to_next_tipA_mm": 147.26,
+   "cup_opens": "toward the shaft",
+   "cup_opening_dir_radial_tangential": [
+    -0.9917,
+    0.1288
+   ],
+   "rotation_sense_model": "CW",
+   "sense_rule": "drag rule: concave face meets the wind on the downwind-moving blade",
+   "leading_tip": "A"
+  },
+  {
+   "hypothesis": "B",
+   "arm_face": "convex",
+   "R_mm": 101.6,
+   "beta_deg": 83.96,
+   "r_tipA_mm": 125.59,
+   "r_tipB_mm": 120.62,
+   "r_min_mm": 99.72,
+   "r_max_mm": 125.78,
+   "r_centroid_mm": 108.5,
+   "tipA_to_next_tipA_mm": 217.52,
+   "cup_opens": "away from the shaft",
+   "cup_opening_dir_radial_tangential": [
+    0.9917,
+    -0.1288
+   ],
+   "rotation_sense_model": "CCW",
+   "sense_rule": "drag rule: concave face meets the wind on the downwind-moving blade",
+   "leading_tip": "A"
+  }
+ ],
+ "check_vs_blade_section_cad_json": {
+  "A": {
+   "r_tipA": [
+    85.0,
+    85.02
+   ],
+   "r_tipB": [
+    89.1,
+    89.06
+   ],
+   "r_min": [
+    84.5,
+    84.46
+   ],
+   "r_max": [
+    106.4,
+    106.42
+   ],
+   "r_centroid": [
+    96.8,
+    96.79
+   ]
+  },
+  "B": {
+   "r_tipA": [
+    125.6,
+    125.59
+   ],
+   "r_tipB": [
+    120.6,
+    120.62
+   ],
+   "r_min": [
+    99.8,
+    99.72
+   ],
+   "r_max": [
+    125.8,
+    125.78
+   ],
+   "r_centroid": [
+    108.5,
+    108.5
+   ]
+  }
+ }
+}

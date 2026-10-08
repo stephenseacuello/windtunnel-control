@@ -1,0 +1,18 @@
+# Priority C: the best-matching hypothesis at the lowest and highest rig speeds,
+# U = 10.2 and 38 m/s, kOmegaSST, medium, 4 ranks. The wall-function mesh is regenerated
+# per speed so the first-cell y+ stays near 40 (h0 0.55 mm at 38 m/s; at 10.2 m/s the 1.81 mm it would need is capped at 1.5 mm, y+ about 33).
+# lambda brackets the rig's loaded range at each speed (10.2 m/s: 0.05-0.11, C_P,el peak 0.08;
+# 38 m/s: 0.14-0.21, C_P,el peak 0.16, light load 0.20-0.21) and extends past it for the
+# zero-torque point. Revolutions: at least 4 and at least 150 D/U (D/U = 21 ms at 10.2 m/s).
+# Written for hypothesis A; change HYP if B matches.
+rot A 10.2 0.05 SST medium nrev=4 navg=2
+rot A 10.2 0.08 SST medium nrev=4 navg=2
+rot A 10.2 0.11 SST medium nrev=6
+rot A 10.2 0.15 SST medium
+rot A 38 0.10 SST medium nrev=6
+rot A 38 0.15 SST medium
+rot A 38 0.20 SST medium
+rot A 38 0.25 SST medium
+rot A 38 0.30 SST medium
+# Time-step check at the default conditions: maxCo 2 against the maxCo 4 case of priority A.
+rot A 23 0.15 SST medium maxco=2

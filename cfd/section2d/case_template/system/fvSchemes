@@ -1,0 +1,74 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Stage 1 section case (cfd/section2d). Numbers come from system/caseParameters,
+  which cfd/section2d/run_case.py writes for each case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    // second-order implicit; stays stable where the local Courant number is a few
+    default         backward;
+    // gammaInt (kOmegaSSTLM): first-order implicit, which keeps it in [0, 1]. With
+    // backward, the impulsive start drove it below 0 in steps 3-5 (min -0.077,
+    // 'bounding gammaInt') and above 1 by 1.3e-2, also with a bounded convection
+    // scheme; with Euler, no bounding and max 1 + 4e-4 (coarse, alpha 90, 38 m/s;
+    // README section 5, tests 6-7). dt is about 1e-3 c/U, so the first-order time error in
+    // a source-dominated equation is small.
+    ddt(gammaInt)   Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    limitedGrad     cellLimited Gauss linear 1;   // only for the convection reconstruction
+}
+
+divSchemes
+{
+    default         none;
+    div(phi,U)      Gauss linearUpwind limitedGrad;
+    // k, omega: first-order upwind. Checked 7 Oct (README): with limitedLinear 1,
+    // omega went negative ('bounding omega') in 217 of 224 steps (coarse mesh,
+    // alpha 0, 23 m/s, SST); with upwind, in 0 of 1386 steps (medium) and 0 of 377
+    // (coarse). The momentum equation stays second order.
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+    // kOmegaSSTLM transport variables. ReThetat: second order, as the T3A tutorial.
+    // gammaInt (0 <= gamma <= 1): TVD, limited to [0, 1]. With linearUpwind it went
+    // below 0 ('bounding gammaInt', min -0.068) in 8 of 380 steps of the 7 Oct LM
+    // pipeline test (README section 5, test 3).
+    div(phi,ReThetat) Gauss linearUpwind limitedGrad;
+    div(phi,gammaInt) Gauss limitedLinear01 1;
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    // max non-orthogonality of the meshes: 44.6 deg (coarse), 39.6 (medium), 39.5 (fine)
+    default         Gauss linear limited corrected 0.5;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         limited corrected 0.5;
+}
+
+wallDist
+{
+    method          meshWave;
+    correctWalls    true;
+}
+
+// ************************************************************************* //

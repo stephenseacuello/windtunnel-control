@@ -1,0 +1,610 @@
+==============================================================================
+== system/controlDict
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+application     pimpleFoam;
+
+startFrom       latestTime;     // resumes from the last write after an interruption
+startTime       0;
+stopAt          endTime;
+endTime         $endTime;       // nConv convective times c/U
+
+deltaT          $deltaT0;
+adjustTimeStep  yes;
+maxCo           $maxCo;
+maxDeltaT       $maxDeltaT;
+
+// Fields every nconv/15 c/U (10 c/U by default), keeping the last 3 (restart
+// points and the averages);
+// the time histories are in postProcessing/.
+writeControl    adjustableRunTime;
+writeInterval   $writeInterval;
+purgeWrite      3;
+writeFormat     binary;
+writePrecision  8;
+writeCompression off;
+timeFormat      general;
+timePrecision   10;
+runTimeModifiable true;
+
+functions
+{
+    // Section loads. Coefficients: q = 0.5 Uinf^2 (kinematic), A = cRef*dz,
+    // Cd along dragDir (= free stream), Cl along liftDir (= z x dragDir).
+    // CmPitch is about e2 = liftDir x dragDir = -z through CofR (the section
+    // centroid), so CmPitch = -Cm_z; summaries report Cm_z (CCW positive).
+    forceCoeffs1
+    {
+        type            forceCoeffs;
+        libs            (forces);
+        patches         (blade);
+        rho             rhoInf;
+        rhoInf          $rhoInf;
+        magUInf         $Uinf;
+        lRef            $cRef;
+        Aref            $Aref;
+        CofR            $CofR;
+        liftDir         $liftDir;
+        dragDir         $dragDir;
+        writeControl    runTime;
+        writeInterval   $sampleInterval;   // c/U / 50
+        log             false;
+    }
+
+    // Dimensional loads (N and N m for the cell depth dz; rho = rhoInf),
+    // global axes, moment about CofR.
+    forces1
+    {
+        type            forces;
+        libs            (forces);
+        patches         (blade);
+        rho             rhoInf;
+        rhoInf          $rhoInf;
+        CofR            $CofR;
+        writeControl    runTime;
+        writeInterval   $sampleInterval;
+        log             false;
+    }
+
+    // y+ at the first cell centre (min, max, mean over the blade), once per c/U.
+    yPlus1
+    {
+        type            yPlus;
+        libs            (fieldFunctionObjects);
+        useWallFunction false;
+        writeFields     false;
+        executeControl  runTime;
+        executeInterval $convTime;
+        writeControl    runTime;
+        writeInterval   $convTime;
+        log             false;
+    }
+
+    // Wall shear stress every step (needed by the average below); field and
+    // min/max written at write times. Separation points come from its mean.
+    wallShearStress1
+    {
+        type            wallShearStress;
+        libs            (fieldFunctionObjects);
+        patches         (blade);
+        writeFields     true;
+        executeControl  timeStep;
+        executeInterval 1;
+        writeControl    writeTime;
+        log             false;
+    }
+
+    // Time averages over the last nAvg convective times.
+    fieldAverage1
+    {
+        type            fieldAverage;
+        libs            (fieldFunctionObjects);
+        timeStart       $averageStart;
+        restartOnRestart  false;
+        restartOnOutput   false;
+        periodicRestart   false;
+        writeControl    writeTime;
+        fields
+        (
+            U
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+            p
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+            wallShearStress
+            {
+                mean        on;
+                prime2Mean  off;
+                base        time;
+            }
+        );
+    }
+
+    // Wake probes (shedding frequency) and one upstream probe (free-stream Tu
+    // reaching the section). Locations are in caseParameters.
+    probes1
+    {
+        type            probes;
+        libs            (sampling);
+        fields          (U p k);
+        probeLocations  $probeLocations;
+        fixedLocations  true;
+        writeControl    runTime;
+        writeInterval   $sampleInterval;
+        log             false;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== system/caseParameters
+==============================================================================
+/*--- written by cfd/section2d/run_case.py; edit run_case.py, not this file ---*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      caseParameters;
+}
+
+caseName                a000.0_U23.0_SST_medium_Tu1.0;
+alphaDeg                0;
+Uinf                    23;
+Ux                      23;
+Uy                      0;
+dragDir                 (1 0 0);
+liftDir                 (-0 1 0);
+turbulenceModel         kOmegaSST;
+nOuterCorrectors        2;
+rhoInf                  1.204;
+nu                      1.516e-05;
+cRef                    0.048;
+dz                      0.001;
+Aref                    4.8e-05;
+CofR                    (0 0 0);
+TuBodyPercent           1;
+TuInletPercent          1.889666733;
+kInlet                  0.2833461827;
+omegaInlet              485.923676;
+nutInlet                0.0005831084112;
+ReThetatInlet           274.6161209;
+turbulenceLengthScale   0.002;
+viscosityRatioFarField  38.46361552;
+viscosityRatioBody      34.73989248;
+convTime                0.002086956522;
+endTime                 0.3130434783;
+averageStart            0.1043478261;
+writeInterval           0.02086956522;
+sampleInterval          4.173913043e-05;
+deltaT0                 2.086956522e-08;
+maxDeltaT               0.0001043478261;
+maxCo                   5;
+nConv                   150;
+nAvg                    100;
+level                   medium;
+model                   SST;
+ReChord                 72823.219;
+probeLocations          
+(
+    (0.048 0 0.0005)
+    (0.048 0.024 0.0005)
+    (0.048 -0.024 0.0005)
+    (0.096 0 0.0005)
+    (0.096 0.024 0.0005)
+    (0.096 -0.024 0.0005)
+    (0.192 0 0.0005)
+    (0.192 0.024 0.0005)
+    (0.192 -0.024 0.0005)
+    (-0.096 0 0.0005)
+);
+
+==============================================================================
+== system/fvSchemes
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    // second-order implicit; stays stable where the local Courant number is a few
+    default         backward;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    limitedGrad     cellLimited Gauss linear 1;   // only for the convection reconstruction
+}
+
+divSchemes
+{
+    default         none;
+    div(phi,U)      Gauss linearUpwind limitedGrad;
+    // k, omega: first-order upwind. With limitedLinear (and linearUpwind) omega
+    // went negative near the square corners from the first step at every maxCo
+    // tried (bounding in 27-80 % of steps); with upwind it never did (smoke tests, README).
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+    // kOmegaSSTLM transport variables: second order, as the T3A tutorial
+    div(phi,ReThetat) Gauss linearUpwind limitedGrad;
+    div(phi,gammaInt) Gauss linearUpwind limitedGrad;
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    // max non-orthogonality of the meshes is about 42 deg (corner cells only)
+    default         Gauss linear limited corrected 0.5;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         limited corrected 0.5;
+}
+
+wallDist
+{
+    method          meshWave;
+    correctWalls    true;
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== system/fvSolution
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+solvers
+{
+    p
+    {
+        solver          GAMG;
+        smoother        DICGaussSeidel;
+        tolerance       1e-6;
+        relTol          0.01;
+    }
+
+    pFinal
+    {
+        $p;
+        tolerance       1e-7;
+        relTol          0;
+    }
+
+    "(U|k|omega|ReThetat|gammaInt)"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0.1;
+    }
+
+    "(U|k|omega|ReThetat|gammaInt)Final"
+    {
+        $U;
+        relTol          0;
+    }
+}
+
+PIMPLE
+{
+    // Outer correctors make the step stable at the local Courant numbers
+    // (up to maxCo) found in the few near-corner cells; see README.
+    momentumPredictor        yes;
+    nOuterCorrectors         $nOuterCorrectors;
+    nCorrectors              2;
+    nNonOrthogonalCorrectors 0;
+    turbOnFinalIterOnly      true;
+    finalOnLastPimpleIterOnly true;   // pFinal/UFinal only in the last outer iteration
+}
+
+relaxationFactors
+{
+    equations
+    {
+        ".*"            1;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== system/decomposeParDict
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      decomposeParDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+numberOfSubdomains 4;
+
+method          scotch;
+
+// ************************************************************************* //
+
+==============================================================================
+== constant/turbulenceProperties
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+simulationType  RAS;
+
+RAS
+{
+    // kOmegaSST (fully turbulent) or kOmegaSSTLM (gamma-ReThetat transition)
+    model           $turbulenceModel;
+    turbulence      on;
+    printCoeffs     on;
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== constant/transportProperties
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Air at 20 C: NU_STD in reports/roughness_2026-09/src/data.py, the value the
+// reports' Reynolds numbers use. Keep the two in step.
+transportModel  Newtonian;
+
+nu              1.516e-5;    // m^2/s
+
+// ************************************************************************* //
+
+==============================================================================
+== 0/ReThetat (initial and boundary conditions)
+==============================================================================
+dimensions      [0 0 0 0 0 0 0];
+
+// kOmegaSSTLM only (ignored by kOmegaSST)
+internalField   uniform $ReThetatInlet;
+
+boundaryField
+{
+    farfield
+    {
+        type            inletOutlet;
+        inletValue      uniform $ReThetatInlet;
+        value           uniform $ReThetatInlet;
+    }
+    blade
+    {
+        type            zeroGradient;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== 0/U (initial and boundary conditions)
+==============================================================================
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform ($Ux $Uy 0);
+
+boundaryField
+{
+    farfield
+    {
+        // inflow where the flux enters, zero gradient where it leaves
+        type            freestreamVelocity;
+        freestreamValue uniform ($Ux $Uy 0);
+        value           uniform ($Ux $Uy 0);
+    }
+    blade
+    {
+        type            noSlip;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== 0/gammaInt (initial and boundary conditions)
+==============================================================================
+dimensions      [0 0 0 0 0 0 0];
+
+// kOmegaSSTLM only (ignored by kOmegaSST)
+internalField   uniform 1;
+
+boundaryField
+{
+    farfield
+    {
+        type            inletOutlet;
+        inletValue      uniform 1;
+        value           uniform 1;
+    }
+    blade
+    {
+        type            zeroGradient;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== 0/k (initial and boundary conditions)
+==============================================================================
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform $kInlet;
+
+boundaryField
+{
+    farfield
+    {
+        type            inletOutlet;
+        inletValue      uniform $kInlet;
+        value           uniform $kInlet;
+    }
+    blade
+    {
+        // low-Re wall: first cell centre at y+ < 1, k = 0 at the wall (as T3A)
+        type            fixedValue;
+        value           uniform 0;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== 0/nut (initial and boundary conditions)
+==============================================================================
+dimensions      [0 2 -1 0 0 0 0];
+
+internalField   uniform $nutInlet;
+
+boundaryField
+{
+    farfield
+    {
+        type            calculated;
+        value           uniform $nutInlet;
+    }
+    blade
+    {
+        // low-Re treatment: nut = 0 at the wall
+        type            nutLowReWallFunction;
+        value           uniform 0;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== 0/omega (initial and boundary conditions)
+==============================================================================
+dimensions      [0 0 -1 0 0 0 0];
+
+internalField   uniform $omegaInlet;
+
+boundaryField
+{
+    farfield
+    {
+        type            inletOutlet;
+        inletValue      uniform $omegaInlet;
+        value           uniform $omegaInlet;
+    }
+    blade
+    {
+        // blends to the viscous-sublayer value 6 nu/(beta1 y^2) at y+ < 1 (as T3A)
+        type            omegaWallFunction;
+        value           uniform $omegaInlet;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== 0/p (initial and boundary conditions)
+==============================================================================
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    farfield
+    {
+        type            freestreamPressure;
+        freestreamValue uniform 0;
+        value           uniform 0;
+    }
+    blade
+    {
+        type            zeroGradient;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

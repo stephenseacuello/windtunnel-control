@@ -1,0 +1,15 @@
+# Priority 3: alpha sweep 0-180 deg in 15 deg steps, 23 m/s, kOmegaSSTLM, medium mesh, Tu 1 %.
+# alpha 0 and 180 are shared with priority 2.
+0    23.0  LM   medium  1.0
+15   23.0  LM   medium  1.0
+30   23.0  LM   medium  1.0
+45   23.0  LM   medium  1.0
+60   23.0  LM   medium  1.0
+75   23.0  LM   medium  1.0
+90   23.0  LM   medium  1.0
+105  23.0  LM   medium  1.0
+120  23.0  LM   medium  1.0
+135  23.0  LM   medium  1.0
+150  23.0  LM   medium  1.0
+165  23.0  LM   medium  1.0
+180  23.0  LM   medium  1.0

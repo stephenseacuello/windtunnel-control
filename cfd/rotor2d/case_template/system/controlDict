@@ -1,0 +1,45 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  cfd/rotor2d case template (OpenFOAM v2606). Values come from caseParameters,
+  written by cfd/rotor2d/run_case.py: edit run_case.py, not the generated case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+application     pimpleFoam;
+
+startFrom       latestTime;     // resumes from the last write after an interruption
+startTime       0;
+stopAt          endTime;
+endTime         $endTime;       // rotating: nRev revolutions; static: nConv rotor convective times
+
+deltaT          $deltaT0;
+adjustTimeStep  yes;
+maxCo           $maxCo;
+maxDeltaT       $maxDeltaT;
+
+// Fields every writeInterval (rotating: half a revolution; static: nConv/10 D/U),
+// keeping the last 3 (restart points). Loads and AMI weights are in postProcessing/.
+writeControl    adjustableRunTime;
+writeInterval   $writeInterval;
+purgeWrite      3;
+writeFormat     binary;
+writePrecision  8;
+writeCompression off;
+timeFormat      general;
+timePrecision   12;
+runTimeModifiable true;
+
+functions
+{
+    #include "functions"
+}
+
+// ************************************************************************* //

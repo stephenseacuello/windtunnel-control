@@ -1,0 +1,68 @@
+/*--- EXAMPLE ONLY (alpha 0, 23 m/s, SST, medium, Tu 1 %, --decay control, 4 ranks). run_case.py
+      writes this file into every case it creates; edit run_case.py, not this file. Included by
+      system/controlDict, system/fvSolution, system/decomposeParDict, constant/turbulenceProperties
+      and 0/*. ---*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      caseParameters;
+}
+
+caseName                a000.0_U23.0_SST_medium_Tu1.0;
+alphaDeg                0;
+Uinf                    23;
+Ux                      23;
+Uy                      0;
+dragDir                 (1 0 0);
+liftDir                 (-0 1 0);
+turbulenceModel         kOmegaSST;
+nOuterCorrectors        2;
+nProcs                  4;
+rhoInf                  1.204;
+nu                      1.516e-05;
+cRef                    0.048;
+dz                      0.001;
+Aref                    4.8e-05;
+CofR                    (0 0 0);
+TuBodyPercent           1;
+TuInletPercent          1;
+kInlet                  0.07935;
+omegaInlet              514.2956348;
+nutInlet                0.0001542886904;
+ReThetatInlet           584.3016;
+freestreamDecay         control;
+freestreamDecayControl  yes;
+kAmbient                0.07935;
+omegaAmbient            514.2956348;
+turbulenceLengthScale   0.001;
+viscosityRatioFarField  10.17735425;
+viscosityRatioBody      10.17735425;
+convTime                0.002086956522;
+yPlusInterval           0.002086956522;
+endTime                 0.3130434783;
+averageStart            0.1043478261;
+writeInterval           0.02086956522;
+sampleInterval          4.173913043e-05;
+deltaT0                 2.086956522e-08;
+maxDeltaT               0.0001043478261;
+maxCo                   5;
+nConv                   150;
+nAvg                    100;
+level                   medium;
+model                   SST;
+ReChord                 72823.219;
+probeLocations          
+(
+    (0.048 0 0.0005)
+    (0.048 0.024 0.0005)
+    (0.048 -0.024 0.0005)
+    (0.096 0 0.0005)
+    (0.096 0.024 0.0005)
+    (0.096 -0.024 0.0005)
+    (0.192 0 0.0005)
+    (0.192 0.024 0.0005)
+    (0.192 -0.024 0.0005)
+    (-0.096 0 0.0005)
+);

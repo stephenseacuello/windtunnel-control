@@ -1,0 +1,38 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Stage 1 section case (cfd/section2d). Numbers come from system/caseParameters,
+  which cfd/section2d/run_case.py writes for each case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      p;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    farfield
+    {
+        type            freestreamPressure;
+        freestreamValue uniform 0;
+        value           uniform 0;
+    }
+    blade
+    {
+        type            zeroGradient;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

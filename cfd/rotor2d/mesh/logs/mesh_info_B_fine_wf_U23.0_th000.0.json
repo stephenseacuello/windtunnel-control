@@ -1,0 +1,101 @@
+{
+ "n_points": 310046,
+ "n_cells": 153870,
+ "n_faces": 616635,
+ "n_internal_faces": 306571,
+ "patch_faces": {
+  "blade1": 312,
+  "blade2": 312,
+  "blade3": 312,
+  "AMI1": 584,
+  "AMI2": 584,
+  "inlet": 50,
+  "outlet": 50,
+  "sides": 120
+ },
+ "hypothesis": "B",
+ "level": "fine",
+ "wall": "wf",
+ "U_design": 23.0,
+ "yplus_target": 40.0,
+ "yplus_flat_plate_estimate": 40.0,
+ "h0_m": 0.0008696781982136294,
+ "theta_deg": 0.0,
+ "params": {
+  "r_bl": 1.12,
+  "n_layers": 5,
+  "ds_max": 0.0005,
+  "ds_corner": 0.00014,
+  "g_t": 1.12,
+  "s_near": 0.0007,
+  "d_near": 0.006,
+  "s_rot": 0.0016,
+  "s_ami": 0.0016,
+  "g_in": 0.08,
+  "s_wake1": 0.0025,
+  "s_wake2": 0.005,
+  "g_out": 0.08,
+  "s_far": 0.15,
+  "t_ring_max": 0.005
+ },
+ "dz_m": 0.01,
+ "r_ami_m": 0.14777591947516588,
+ "n_ami_faces": 584,
+ "ami_margin_m": 0.022,
+ "D_rotor_m": 0.2515518389503318,
+ "domain": {
+  "x_in": -2.5,
+  "x_out": 6.25,
+  "y_lo": -3.75,
+  "y_hi": 3.75,
+  "sides": "patch",
+  "D_ref": 0.25
+ },
+ "ring": {
+  "n_layers": 4,
+  "n_wall_nodes": 312,
+  "thickness_m": 0.004156477363711949,
+  "first_cell_m": 0.0008696781982136294,
+  "last_layer_m": 0.001221835251659878,
+  "edge_spacing_m": [
+   0.00030678711052121614,
+   0.0005311828045751325,
+   0.001226246580625343
+  ],
+  "quad_angle_deg": [
+   29.489029000049126,
+   156.17010736576972
+  ],
+  "aspect_max": 6.56289762635963,
+  "r_edge_m": [
+   0.09556240870323503,
+   0.1299355831718742
+  ]
+ },
+ "n_cells_rotor": 41898,
+ "n_cells_stator": 111972,
+ "n_tri": 14,
+ "pose": {
+  "hypothesis": "B",
+  "arm_face": "convex",
+  "R_mm": 101.6,
+  "beta_deg": 83.96,
+  "r_tipA_mm": 125.59,
+  "r_tipB_mm": 120.62,
+  "r_min_mm": 99.72,
+  "r_max_mm": 125.78,
+  "r_centroid_mm": 108.5,
+  "tipA_to_next_tipA_mm": 217.52,
+  "cup_opens": "away from the shaft",
+  "cup_opening_dir_radial_tangential": [
+   0.9917,
+   -0.1288
+  ],
+  "rotation_sense_model": "CCW",
+  "sense_rule": "drag rule: concave face meets the wind on the downwind-moving blade",
+  "leading_tip": "A"
+ },
+ "seconds": 24.0,
+ "checkMesh_ok": true,
+ "mesh_seconds_total": 34.6
+}

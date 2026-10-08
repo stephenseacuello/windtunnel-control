@@ -1,0 +1,69 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Stage 1 section case (cfd/section2d). Numbers come from system/caseParameters,
+  which cfd/section2d/run_case.py writes for each case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+solvers
+{
+    p
+    {
+        solver          GAMG;
+        smoother        DICGaussSeidel;
+        tolerance       1e-6;
+        relTol          0.01;
+    }
+
+    pFinal
+    {
+        $p;
+        tolerance       1e-7;
+        relTol          0;
+    }
+
+    "(U|k|omega|ReThetat|gammaInt)"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0.1;
+    }
+
+    "(U|k|omega|ReThetat|gammaInt)Final"
+    {
+        $U;
+        relTol          0;
+    }
+}
+
+PIMPLE
+{
+    // Two outer correctors keep the step stable at maxCo 5, reached only in about
+    // 100 cells within 0.2 mm of two square corners. maxCo 10 with two outer
+    // correctors diverged within 50 steps (smoke test, README).
+    momentumPredictor        yes;
+    nOuterCorrectors         $nOuterCorrectors;
+    nCorrectors              2;
+    nNonOrthogonalCorrectors 0;
+    turbOnFinalIterOnly      true;
+    finalOnLastPimpleIterOnly true;   // pFinal/UFinal only in the last outer iteration
+}
+
+relaxationFactors
+{
+    equations
+    {
+        ".*"            1;
+    }
+}
+
+// ************************************************************************* //

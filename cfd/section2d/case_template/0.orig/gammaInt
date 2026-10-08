@@ -1,0 +1,39 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Stage 1 section case (cfd/section2d). Numbers come from system/caseParameters,
+  which cfd/section2d/run_case.py writes for each case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      gammaInt;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+dimensions      [0 0 0 0 0 0 0];
+
+// kOmegaSSTLM only (ignored by kOmegaSST)
+internalField   uniform 1;
+
+boundaryField
+{
+    farfield
+    {
+        type            inletOutlet;
+        inletValue      uniform 1;
+        value           uniform 1;
+    }
+    blade
+    {
+        type            zeroGradient;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+// ************************************************************************* //

@@ -1,0 +1,23 @@
+# Regenerable CFD output. Case set-ups, scripts and small result files
+# (result.md, result.png, metrics.json, *.csv, timing.txt) stay tracked.
+
+# working cases: everything under runs/ is generated
+runs/
+
+# decomposed cases, anywhere
+processor*/
+
+# OpenFOAM output inside the tracked cases (0.orig stays tracked)
+validation/*/0/
+validation/*/0.[0-9]*/
+validation/*/[1-9]*/
+validation/*/postProcessing/
+validation/*/constant/polyMesh/
+validation/*/dynamicCode/
+section2d/**/postProcessing/
+
+# solver logs, ParaView stubs, python environment and caches
+log.*
+*.foam
+.venv/
+__pycache__/

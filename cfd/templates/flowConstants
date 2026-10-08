@@ -1,0 +1,22 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Shared constants for cfd/ cases. Use with
+      #include "<path to cfd>/templates/flowConstants"
+  then $nu, $rhoInf, $UInf ... in any dictionary. Values in SI units.
+\*---------------------------------------------------------------------------*/
+
+// Air at 20 C and 101.325 kPa (reports/roughness_2026-09/src/data.py:
+// RHO_STD, NU_STD). Kinematic: OpenFOAM's incompressible solvers work in p/rho.
+rhoInf          1.204;       // kg/m^3, used by forces/forceCoeffs
+nu              1.516e-5;    // m^2/s
+
+// Stage 1 free-stream speeds (cfd/PLAN.md), m/s. A case sets UInf to one of them.
+UInfLow         10;
+UInfMid         23;
+UInfHigh        38;
+
+// Reference length for force coefficients: NOT set here on purpose. The reports
+// use chord 48.0 mm; the outer-tip chord measured from blades/v1.stl is
+// 46.16 mm (cfd/geometry/section_v1.json). Choose one before Stage 1 and
+// state it in every coefficient.
+
+// ************************************************************************* //

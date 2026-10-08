@@ -1,0 +1,48 @@
+{
+ "case": "/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/_test_pipeline_coarse_N0.3",
+ "kind": "section",
+ "images": [
+  "cp_mean_near.png",
+  "cp_near.png",
+  "lic_mean_near.png",
+  "lic_near.png",
+  "mesh_cornerA_0p1mm.png",
+  "mesh_cornerA_0p8mm.png",
+  "mesh_cornerA_6mm.png",
+  "mesh_domain.png",
+  "mesh_near.png",
+  "nut_ratio_near.png",
+  "nut_ratio_wake.png",
+  "streamlines_mean_near.png",
+  "streamlines_near.png",
+  "surface_inst.png",
+  "surface_mean.png",
+  "velocity_mean_near.png",
+  "velocity_mean_wake.png",
+  "velocity_near.png",
+  "velocity_wake.png",
+  "vorticity_near.png",
+  "vorticity_wake.png"
+ ],
+ "notes": [
+  "no animation: 1 saved field time(s) (purgeWrite keeps the last 3; finished cases keep only the last)"
+ ],
+ "read_as": "reconstructed",
+ "time": 0.0006260869565,
+ "times_available": [
+  0.0,
+  0.0006260869565
+ ],
+ "yplus_inst": {
+  "min": 0.006814200840237788,
+  "mean": 0.200852054252283,
+  "max": 1.5516616126871308,
+  "p95": 0.680285907853484
+ },
+ "yplus_mean": {
+  "min": 0.005742866517217838,
+  "mean": 0.18428501006594006,
+  "max": 1.8259889214439402,
+  "p95": 0.62736338406039
+ }
+}

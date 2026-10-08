@@ -1,0 +1,29 @@
+mesh images
+  mesh_domain.png
+  mesh_near.png
+  mesh_cornerA_6mm.png
+  mesh_cornerA_0p8mm.png
+  mesh_cornerA_0p1mm.png
+fields at t = 0.000626087 s
+  velocity_near.png
+  velocity_wake.png
+  vorticity_near.png
+  vorticity_wake.png
+  cp_near.png
+  nut_ratio_near.png
+  nut_ratio_wake.png
+  gammaInt_near.png
+  gammaInt_wall.png
+  lic_near.png
+  streamlines_near.png
+  velocity_mean_near.png
+  velocity_mean_wake.png
+  cp_mean_near.png
+  lic_mean_near.png
+  streamlines_mean_near.png
+  surface_inst.csv
+  surface_inst.png
+  surface_mean.csv
+  surface_mean.png
+render_fields: 23 images in /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/_test_pipeline_coarse_LM_N0.3/fields
+

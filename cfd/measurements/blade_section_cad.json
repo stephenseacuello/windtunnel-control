@@ -1,0 +1,85 @@
+{
+ "_source": "blades/v1.stl, sliced; frame as in ~/Downloads/turbine.STEP (inches). Calculated, not measured.",
+ "_frame": "z along span (z=0 is the end farther from the holes); x along the bolt-hole axis; y across.",
+ "bbox_mm": [
+  24.46,
+  48.03,
+  245.11
+ ],
+ "span_mm": 245.11,
+ "wall_at_square_edges_mm": [
+  1.854,
+  1.854
+ ],
+ "wall_area_over_midline_mm": 1.848,
+ "face_lengths_mm": [
+  71.58,
+  65.42
+ ],
+ "section_area_mm2": 126.6,
+ "centroid_xy_mm": [
+  17.6,
+  31.54
+ ],
+ "tipA_xy_mm": [
+  2.66,
+  6.04
+ ],
+ "tipB_xy_mm": [
+  7.36,
+  50.41
+ ],
+ "chord_tip_to_tip_mm": 44.61,
+ "chord_angle_to_bolt_axis_deg": 84.0,
+ "depth_chord_to_outer_face_mm": 20.58,
+ "depth_position_fraction_of_chord_from_tipA": 0.71,
+ "midline_length_mm": 68.5,
+ "turning_deg_from_edge_normals": 190.3,
+ "single_circle_fit": {
+  "radius_mm": 23.79,
+  "rms_mm": 1.97
+ },
+ "leg_radius_mm_s0.05-0.40": 56.5,
+ "curl_radius_mm_s0.60-0.95": 12.5,
+ "holes": [
+  {
+   "z_from_far_end_mm": 125.23,
+   "z_from_near_end_mm": 119.89,
+   "diameter_mm": 5.05,
+   "y_axis_mm": 29.2
+  },
+  {
+   "z_from_far_end_mm": 135.13,
+   "z_from_near_end_mm": 109.99,
+   "diameter_mm": 5.05,
+   "y_axis_mm": 29.2
+  }
+ ],
+ "hole_axis": "parallel to CAD x (STEP: two CYLINDRICAL_SURFACE, r = 0.100 in, direction (1,0,0))",
+ "bolt_axis_crosses_concave_face_x_mm": 22.44,
+ "bolt_axis_crosses_convex_face_x_mm": 24.49,
+ "if_bolts_radial_R_to_concave_face": {
+  "shaft_axis_xy_mm": [
+   -79.2,
+   29.2
+  ],
+  "r_tipA_mm": 85.0,
+  "r_tipB_mm": 89.1,
+  "r_min_mm": 84.5,
+  "r_max_mm": 106.4,
+  "r_centroid_mm": 96.8,
+  "tipA_to_adjacent_tipA_mm": 147.3
+ },
+ "if_bolts_radial_R_to_convex_face": {
+  "shaft_axis_xy_mm": [
+   126.1,
+   29.2
+  ],
+  "r_tipA_mm": 125.6,
+  "r_tipB_mm": 120.6,
+  "r_min_mm": 99.8,
+  "r_max_mm": 125.8,
+  "r_centroid_mm": 108.5,
+  "tipA_to_adjacent_tipA_mm": 217.5
+ }
+}

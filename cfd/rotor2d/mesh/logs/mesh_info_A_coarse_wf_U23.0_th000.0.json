@@ -1,0 +1,99 @@
+{
+ "n_points": 65656,
+ "n_cells": 32815,
+ "n_faces": 131275,
+ "n_internal_faces": 64498,
+ "patch_faces": {
+  "blade1": 157,
+  "blade2": 157,
+  "blade3": 157,
+  "AMI1": 272,
+  "AMI2": 272,
+  "inlet": 30,
+  "outlet": 30,
+  "sides": 72
+ },
+ "hypothesis": "A",
+ "level": "coarse",
+ "wall": "wf",
+ "U_design": 23.0,
+ "yplus_target": 40.0,
+ "h0_m": 0.0008696781982136294,
+ "theta_deg": 0.0,
+ "params": {
+  "r_bl": 1.2,
+  "n_layers": 3,
+  "ds_max": 0.001,
+  "ds_corner": 0.0003,
+  "g_t": 1.2,
+  "s_near": 0.0014,
+  "d_near": 0.004,
+  "s_rot": 0.0032,
+  "s_ami": 0.003,
+  "g_in": 0.12,
+  "s_wake1": 0.005,
+  "s_wake2": 0.01,
+  "g_out": 0.12,
+  "s_far": 0.25
+ },
+ "dz_m": 0.01,
+ "r_ami_m": 0.12841986662039698,
+ "n_ami_faces": 272,
+ "ami_margin_m": 0.022,
+ "D_rotor_m": 0.21283973324079397,
+ "domain": {
+  "x_in": -2.5,
+  "x_out": 6.25,
+  "y_lo": -3.75,
+  "y_hi": 3.75,
+  "sides": "patch",
+  "D_ref": 0.25
+ },
+ "ring": {
+  "n_layers": 3,
+  "n_wall_nodes": 157,
+  "thickness_m": 0.0031656286414976104,
+  "first_cell_m": 0.0008696781982136294,
+  "last_layer_m": 0.0012523366054276257,
+  "edge_spacing_m": [
+   0.0006941616090875511,
+   0.0010369955823038258,
+   0.0018900153872840923
+  ],
+  "quad_angle_deg": [
+   34.09958296533813,
+   158.64024485241316
+  ],
+  "aspect_max": 2.992042367900404,
+  "r_edge_m": [
+   0.08130088606858023,
+   0.10958324416190851
+  ]
+ },
+ "n_cells_rotor": 9986,
+ "n_cells_stator": 22829,
+ "n_tri": 1117,
+ "pose": {
+  "hypothesis": "A",
+  "arm_face": "concave",
+  "R_mm": 101.6,
+  "beta_deg": 83.96,
+  "r_tipA_mm": 85.02,
+  "r_tipB_mm": 89.06,
+  "r_min_mm": 84.46,
+  "r_max_mm": 106.42,
+  "r_centroid_mm": 96.79,
+  "tipA_to_next_tipA_mm": 147.26,
+  "cup_opens": "toward the shaft",
+  "cup_opening_dir_radial_tangential": [
+   -0.9917,
+   0.1288
+  ],
+  "rotation_sense_model": "CW",
+  "sense_rule": "drag rule: concave face meets the wind on the downwind-moving blade",
+  "leading_tip": "A"
+ },
+ "seconds": 26.1,
+ "checkMesh_ok": true,
+ "mesh_seconds_total": 55.2
+}

@@ -1,0 +1,49 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  cfd/rotor2d case template (OpenFOAM v2606). Values come from caseParameters,
+  written by cfd/rotor2d/run_case.py: edit run_case.py, not the generated case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+simulationType  RAS;
+
+RAS
+{
+    model           $turbulenceModel;     // kOmegaSST (default) or kOmegaSSTLM (low-Re mesh only)
+    turbulence      on;
+    printCoeffs     on;
+
+    // As cfd/section2d/case_template. Only the <model>Coeffs dictionary of the selected model
+    // is read (RASModel.C: optionalSubDict(type + "Coeffs")); kOmegaSSTLM derives from
+    // kOmegaSST and reads the same decay-control entries from kOmegaSSTLMCoeffs.
+    kOmegaSSTCoeffs
+    {
+        // Free-stream decay control (Spalart and Rumsey 2007; kOmegaSSTBase.C, v2606):
+        // sources betaStar*omegaInf*kInf (k) and beta*omegaInf^2 (omega) balance the
+        // free-stream destruction, so k and omega keep their inlet values up to the rotor.
+        // With --decay control (default) kInf = kInlet and omegaInf = omegaInlet; with
+        // --decay precompensate it is off (kInf = omegaInf = 0, not read).
+        decayControl    $freestreamDecayControl;
+        kInf            $kAmbient;
+        omegaInf        $omegaAmbient;
+    }
+
+    kOmegaSSTLMCoeffs
+    {
+        $kOmegaSSTCoeffs;
+        // The lambda iteration for Re_theta,t0 runs to lambdaErr whatever this is;
+        // maxLambdaIter (default 10) only sets when the "Number of lambda iterations
+        // exceeds maxLambdaIter" warning is printed (kOmegaSSTLM.C, v2606).
+        maxLambdaIter   50;
+    }
+}
+
+// ************************************************************************* //

@@ -1,0 +1,74 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  cfd/rotor2d case template (OpenFOAM v2606). Values come from caseParameters,
+  written by cfd/rotor2d/run_case.py: edit run_case.py, not the generated case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+solvers
+{
+    "pcorr.*"
+    {
+        solver          GAMG;
+        smoother        GaussSeidel;
+        tolerance       1e-3;
+        relTol          0;
+    }
+    p
+    {
+        solver          GAMG;
+        smoother        DICGaussSeidel;
+        tolerance       1e-6;
+        relTol          0.01;
+    }
+    pFinal
+    {
+        $p;
+        tolerance       1e-7;
+        relTol          0;
+    }
+    "(U|k|omega|ReThetat|gammaInt)"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0.1;
+    }
+    "(U|k|omega|ReThetat|gammaInt)Final"
+    {
+        $U;
+        relTol          0;
+    }
+}
+
+PIMPLE
+{
+    momentumPredictor        yes;
+    nOuterCorrectors         $nOuterCorrectors;
+    nCorrectors              2;
+    nNonOrthogonalCorrectors 0;
+    turbOnFinalIterOnly      true;
+    finalOnLastPimpleIterOnly true;
+    // moving mesh (rotating cases; ignored on a static mesh)
+    correctPhi               yes;
+    moveMeshOuterCorrectors  no;
+    checkMeshCourantNo       no;
+}
+
+relaxationFactors
+{
+    equations
+    {
+        ".*"            1;
+    }
+}
+
+// ************************************************************************* //

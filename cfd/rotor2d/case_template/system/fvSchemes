@@ -1,0 +1,64 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  cfd/rotor2d case template (OpenFOAM v2606). Values come from caseParameters,
+  written by cfd/rotor2d/run_case.py: edit run_case.py, not the generated case.
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+ddtSchemes
+{
+    default         backward;       // second order in time
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    limitedGrad     cellLimited Gauss linear 1;   // convection reconstruction only
+}
+
+divSchemes
+{
+    default         none;
+    div(phi,U)      Gauss linearUpwind limitedGrad;
+    // k, omega first-order upwind: Stage 1 smoke tests found omega going negative
+    // at the square corners with higher-order schemes (cfd/section2d/README.md).
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+    div(phi,ReThetat) Gauss linearUpwind limitedGrad;
+    div(phi,gammaInt) Gauss linearUpwind limitedGrad;
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear limited corrected 0.5;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         limited corrected 0.5;
+}
+
+wallDist
+{
+    method          meshWave;
+    correctWalls    true;
+    // Rotating cases: the distance field is recomputed every updateInterval steps
+    // (rotor cells move rigidly with the blades; only stator cells change).
+    updateInterval  $wallDistInterval;
+}
+
+// ************************************************************************* //

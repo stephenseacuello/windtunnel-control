@@ -1,0 +1,16 @@
+# Priority 1: mesh study, 23 m/s, kOmegaSST, alpha 0 / 90 / 180 on coarse, medium, fine,
+# then one time-step check (alpha 0, medium, maxCo 2.5 against the default maxCo 5; both
+# with 2 outer correctors). maxCo 10 with 2 outer correctors diverged in the smoke test
+# (README), so the check goes to a smaller step, not a larger one.
+# Columns: alpha_deg U_ms model level Tu_pct [key=value ...]
+# Order: the medium baseline first, then coarse (cheap), the other medium angles, fine.
+0    23.0  SST  medium  1.0
+0    23.0  SST  coarse  1.0
+90   23.0  SST  coarse  1.0
+180  23.0  SST  coarse  1.0
+90   23.0  SST  medium  1.0
+180  23.0  SST  medium  1.0
+0    23.0  SST  fine    1.0
+90   23.0  SST  fine    1.0
+180  23.0  SST  fine    1.0
+0    23.0  SST  medium  1.0  maxco=2.5

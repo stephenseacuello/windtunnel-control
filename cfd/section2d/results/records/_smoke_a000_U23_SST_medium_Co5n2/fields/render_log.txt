@@ -1,0 +1,20 @@
+mesh images
+  mesh_domain.png
+  mesh_near.png
+  mesh_cornerA_6mm.png
+  mesh_cornerA_0p8mm.png
+  mesh_cornerA_0p1mm.png
+fields at t = 0.00123835 s
+  velocity_near.png
+  velocity_wake.png
+  vorticity_near.png
+  vorticity_wake.png
+  cp_near.png
+  nut_ratio_near.png
+  nut_ratio_wake.png
+  lic_near.png
+  streamlines_near.png
+  surface_inst.csv
+  surface_inst.png
+render_fields: 15 images in /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/_smoke_a000_U23_SST_medium_Co5n2/fields
+

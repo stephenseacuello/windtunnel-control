@@ -1,0 +1,10 @@
+=== 2026-10-07 22:55:21 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/_test_pipeline_coarse_N0.3
+[record] _test_pipeline_coarse_N0.3 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/_test_pipeline_coarse_N0.3
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/_test_pipeline_coarse_N0.3/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/_test_pipeline_coarse_N0.3 : 2.95 MB, 40 files
+
+=== 2026-10-08 07:46:08 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/_test_pipeline_coarse_N0.3
+[record] _test_pipeline_coarse_N0.3 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/_test_pipeline_coarse_N0.3
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/_test_pipeline_coarse_N0.3/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/_test_pipeline_coarse_N0.3 : 2.58 MB, 40 files
+

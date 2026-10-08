@@ -1,0 +1,139 @@
+{
+ "n_points": 220176,
+ "n_cells": 108881,
+ "n_faces": 436733,
+ "n_internal_faces": 216517,
+ "patch_faces": {
+  "blade1": 518,
+  "blade2": 518,
+  "blade3": 518,
+  "AMI1": 368,
+  "AMI2": 368,
+  "inlet": 38,
+  "outlet": 38,
+  "sides": 88
+ },
+ "hypothesis": "A",
+ "level": "medium",
+ "wall": "lowRe",
+ "U_design": 23.0,
+ "yplus_target": 0.8,
+ "yplus_flat_plate_estimate": 0.8,
+ "h0_m": 1.2075536792153207e-05,
+ "theta_deg": 0.0,
+ "params": {
+  "r_bl": 1.15,
+  "n_layers": null,
+  "ds_max": 0.0003,
+  "ds_corner": 6e-05,
+  "g_t": 1.12,
+  "s_near": 0.0006,
+  "d_near": 0.005,
+  "s_rot": 0.0023,
+  "s_ami": 0.0022,
+  "g_in": 0.1,
+  "s_wake1": 0.0035,
+  "s_wake2": 0.007,
+  "g_out": 0.1,
+  "s_far": 0.2
+ },
+ "dz_m": 0.01,
+ "r_ami_m": 0.12841986662039698,
+ "n_ami_faces": 368,
+ "ami_margin_m": 0.022,
+ "D_rotor_m": 0.21283973324079397,
+ "domain": {
+  "x_in": -2.5,
+  "x_out": 6.25,
+  "y_lo": -3.75,
+  "y_hi": 3.75,
+  "sides": "patch",
+  "D_ref": 0.25
+ },
+ "ring": {
+  "n_layers": 24,
+  "n_wall_nodes": 518,
+  "thickness_m": 0.0022239255432373434,
+  "first_cell_m": 1.2075536792153207e-05,
+  "last_layer_m": 0.00030057771154587366,
+  "edge_spacing_m": [
+   0.00013188969763516925,
+   0.0003092126690369976,
+   0.0005582992165145851
+  ],
+  "quad_angle_deg": [
+   36.433191171066056,
+   147.4855219180407
+  ],
+  "aspect_max": 24.89050135447856,
+  "r_edge_m": [
+   0.08222590482508416,
+   0.10864375093005153
+  ]
+ },
+ "n_cells_rotor": 64986,
+ "n_cells_stator": 43895,
+ "n_tri": 36,
+ "pose": {
+  "hypothesis": "A",
+  "arm_face": "concave",
+  "R_mm": 101.6,
+  "beta_deg": 83.96,
+  "r_tipA_mm": 85.02,
+  "r_tipB_mm": 89.06,
+  "r_min_mm": 84.46,
+  "r_max_mm": 106.42,
+  "r_centroid_mm": 96.79,
+  "tipA_to_next_tipA_mm": 147.26,
+  "cup_opens": "toward the shaft",
+  "cup_opening_dir_radial_tangential": [
+   -0.9917,
+   0.1288
+  ],
+  "rotation_sense_model": "CW",
+  "sense_rule": "drag rule: concave face meets the wind on the downwind-moving blade",
+  "leading_tip": "A"
+ },
+ "pose_full": {
+  "name": "A",
+  "arm_face": "concave",
+  "source": "cfd/measurements/blade_section_cad.json hypothesis A (bolts radial, CAD), R = 101.6 mm",
+  "R_m": 0.1016,
+  "beta_deg": 83.96380866584273,
+  "sense": -1,
+  "sense_rule": "drag rule: concave face meets the wind on the downwind-moving blade",
+  "S_cad": [
+   -0.07914303465403955,
+   0.029201156459748745
+  ],
+  "e_r_cad": [
+   1.0,
+   0.0
+  ],
+  "P_att_cad": [
+   0.02245696534596045,
+   0.029201156459748745
+  ],
+  "r_tipA_m": 0.08502129578711945,
+  "r_tipB_m": 0.08906032482047999,
+  "r_min_m": 0.08445865482977429,
+  "r_max_m": 0.10641986662039699,
+  "r_centroid_m": 0.09679065826507342,
+  "cup_opening_radial": -0.9916723754328098,
+  "cup_opening_tangential_ccw": 0.12878625626769394,
+  "cup_opens": "toward the shaft",
+  "leading_tip": "A",
+  "tipA_rt_m": [
+   0.0818071565865594,
+   -0.0231562058321955
+  ],
+  "tipB_rt_m": [
+   0.08649835075904716,
+   0.02120794127430215
+  ],
+  "tipA_to_next_tipA_m": 0.14726120402863263
+ },
+ "seconds": 14.9,
+ "checkMesh_ok": true,
+ "mesh_seconds_total": 26.1
+}

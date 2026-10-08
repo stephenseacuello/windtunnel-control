@@ -1,0 +1,4 @@
+2026-10-08 07:33:03 queue: 31 unique cases from queues/priority1.txt, queues/priority2.txt, queues/priority3.txt; pid 19767
+2026-10-08 07:33:03 case 1/31: a000.0_U23.0_SST_medium_Tu1.0
+[setup] a000.0_U23.0_SST_medium_Tu1.0
+[run] a000.0_U23.0_SST_medium_Tu1.0: pimpleFoam on 4 ranks, end 0.313043 s (150.0 c/U), log /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_medium_Tu1.0/log.pimpleFoam

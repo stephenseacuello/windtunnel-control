@@ -1,0 +1,87 @@
+{
+ "n_points": 255548,
+ "n_cells": 131061,
+ "n_faces": 520957,
+ "n_internal_faces": 257762,
+ "n_wall_faces": 973,
+ "n_farfield_faces": 100,
+ "level": "medium",
+ "alpha_deg_wake": 0.0,
+ "params": {
+  "h0": 4.5e-06,
+  "r_bl": 1.15,
+  "ds_max": 0.00015,
+  "ds_corner": 4.5e-05,
+  "g_t": 1.12,
+  "s_near": 0.0003,
+  "d_near": 0.006,
+  "s_wake": 0.0006,
+  "s_wake2": 0.0012,
+  "g_out": 0.1,
+  "s_far": 0.08
+ },
+ "lambda_fan": 2.0,
+ "r_farfield_m": 1.296,
+ "c_ref_m": 0.048,
+ "dz_m": 0.001,
+ "wake_chords": {
+  "x_up": -0.6,
+  "x1": 4.0,
+  "x2": 8.0,
+  "w1": 0.75,
+  "w2": 1.5
+ },
+ "ring": {
+  "n_layers": 27,
+  "n_wall_nodes": 973,
+  "thickness_m": 0.0012760594451901534,
+  "first_cell_m": 4.5e-06,
+  "last_layer_m": 0.00017035557980741114,
+  "edge_spacing_m": {
+   "min": 8.882347837971678e-05,
+   "median": 0.0001528633958885267,
+   "max": 0.0002475404367484079
+  },
+  "quad_angle_deg": [
+   46.38637269527783,
+   135.10042383409728
+  ],
+  "aspect_max": 33.3365249939846
+ },
+ "outer": {
+  "n_cells": 104790,
+  "n_tri": 7647,
+  "n_quad": 97143
+ },
+ "wall_vs_csv_max_m": 4.7777600029549776e-05,
+ "frame": {
+  "centroid_cad_m": [
+   0.017620123320014388,
+   0.03150692208442688
+  ],
+  "body_x_dir_deg_in_cad": -4.7636414938898834,
+  "body_y_dir_deg_in_cad": 85.23635850611012,
+  "wall_m": 0.0018542294841820239,
+  "area_m2": 0.0001270868709773303,
+  "corners_body_m": {
+   "B_outer": [
+    -0.012365198605818707,
+    0.01871864633298522
+   ],
+   "B_inner": [
+    -0.011232981943450628,
+    0.017250227996997134
+   ],
+   "A_inner": [
+    -0.013214477787764847,
+    -0.025791898077446557
+   ],
+   "A_outer": [
+    -0.012365198605818707,
+    -0.027440197762310575
+   ]
+  },
+  "note": "x_body = R (x_cad - centroid); R rows = (body x, body y) unit vectors in CAD"
+ },
+ "seconds": 11.2
+}

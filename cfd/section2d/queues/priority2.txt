@@ -1,0 +1,15 @@
+# Priority 2: alpha 0 (cup into the wind) and 180 (convex side into the wind) at the three
+# rig speeds, both turbulence models, medium mesh, Tu 1 %. The 23 m/s SST cases are shared
+# with priority 1 and are skipped if already complete.
+0    10.2  SST  medium  1.0
+0    23.0  SST  medium  1.0
+0    38.0  SST  medium  1.0
+180  10.2  SST  medium  1.0
+180  23.0  SST  medium  1.0
+180  38.0  SST  medium  1.0
+0    10.2  LM   medium  1.0
+0    23.0  LM   medium  1.0
+0    38.0  LM   medium  1.0
+180  10.2  LM   medium  1.0
+180  23.0  LM   medium  1.0
+180  38.0  LM   medium  1.0

@@ -1,0 +1,130 @@
+{
+ "time": "269",
+ "n_plate_faces_used": 300,
+ "simulation": {
+  "onset_x_m": 0.322378,
+  "onset_cf": 0.002441227709190672,
+  "peak_x_m": 0.765502,
+  "peak_cf": 0.004595377229080932,
+  "mid_x_m": 0.5378599883446292
+ },
+ "simulation_tutorial_sample_line": {
+  "onset_x_m": 0.303705,
+  "onset_cf": 0.0024503429355281206,
+  "peak_x_m": 0.7884319999999999,
+  "peak_cf": 0.004591213991769547,
+  "mid_x_m": 0.5381468219475656
+ },
+ "experiment": {
+  "onset_x_m_station": 0.395,
+  "onset_x_m_parabola": 0.4060526315789474,
+  "onset_cf": 0.002098,
+  "peak_x_m_station": 0.895,
+  "peak_x_m_parabola": 0.8529470198675496,
+  "peak_cf": 0.004861,
+  "mid_x_m": 0.665719489981785,
+  "station_spacing_m": 0.1
+ },
+ "delta_m": {
+  "onset": -0.08367463157894739,
+  "mid": -0.12785950163715576,
+  "peak": -0.0874450198675496
+ },
+ "Re_x": {
+  "sim_onset": 116056.08000000002,
+  "exp_onset": 145210.8748692925,
+  "sim_mid": 193629.5958040665,
+  "exp_mid": 238071.87058951255
+ },
+ "cf_rel_error_at_stations": {
+  "x_m": [
+   0.045,
+   0.095,
+   0.195,
+   0.295,
+   0.395,
+   0.495,
+   0.595,
+   0.695,
+   0.795,
+   0.895,
+   0.995,
+   1.095,
+   1.195,
+   1.295,
+   1.395,
+   1.495
+  ],
+  "rel": [
+   0.0688462615589358,
+   0.08917756213274952,
+   0.10780469410607618,
+   0.08430495056314191,
+   0.21118946937556227,
+   0.4442208339112055,
+   0.46912656410235987,
+   0.19631209402746563,
+   -0.05353632378024764,
+   -0.06717850329035013,
+   -0.055311594947447196,
+   -0.03705574142907597,
+   -0.02391812848152619,
+   -0.010617450746045587,
+   -0.004886697407500362,
+   0.012956143843343648
+  ],
+  "laminar_x_lt_0.4_max_abs": 0.21118946937556227,
+  "turbulent_x_gt_0.9_max_abs": 0.055311594947447196,
+  "turbulent_x_gt_0.9_mean": -0.01980557819470861
+ },
+ "Tu_rel_error_at_stations_max_abs": 0.07533421214148106,
+ "criterion": "onset (cf minimum) and 50 % point of the cf rise both within +-0.05 m (half the 0.1 m station spacing) of the experiment",
+ "verdict": "DOES NOT MATCH",
+ "run": {
+  "iterations": 269,
+  "converged_by_residualControl": true,
+  "execution_time_s": 14.55,
+  "clock_time_s": 15.0,
+  "mpi_ranks": 1
+ },
+ "checks": {
+  "T3A_np4": {
+   "what": "same case, 4 MPI ranks (scotch)",
+   "time": "269",
+   "transition": {
+    "onset_x_m": 0.322378,
+    "onset_cf": 0.0024412345679012343,
+    "peak_x_m": 0.765502,
+    "peak_cf": 0.004595493827160494,
+    "mid_x_m": 0.5378633997227357
+   },
+   "max_rel_cf_change_vs_serial": 0.00010695969871155064,
+   "run": {
+    "iterations": 269,
+    "converged_by_residualControl": true,
+    "execution_time_s": 7.25,
+    "clock_time_s": 7.0,
+    "mpi_ranks": 4
+   }
+  },
+  "T3A_tight": {
+   "what": "residualControl 1e-12: all 1000 iterations",
+   "time": "1000",
+   "transition": {
+    "onset_x_m": 0.322378,
+    "onset_cf": 0.00244059670781893,
+    "peak_x_m": 0.765502,
+    "peak_cf": 0.004594478737997256,
+    "mid_x_m": 0.5379555798336585
+   },
+   "max_rel_cf_change_vs_serial": 0.005612298253564352,
+   "run": {
+    "iterations": 1000,
+    "converged_by_residualControl": false,
+    "execution_time_s": 39.89,
+    "clock_time_s": 40.0,
+    "mpi_ranks": 1
+   }
+  }
+ }
+}

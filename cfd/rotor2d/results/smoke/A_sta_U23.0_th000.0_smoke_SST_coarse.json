@@ -1,0 +1,92 @@
+{
+ "name": "A_sta_U23.0_th000.0_SST_coarse",
+ "mode": "static",
+ "hypothesis": "A",
+ "U_ms": 23.0,
+ "model": "kOmegaSST",
+ "level": "coarse",
+ "wall": "wf",
+ "n_cells": 32815,
+ "h0_m": 0.0008696781982136294,
+ "sense": "CW",
+ "R_m": 0.1016,
+ "r_max_m": 0.10641986662039699,
+ "dz_m": 0.01,
+ "Tu_rotor_pct": 0.9999999999999999,
+ "maxCo": 2.0,
+ "nOuter": 2,
+ "nProcs": 2,
+ "wall_time_s": 240.0,
+ "n_steps": 730,
+ "t_first": 1.19997425293e-06,
+ "t_last": 0.0124742780135,
+ "dt_mean_s": 1.7088052092328765e-05,
+ "dt_last_half_mean_s": 1.748357480821918e-05,
+ "dt_min_s": 1.1999743e-06,
+ "dt_max_s": 2.1869386e-05,
+ "Co_max_mean": 1.9988171325136612,
+ "Co_max_max": 2.0089542,
+ "clock_s": 225.0,
+ "s_per_step_recent": 0.2708333333333333,
+ "s_per_step": 0.3090659340659341,
+ "omega_bounded_steps": 0,
+ "ami_log_sum_min": 1.0,
+ "ami_log_sum_max": 1.0,
+ "ami_log_n": 2,
+ "ami": {},
+ "t_end": 0.0124101641969,
+ "n_samples": 67,
+ "theta_deg": 0.0,
+ "convTime_s": 0.009253901445251912,
+ "t_end_conv": 1.3410737374199653,
+ "avg_window_conv": 1.3208558224984706,
+ "avg_window_complete": false,
+ "CQ_mean": -0.06421877930547175,
+ "CQ_std": 0.10843167749609593,
+ "CQ_pressure_mean": -0.06340265311238905,
+ "Cx_mean": 1.0918663146856122,
+ "Cx_std": 0.13238560533218846,
+ "Cy_mean": -0.056633690067200905,
+ "Cy_std": 0.20844439359516112,
+ "CQ_blade_mean": [
+  -0.19322963561002887,
+  0.1379200512669444,
+  -0.008909195033386667
+ ],
+ "f_peak_Hz": 81.79253589322413,
+ "St_D": 0.7569000661131255,
+ "yplus": {
+  "blade1": {
+   "min": 2.61477643,
+   "max": 74.7941878,
+   "mean_of_avg": 32.4018396,
+   "n": 1
+  },
+  "blade2": {
+   "min": 3.54214916,
+   "max": 86.5289523,
+   "mean_of_avg": 30.5067394,
+   "n": 1
+  },
+  "blade3": {
+   "min": 2.03439076,
+   "max": 55.5094513,
+   "mean_of_avg": 24.9661549,
+   "n": 1
+  }
+ },
+ "yplus_mean": 29.291577966666665,
+ "yplus_max": 86.5289523,
+ "smoke_test": true,
+ "complete": false,
+ "timing_sessions": [
+  {
+   "start": "2026-10-07T19:37:19",
+   "wall_s": 240.0,
+   "t_start": 0.0,
+   "t_end": 0.0,
+   "rc": "timeout",
+   "np": 2
+  }
+ ]
+}

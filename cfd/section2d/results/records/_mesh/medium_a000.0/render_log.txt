@@ -1,0 +1,8 @@
+mesh images
+  mesh_domain.png
+  mesh_near.png
+  mesh_cornerA_6mm.png
+  mesh_cornerA_0p8mm.png
+  mesh_cornerA_0p1mm.png
+render_fields: 5 images in /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/_mesh/medium_a000.0
+

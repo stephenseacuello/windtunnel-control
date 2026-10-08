@@ -1,0 +1,3 @@
+Wall time 15.8 s (restore0Dir + blockMesh + simpleFoam, 1 core, 2026-10-07 16:04).
+simpleFoam alone: ExecutionTime = 14.55 s  ClockTime = 15 s
+SIMPLE solution converged in 269 iterations

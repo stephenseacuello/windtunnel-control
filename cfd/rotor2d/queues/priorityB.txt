@@ -1,0 +1,15 @@
+# Priority B: static rotor (stage 3a), C_Q(theta) over one 120-deg period (3-fold symmetry),
+# U = 23 m/s, kOmegaSST, medium, 4 ranks, 40 rotor convective times D/U each, averages over
+# the last 25. Written for hypothesis A; after priority A, change HYP to the hypothesis whose
+# lambda at peak C_P and zero-torque lambda match the rig (cfd/post/plot_rotor_cp.py), or keep both.
+# The mean of C_Q over theta is the starting torque: its sign tests the assumed rotation sense.
+# Priority 0 (priority0.txt) now runs these 8 cases and the same 8 for hypothesis B first,
+# so this file is skipped as complete after it; it stays for a change of HYP or options.
+sta A 23 0   SST medium
+sta A 23 15  SST medium
+sta A 23 30  SST medium
+sta A 23 45  SST medium
+sta A 23 60  SST medium
+sta A 23 75  SST medium
+sta A 23 90  SST medium
+sta A 23 105 SST medium

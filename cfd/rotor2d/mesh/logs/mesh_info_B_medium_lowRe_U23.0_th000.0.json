@@ -1,0 +1,100 @@
+{
+ "n_points": 256410,
+ "n_cells": 126948,
+ "n_faces": 509051,
+ "n_internal_faces": 252589,
+ "patch_faces": {
+  "blade1": 518,
+  "blade2": 518,
+  "blade3": 518,
+  "AMI1": 424,
+  "AMI2": 424,
+  "inlet": 38,
+  "outlet": 38,
+  "sides": 88
+ },
+ "hypothesis": "B",
+ "level": "medium",
+ "wall": "lowRe",
+ "U_design": 23.0,
+ "yplus_target": 0.8,
+ "yplus_flat_plate_estimate": 0.8,
+ "h0_m": 1.2075536792153207e-05,
+ "theta_deg": 0.0,
+ "params": {
+  "r_bl": 1.15,
+  "n_layers": null,
+  "ds_max": 0.0003,
+  "ds_corner": 6e-05,
+  "g_t": 1.12,
+  "s_near": 0.0006,
+  "d_near": 0.005,
+  "s_rot": 0.0023,
+  "s_ami": 0.0022,
+  "g_in": 0.1,
+  "s_wake1": 0.0035,
+  "s_wake2": 0.007,
+  "g_out": 0.1,
+  "s_far": 0.2
+ },
+ "dz_m": 0.01,
+ "r_ami_m": 0.14777591947516588,
+ "n_ami_faces": 424,
+ "ami_margin_m": 0.022,
+ "D_rotor_m": 0.2515518389503318,
+ "domain": {
+  "x_in": -2.5,
+  "x_out": 6.25,
+  "y_lo": -3.75,
+  "y_hi": 3.75,
+  "sides": "patch",
+  "D_ref": 0.25
+ },
+ "ring": {
+  "n_layers": 24,
+  "n_wall_nodes": 518,
+  "thickness_m": 0.0022239255432373434,
+  "first_cell_m": 1.2075536792153207e-05,
+  "last_layer_m": 0.00030057771154587366,
+  "edge_spacing_m": [
+   0.00013188969763516925,
+   0.0003092126690369976,
+   0.0005582992165145851
+  ],
+  "quad_angle_deg": [
+   36.433191171066056,
+   147.4855219180407
+  ],
+  "aspect_max": 24.89050135447856,
+  "r_edge_m": [
+   0.09749436330010258,
+   0.1280033669746243
+  ]
+ },
+ "n_cells_rotor": 68542,
+ "n_cells_stator": 58406,
+ "n_tri": 48,
+ "pose": {
+  "hypothesis": "B",
+  "arm_face": "convex",
+  "R_mm": 101.6,
+  "beta_deg": 83.96,
+  "r_tipA_mm": 125.59,
+  "r_tipB_mm": 120.62,
+  "r_min_mm": 99.72,
+  "r_max_mm": 125.78,
+  "r_centroid_mm": 108.5,
+  "tipA_to_next_tipA_mm": 217.52,
+  "cup_opens": "away from the shaft",
+  "cup_opening_dir_radial_tangential": [
+   0.9917,
+   -0.1288
+  ],
+  "rotation_sense_model": "CCW",
+  "sense_rule": "drag rule: concave face meets the wind on the downwind-moving blade",
+  "leading_tip": "A"
+ },
+ "seconds": 16.5,
+ "checkMesh_ok": true,
+ "mesh_seconds_total": 25.8
+}

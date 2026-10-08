@@ -1,0 +1,109 @@
+{
+ "name": "A_rot_U23.0_lam0.150_SST_medium",
+ "mode": "rotating",
+ "hypothesis": "A",
+ "U_ms": 23.0,
+ "model": "kOmegaSST",
+ "level": "medium",
+ "wall": "wf",
+ "n_cells": 61910,
+ "h0_m": 0.0008696781982136294,
+ "sense": "CW",
+ "R_m": 0.1016,
+ "r_max_m": 0.10641986662039699,
+ "dz_m": 0.01,
+ "Tu_rotor_pct": 0.9999999999999999,
+ "maxCo": 2.0,
+ "nOuter": 2,
+ "nProcs": 2,
+ "wall_time_s": 600.0,
+ "n_steps": 2297,
+ "t_first": 1.20000035189e-06,
+ "t_last": 0.0233005626059,
+ "dt_mean_s": 1.0143910577361777e-05,
+ "dt_last_half_mean_s": 8.300637041775458e-06,
+ "dt_min_s": 1.2000004e-06,
+ "dt_max_s": 1.8084628e-05,
+ "Co_max_mean": 2.000544029304348,
+ "Co_max_max": 2.0589328,
+ "clock_s": 597.0,
+ "s_per_step_recent": 0.2794759825327511,
+ "s_per_step": 0.2601307189542484,
+ "omega_bounded_steps": 0,
+ "ami_log_sum_min": 1.0,
+ "ami_log_sum_max": 1.0000182,
+ "ami_log_n": 4596,
+ "ami": {
+  "AMI1": {
+   "src_min": 1.00000042,
+   "src_max": 1.00001799,
+   "tgt_min": 1.00000042,
+   "tgt_max": 1.00001799,
+   "src_avg": 1.0000121244444444,
+   "tgt_avg": 1.0000121244444444,
+   "n": 9
+  }
+ },
+ "ami_weight_min": 1.00000042,
+ "ami_weight_max": 1.00001799,
+ "t_end": 0.0231264653547,
+ "n_samples": 90,
+ "lam": 0.15,
+ "Omega": 33.95669291338582,
+ "rpm": 324.26253169313316,
+ "Trev_s": 0.18503525426360756,
+ "n_rev_done": 0.12498410341714258,
+ "n_rev_target": 8,
+ "n_avg_rev": 0.12358739963723576,
+ "avg_window_complete": false,
+ "CQ_mean": -0.19668546444540128,
+ "CP_mean": -0.02950281966681019,
+ "CQ_std": 0.130213823018779,
+ "CQ_min": -0.45565093059404427,
+ "CQ_max": 0.03724376129237598,
+ "CQ_pressure_mean": -0.19456963057396162,
+ "Cx_mean": 0.6992301434112556,
+ "Cy_mean": 0.02507946350852559,
+ "CQ_per_rev": [],
+ "CP_per_rev": [],
+ "CQ_drift_last_two_rev": null,
+ "CQ_blade_mean": [
+  -0.13101659205652277,
+  0.005508993620617868,
+  -0.07117786602535595
+ ],
+ "yplus": {
+  "blade1": {
+   "min": 6.57775709,
+   "max": 59.8905217,
+   "mean_of_avg": 33.1055827,
+   "n": 1
+  },
+  "blade2": {
+   "min": 1.60821415,
+   "max": 71.0136571,
+   "mean_of_avg": 22.5312776,
+   "n": 1
+  },
+  "blade3": {
+   "min": 5.68150704,
+   "max": 78.7441217,
+   "mean_of_avg": 37.4678802,
+   "n": 1
+  }
+ },
+ "yplus_mean": 31.0349135,
+ "yplus_max": 78.7441217,
+ "smoke_test": true,
+ "complete": false,
+ "timing_sessions": [
+  {
+   "start": "2026-10-07T22:24:13",
+   "wall_s": 600.0,
+   "t_start": 0.0,
+   "t_end": 0.0,
+   "rc": "timeout",
+   "np": 2
+  }
+ ]
+}

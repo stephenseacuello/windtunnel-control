@@ -1,0 +1,28 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  cfd/rotor2d case template (OpenFOAM v2606). Values come from caseParameters,
+  written by cfd/rotor2d/run_case.py: edit run_case.py, not the generated case.
+\*---------------------------------------------------------------------------*/
+// Copied to constant/dynamicMeshDict for rotating cases only (static cases have none).
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      dynamicMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+dynamicFvMesh   dynamicMotionSolverFvMesh;
+motionSolverLibs (fvMotionSolvers);
+
+motionSolver    solidBody;
+cellZone        rotor;
+solidBodyMotionFunction rotatingMotion;
+
+origin          (0 0 0);
+axis            (0 0 1);
+omega           $omegaZ;           // rad/s about +z: sense * lambda * U / R
+
+// ************************************************************************* //

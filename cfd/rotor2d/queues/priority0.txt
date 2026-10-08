@@ -1,0 +1,37 @@
+# Priority 0: static rotor (stage 3a) for BOTH assembly hypotheses, run before the rotating
+# sweep (priority A). Purpose: the rotation sense. With the bolts radial the cup opens only
+# 7.4 deg off the radial line, so the drag rule (rotor_geometry.py) is weakly determined, and
+# the start-up torque of both smoke tests at lambda 0.15 opposed the assumed sense. The mean
+# of the static C_Q over one 120-deg period is the starting torque: its sign is the direction
+# the rotor self-starts. 2 x 8 cases, about 4 h (A) + 5 h (B) on 4 performance cores (README).
+#
+# One sense per hypothesis is enough: the azimuth grid 0, 15, ..., 105 is the same set of blade
+# positions in either sense, so the mean in the opposite sense is the negative of this one.
+# Order: A and B interleaved, 0/60/30/90 first, so that after 8 cases both hypotheses have a
+# 4-point (30-deg) mean; the 15-deg points follow. These are the same cases (same names) as
+# priorityB.txt for hypothesis A, so priority B is then skipped as complete.
+#
+# After it: python3 cfd/rotor2d/queue.py --csv; python3 cfd/post/plot_rotor_cp.py --U 23
+# -> results/rotor_cp_compare_U23.json, "static": CQ_mean_over_theta +- CQ_mean_over_theta_sem
+# and self_start. If a hypothesis's mean is negative (beyond 2 standard errors), add
+# sense=CCW (A) or sense=CW (B) to that hypothesis's lines in priorityA.txt and priorityC.txt
+# before launching them; if it is within 2 standard errors of zero, the static torque does not
+# decide the sense: run lambda 0.15 in both senses first (priorityA.txt, first two lines with
+# and without the sense= key).
+# Columns: sta HYP U_ms theta MODEL LEVEL [key=value ...]   (see ../queue.py)
+sta A 23 0   SST medium np=2
+sta B 23 0   SST medium np=2
+sta A 23 60  SST medium np=2
+sta B 23 60  SST medium np=2
+sta A 23 30  SST medium np=2
+sta B 23 30  SST medium np=2
+sta A 23 90  SST medium np=2
+sta B 23 90  SST medium np=2
+sta A 23 15  SST medium np=2
+sta B 23 15  SST medium np=2
+sta A 23 45  SST medium np=2
+sta B 23 45  SST medium np=2
+sta A 23 75  SST medium np=2
+sta B 23 75  SST medium np=2
+sta A 23 105 SST medium np=2
+sta B 23 105 SST medium np=2

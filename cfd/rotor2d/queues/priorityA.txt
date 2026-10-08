@@ -1,0 +1,20 @@
+# Priority A: rotating rotor (stage 3b), both assembly hypotheses, U = 23 m/s, kOmegaSST,
+# medium wall-function mesh (y+ target 40), maxCo 4, 2 PIMPLE outer correctors, 4 MPI ranks
+# (run_case.py defaults; maxCo 4 matched maxCo 2 within 1 % over the smoke-test window, README).
+# Columns: rot HYP U_ms lambda MODEL LEVEL [key=value ...]   (see ../queue.py)
+# Run length: 8 revolutions, averages over the last 3 (run_case.py default), except at
+# lambda <= 0.10 where one revolution is 25-60 rotor convective times D/U: there 4 (0.05)
+# and 6 (0.10) revolutions, averaging the last 2 and 3, still >= 150 D/U in total.
+# Ordered so that each hypothesis's peak and zero-torque region (0.10-0.20) comes first.
+# Run AFTER priority0.txt (static, both hypotheses): its mean static C_Q sets the rotation
+# sense. Where it is negative, add sense=CCW (A) or sense=CW (B) to that hypothesis's lines.
+rot A 23 0.15 SST medium
+rot B 23 0.15 SST medium
+rot A 23 0.10 SST medium nrev=6
+rot B 23 0.10 SST medium nrev=6
+rot A 23 0.20 SST medium
+rot B 23 0.20 SST medium
+rot A 23 0.25 SST medium
+rot B 23 0.25 SST medium
+rot A 23 0.05 SST medium nrev=4 navg=2
+rot B 23 0.05 SST medium nrev=4 navg=2

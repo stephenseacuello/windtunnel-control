@@ -1,0 +1,74 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  cfd/rotor2d case template (OpenFOAM v2606). Values come from caseParameters,
+  written by cfd/rotor2d/run_case.py: edit run_case.py, not the generated case.
+\*---------------------------------------------------------------------------*/
+// Included inside controlDict's functions{} (caseParameters already read).
+
+// Loads on all three blades: N and N m for the slab depth dz, global axes, moment
+// about the shaft axis (CofR = origin). Per unit span = value / dz. Torque Q' = sense*M_z/dz.
+forcesRotor
+{
+    type            forces;
+    libs            (forces);
+    patches         (blade1 blade2 blade3);
+    rho             rhoInf;
+    rhoInf          $rhoInf;
+    CofR            (0 0 0);
+    writeControl    runTime;
+    writeInterval   $sampleInterval;   // rotating: 0.5 deg of rotation; static: (D/U)/50
+    log             false;
+}
+forcesBlade1
+{
+    $forcesRotor;
+    patches         (blade1);
+}
+forcesBlade2
+{
+    $forcesRotor;
+    patches         (blade2);
+}
+forcesBlade3
+{
+    $forcesRotor;
+    patches         (blade3);
+}
+
+// Sum of AMI weights on both sides (1 = perfect coverage), min/max/average.
+AMIWeights1
+{
+    type            AMIWeights;
+    libs            (fieldFunctionObjects);
+    writeFields     false;
+    writeControl    runTime;
+    writeInterval   $amiInterval;      // rotating: every 5 deg; static: once per write
+    log             false;
+}
+
+// y+ at the first cell centre on the blades (wall-function value where a
+// wall function is used), min/max/average per patch.
+yPlus1
+{
+    type            yPlus;
+    libs            (fieldFunctionObjects);
+    writeFields     false;
+    writeControl    runTime;
+    writeInterval   $yplusInterval;
+    log             false;
+}
+
+// Wake and upstream probes (model frame); locations in caseParameters. k gives the
+// free-stream Tu reaching the rotor at the upstream probe (-2 D): Tu_upstream_probe_pct.
+probes1
+{
+    type            probes;
+    libs            (sampling);
+    fields          (U p k);
+    probeLocations  $probeLocations;
+    fixedLocations  true;
+    writeControl    runTime;
+    writeInterval   $sampleInterval;
+    log             false;
+}
+
+// ************************************************************************* //

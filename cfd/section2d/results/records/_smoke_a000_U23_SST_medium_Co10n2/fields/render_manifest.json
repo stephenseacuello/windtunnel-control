@@ -1,0 +1,19 @@
+{
+ "case": "/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/_smoke_a000_U23_SST_medium_Co10n2",
+ "kind": "section",
+ "images": [
+  "mesh_cornerA_0p1mm.png",
+  "mesh_cornerA_0p8mm.png",
+  "mesh_cornerA_6mm.png",
+  "mesh_domain.png",
+  "mesh_near.png"
+ ],
+ "notes": [
+  "no field data: mesh images only"
+ ],
+ "read_as": "reconstructed",
+ "time": 0.0,
+ "times_available": [
+  0.0
+ ]
+}
