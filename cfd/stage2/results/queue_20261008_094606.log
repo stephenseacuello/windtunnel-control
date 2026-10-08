@@ -1,3 +1,4 @@
 2026-10-08 09:46:07 queue: 15 unique cases from cfd/stage2/queues/S2a_ks_U23.txt; 2 ranks; pid 37671
 2026-10-08 09:46:07 case 1/15: a180.0_U23.0_SST_wf_Ks0_Tu1.0
 [setup] a180.0_U23.0_SST_wf_Ks0_Tu1.0
+[run] a180.0_U23.0_SST_wf_Ks0_Tu1.0: pimpleFoam on 2 ranks, end 0.313043 s (150.0 c/U), log /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/runs/a180.0_U23.0_SST_wf_Ks0_Tu1.0/log.pimpleFoam
