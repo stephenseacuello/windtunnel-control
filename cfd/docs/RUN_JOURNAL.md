@@ -31,6 +31,57 @@ How to fill it fast:
 
 ---
 
+## 2026-10-09 (Mac queues paused; production moved to Unity HPC)
+
+**Mac.** The three queues were paused at 06:45 (`queue.py --pause`) so the laptop could be closed.
+- Finished on the Mac and kept: section a000 medium and a000/a090/a180 coarse; rotor static A θ0,
+  θ30, θ60 and B θ0, θ60; Stage 2 a180 Ks0.
+- Half-finished cases moved to Unity with `cfd/hpc/migrate.py`, each resumed from its
+  reconstructed latest time on 8 ranks (*measured*, job logs: "[migrated] ... [resume]"):
+
+  | Case | Moved at |
+  |---|---|
+  | section a090 SST medium | 138.5 of 150 c/U |
+  | rotor B θ30 static | t = 0.415 of 0.437 s |
+  | Stage 2 a180 Ks50 | t = 0.236 of 0.313 s |
+
+**Unity set-up** (`cfd/hpc/README.md`):
+- OpenFOAM v2606 through the `opencfd/openfoam-run:2606` image, the same source commit as the Mac
+  app.
+- One Slurm job per case on `uri-cpu`, account `pi_sodhi_uri_edu`.
+- All 65 meshes made on the Mac and uploaded.
+
+**Test job 65482767** (uri-cpu032, Xeon 8352Y, 8 ranks each, early flow, *measured*):
+
+| Case | Rate | Notes |
+|---|---|---|
+| Section coarse a000 | 0.069 s/step | decay-control message present |
+| Rotor static B θ90 medium | 0.091 s/step | forces, AMI weights and probes written |
+| Stage 2 wf a000 Ks100 | 0.124 s/step | |
+
+All three match the cost model in `hpc_common.py`.
+
+Two checks did not run as intended:
+- **Migration path.** Not exercised: the 240 s section run wrote no time folder to reconstruct.
+  The three real moved cases above then resumed correctly.
+- **Making a mesh inside the container.** It failed because `/work/.../tmp` is not visible in the
+  container. Case folders under `repo/cfd`, the job's working directory, are visible. Production
+  does not make meshes in jobs: `submit.py` holds any case without an uploaded mesh.
+
+**Submitted at 18:32 EDT.** 129 jobs, all remaining cases of section priority 1-4, rotor
+priority 0, A and C (rotating cases in both rotation senses) and Stage 2 S2a-S2c.
+- Dealt into 26 lanes of 8 ranks and 19 of 16, at most 512 of the lab's 768 cores.
+- About 5,100 core-hours, and about 14 h once running (*estimated*, cost model).
+- The jobs still waiting were scheduled to start by 20:00 EDT (`squeue --start`).
+
+**Next** (Monday 12 Oct, from a network that allows SSH; the 9 Oct wired network blocks port
+22):
+1. `python3 cfd/hpc/status.py`.
+2. `python3 cfd/hpc/pull_results.py`, which downloads, makes records and rebuilds CSVs.
+3. `python3 cfd/hpc/submit.py --sense-variants` resumes anything that stopped at its time limit.
+
+---
+
 ## 2026-10-08 (Apple M2 MacBook Air, fanless; AC; Stage 1 production queue) - in progress
 
 **Queue launch, 07:33:03.** `queue.py --detach queues/priority1.txt priority2.txt priority3.txt`:

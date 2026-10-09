@@ -28,7 +28,8 @@ Contents
 9. [Roughness: sand-grain ks against Ra](#9-roughness-sand-grain-ks-against-ra)
 10. [Rotating meshes with AMI](#10-rotating-meshes-with-ami)
 11. [Validating without a load cell](#11-validating-without-a-load-cell)
-12. [References](#12-references)
+12. [Running on a cluster (Unity)](#12-running-on-a-cluster-unity)
+13. [References](#13-references)
 
 ---
 
@@ -533,7 +534,63 @@ Pressure drag dominates (section 7), so taps on the mean-Cp positions of `surfac
 give nearly all of Cd. They also show whether the model's separation points (Cf sign changes) are
 right.
 
-## 12. References
+## 12. Running on a cluster (Unity)
+
+**Why.** On the laptop the cases ran one at a time per queue: at the 8 Oct pace the Stage 1 queue
+alone would have finished on 22-23 Oct (*calculated* from the measured 9.4 h per medium case),
+and the Mac had to stay awake and plugged in. A cluster runs many cases at once, each on more
+and faster cores. The cases, meshes and OpenFOAM version stay the same; only the machine
+changes. How to use it: `cfd/hpc/README.md`.
+
+**The parts of a cluster.**
+- *Login node.* Where `ssh unity` lands. It is shared by everyone and capped at about 2 cores
+  and 8 GB per user (*measured*, 9 Oct). Use it to copy files and submit jobs, never to run a
+  solver.
+- *Compute nodes.* Where jobs run. The URI partition `uri-cpu` has 49 nodes of 64 Xeon cores
+  each (*measured*, `sinfo`).
+- *Slurm, the scheduler.* A job script starts with `#SBATCH` lines that ask for resources:
+  account, partition, number of MPI tasks, memory, time limit. Slurm starts the job when a
+  node has them free and stops it at the time limit. Useful commands: `squeue --me` (my jobs),
+  `scancel <id>`, `sacct -j <id>` (what a finished job used).
+- *Account and limits.* The lab account `pi_sodhi_uri_edu` may use up to 768 cores on
+  `uri-cpu` at once (*measured*, the QOS limit). `submit.py` keeps us to 512 so labmates keep a
+  share.
+- *Container.* Unity has no OpenFOAM v2606 module, so the official OpenFOAM image runs through
+  Apptainer: a whole Linux system with OpenFOAM in one file (`openfoam-run_2606.sif`). It is
+  built from the same source commit as the Mac app. Only the compiler differs, so results
+  should agree to round-off (*inferred*).
+
+**Parallel runs are the same on both machines.** `decomposePar` cuts the mesh into N pieces,
+`mpirun -np N pimpleFoam -parallel` gives each piece to one core, and neighbouring pieces swap
+boundary values every step. More ranks mean less work per core, but more of the time goes to
+communication. Doubling the ranks therefore never quite halves the run time.
+
+| Run (Stage 1 medium mesh, 131k cells) | Rate | Relative |
+|---|---|---|
+| Unity, 16 ranks | 16.2 steps/s | about 5× the Mac (*measured*, 9 Oct benchmark job) |
+| Mac, 4 ranks (three queues sharing it) | 3.6–4.1 steps/s | (*measured*) |
+
+So `submit.py` uses 8 ranks for medium meshes, which spends fewer core-hours per case, and 16
+only for the large fine and texture meshes.
+
+**Time limits and resuming.**
+- Every job has a time limit. Slurm sends a stop signal 15 min before it; the solver stops, and
+  the case keeps its last written time.
+- The next submission resumes from that time, the same mechanism as `queue.py --pause` on the
+  Mac.
+
+**Moving a half-finished case between machines** (`cfd/hpc/migrate.py`, used on 9 Oct for three
+Mac cases):
+1. `reconstructPar -latestTime` joins the latest time of the 2 or 4 pieces back into one field
+   set. This includes `uniform/`, where the averaging function objects keep their running sums.
+2. That time is uploaded.
+3. `decomposePar` cuts it again for the job's 8 ranks, and the solver continues to the same end
+   time.
+
+A restart writes the force and probe files into a new time folder. The summaries already join
+these.
+
+## 13. References
 
 - Celik, I. B., Ghia, U., Roache, P. J., Freitas, C. J., Coleman, H., and Raad, P. E. (2008).
   Procedure for estimation and reporting of uncertainty due to discretization in CFD applications.

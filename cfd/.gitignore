@@ -21,3 +21,7 @@ log.*
 *.foam
 .venv/
 __pycache__/
+
+# queue control files (queue.py --pause, the running-queue lock)
+*/queues/STOP
+*/queues/LOCK

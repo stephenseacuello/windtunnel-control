@@ -1,0 +1,123 @@
+{
+ "caseName": "B_sta_U23.0_th060.0_SST_medium",
+ "mode": "static",
+ "hypothesis": "B",
+ "Uinf": 23.0,
+ "rhoInf": 1.204,
+ "nu": 1.516e-05,
+ "dz": 0.01,
+ "R": 0.1016,
+ "D": 0.2515518389503318,
+ "rMax": 0.1257759194751659,
+ "sense": 1,
+ "turbulenceModel": "kOmegaSST",
+ "wall": "wf",
+ "nOuterCorrectors": 2,
+ "maxCo": 4.0,
+ "nProcs": 2,
+ "wallDistInterval": 1,
+ "TuRotorPercent": 1.0,
+ "TuInletPercent": 1.0,
+ "kInlet": 0.07935,
+ "omegaInlet": 514.2956348249517,
+ "nutInlet": 0.0001542886904474855,
+ "ReThetatInlet": 584.3016,
+ "freestreamDecay": "control",
+ "freestreamDecayControl": "yes",
+ "kAmbient": 0.07935,
+ "omegaAmbient": 514.2956348249517,
+ "decayDistance": 2.352224080524834,
+ "turbulenceLengthScale": 0.001,
+ "viscosityRatioInlet": 10.177354251153396,
+ "viscosityRatioRotor": 10.177354251153396,
+ "ReChordTip": 67680.07915567282,
+ "qRef": 318.45799999999997,
+ "Aref": 0.2032,
+ "thetaDeg": 60.0,
+ "convTime": 0.010937036476101381,
+ "nConv": 40,
+ "nAvgConv": 25,
+ "endTime": 0.4374814590440552,
+ "averageStart": 0.1640555471415207,
+ "writeInterval": 0.043748145904405525,
+ "sampleInterval": 0.00021874072952202762,
+ "amiInterval": 0.010937036476101381,
+ "yplusInterval": 0.010937036476101381,
+ "deltaT0": 1e-06,
+ "maxDeltaT": 0.00021874072952202762,
+ "Omega": 0.0,
+ "omegaZ": 0.0,
+ "probeLocations": [
+  [
+   0.2515518389503318,
+   0.0,
+   0.005
+  ],
+  [
+   0.2515518389503318,
+   0.1257759194751659,
+   0.005
+  ],
+  [
+   0.2515518389503318,
+   -0.1257759194751659,
+   0.005
+  ],
+  [
+   0.5031036779006636,
+   0.0,
+   0.005
+  ],
+  [
+   0.5031036779006636,
+   0.1257759194751659,
+   0.005
+  ],
+  [
+   0.5031036779006636,
+   -0.1257759194751659,
+   0.005
+  ],
+  [
+   1.0062073558013271,
+   0.0,
+   0.005
+  ],
+  [
+   -0.5031036779006636,
+   0.0,
+   0.005
+  ],
+  [
+   0.0,
+   0.0,
+   0.005
+  ]
+ ],
+ "inputs": {
+  "level": "medium",
+  "model": "SST",
+  "wall": "wf",
+  "tu": 1.0,
+  "decay": "control",
+  "lt": 0.001,
+  "nrev": 8,
+  "navg": 3,
+  "nconv": 40,
+  "navgconv": 25,
+  "maxco": 4.0,
+  "nouter": 2,
+  "sense": "auto",
+  "beta": null,
+  "np": 2,
+  "yplus": null,
+  "walls": null,
+  "side_bc": "slip",
+  "wdist": 1,
+  "name": null,
+  "hyp": "B",
+  "U": 23.0,
+  "theta": 60.0
+ },
+ "mesh": "B_medium_wf_U23.0_th060.0"
+}

@@ -59,6 +59,7 @@ TEMPLATE = HERE / "case_template"
 VENV_PY = CFD / ".venv" / "bin" / "python"
 MAKE_MESH = HERE / "mesh" / "make_mesh.py"
 sys.path.insert(0, str(CFD / "post"))
+import foam_launch  # noqa: E402  cfd/post/foam_launch.py: CFD_FOAM_LAUNCH (Unity container), migrated cases
 
 NU = 1.516e-5           # m^2/s, cfd/templates/transportProperties
 RHO = 1.204             # kg/m^3, cfd/templates/flowConstants
@@ -70,7 +71,8 @@ MODELS = {"SST": "kOmegaSST", "LM": "kOmegaSSTLM"}
 LEVELS = ("coarse", "medium", "fine")
 WAKE_PROBES = [(1, 0), (1, 0.5), (1, -0.5), (2, 0), (2, 0.5), (2, -0.5), (4, 0), (4, 0.5), (4, -0.5)]
 UPSTREAM_PROBE = (-2, 0)          # chords, free-stream frame: Tu reaching the section
-NP = 4                 # MPI ranks for production (--np; tests use at most 2)
+NP = int(os.environ.get("SLURM_NTASKS") or 4)   # MPI ranks for production (--np; tests use at most 2);
+                                                # a Slurm job's task count on Unity (cfd/hpc/)
 CMU25 = 0.09 ** 0.25
 DECAY_MODES = ("control", "precompensate")
 DECAY_DEFAULT = "control"
@@ -243,6 +245,7 @@ def foam(case, cmd, log, append=False, caffeinate=False, timeout=None):
     full = ["openfoam2606", "-c", f"cd {case} && {cmd} {redir} {log} 2>&1"]
     if caffeinate:
         full = ["caffeinate", "-is"] + full     # no idle sleep; no system sleep while on AC power
+    full = foam_launch.adapt(full)              # unchanged unless CFD_FOAM_LAUNCH is set (cfd/hpc/README.md)
     p = subprocess.Popen(full, start_new_session=True)
     _CHILD.append(p)
     try:
@@ -369,6 +372,9 @@ def run(alpha, U, model, level, tu=1.0, nconv=NCONV_DEFAULT, navg=NAVG_DEFAULT, 
             say(f"[skip] {name}: complete")
             return "skipped"
     P = case_parameters(alpha, U, model, level, tu, nconv, navg, maxco, nouter, lt, decay, name, np)
+    if not force and foam_launch.migrated(case):
+        # moved from another machine (cfd/hpc/migrate.py): reconstructed time, no processor*/
+        foam_launch.redecompose(case, np, foam, say)
     t_last = latest_proc_time(case) if case.exists() else None
     resume = (not force) and t_last is not None and t_last > 0 and (case / "case.json").exists()
     if resume:

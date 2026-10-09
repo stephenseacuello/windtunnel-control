@@ -1,0 +1,37 @@
+{
+ "case": "/Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/A_sta_U23.0_th030.0_SST_medium",
+ "kind": "rotor",
+ "images": [
+  "cp_near.png",
+  "lic_near.png",
+  "mesh_ami.png",
+  "mesh_cornerA_0p1mm.png",
+  "mesh_cornerA_0p8mm.png",
+  "mesh_cornerA_6mm.png",
+  "mesh_domain.png",
+  "mesh_near.png",
+  "nut_ratio_near.png",
+  "nut_ratio_wake.png",
+  "streamlines_near.png",
+  "surface_inst.png",
+  "velocity_near.png",
+  "velocity_wake.png",
+  "vorticity_near.png",
+  "vorticity_wake.png"
+ ],
+ "notes": [
+  "no animation: 1 saved field time(s) (purgeWrite keeps the last 3; finished cases keep only the last)"
+ ],
+ "read_as": "reconstructed",
+ "time": 0.3701560578,
+ "times_available": [
+  0.0,
+  0.3701560578
+ ],
+ "yplus_inst": {
+  "min": 0.6554351029701306,
+  "mean": 25.38926794450574,
+  "max": 64.58615170130369,
+  "p95": 61.712017192818145
+ }
+}

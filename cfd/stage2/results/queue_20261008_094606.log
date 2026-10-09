@@ -2,3 +2,13 @@
 2026-10-08 09:46:07 case 1/15: a180.0_U23.0_SST_wf_Ks0_Tu1.0
 [setup] a180.0_U23.0_SST_wf_Ks0_Tu1.0
 [run] a180.0_U23.0_SST_wf_Ks0_Tu1.0: pimpleFoam on 2 ranks, end 0.313043 s (150.0 c/U), log /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/runs/a180.0_U23.0_SST_wf_Ks0_Tu1.0/log.pimpleFoam
+[done] a180.0_U23.0_SST_wf_Ks0_Tu1.0: Cd 1.642 +- 0.248, Cl -1.459, St 0.238, wall 12.08 h
+2026-10-08 21:52:30 csv: 1 complete cases in /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/results/stage2_polars.csv
+2026-10-08 21:52:30 hook: /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/after_case.sh /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/runs/a180.0_U23.0_SST_wf_Ks0_Tu1.0 (limit 1800 s)
+2026-10-08 21:53:55 hook: done in 85 s
+2026-10-08 21:53:55 case 2/15: a180.0_U23.0_SST_wf_Ks50_Tu1.0
+[setup] a180.0_U23.0_SST_wf_Ks50_Tu1.0
+[run] a180.0_U23.0_SST_wf_Ks50_Tu1.0: pimpleFoam on 2 ranks, end 0.313043 s (150.0 c/U), log /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/runs/a180.0_U23.0_SST_wf_Ks50_Tu1.0/log.pimpleFoam
+[paused] a180.0_U23.0_SST_wf_Ks50_Tu1.0 at t = 0.235755 s; re-run to resume
+2026-10-09 06:45:35 queue: case paused by --pause; stopping
+2026-10-09 06:45:35 queue finished: {'complete': 1, 'stopped': 1}

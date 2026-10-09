@@ -1,0 +1,5 @@
+=== 2026-10-08 21:52:30 stage2 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/runs/a180.0_U23.0_SST_wf_Ks0_Tu1.0
+[record] a180.0_U23.0_SST_wf_Ks0_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/results/records/a180.0_U23.0_SST_wf_Ks0_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/results/records/a180.0_U23.0_SST_wf_Ks0_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/results/records/a180.0_U23.0_SST_wf_Ks0_Tu1.0 : 4.05 MB, 42 files
+

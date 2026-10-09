@@ -9,3 +9,36 @@
 2026-10-08 10:59:06 case 2/16: B_sta_U23.0_th000.0_SST_medium
 [setup] B_sta_U23.0_th000.0_SST_medium
 [run] B_sta_U23.0_th000.0_SST_medium: mpirun -np 2 pimpleFoam -parallel, end 0.437481 s, log /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/B_sta_U23.0_th000.0_SST_medium/log.pimpleFoam
+[done] B_sta_U23.0_th000.0_SST_medium: C_Q 0.0789 +- 0.3180, wall 5.17 h
+2026-10-08 16:09:45 csv: 0 rotating -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/rotor_cp.csv, 2 static -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/rotor_static.csv
+2026-10-08 16:09:45 hook: /Users/stepheneacuello/Projects/windtunnel-control/cfd/post/after_case.sh /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/B_sta_U23.0_th000.0_SST_medium (limit 1800 s)
+2026-10-08 16:10:56 hook: done in 71 s
+2026-10-08 16:10:56 case 3/16: A_sta_U23.0_th060.0_SST_medium
+[setup] A_sta_U23.0_th060.0_SST_medium
+[run] A_sta_U23.0_th060.0_SST_medium: mpirun -np 2 pimpleFoam -parallel, end 0.370156 s, log /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/A_sta_U23.0_th060.0_SST_medium/log.pimpleFoam
+[done] A_sta_U23.0_th060.0_SST_medium: C_Q -0.0153 +- 0.0605, wall 2.81 h
+2026-10-08 19:00:02 csv: 0 rotating -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/rotor_cp.csv, 3 static -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/rotor_static.csv
+2026-10-08 19:00:02 hook: /Users/stepheneacuello/Projects/windtunnel-control/cfd/post/after_case.sh /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/A_sta_U23.0_th060.0_SST_medium (limit 1800 s)
+2026-10-08 19:00:58 hook: done in 56 s
+2026-10-08 19:00:58 case 4/16: B_sta_U23.0_th060.0_SST_medium
+[setup] B_sta_U23.0_th060.0_SST_medium
+[run] B_sta_U23.0_th060.0_SST_medium: mpirun -np 2 pimpleFoam -parallel, end 0.437481 s, log /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/B_sta_U23.0_th060.0_SST_medium/log.pimpleFoam
+[done] B_sta_U23.0_th060.0_SST_medium: C_Q 0.0867 +- 0.2195, wall 4.69 h
+2026-10-08 23:42:55 csv: 0 rotating -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/rotor_cp.csv, 4 static -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/rotor_static.csv
+2026-10-08 23:42:55 hook: /Users/stepheneacuello/Projects/windtunnel-control/cfd/post/after_case.sh /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/B_sta_U23.0_th060.0_SST_medium (limit 1800 s)
+2026-10-08 23:44:18 hook: done in 83 s
+2026-10-08 23:44:18 case 5/16: A_sta_U23.0_th030.0_SST_medium
+[mesh] A_medium_wf_U23.0_th030.0
+[setup] A_sta_U23.0_th030.0_SST_medium
+[run] A_sta_U23.0_th030.0_SST_medium: mpirun -np 2 pimpleFoam -parallel, end 0.370156 s, log /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/A_sta_U23.0_th030.0_SST_medium/log.pimpleFoam
+[done] A_sta_U23.0_th030.0_SST_medium: C_Q -0.0061 +- 0.1379, wall 2.58 h
+2026-10-09 02:20:19 csv: 0 rotating -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/rotor_cp.csv, 5 static -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/rotor_static.csv
+2026-10-09 02:20:19 hook: /Users/stepheneacuello/Projects/windtunnel-control/cfd/post/after_case.sh /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/A_sta_U23.0_th030.0_SST_medium (limit 1800 s)
+2026-10-09 02:21:18 hook: done in 59 s
+2026-10-09 02:21:18 case 6/16: B_sta_U23.0_th030.0_SST_medium
+[mesh] B_medium_wf_U23.0_th030.0
+[setup] B_sta_U23.0_th030.0_SST_medium
+[run] B_sta_U23.0_th030.0_SST_medium: mpirun -np 2 pimpleFoam -parallel, end 0.437481 s, log /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/B_sta_U23.0_th030.0_SST_medium/log.pimpleFoam
+[paused] B_sta_U23.0_th030.0_SST_medium at t = 0.415202 s; re-run to resume
+2026-10-09 06:45:33 queue: case paused by --pause; stopping
+2026-10-09 06:45:33 queue finished: {'complete': 5, 'stopped': 1}

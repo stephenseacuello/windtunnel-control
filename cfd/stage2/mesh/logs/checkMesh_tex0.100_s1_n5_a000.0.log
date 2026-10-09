@@ -8,12 +8,12 @@
 Build  : _481094fdf3-20260618 OPENFOAM=2606 version=v2606
 Arch   : "LSB;label=32;scalar=64"
 Exec   : checkMesh
-Date   : Oct 08 2026
-Time   : 09:40:12
+Date   : Oct 09 2026
+Time   : 08:55:10
 Host   : Manbirs-MacBook-Air.local
-PID    : 33633
+PID    : 22395
 I/O    : uncollated
-Case   : /private/tmp/claude-503/-Users-stepheneacuello-Projects-windtunnel-control/6a3806a4-9014-460a-a0dd-c69522320797/scratchpad/meshes/tex0.1_a0
+Case   : /Users/stepheneacuello/Projects/windtunnel-control/cfd/hpc/mesh_cache/stage2/tex0.100_s1_n5_a000.0
 nProcs : 1
 trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
 memory pool : not available
@@ -89,7 +89,7 @@ Checking geometry...
     Mesh has 2 solution (non-empty) directions (1 1 0)
     All edges aligned with or perpendicular to non-empty directions.
     Boundary openness (-3.8521801e-21 -1.8297855e-20 5.2931489e-16) OK.
-    Max cell openness = 5.8328149e-16 OK.
+    Max cell openness = 5.0981298e-16 OK.
     Max aspect ratio = 12.744112 OK.
     Minimum face area = 1.6082467e-10. Maximum face area = 0.0091580606.  Face area magnitudes OK.
     Min volume = 1.6082467e-13. Max volume = 9.1580606e-06.  Total volume = 0.005273071.  Cell volumes OK.

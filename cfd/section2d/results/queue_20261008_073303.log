@@ -2,3 +2,34 @@
 2026-10-08 07:33:03 case 1/31: a000.0_U23.0_SST_medium_Tu1.0
 [setup] a000.0_U23.0_SST_medium_Tu1.0
 [run] a000.0_U23.0_SST_medium_Tu1.0: pimpleFoam on 4 ranks, end 0.313043 s (150.0 c/U), log /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_medium_Tu1.0/log.pimpleFoam
+[done] a000.0_U23.0_SST_medium_Tu1.0: Cd 3.190 +- 0.399, Cl -0.689, St 0.122, y+max 1.12, wall 9.43 h
+2026-10-08 16:58:40 csv: 1 complete cases in /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/section_polars.csv
+2026-10-08 16:58:40 hook: /Users/stepheneacuello/Projects/windtunnel-control/cfd/post/after_case.sh /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_medium_Tu1.0 (limit 1800 s)
+2026-10-08 16:58:58 hook: done in 17 s
+2026-10-08 16:58:58 case 2/31: a000.0_U23.0_SST_coarse_Tu1.0
+[setup] a000.0_U23.0_SST_coarse_Tu1.0
+[run] a000.0_U23.0_SST_coarse_Tu1.0: pimpleFoam on 4 ranks, end 0.313043 s (150.0 c/U), log /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_coarse_Tu1.0/log.pimpleFoam
+[done] a000.0_U23.0_SST_coarse_Tu1.0: Cd 3.168 +- 0.490, Cl -0.703, St 0.122, y+max 1.06, wall 2.93 h
+2026-10-08 19:54:54 csv: 2 complete cases in /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/section_polars.csv
+2026-10-08 19:54:54 hook: /Users/stepheneacuello/Projects/windtunnel-control/cfd/post/after_case.sh /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_coarse_Tu1.0 (limit 1800 s)
+2026-10-08 19:55:10 hook: done in 16 s
+2026-10-08 19:55:10 case 3/31: a090.0_U23.0_SST_coarse_Tu1.0
+[setup] a090.0_U23.0_SST_coarse_Tu1.0
+[run] a090.0_U23.0_SST_coarse_Tu1.0: pimpleFoam on 4 ranks, end 0.313043 s (150.0 c/U), log /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_SST_coarse_Tu1.0/log.pimpleFoam
+[done] a090.0_U23.0_SST_coarse_Tu1.0: Cd 0.338 +- 0.044, Cl 1.077, St 0.500, y+max 0.88, wall 2.07 h
+2026-10-08 21:59:30 csv: 3 complete cases in /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/section_polars.csv
+2026-10-08 21:59:30 hook: /Users/stepheneacuello/Projects/windtunnel-control/cfd/post/after_case.sh /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_SST_coarse_Tu1.0 (limit 1800 s)
+2026-10-08 21:59:45 hook: done in 15 s
+2026-10-08 21:59:45 case 4/31: a180.0_U23.0_SST_coarse_Tu1.0
+[setup] a180.0_U23.0_SST_coarse_Tu1.0
+[run] a180.0_U23.0_SST_coarse_Tu1.0: pimpleFoam on 4 ranks, end 0.313043 s (150.0 c/U), log /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_SST_coarse_Tu1.0/log.pimpleFoam
+[done] a180.0_U23.0_SST_coarse_Tu1.0: Cd 1.750 +- 0.404, Cl -1.335, St 0.227, y+max 1.04, wall 3.16 h
+2026-10-09 01:09:26 csv: 4 complete cases in /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/section_polars.csv
+2026-10-09 01:09:26 hook: /Users/stepheneacuello/Projects/windtunnel-control/cfd/post/after_case.sh /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_SST_coarse_Tu1.0 (limit 1800 s)
+2026-10-09 01:09:45 hook: done in 19 s
+2026-10-09 01:09:45 case 5/31: a090.0_U23.0_SST_medium_Tu1.0
+[setup] a090.0_U23.0_SST_medium_Tu1.0
+[run] a090.0_U23.0_SST_medium_Tu1.0: pimpleFoam on 4 ranks, end 0.313043 s (150.0 c/U), log /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_SST_medium_Tu1.0/log.pimpleFoam
+[paused] a090.0_U23.0_SST_medium_Tu1.0 at t = 0.288942 s; re-run to resume
+2026-10-09 06:45:27 queue: case paused by --pause; stopping
+2026-10-09 06:45:27 queue finished: {'complete': 4, 'stopped': 1}

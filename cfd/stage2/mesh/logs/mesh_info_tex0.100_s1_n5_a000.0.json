@@ -119,5 +119,5 @@
   "fade_rule": "w(d) = 1 - smoothstep(d/D), D = 2.5 t + 0.1 mm",
   "max_relative_height_change": 0.4285714285714286
  },
- "seconds": 121.2
+ "seconds": 22.5
 }

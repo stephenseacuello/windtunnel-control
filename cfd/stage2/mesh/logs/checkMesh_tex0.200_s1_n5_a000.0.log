@@ -8,12 +8,12 @@
 Build  : _481094fdf3-20260618 OPENFOAM=2606 version=v2606
 Arch   : "LSB;label=32;scalar=64"
 Exec   : checkMesh
-Date   : Oct 08 2026
-Time   : 09:35:34
+Date   : Oct 09 2026
+Time   : 08:54:39
 Host   : Manbirs-MacBook-Air.local
-PID    : 29358
+PID    : 21051
 I/O    : uncollated
-Case   : /Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/runs/_mesh/tex0.200_s1_n5_a000.0
+Case   : /Users/stepheneacuello/Projects/windtunnel-control/cfd/hpc/mesh_cache/stage2/tex0.200_s1_n5_a000.0
 nProcs : 1
 trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
 memory pool : not available

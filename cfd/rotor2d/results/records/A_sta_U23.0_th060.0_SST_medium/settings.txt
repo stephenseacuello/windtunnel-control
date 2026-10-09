@@ -1,0 +1,635 @@
+==============================================================================
+== system/controlDict
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+application     pimpleFoam;
+
+startFrom       latestTime;     // resumes from the last write after an interruption
+startTime       0;
+stopAt          endTime;
+endTime         $endTime;       // rotating: nRev revolutions; static: nConv rotor convective times
+
+deltaT          $deltaT0;
+adjustTimeStep  yes;
+maxCo           $maxCo;
+maxDeltaT       $maxDeltaT;
+
+// Fields every writeInterval (rotating: half a revolution; static: nConv/10 D/U),
+// keeping the last 3 (restart points). Loads and AMI weights are in postProcessing/.
+writeControl    adjustableRunTime;
+writeInterval   $writeInterval;
+purgeWrite      3;
+writeFormat     binary;
+writePrecision  8;
+writeCompression off;
+timeFormat      general;
+timePrecision   12;
+runTimeModifiable true;
+
+functions
+{
+    #include "functions"
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== system/caseParameters
+==============================================================================
+/*--- written by cfd/rotor2d/run_case.py; edit run_case.py, not this file ---*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      caseParameters;
+}
+
+caseName                A_sta_U23.0_th060.0_SST_medium;
+mode                    static;
+hypothesis              A;
+Uinf                    23;
+rhoInf                  1.204;
+nu                      1.516e-05;
+dz                      0.01;
+R                       0.1016;
+D                       0.2128397332;
+rMax                    0.1064198666;
+sense                   -1;
+turbulenceModel         kOmegaSST;
+wall                    wf;
+nOuterCorrectors        2;
+maxCo                   4;
+nProcs                  2;
+wallDistInterval        1;
+TuRotorPercent          1;
+TuInletPercent          1;
+kInlet                  0.07935;
+omegaInlet              514.2956348;
+nutInlet                0.0001542886904;
+ReThetatInlet           584.3016;
+freestreamDecay         control;
+freestreamDecayControl  yes;
+kAmbient                0.07935;
+omegaAmbient            514.2956348;
+decayDistance           2.371580133;
+turbulenceLengthScale   0.001;
+viscosityRatioInlet     10.17735425;
+viscosityRatioRotor     10.17735425;
+ReChordTip              67680.07916;
+qRef                    318.458;
+Aref                    0.2032;
+thetaDeg                60;
+convTime                0.009253901445;
+nConv                   40;
+nAvgConv                25;
+endTime                 0.3701560578;
+averageStart            0.1388085217;
+writeInterval           0.03701560578;
+sampleInterval          0.0001850780289;
+amiInterval             0.009253901445;
+yplusInterval           0.009253901445;
+deltaT0                 1e-06;
+maxDeltaT               0.0001850780289;
+Omega                   0;
+omegaZ                  0;
+probeLocations          
+(
+    (0.2128397332 0 0.005)
+    (0.2128397332 0.1064198666 0.005)
+    (0.2128397332 -0.1064198666 0.005)
+    (0.4256794665 0 0.005)
+    (0.4256794665 0.1064198666 0.005)
+    (0.4256794665 -0.1064198666 0.005)
+    (0.851358933 0 0.005)
+    (-0.4256794665 0 0.005)
+    (0 0 0.005)
+);
+
+==============================================================================
+== system/functions
+==============================================================================
+// Included inside controlDict's functions{} (caseParameters already read).
+
+// Loads on all three blades: N and N m for the slab depth dz, global axes, moment
+// about the shaft axis (CofR = origin). Per unit span = value / dz. Torque Q' = sense*M_z/dz.
+forcesRotor
+{
+    type            forces;
+    libs            (forces);
+    patches         (blade1 blade2 blade3);
+    rho             rhoInf;
+    rhoInf          $rhoInf;
+    CofR            (0 0 0);
+    writeControl    runTime;
+    writeInterval   $sampleInterval;   // rotating: 0.5 deg of rotation; static: (D/U)/50
+    log             false;
+}
+forcesBlade1
+{
+    $forcesRotor;
+    patches         (blade1);
+}
+forcesBlade2
+{
+    $forcesRotor;
+    patches         (blade2);
+}
+forcesBlade3
+{
+    $forcesRotor;
+    patches         (blade3);
+}
+
+// Sum of AMI weights on both sides (1 = perfect coverage), min/max/average.
+AMIWeights1
+{
+    type            AMIWeights;
+    libs            (fieldFunctionObjects);
+    writeFields     false;
+    writeControl    runTime;
+    writeInterval   $amiInterval;      // rotating: every 5 deg; static: once per write
+    log             false;
+}
+
+// y+ at the first cell centre on the blades (wall-function value where a
+// wall function is used), min/max/average per patch.
+yPlus1
+{
+    type            yPlus;
+    libs            (fieldFunctionObjects);
+    writeFields     false;
+    writeControl    runTime;
+    writeInterval   $yplusInterval;
+    log             false;
+}
+
+// Wake and upstream probes (model frame); locations in caseParameters. k gives the
+// free-stream Tu reaching the rotor at the upstream probe (-2 D): Tu_upstream_probe_pct.
+probes1
+{
+    type            probes;
+    libs            (sampling);
+    fields          (U p k);
+    probeLocations  $probeLocations;
+    fixedLocations  true;
+    writeControl    runTime;
+    writeInterval   $sampleInterval;
+    log             false;
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== system/fvSchemes
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+ddtSchemes
+{
+    default         backward;       // second order in time
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    limitedGrad     cellLimited Gauss linear 1;   // convection reconstruction only
+}
+
+divSchemes
+{
+    default         none;
+    div(phi,U)      Gauss linearUpwind limitedGrad;
+    // k, omega first-order upwind: Stage 1 smoke tests found omega going negative
+    // at the square corners with higher-order schemes (cfd/section2d/README.md).
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+    div(phi,ReThetat) Gauss linearUpwind limitedGrad;
+    div(phi,gammaInt) Gauss linearUpwind limitedGrad;
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear limited corrected 0.5;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         limited corrected 0.5;
+}
+
+wallDist
+{
+    method          meshWave;
+    correctWalls    true;
+    // Rotating cases: the distance field is recomputed every updateInterval steps
+    // (rotor cells move rigidly with the blades; only stator cells change).
+    updateInterval  $wallDistInterval;
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== system/fvSolution
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+solvers
+{
+    "pcorr.*"
+    {
+        solver          GAMG;
+        smoother        GaussSeidel;
+        tolerance       1e-3;
+        relTol          0;
+    }
+    p
+    {
+        solver          GAMG;
+        smoother        DICGaussSeidel;
+        tolerance       1e-6;
+        relTol          0.01;
+    }
+    pFinal
+    {
+        $p;
+        tolerance       1e-7;
+        relTol          0;
+    }
+    "(U|k|omega|ReThetat|gammaInt)"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0.1;
+    }
+    "(U|k|omega|ReThetat|gammaInt)Final"
+    {
+        $U;
+        relTol          0;
+    }
+}
+
+PIMPLE
+{
+    momentumPredictor        yes;
+    nOuterCorrectors         $nOuterCorrectors;
+    nCorrectors              2;
+    nNonOrthogonalCorrectors 0;
+    turbOnFinalIterOnly      true;
+    finalOnLastPimpleIterOnly true;
+    // moving mesh (rotating cases; ignored on a static mesh)
+    correctPhi               yes;
+    moveMeshOuterCorrectors  no;
+    checkMeshCourantNo       no;
+}
+
+relaxationFactors
+{
+    equations
+    {
+        ".*"            1;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== system/decomposeParDict
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      decomposeParDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "caseParameters"
+
+numberOfSubdomains $nProcs;
+method          scotch;
+
+// ************************************************************************* //
+
+==============================================================================
+== constant/turbulenceProperties
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../system/caseParameters"
+
+simulationType  RAS;
+
+RAS
+{
+    model           $turbulenceModel;     // kOmegaSST (default) or kOmegaSSTLM (low-Re mesh only)
+    turbulence      on;
+    printCoeffs     on;
+
+    // As cfd/section2d/case_template. Only the <model>Coeffs dictionary of the selected model
+    // is read (RASModel.C: optionalSubDict(type + "Coeffs")); kOmegaSSTLM derives from
+    // kOmegaSST and reads the same decay-control entries from kOmegaSSTLMCoeffs.
+    kOmegaSSTCoeffs
+    {
+        // Free-stream decay control (Spalart and Rumsey 2007; kOmegaSSTBase.C, v2606):
+        // sources betaStar*omegaInf*kInf (k) and beta*omegaInf^2 (omega) balance the
+        // free-stream destruction, so k and omega keep their inlet values up to the rotor.
+        // With --decay control (default) kInf = kInlet and omegaInf = omegaInlet; with
+        // --decay precompensate it is off (kInf = omegaInf = 0, not read).
+        decayControl    $freestreamDecayControl;
+        kInf            $kAmbient;
+        omegaInf        $omegaAmbient;
+    }
+
+    kOmegaSSTLMCoeffs
+    {
+        $kOmegaSSTCoeffs;
+        // The lambda iteration for Re_theta,t0 runs to lambdaErr whatever this is;
+        // maxLambdaIter (default 10) only sets when the "Number of lambda iterations
+        // exceeds maxLambdaIter" warning is printed (kOmegaSSTLM.C, v2606).
+        maxLambdaIter   50;
+    }
+}
+
+// ************************************************************************* //
+
+==============================================================================
+== constant/transportProperties
+==============================================================================
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Air at 20 C: NU_STD in reports/roughness_2026-09/src/data.py (cfd/templates/transportProperties).
+transportModel  Newtonian;
+nu              1.516e-5;    // m^2/s
+
+// ************************************************************************* //
+
+==============================================================================
+== 0/U (initial and boundary conditions)
+==============================================================================
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (23 0 0);
+
+boundaryField
+{
+    inlet
+    {
+        type            fixedValue;
+        value           uniform (23 0 0);
+    }
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
+        value           uniform (23 0 0);
+    }
+    sides
+    {
+        type            freestreamVelocity;
+        freestreamValue uniform (23 0 0);
+        value           uniform (23 0 0);
+    }
+    "blade.*"
+    {
+        type            movingWallVelocity;
+        value           uniform (0 0 0);
+    }
+    AMI1
+    {
+        type            cyclicAMI;
+    }
+    AMI2
+    {
+        type            cyclicAMI;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+==============================================================================
+== 0/k (initial and boundary conditions)
+==============================================================================
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform 0.07935;
+
+boundaryField
+{
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 0.07935;
+    }
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform 0.07935;
+        value           uniform 0.07935;
+    }
+    sides
+    {
+        type            inletOutlet;
+        inletValue      uniform 0.07935;
+        value           uniform 0.07935;
+    }
+    "blade.*"
+    {
+        type            kqRWallFunction;
+        value           uniform 0.07935;
+    }
+    AMI1
+    {
+        type            cyclicAMI;
+    }
+    AMI2
+    {
+        type            cyclicAMI;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+==============================================================================
+== 0/nut (initial and boundary conditions)
+==============================================================================
+dimensions      [0 2 -1 0 0 0 0];
+
+internalField   uniform 0.0001542886904;
+
+boundaryField
+{
+    inlet
+    {
+        type            calculated;
+        value           uniform 0.0001542886904;
+    }
+    outlet
+    {
+        type            calculated;
+        value           uniform 0.0001542886904;
+    }
+    sides
+    {
+        type            calculated;
+        value           uniform 0.0001542886904;
+    }
+    "blade.*"
+    {
+        type            nutUSpaldingWallFunction;
+        value           uniform 0;
+    }
+    AMI1
+    {
+        type            cyclicAMI;
+    }
+    AMI2
+    {
+        type            cyclicAMI;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+==============================================================================
+== 0/omega (initial and boundary conditions)
+==============================================================================
+dimensions      [0 0 -1 0 0 0 0];
+
+internalField   uniform 514.2956348;
+
+boundaryField
+{
+    inlet
+    {
+        type            fixedValue;
+        value           uniform 514.2956348;
+    }
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform 514.2956348;
+        value           uniform 514.2956348;
+    }
+    sides
+    {
+        type            inletOutlet;
+        inletValue      uniform 514.2956348;
+        value           uniform 514.2956348;
+    }
+    "blade.*"
+    {
+        type            omegaWallFunction;
+        value           uniform 514.2956348;
+    }
+    AMI1
+    {
+        type            cyclicAMI;
+    }
+    AMI2
+    {
+        type            cyclicAMI;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}
+
+==============================================================================
+== 0/p (initial and boundary conditions)
+==============================================================================
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    inlet
+    {
+        type            zeroGradient;
+    }
+    outlet
+    {
+        type            fixedValue;
+        value           uniform 0;
+    }
+    sides
+    {
+        type            freestreamPressure;
+        freestreamValue uniform 0;
+        value           uniform 0;
+    }
+    "blade.*"
+    {
+        type            zeroGradient;
+    }
+    AMI1
+    {
+        type            cyclicAMI;
+    }
+    AMI2
+    {
+        type            cyclicAMI;
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+}

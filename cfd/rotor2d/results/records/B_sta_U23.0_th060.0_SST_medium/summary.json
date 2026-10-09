@@ -1,0 +1,173 @@
+{
+ "case": "B_sta_U23.0_th060.0_SST_medium",
+ "kind": "rotor",
+ "stage": "rotor2d",
+ "status": "finished",
+ "status_reason": "solver log ends with End",
+ "recorded_at": "2026-10-08T23:42:57",
+ "record_version": 1,
+ "source": "cfd/rotor2d/runs/B_sta_U23.0_th060.0_SST_medium",
+ "source_log": {
+  "name": "log.pimpleFoam",
+  "bytes": 29913010,
+  "mtime": "2026-10-08T23:42:47"
+ },
+ "mesh": {
+  "n_cells": 79815,
+  "first_cell_m": 0.0008696781982136295,
+  "level": "medium",
+  "cells": 79815,
+  "points": 161300,
+  "max_aspect_ratio": 4.62369636853,
+  "max_non_orthogonality_deg": 57.0627222539,
+  "avg_non_orthogonality_deg": 5.46376313515,
+  "max_skewness": 2.04729058582,
+  "min_volume_m3": 1.01882563189e-09,
+  "mesh_ok": true
+ },
+ "run": {
+  "n_steps": 17559,
+  "t_first_s": 1.19999303015e-06,
+  "t_last_s": 0.437481459,
+  "t_last_nd": 39.99999999597192,
+  "nd_unit": "t U / D",
+  "dt_mean_s": 2.491494156466769e-05,
+  "dt_min_s": 1.199993e-06,
+  "dt_last_s": 2.9775569e-05,
+  "Co_max_mean": 3.9976558607352355,
+  "Co_max_max": 4.6472181,
+  "cpu_s": 14446.03,
+  "clock_s": 16893.0,
+  "s_per_step_cpu": 0.8227137080699357,
+  "sessions": [
+   {
+    "date": "Oct 08 2026",
+    "start": "19:01:13",
+    "nprocs": 2,
+    "n_steps": 17559,
+    "t_first": 1.19999303015e-06,
+    "t_last": 0.437481459,
+    "cpu_s": 14446.03,
+    "clock_s": 16893.0,
+    "clock_over_cpu": 1.17
+   }
+  ],
+  "warnings": {
+   "--> FOAM Warning : allowSystemOperations : Allowing user-supplied system call operations.": 1
+  },
+  "endTime_s": 0.4374814590440552,
+  "fraction_of_endTime": 0.9999999998992981
+ },
+ "window": {
+  "t0_s": 0.1640555470974655,
+  "t1_s": 0.437481459,
+  "t0_nd": 14.999999995971924,
+  "t1_nd": 39.99999999597192,
+  "intended_nd": 25,
+  "complete": true,
+  "unit": "t U / D"
+ },
+ "CQ_mean": 0.08673792318700879,
+ "CQ_std": 0.21949614682150362,
+ "Cx_mean": 1.016236771079073,
+ "Cy_mean": -0.15077304395648924,
+ "CQ_blade_mean": [
+  0.24528758931607186,
+  -0.17970008383615577,
+  0.021150417692525087
+ ],
+ "coefficients_csv_rows": 2000,
+ "St_D": 0.9737733846441899,
+ "ami_weight_min": 1.0,
+ "ami_weight_max": 1.0,
+ "yplus_function_object": {
+  "blade1": {
+   "min": 0.614091676,
+   "max": 100.256482,
+   "mean": 27.80019656923077,
+   "n_samples": 26
+  },
+  "blade2": {
+   "min": 0.531655577,
+   "max": 84.3048313,
+   "mean": 29.157776142307696,
+   "n_samples": 26
+  },
+  "blade3": {
+   "min": 0.590496747,
+   "max": 71.2988063,
+   "mean": 24.358248896153846,
+   "n_samples": 26
+  }
+ },
+ "renders": {
+  "rc": 0,
+  "seconds": 72.8,
+  "images": [
+   "cp_near.png",
+   "lic_near.png",
+   "mesh_ami.png",
+   "mesh_cornerA_0p1mm.png",
+   "mesh_cornerA_0p8mm.png",
+   "mesh_cornerA_6mm.png",
+   "mesh_domain.png",
+   "mesh_near.png",
+   "nut_ratio_near.png",
+   "nut_ratio_wake.png",
+   "streamlines_near.png",
+   "surface_inst.png",
+   "velocity_near.png",
+   "velocity_wake.png",
+   "vorticity_near.png",
+   "vorticity_wake.png"
+  ],
+  "time_s": 0.437481459,
+  "read_as": "reconstructed",
+  "notes": [
+   "no animation: 1 saved field time(s) (purgeWrite keeps the last 3; finished cases keep only the last)"
+  ],
+  "yplus_inst": {
+   "min": 1.1550912905838342,
+   "mean": 25.379438205802074,
+   "max": 81.22042710444066,
+   "p95": 69.49550160573772
+  },
+  "yplus_mean": null
+ },
+ "record_bytes": 3478180,
+ "files": [
+  "case.json",
+  "checkMesh.log",
+  "coefficients.csv",
+  "coefficients.png",
+  "fields/cp_near.png",
+  "fields/lic_near.png",
+  "fields/mesh_ami.png",
+  "fields/mesh_cornerA_0p1mm.png",
+  "fields/mesh_cornerA_0p8mm.png",
+  "fields/mesh_cornerA_6mm.png",
+  "fields/mesh_domain.png",
+  "fields/mesh_near.png",
+  "fields/nut_ratio_near.png",
+  "fields/nut_ratio_wake.png",
+  "fields/render_log.txt",
+  "fields/render_manifest.json",
+  "fields/streamlines_near.png",
+  "fields/surface_inst.csv",
+  "fields/surface_inst.png",
+  "fields/velocity_near.png",
+  "fields/velocity_wake.png",
+  "fields/vorticity_near.png",
+  "fields/vorticity_wake.png",
+  "log_excerpt.txt",
+  "mesh_info.json",
+  "residuals.csv",
+  "residuals.png",
+  "results.json",
+  "settings.txt",
+  "spectrum.png",
+  "timestep.png",
+  "timing.json",
+  "yplus.png"
+ ]
+}

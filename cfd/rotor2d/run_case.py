@@ -69,6 +69,7 @@ sys.path[:] = [p for p in sys.path if Path(p or ".").resolve() != HERE]
 sys.path.append(str(HERE))
 sys.path.insert(0, str(CFD / "post"))
 import rotor_geometry as rg  # noqa: E402
+import foam_launch  # noqa: E402  cfd/post/foam_launch.py: CFD_FOAM_LAUNCH (Unity container), migrated cases
 
 NU = 1.516e-5           # m^2/s, cfd/templates/transportProperties
 RHO = 1.204             # kg/m^3, cfd/templates/flowConstants
@@ -91,7 +92,7 @@ DECAY_DEFAULT = "control"
 #  precompensate: 10 mm, the 7 Oct smoke-test value (kept for reproducibility).
 LT_DEFAULTS = {"control": 1.0e-3, "precompensate": 0.01}
 DEFAULTS = dict(level="medium", model="SST", wall="wf", tu=1.0, decay=DECAY_DEFAULT, lt=None, nrev=8, navg=3,
-                nconv=40, navgconv=25, maxco=4.0, nouter=2, sense="auto", beta=None, np=4, yplus=None, walls=None,
+                nconv=40, navgconv=25, maxco=4.0, nouter=2, sense="auto", beta=None, np=int(os.environ.get("SLURM_NTASKS") or 4), yplus=None, walls=None,
                 side_bc="slip", wdist=1, name=None)
 
 
@@ -352,6 +353,7 @@ def foam(case, cmd, log, append=False, caffeinate=False, timeout=None):
     full = ["openfoam2606", "-c", f"cd {case} && {cmd} {redir} {log} 2>&1"]
     if caffeinate:
         full = ["caffeinate", "-i"] + full
+    full = foam_launch.adapt(full)              # unchanged unless CFD_FOAM_LAUNCH is set (cfd/hpc/README.md)
     p = subprocess.Popen(full, start_new_session=True)
     _CHILD.append(p)
     try:
@@ -514,12 +516,20 @@ def run(c, setup_only=False, force=False, wall_limit=None, keep_processors=False
         say(f"[busy] {name}: RUNNING marker and log.pimpleFoam written {time.time() - lg.stat().st_mtime:.0f} s ago; "
             f"a solver may still be running in {case}. Stop it (or wait 2 min if it has died) and re-launch.")
         return "busy"
+    if not force and np_ > 1 and foam_launch.migrated(case):
+        # moved from another machine (cfd/hpc/migrate.py): reconstructed time, no processor*/
+        foam_launch.redecompose(case, np_, foam, say)
     t_last = latest_time(case, np_) if case.exists() else None
     resume = (not force) and t_last is not None and t_last > 0 and (case / "case.json").exists()
     if resume:
         old = json.loads((case / "case.json").read_text())
         if old["nProcs"] != np_:
-            raise RuntimeError(f"{name}: decomposed for {old['nProcs']} ranks; run with --np {old['nProcs']} or --force")
+            n_old = len([q for q in case.glob("processor[0-9]*") if q.is_dir()])
+            if not foam_launch.hpc_mode() or n_old != old["nProcs"]:
+                raise RuntimeError(f"{name}: decomposed for {old['nProcs']} ranks; run with --np {old['nProcs']} or --force")
+            # HPC job with another task count (cfd/hpc/): run on the existing decomposition
+            say(f"[resume] {name} is decomposed for {n_old} ranks; running on {n_old}, not {np_}")
+            np_ = n_old
         # Never resume a case set up with other physics under the same name (e.g. a free stream
         # without decay control, set up before 8 Oct): compare with what this command would write.
         # kAmbient/omegaAmbient are absent in cases set up before decay control (= no decay control).

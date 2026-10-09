@@ -108,5 +108,5 @@
   "ks_valid_max_m": 0.00065,
   "note": "nutkRoughWallFunction: keep Ks below y_p (first cell centre)"
  },
- "seconds": 45.2
+ "seconds": 8.3
 }
