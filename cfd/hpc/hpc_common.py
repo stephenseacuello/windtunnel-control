@@ -33,11 +33,13 @@ JOBS = HPC / "jobs"                    # local copies of the generated sbatch sc
 STAGES = {
     # default queue files: everything that is (or will be) queued for production
     "section2d": dict(queue_mod="hpc_q_section2d", queues=["queues/priority1.txt", "queues/priority2.txt",
-                                                            "queues/priority3.txt", "queues/priority4.txt"]),
+                                                            "queues/priority3.txt", "queues/priority4.txt",
+                                                            "queues/priority5_co25.txt"]),
     "rotor2d": dict(queue_mod="hpc_q_rotor2d", queues=["queues/priority0.txt", "queues/priorityA.txt",
                                                         "queues/priorityC.txt"]),
     "stage2": dict(queue_mod="hpc_q_stage2", queues=["queues/S2a_ks_U23.txt", "queues/S2b_speeds.txt",
-                                                      "queues/S2c_texture.txt"]),
+                                                      "queues/S2c_texture.txt",
+                                                      "queues/S2d_co25.txt"]),
 }
 
 _LOADED = {}
@@ -171,7 +173,7 @@ STEPS_PER_REV_ROTOR_015 = 10000                         # smoke test at lambda 0
 S_PER_STEP = {
     "section_medium": {8: 0.135, 16: 0.085},
     "section_coarse": {8: 0.075, 16: 0.055},
-    "section_fine": {16: 0.17, 32: 0.10},
+    "section_fine": {16: 0.23, 32: 0.13},          # 16: measured 0.215-0.235 (10 Oct)
     "stage2_wf": {8: 0.12, 16: 0.075},
     "stage2_tex": {16: 0.20, 32: 0.12},
     "rotor_static": {8: 0.09, 16: 0.07},
@@ -195,10 +197,11 @@ def kind_of(stage, c):
 
 def est_steps(stage, c):
     n = norm(stage, c)
+    co = 5.0 / float(n.get("maxco") or 5.0)        # the time step is Courant-limited: steps ~ 1/maxCo
     if stage == "section2d":
-        return STEPS_PER_CONV[n["level"]] * float(n["nconv"])
+        return STEPS_PER_CONV[n["level"]] * float(n["nconv"]) * co
     if stage == "stage2":
-        return STEPS_PER_CONV_STAGE2[n["wall"]] * float(n["nconv"])
+        return STEPS_PER_CONV_STAGE2[n["wall"]] * float(n["nconv"]) * co
     if n.get("lam") is None:
         return STEPS_PER_DU_ROTOR_STATIC * float(n["nconv"])
     f = 1.3 if n["U"] > 30 else 1.0          # thinner first cell at 38 m/s (h0 0.55 mm against 0.87 mm)

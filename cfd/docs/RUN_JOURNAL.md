@@ -31,6 +31,53 @@ How to fill it fast:
 
 ---
 
+## 2026-10-12 (Unity: status after the weekend; fixes and resubmissions)
+
+**Status at 06:53 EDT** (`cfd/hpc/status.py`; `sacct`, *measured*):
+- 116 of 139 cases complete: 106 on Unity, 10 on the Mac.
+- Of the 129 Unity jobs, 106 completed and 23 failed.
+
+**The 23 failures, by cause:**
+
+1. **No final write after a restart (3 cases).** These are the three cases moved from the Mac.
+   - Each ran to "End", but its final time was never written.
+   - Cause: OpenFOAM counts adjustableRunTime write times from each run's start time, and these
+     runs restarted from a writeNow pause off the write grid.
+   - Fix: `foam_launch.align_final_write`, called on every resume in all three `run_case.py`.
+     It makes the end time a write time.
+   - Resubmitted.
+2. **Time limit (12 cases).** All are kOmegaSSTLM medium section cases, stopped at 36-99 %.
+   - Their time step is 0.14-2.2 us, against 2-3.4 us for SST (*measured*), because the
+     transition model is far stiffer.
+   - Resubmitted with limits from each case's own measured speed, using the new estimate in
+     `submit.py`.
+   - The slowest two, a180 at 10.2 m/s and a165, need about 1.5-2 days (*estimated*).
+3. **Divergence at maxCo 5 (8 cases).** The time step collapsed (to 1e-34 to 1e-103 s), followed
+   by a floating-point exception (rc 136). The 8 cases are:
+
+   | Group | Cases | Collapsed at |
+   |---|---|---|
+   | Section, fine mesh | a000, a090, a180 | 40-46 c/U |
+   | Stage 2, alpha 0, 23 m/s | Ks0, Ks100 | |
+   | Stage 2, alpha 0, 10.2 m/s | Ks0, Ks100, Ks200 | |
+
+   Not resumed. They are re-run at maxCo 2.5 from new queue files:
+   - `section2d/queues/priority5_co25.txt`: coarse, medium and fine at alpha 0, 90 and 180.
+     a000 medium at maxCo 2.5 was already in priority 1.
+   - `stage2/queues/S2d_co25.txt`: the whole alpha-0 Ks and speed sweeps at 10.2, 23 and 38 m/s.
+     The cases that finished at maxCo 5 give the time-step sensitivity.
+   - 19 jobs.
+
+**Also changed:**
+- The cost model scales the step count with 5/maxCo.
+- `run_one.py` rebuilds the stage's results CSV on Unity after each completed case, so the CSVs
+  can be read through Unity OnDemand.
+
+**Next**: when everything is complete, run `pull_results.py` on a network that allows SSH. The
+Co 2.5 fine cases take about 22 h; the slowest LM cases run to about Wednesday 14 Oct.
+
+---
+
 ## 2026-10-09 (Mac queues paused; production moved to Unity HPC)
 
 **Mac.** The three queues were paused at 06:45 (`queue.py --pause`) so the laptop could be closed.

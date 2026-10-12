@@ -1,0 +1,13 @@
+# Grid study at maxCo 2.5 (12 Oct 2026). The three fine-mesh cases diverged at maxCo 5 on Unity
+# (10 Oct: the time step collapsed at 40-46 c/U, then a floating-point exception), so coarse,
+# medium and fine are run at maxCo 2.5 for a comparison at one setting. The a000 medium case at
+# maxCo 2.5 is already in priority1.
+# alpha  U     model level  Tu   options
+0    23.0  SST  coarse  1.0  maxco=2.5
+90   23.0  SST  coarse  1.0  maxco=2.5
+180  23.0  SST  coarse  1.0  maxco=2.5
+90   23.0  SST  medium  1.0  maxco=2.5
+180  23.0  SST  medium  1.0  maxco=2.5
+0    23.0  SST  fine    1.0  maxco=2.5
+90   23.0  SST  fine    1.0  maxco=2.5
+180  23.0  SST  fine    1.0  maxco=2.5

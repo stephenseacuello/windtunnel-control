@@ -1,0 +1,16 @@
+# alpha 0 at maxCo 2.5 (12 Oct 2026). At maxCo 5, a000 Ks0 and Ks100 at 23 m/s and all three
+# 10.2 m/s cases diverged on Unity (10 Oct: time step collapsed, floating-point exception). The
+# whole alpha-0 Ks and speed sweeps run again at maxCo 2.5, so each sweep uses one setting; the
+# cases that finished at maxCo 5 (23 m/s Ks50/200/400, 38 m/s) give the time-step sensitivity.
+# alpha  U     model wall options
+0    23.0  SST  wf  ks=0    maxco=2.5
+0    23.0  SST  wf  ks=50   maxco=2.5
+0    23.0  SST  wf  ks=100  maxco=2.5
+0    23.0  SST  wf  ks=200  maxco=2.5
+0    23.0  SST  wf  ks=400  maxco=2.5
+0    10.2  SST  wf  ks=0    maxco=2.5
+0    10.2  SST  wf  ks=100  maxco=2.5
+0    10.2  SST  wf  ks=200  maxco=2.5
+0    38.0  SST  wf  ks=0    maxco=2.5
+0    38.0  SST  wf  ks=100  maxco=2.5
+0    38.0  SST  wf  ks=200  maxco=2.5

@@ -88,6 +88,12 @@ def main():
         with open(case_dir / "hpc_jobs.jsonl", "a") as f:
             f.write(json.dumps(rec) + "\n")
     print(f"run_one: {folder}: {st} after {rec['wall_s']:.0f} s", flush=True)
+    if st == "complete" and not a.folder:
+        # keep the stage's results CSV on Unity current, so it can be read there (OnDemand) any time
+        try:
+            print(f"run_one: {q.rebuild_csv()} complete cases in the {a.stage} results CSV", flush=True)
+        except Exception as e:  # noqa: BLE001 - the case itself is done
+            print(f"run_one: CSV rebuild failed: {e!r}", flush=True)
     sys.exit(0 if st in ("complete", "skipped", "setup") else 3 if st in ("stopped", "timeout")
              else 4 if st == "busy" else 1)
 
