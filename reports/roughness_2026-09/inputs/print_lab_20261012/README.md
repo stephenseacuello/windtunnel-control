@@ -32,3 +32,44 @@ $24.99/kg in `turbine_default.3mf`.
   (*inferred*).
 - **FS 0.05.** No slice is shown for the tested FS 0.05 ("Ra 20") set.
 - **Estimates only.** These are slicer estimates, not logged print times.
+
+## The two project files (received 12 Oct; not committed: 80.6 MB and 20.2 MB)
+
+Checksums are in `SHA256SUMS_3mf.txt`. The settings below were read from
+`Metadata/project_settings.config` and `model_settings.config`.
+
+**`turbine_p2mm.3mf`** (Bambu Studio 02.08.02.61). The settings are the same as
+`../slicer/turbine_default.3mf`:
+- printer and process: P1S 0.2 nozzle, "0.10mm Standard"; 0.1 mm layers (first layer 0.1 mm);
+- walls and lines: 4 wall loops, 0.22 mm line width, outer wall at 120 mm/s;
+- fuzzy skin: displacement mode, 0.2 mm point distance;
+- infill and shells: 15 % sparse infill, 7 top and 5 bottom layers;
+- material and plate: Bambu PLA Basic at 220 °C, Textured PEI plate, 5 mm auto brim.
+
+The plates are:
+
+| Plate | Fuzzy-skin thickness |
+|---|---|
+| "10 RA" | 0.025 mm |
+| "40 RA" | 0.101 mm |
+| "80 RA" | 0.202 mm |
+| plate 4, unnamed | 0.805 mm |
+
+Differences from the default file: filament cost $19.99/kg (was $24.99), and plate 4. Neither
+file has a plate for Plain or for FS 0.05 (0.050 mm).
+
+**`turbine_320.3mf`** (the planned "Ra 320" set). Changes against the tested sets:
+
+| Setting | Tested sets | Ra 320 plan |
+|---|---|---|
+| Nozzle | 0.2 mm | 0.4 mm |
+| Process profile | 0.10mm Standard | 0.12mm High Quality |
+| Layer height (first layer) | 0.1 mm (0.1 mm) | 0.12 mm (0.2 mm) |
+| Wall loops | 4 | 2 |
+| Line width | 0.22 mm | 0.42 mm |
+| Outer wall speed | 120 mm/s | 60 mm/s |
+| Fuzzy skin | as above | 0.805 mm thickness, 0.2 mm point distance (object overrides) |
+| Brim | 5 mm, auto | 20 mm, outer only |
+
+The slicing result (`320RA.png`) gives 71.6 g per blade, against about 39 g for the tested sets.
+22.5 % of the print time is "overhang wall", from the outward displacement.
