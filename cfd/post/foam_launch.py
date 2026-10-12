@@ -23,6 +23,7 @@ the case is decomposed again for the new rank count and continued from that time
 uses it only when the MIGRATED marker exists, so cases without one behave as before.
 """
 import json
+import math
 import os
 import re
 import shlex
@@ -132,3 +133,33 @@ def redecompose(case, np, foam, say=print):
     info.setdefault("redecomposed", []).append(dict(time=tname, nprocs=int(np), job=os.environ.get("SLURM_JOB_ID")))
     m.write_text(json.dumps(info, indent=1))
     return t
+
+
+# --------------------------------------------------------------------------- restarts
+def align_final_write(case, t_start, end_time, write_interval, say=print):
+    """Make the end time a write time for a run restarted at t_start.
+
+    With writeControl adjustableRunTime, OpenFOAM counts write times from the start time of each
+    run. After a restart from a time that is not a whole number of write intervals before the end
+    (a writeNow pause, a migrated case), the end time is not a write time, so the solver ends
+    without writing its final fields and run_case.py reports "solver exited (rc 0)". This
+    happened on Unity on 10 Oct 2026 to the three cases moved from the Mac.
+
+    Sets the top-level writeInterval in system/controlDict to the largest value <= write_interval
+    that divides (end_time - t_start) into whole intervals. When the restart is already aligned
+    (a periodic write), it sets the line back to $writeInterval, the template's value."""
+    cd = Path(case) / "system" / "controlDict"
+    s = cd.read_text()
+    rem, wi = float(end_time) - float(t_start), float(write_interval)
+    n = max(1, math.ceil(rem / wi - 1e-6))
+    aligned = abs(rem - n * wi) <= 1e-6 * wi
+    val = "$writeInterval;" if aligned else \
+        f"{rem / n:.15g};   // end time aligned after a restart at {float(t_start):.10g} (foam_launch)"
+    s2, k = re.subn(r"^writeInterval(\s+)[^;\n]+;.*$", lambda m: f"writeInterval{m.group(1)}{val}", s,
+                    count=1, flags=re.M)
+    if k != 1:
+        raise RuntimeError(f"{cd}: no top-level writeInterval line")
+    if s2 != s:
+        cd.write_text(s2)
+    if not aligned:
+        say(f"[resume] writeInterval set to {rem / n:.6g} s ({n} writes to the end time) so the final time is written")

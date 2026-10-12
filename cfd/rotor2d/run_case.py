@@ -547,6 +547,7 @@ def run(c, setup_only=False, force=False, wall_limit=None, keep_processors=False
         P = {k: v for k, v in old.items() if k not in ("inputs", "mesh")}
         say(f"[resume] {name} from t = {t_last:.6g} s")
         set_stop_at(case, "endTime")
+        foam_launch.align_final_write(case, t_last, P["endTime"], P["writeInterval"], say)
     else:
         md = ensure_mesh(c, quiet)
         P = case_parameters(c, json.loads((md / "mesh_info.json").read_text()))

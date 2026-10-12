@@ -390,6 +390,7 @@ def run(alpha, U, model, level, tu=1.0, nconv=NCONV_DEFAULT, navg=NAVG_DEFAULT, 
             np = n_old
         say(f"[resume] {name} from t = {t_last:g} s ({t_last / P['convTime']:.1f} c/U)")
         set_stop_at(case, "endTime")
+        foam_launch.align_final_write(case, t_last, P["endTime"], P["writeInterval"], say)
     else:
         say(f"[setup] {name}")
         create_case(case, P, level, alpha)

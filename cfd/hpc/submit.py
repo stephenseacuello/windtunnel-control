@@ -169,6 +169,10 @@ def main():
         if state in ("partial", "migrated") and t and info.get("endTime"):
             frac = max(0.05, 1 - t / float(info["endTime"]))
         est = r["est_s"] * frac
+        lg = info.get("log") or {}
+        if state != "complete" and lg.get("s_per_simtime") and lg.get("t") is not None and info.get("endTime"):
+            # measured: this case's own clock seconds per simulated second (last 200 steps)
+            est = max(est * 0.1, (float(info["endTime"]) - lg["t"]) * lg["s_per_simtime"])
         limit = min(13 * 86400, max(2 * 3600, est * a.time_factor * EXTRA_FACTOR.get(r["kind"], 1.0) + 1800))
         if state == "complete":
             act = "skip: complete"

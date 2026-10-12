@@ -458,6 +458,7 @@ def run(c, setup_only=False, force=False, wall_limit=None, keep_processors=False
             np = n_old
         say(f"[resume] {name} from t = {t_last:g} s ({t_last / P['convTime']:.1f} c/U)")
         set_stop_at(case, "endTime")
+        foam_launch.align_final_write(case, t_last, P["endTime"], P["writeInterval"], say)
         P = old
     else:
         say(f"[setup] {name}")
