@@ -1,0 +1,7 @@
+alpha_deg,level,case_Co5,case_Co25,usable,Cd_Co5,Cd_Co25,dCd_pct,Cl_Co5,Cl_Co25,dCl_pct,Cl_std_Co5,Cl_std_Co25,St_Co5,St_Co25,St_status_Co5,St_status_Co25,steps_Co5,steps_Co25
+0,coarse,a000.0_U23.0_SST_coarse_Tu1.0,a000.0_U23.0_SST_coarse_Tu1.0_Co2.5n2,True,3.16819,1.79507,-43.3408,-0.703456,0.0209946,102.984,0.83611,0.00312135,0.122373,0.124294,clean peak,clean peak,81316,123778
+0,medium,a000.0_U23.0_SST_medium_Tu1.0,a000.0_U23.0_SST_medium_Tu1.0_Co2.5n2,True,3.1905,1.7508,-45.1246,-0.689364,0.043858,106.362,0.857412,0.00520486,0.121761,0.131237,clean peak,clean peak,115280,181204
+90,coarse,a090.0_U23.0_SST_coarse_Tu1.0,a090.0_U23.0_SST_coarse_Tu1.0_Co2.5n2,True,0.338096,0.345872,2.29994,1.07684,0.998967,-7.23162,0.121404,0.00010279,0.499802,2.18039,clean peak,steady (Cl_std < 0.001),61590,119499
+90,medium,a090.0_U23.0_SST_medium_Tu1.0,a090.0_U23.0_SST_medium_Tu1.0_Co2.5n2,True,0.34512,0.37479,8.59701,1.09629,0.93345,-14.8537,0.139248,2.82761e-05,0.506639,14.9038,clean peak,steady (Cl_std < 0.001),95765,172790
+180,coarse,a180.0_U23.0_SST_coarse_Tu1.0,a180.0_U23.0_SST_coarse_Tu1.0_Co2.5n2,True,1.7495,1.66913,-4.59388,-1.33506,-1.22079,8.55917,0.538431,0.418243,0.226751,0.230778,broadband (peak frac < 0.5),clean peak,83814,113346
+180,medium,a180.0_U23.0_SST_medium_Tu1.0,a180.0_U23.0_SST_medium_Tu1.0_Co2.5n2,False,0.593102,1.47935,149.426,-1.56711,-0.958987,38.8054,4.20021,0.370163,0.0284446,0.223172,corrupted run,clean peak,248073,143780

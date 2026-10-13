@@ -1,0 +1,157 @@
+{
+ "col_fit": {
+  "slope_pct_per_ksplus": -0.19332701936858854,
+  "slope_se": 0.008892344350531949,
+  "n": 10,
+  "resid_rms_pct": 0.40374937849103154,
+  "resid_max_pct": 0.6483895847233043
+ },
+ "k_end_FS020_vs_Plain_dD_pct": {
+  "84.0": -3.0656909416355047,
+  "97.0": -4.1465793020418165
+ },
+ "measured_extra": {
+  "stepV": {
+   "Plain": "24--26",
+   "FS 0.05": "22--24",
+   "FS 0.10": "22",
+   "FS 0.20": "20"
+  },
+  "band": [
+   "21",
+   "25"
+  ],
+  "gMaxB": "+22.4",
+  "gMaxVB": "25",
+  "gMaxC": "+36.2",
+  "gMaxVC": "23",
+  "lam_peak": {
+   "Plain": 0.122,
+   "FS 0.05": 0.123,
+   "FS 0.10": 0.13,
+   "FS 0.20": 0.131
+  }
+ },
+ "lam": 0.125,
+ "quality": {
+  "n_cases": 43,
+  "n_wf": 27,
+  "n_tex": 16,
+  "alpha0_wf_drift_negative": "17 of 17",
+  "alpha0_wf_drift_range": [
+   -0.0941464,
+   -0.00764769
+  ],
+  "tex_drift_negative": "16 of 16",
+  "tex_drift_range": [
+   -0.0557835,
+   -0.0156784
+  ],
+  "wf_a90_a180_absdrift_max": 0.0050715,
+  "Ks_over_yP_range": [
+   0.113636,
+   0.909091
+  ],
+  "yplus_wf_mean_range": [
+   17.168,
+   48.6357
+  ],
+  "yplus_wf_max_range": [
+   49.4554,
+   171.744
+  ],
+  "yplus_tex_mean_range": [
+   0.0465408,
+   0.133402
+  ],
+  "yplus_tex_max": 1.04189,
+  "ksplus_mean_by_Ks": {
+   "50": [
+    2.54696,
+    3.55328
+   ],
+   "100": [
+    2.74833,
+    10.1152
+   ],
+   "200": [
+    5.86874,
+    22.1071
+   ],
+   "400": [
+    26.0281,
+    37.3794
+   ]
+  },
+  "ksplus_max_overall": 106.234,
+  "omega_bounded_steps_total": 0,
+  "Tu_probe_range": [
+   1.00103,
+   1.01516
+  ],
+  "cycles_alpha0_wf": [
+   10.8462,
+   11.9915
+  ],
+  "cycles_alpha180_wf": [
+   23.6142,
+   23.8324
+  ],
+  "cycles_tex_alpha0": [
+   7.11764,
+   7.29795
+  ],
+  "St_peak_frac_tex_a180": [
+   0.0544883,
+   0.570003
+  ],
+  "timestep_dCd_pct_range": [
+   -0.1531947064928567,
+   1.2440021908606933
+  ],
+  "timestep_effect_diff_range": [
+   -0.011069999999999691,
+   0.017129999999999423
+  ],
+  "state_wf_alpha0_Cd": [
+   2.92079,
+   3.14604
+  ],
+  "state_wf_alpha0_Cl": [
+   -0.654281,
+   -0.448492
+  ],
+  "state_wf_alpha0_St": [
+   0.108462,
+   0.11994
+  ],
+  "state_wf_alpha0_Cdstd": [
+   0.391705,
+   0.46182
+  ],
+  "state_tex_alpha0_Cd": [
+   1.7761,
+   1.87651
+  ],
+  "state_tex_alpha0_Cl": [
+   0.00145792,
+   0.127973
+  ],
+  "state_tex_alpha0_St": [
+   0.14241,
+   0.14596
+  ],
+  "state_tex_alpha0_Cdstd": [
+   0.0142427,
+   0.0351192
+  ],
+  "state_gap_SST_23": 1.2633599999999998,
+  "largest_wf_dCd": 0.1869799999999997,
+  "Re_k_upper_23ms": {
+   "k 38 um": 57.65171503957784,
+   "k 84 um": 127.44063324538257,
+   "k 97 um": 147.1635883905013
+  },
+  "state_gap_over_largest_wf_dCd": 6.7566584661461215
+ }
+}

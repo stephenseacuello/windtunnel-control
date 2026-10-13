@@ -1,0 +1,14 @@
+source,level,model,maxCo,U_ms,Tu_pct,case_a0,case_a180,Cd_a0,Cd_a180,branch_a0,usable,ratio,dCd,lambda0_qs,lambda_peak_qs
+CFD,coarse,SST,2.5,23,1,a000.0_U23.0_SST_coarse_Tu1.0_Co2.5n2,a180.0_U23.0_SST_coarse_Tu1.0_Co2.5n2,1.7951,1.6691,low-drag,True,1.0755,0.12594,0.018183,0.0090909
+CFD,coarse,SST,5,23,1,a000.0_U23.0_SST_coarse_Tu1.0,a180.0_U23.0_SST_coarse_Tu1.0,3.1682,1.7495,high-drag shedding,True,1.8109,1.4187,0.14738,0.073284
+CFD,fine,SST,2.5,23,1,a000.0_U23.0_SST_fine_Tu1.0_Co2.5n2,a180.0_U23.0_SST_fine_Tu1.0_Co2.5n2,1.9248,1.6531,low-drag,True,1.1644,0.2717,0.038025,0.019005
+CFD,medium,LM,5,10.2,1,a000.0_U10.2_LM_medium_Tu1.0,a180.0_U10.2_LM_medium_Tu1.0,2.0126,-1.8981,low-drag,False,,,,
+CFD,medium,LM,5,23,0.5,a000.0_U23.0_LM_medium_Tu0.5,a180.0_U23.0_LM_medium_Tu0.5,3.1403,2.0455,high-drag shedding,False,,,,
+CFD,medium,LM,5,23,1,a000.0_U23.0_LM_medium_Tu1.0,a180.0_U23.0_LM_medium_Tu1.0,1.9571,1.4803,low-drag,False,,,,
+CFD,medium,LM,5,23,3,a000.0_U23.0_LM_medium_Tu3.0,a180.0_U23.0_LM_medium_Tu3.0,3.2235,0.73897,high-drag shedding,False,,,,
+CFD,medium,LM,5,38,1,a000.0_U38.0_LM_medium_Tu1.0,a180.0_U38.0_LM_medium_Tu1.0,3.0446,2.0101,high-drag shedding,False,,,,
+CFD,medium,SST,2.5,23,1,a000.0_U23.0_SST_medium_Tu1.0_Co2.5n2,a180.0_U23.0_SST_medium_Tu1.0_Co2.5n2,1.7508,1.4793,low-drag,True,1.1835,0.27145,0.042093,0.021037
+CFD,medium,SST,5,10.2,1,a000.0_U10.2_SST_medium_Tu1.0,a180.0_U10.2_SST_medium_Tu1.0,2.9746,-0.10463,high-drag shedding,False,,,,
+CFD,medium,SST,5,23,1,a000.0_U23.0_SST_medium_Tu1.0,a180.0_U23.0_SST_medium_Tu1.0,3.1905,0.5931,high-drag shedding,False,,,,
+CFD,medium,SST,5,38,1,a000.0_U38.0_SST_medium_Tu1.0,a180.0_U38.0_SST_medium_Tu1.0,3.0485,1.0448,high-drag shedding,False,,,,
+literature (cfd/PLAN.md; 2D half-cylinder shell),,,,,,,,2.3,1.2,,True,1.9167,1.1,0.16123,0.080083

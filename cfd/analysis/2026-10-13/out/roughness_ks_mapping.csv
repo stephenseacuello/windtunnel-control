@@ -1,0 +1,17 @@
+rotor,t_mm,Ra_um,Pa_um,rule,Ks_lo_um,Ks_hi_um,Ks_mid_um,beyond_sweep,Cd0_interp,Cd180_interp,D_interp,Cd90_interp,ksplus_note,dD_vs_Plain,dD_pct_vs_Plain
+Plain,0,12.74,19.01,Ks = k (scan height),38,38,38,False,3.09956,1.645,1.45456,0.196316,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0,0
+Plain,0,12.74,19.01,Ks = 3-6 Ra,38.22,76.44,57.33,False,3.09025,1.64803,1.44223,0.197767,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0,0
+Plain,0,12.74,19.01,Ks = 3-6 Pa,57.03,114.06,85.545,False,3.0644,1.6563,1.4081,0.202383,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0,0
+Plain,0,12.74,19.01,Ks = 2.09 t (nominal texture),0,0,0,False,3.10777,1.64221,1.46556,0.195516,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0,0
+FS 0.05,0.05,9.376,13.92,Ks = k (scan height),38,38,38,False,3.09956,1.645,1.45456,0.196316,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0,0
+FS 0.05,0.05,9.376,13.92,Ks = 3-6 Ra,28.128,56.256,42.192,False,3.09866,1.64531,1.45335,0.196404,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0.0111245,0.771345
+FS 0.05,0.05,9.376,13.92,Ks = 3-6 Pa,41.76,83.52,62.64,False,3.08539,1.64959,1.4358,0.198636,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0.0277013,1.96728
+FS 0.05,0.05,9.376,13.92,Ks = 2.09 t (nominal texture),104.5,104.5,104.5,False,3.04957,1.66151,1.38806,0.205814,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",-0.0775018,-5.28821
+FS 0.10,0.101,8.21,13.18,Ks = k (scan height),38,38,38,False,3.09956,1.645,1.45456,0.196316,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0,0
+FS 0.10,0.101,8.21,13.18,Ks = 3-6 Ra,24.63,49.26,36.945,False,3.09979,1.64492,1.45487,0.196293,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0.012643,0.876633
+FS 0.10,0.101,8.21,13.18,Ks = 3-6 Pa,39.54,79.08,59.31,False,3.08844,1.64861,1.43983,0.198091,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0.0317286,2.25329
+FS 0.10,0.101,8.21,13.18,Ks = 2.09 t (nominal texture),211.09,211.09,211.09,False,3.0105,1.68516,1.32534,0.23143,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",-0.140221,-9.56773
+FS 0.20,0.202,10.34,28.66,Ks = k (scan height),84,97,90.5,False,3.05986,1.65775,1.40211,0.203194,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",-0.0524535,-3.60614
+FS 0.20,0.202,10.34,28.66,Ks = 3-6 Ra,31.02,62.04,46.53,False,3.09772,1.64563,1.45209,0.196495,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",0.00986912,0.684298
+FS 0.20,0.202,10.34,28.66,Ks = 3-6 Pa,85.98,171.96,128.97,False,3.04091,1.66678,1.37413,0.211612,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",-0.0339745,-2.41279
+FS 0.20,0.202,10.34,28.66,Ks = 2.09 t (nominal texture),422.18,422.18,422.18,True,2.92079,1.7377,1.18309,0.282333,"interpolated in the 23 m/s wf sweep (alpha 0 maxCo 2.5, alpha 90 and 180 maxCo 5)",-0.28247,-19.2739

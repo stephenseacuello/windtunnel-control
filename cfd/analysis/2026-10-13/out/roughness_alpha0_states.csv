@@ -1,0 +1,38 @@
+table,case,U_ms,model,family,maxCo,roughness,Cd,Cd_std,Cl,St,state
+section_polars,a000.0_U10.2_LM_medium_Tu1.0,10.2,LM,Stage 1 medium,5,smooth,2.01264,1.05028,0.178863,0.15662,low-drag
+section_polars,a000.0_U10.2_SST_medium_Tu1.0,10.2,SST,Stage 1 medium,5,smooth,2.97463,0.467758,-0.585125,0.121838,high-drag
+section_polars,a000.0_U23.0_LM_medium_Tu0.5,23,LM,Stage 1 medium,5,smooth,3.1403,0.67108,-0.485415,0.129883,high-drag
+section_polars,a000.0_U23.0_LM_medium_Tu1.0,23,LM,Stage 1 medium,5,smooth,1.95714,0.1398,0.0301539,0.146741,low-drag
+section_polars,a000.0_U23.0_LM_medium_Tu3.0,23,LM,Stage 1 medium,5,smooth,3.22349,0.687854,-0.266711,0.144053,high-drag
+section_polars,a000.0_U23.0_SST_coarse_Tu1.0,23,SST,Stage 1 coarse,5,smooth,3.16819,0.490101,-0.703456,0.122373,high-drag
+section_polars,a000.0_U23.0_SST_coarse_Tu1.0_Co2.5n2,23,SST,Stage 1 coarse,2.5,smooth,1.79507,0.00965274,0.0209946,0.124294,low-drag
+section_polars,a000.0_U23.0_SST_fine_Tu1.0_Co2.5n2,23,SST,Stage 1 fine,2.5,smooth,1.92477,1.0235,0.0927637,0.143067,low-drag
+section_polars,a000.0_U23.0_SST_medium_Tu1.0,23,SST,Stage 1 medium,5,smooth,3.1905,0.398809,-0.689364,0.121761,high-drag
+section_polars,a000.0_U23.0_SST_medium_Tu1.0_Co2.5n2,23,SST,Stage 1 medium,2.5,smooth,1.7508,0.0172726,0.043858,0.131237,low-drag
+section_polars,a000.0_U38.0_LM_medium_Tu1.0,38,LM,Stage 1 medium,5,smooth,3.04456,0.45086,-0.645776,0.117617,high-drag
+section_polars,a000.0_U38.0_SST_medium_Tu1.0,38,SST,Stage 1 medium,5,smooth,3.04854,0.485654,-0.62995,0.118525,high-drag
+stage2_polars,a000.0_U10.2_SST_wf_Ks0_Tu1.0_Co2.5n2,10.2,SST,Stage 2 wf,2.5,Ks 0 um,3.14163,0.447314,-0.654281,0.10932,high-drag
+stage2_polars,a000.0_U10.2_SST_wf_Ks100_Tu1.0_Co2.5n2,10.2,SST,Stage 2 wf,2.5,Ks 100 um,3.1339,0.445758,-0.638994,0.110142,high-drag
+stage2_polars,a000.0_U10.2_SST_wf_Ks200_Tu1.0_Co2.5n2,10.2,SST,Stage 2 wf,2.5,Ks 200 um,3.10739,0.439803,-0.627211,0.111781,high-drag
+stage2_polars,a000.0_U23.0_LM_tex0.000_s1_Tu1.0_N80A50,23,LM,Stage 2 tex,5,t 0.00 mm,1.77764,0.0351192,0.00145792,0.145066,low-drag
+stage2_polars,a000.0_U23.0_LM_tex0.050_s1_Tu1.0_N80A50,23,LM,Stage 2 tex,5,t 0.05 mm,1.7761,0.0247182,0.127973,0.145057,low-drag
+stage2_polars,a000.0_U23.0_LM_tex0.100_s1_Tu1.0_N80A50,23,LM,Stage 2 tex,5,t 0.10 mm,1.82429,0.0177151,0.0840405,0.14241,low-drag
+stage2_polars,a000.0_U23.0_LM_tex0.200_s1_Tu1.0_N80A50,23,LM,Stage 2 tex,5,t 0.20 mm,1.78179,0.0206986,0.0908431,0.142716,low-drag
+stage2_polars,a000.0_U23.0_SST_tex0.000_s1_Tu1.0_N80A50,23,SST,Stage 2 tex,5,t 0.00 mm,1.84441,0.0142427,0.0822121,0.142433,low-drag
+stage2_polars,a000.0_U23.0_SST_tex0.050_s1_Tu1.0_N80A50,23,SST,Stage 2 tex,5,t 0.05 mm,1.78438,0.033657,0.0509639,0.14596,low-drag
+stage2_polars,a000.0_U23.0_SST_tex0.100_s1_Tu1.0_N80A50,23,SST,Stage 2 tex,5,t 0.10 mm,1.86964,0.0189902,0.0234562,0.143831,low-drag
+stage2_polars,a000.0_U23.0_SST_tex0.200_s1_Tu1.0_N80A50,23,SST,Stage 2 tex,5,t 0.20 mm,1.87651,0.0173353,0.0125658,0.143527,low-drag
+stage2_polars,a000.0_U23.0_SST_wf_Ks0_Tu1.0_Co2.5n2,23,SST,Stage 2 wf,2.5,Ks 0 um,3.10777,0.450255,-0.576644,0.108898,high-drag
+stage2_polars,a000.0_U23.0_SST_wf_Ks100_Tu1.0_Co2.5n2,23,SST,Stage 2 wf,2.5,Ks 100 um,3.05116,0.454963,-0.521197,0.112556,high-drag
+stage2_polars,a000.0_U23.0_SST_wf_Ks200_Tu1.0,23,SST,Stage 2 wf,5,Ks 200 um,3.01115,0.409582,-0.550814,0.114766,high-drag
+stage2_polars,a000.0_U23.0_SST_wf_Ks200_Tu1.0_Co2.5n2,23,SST,Stage 2 wf,2.5,Ks 200 um,3.01577,0.46182,-0.495743,0.117933,high-drag
+stage2_polars,a000.0_U23.0_SST_wf_Ks400_Tu1.0,23,SST,Stage 2 wf,5,Ks 400 um,2.93746,0.391705,-0.477437,0.117628,high-drag
+stage2_polars,a000.0_U23.0_SST_wf_Ks400_Tu1.0_Co2.5n2,23,SST,Stage 2 wf,2.5,Ks 400 um,2.92079,0.438613,-0.448492,0.11994,high-drag
+stage2_polars,a000.0_U23.0_SST_wf_Ks50_Tu1.0,23,SST,Stage 2 wf,5,Ks 50 um,3.10342,0.438847,-0.559945,0.111335,high-drag
+stage2_polars,a000.0_U23.0_SST_wf_Ks50_Tu1.0_Co2.5n2,23,SST,Stage 2 wf,2.5,Ks 50 um,3.09697,0.454096,-0.545019,0.110408,high-drag
+stage2_polars,a000.0_U38.0_SST_wf_Ks0_Tu1.0,38,SST,Stage 2 wf,5,Ks 0 um,3.14604,0.448244,-0.58133,0.110155,high-drag
+stage2_polars,a000.0_U38.0_SST_wf_Ks0_Tu1.0_Co2.5n2,38,SST,Stage 2 wf,2.5,Ks 0 um,3.12524,0.448297,-0.584014,0.108462,high-drag
+stage2_polars,a000.0_U38.0_SST_wf_Ks100_Tu1.0,38,SST,Stage 2 wf,5,Ks 100 um,3.08696,0.428097,-0.569969,0.114519,high-drag
+stage2_polars,a000.0_U38.0_SST_wf_Ks100_Tu1.0_Co2.5n2,38,SST,Stage 2 wf,2.5,Ks 100 um,3.04903,0.453155,-0.527869,0.113318,high-drag
+stage2_polars,a000.0_U38.0_SST_wf_Ks200_Tu1.0,38,SST,Stage 2 wf,5,Ks 200 um,3.03198,0.422471,-0.517076,0.117461,high-drag
+stage2_polars,a000.0_U38.0_SST_wf_Ks200_Tu1.0_Co2.5n2,38,SST,Stage 2 wf,2.5,Ks 200 um,3.0043,0.456079,-0.494521,0.118513,high-drag

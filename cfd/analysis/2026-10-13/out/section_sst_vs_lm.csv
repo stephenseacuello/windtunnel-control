@@ -1,0 +1,8 @@
+alpha_deg,U_ms,Tu_pct,level,maxCo,case_SST,case_LM,usable,Cd_SST,Cd_LM,dCd_pct,St_SST,St_LM,dSt_pct,Cl_SST,Cl_LM,Cdv_SST,Cdv_LM,branch_SST,branch_LM
+0,10.2,1,medium,5,a000.0_U10.2_SST_medium_Tu1.0,a000.0_U10.2_LM_medium_Tu1.0,True,2.97463,2.01264,-32.3398,0.121838,0.15662,28.5477,-0.585125,0.178863,-0.00572715,-0.00976525,high-drag shedding,low-drag
+0,23,1,medium,5,a000.0_U23.0_SST_medium_Tu1.0,a000.0_U23.0_LM_medium_Tu1.0,True,3.1905,1.95714,-38.6573,0.121761,0.146741,20.5156,-0.689364,0.0301539,-0.00516245,-0.00445416,high-drag shedding,low-drag
+0,38,1,medium,5,a000.0_U38.0_SST_medium_Tu1.0,a000.0_U38.0_LM_medium_Tu1.0,True,3.04854,3.04456,-0.130554,0.118525,0.117617,-0.766083,-0.62995,-0.645776,-0.00392143,-0.00419282,high-drag shedding,high-drag shedding
+90,23,1,medium,5,a090.0_U23.0_SST_medium_Tu1.0,a090.0_U23.0_LM_medium_Tu1.0,False,0.34512,0.471646,,0.506639,0.435889,,1.09629,1.16665,0.00492877,0.00712009,,
+180,10.2,1,medium,5,a180.0_U10.2_SST_medium_Tu1.0,a180.0_U10.2_LM_medium_Tu1.0,False,-0.104628,-1.89809,,0.212523,0.204208,,-2.65162,-10.1579,-0.0624492,-0.184407,,
+180,23,1,medium,5,a180.0_U23.0_SST_medium_Tu1.0,a180.0_U23.0_LM_medium_Tu1.0,False,0.593102,1.48029,,0.0284446,0.150891,,-1.56711,-8.0531,-0.0205097,-0.0894008,,
+180,38,1,medium,5,a180.0_U38.0_SST_medium_Tu1.0,a180.0_U38.0_LM_medium_Tu1.0,False,1.04475,2.01011,,0.0463942,0.15818,,-1.81545,-4.48642,-0.00910227,-0.0304837,,
