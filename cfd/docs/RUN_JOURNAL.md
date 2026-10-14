@@ -63,6 +63,17 @@ How to fill it fast:
   at maxCo 5, each for 60 c/U.
 - If each keeps its state, the alpha-0 state depends on history (bistable), not only on the time
   step.
+- **Result** (14 Oct 17:30, computed from the restarts' forceCoeffs; c/U from the restart time):
+
+  | Restart | Started from | 0-10 c/U | 10-30 c/U | 30-60 c/U |
+  |---|---|---|---|---|
+  | `_hyst_Co5to2p5_a000` | high-drag field (maxCo 5), run at maxCo 2.5 | Cd 3.255, Cl -0.82 | Cd 3.196, Cl -0.72 | Cd 3.171, Cl -0.62 |
+  | `_hyst_Co2p5to5_a000` | low-drag field (maxCo 2.5), run at maxCo 5 | Cd 1.737, Cl +0.05 | Cd 1.745, Cl +0.06 | Cd 1.754, Cl +0.06 |
+
+  Each run kept the state it started in for 60 c/U, whatever the time step. So the alpha-0 flow
+  is bistable in 2D URANS: the start-up selects the state, and the time step does not sustain it
+  (established for 60 c/U; the high-drag Cd drifts down by 0.08 over the 60 c/U). Which state
+  the real blade takes needs the section force test (or 3D).
 
 **Records updated.**
 - LEARNING_LOG: grid table, St against alpha, the health flag, the two alpha-0 states, and the
