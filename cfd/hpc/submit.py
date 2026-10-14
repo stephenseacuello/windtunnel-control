@@ -51,9 +51,13 @@ while read -r f lane; do
   if grep -qxF "$jn" <<<"$q"; then echo "QUEUED $jn"; continue; fi
   dep=()
   if [ "$lane" != "-" ] && [ -n "${last[$lane]:-}" ]; then dep=(--dependency=afterany:${last[$lane]}); fi
-  if id=$(sbatch --parsable "${dep[@]}" "$f" 2>&1); then
-    id=${id%%;*}; echo "OK $jn $id lane $lane"; [ "$lane" != "-" ] && last[$lane]=$id
-  else echo "FAIL $jn $id"; fi
+  # stdout only: sbatch prints notes (e.g. the 32 GB memory note) on stderr, which must not
+  # end up in the job id used for the next job's --dependency
+  if out=$(sbatch --parsable "${dep[@]}" "$f" 2>sbatch.err); then
+    id=$(printf '%s\n' "$out" | grep -oE '^[0-9]+' | tail -1)
+    echo "OK $jn $id lane $lane"
+    if [ "$lane" != "-" ] && [ -n "$id" ]; then last[$lane]=$id; fi
+  else echo "FAIL $jn $(tr '\n' ' ' < sbatch.err)"; fi
 done < ORDER
 """
 

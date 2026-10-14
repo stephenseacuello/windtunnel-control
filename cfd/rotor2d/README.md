@@ -3,7 +3,9 @@
 Stages 3a and 3b of [../PLAN.md](../PLAN.md). Built 7 Oct 2026. Status: case generator,
 meshes, queues and post-processing done; smoke tests run (below). 8 Oct: free stream switched
 to decay control as in Stage 1 (below, "Free-stream turbulence"), post-case hook added to the
-queue, both tested. **No production run launched.** The rotor assembly is not measured, so
+queue, both tested. Production (priorities 0, A and C, 56 cases) ran 8-12 Oct on the Mac and
+Unity (`../hpc/README.md`); analysis in `../analysis/2026-10-13/RESULTS.md` section 4. 13 Oct:
+optional rough blades (below, "Rough blades") and queue E. The rotor assembly is not measured, so
 everything runs for two hypotheses until `cfd/inputs/rig_geometry.json` exists.
 
 Provenance labels: *measured* (read from a run or a log), *calculated* (derived from measured
@@ -20,7 +22,8 @@ values or geometry), *assumed* (an input chosen without data), *estimated* (an e
 | `case_template/` | `system/` (controlDict, function objects, schemes, solution, decomposition) and `constant/` (transport, turbulence, `dynamicMeshDict.rotating`) |
 | `run_case.py` | Create and run one case (static or rotating); resume-safe |
 | `queue.py` | Sequential, resume-safe queue; writes `results/rotor_cp.csv` and `results/rotor_static.csv`; runs `../post/after_case.sh` after each completed case |
-| `queues/priority{0,A,B,C}.txt` | Production queues (not launched); run order 0, A, C (B is contained in 0) |
+| `queues/priority{0,A,B,C}.txt` | Production queues; run order 0, A, C (B is contained in 0) |
+| `queues/priorityD_rerun.txt`, `queues/priorityE_rough.txt` | 13 Oct: mesh check and the longer 38 m/s case (D); smooth against rough blades, 45 averaged revolutions (E, "Rough blades") |
 | `results/` | CSVs, queue logs, smoke-test summaries (`results/smoke/`), comparison plots |
 | `../post/rotor_summary.py` | Loads, C_Q, C_P, AMI weights, y+, upstream-probe Tu, timing from one case (works on partial runs) |
 | `../post/after_case.sh` | Post-case hook: record of one case (`../post/record_case.py --kind rotor`) in `results/records/<case>/` |
@@ -119,7 +122,8 @@ wall functions) for blockage runs once the test section is measured.
   h0 = 0.87 mm at 23 m/s, 0.55 mm at 38 m/s; at 10.2 m/s the 1.81 mm it would need is capped at
   1.5 mm (flat-plate y+ about 33) and the ring at 5 mm (the curl's inner radius of curvature is
   9.8 mm). Wall functions: nutUSpaldingWallFunction (valid at any y+), kqRWallFunction,
-  omegaWallFunction. The mesh is regenerated per speed.
+  omegaWallFunction. The mesh is regenerated per speed. Optional rough blades
+  (nutkRoughWallFunction): section "Rough blades".
 * `lowRe` (optional, needed for kOmegaSSTLM): h0 for y+ 0.8 with u_tau at 1.5 U (12 um at 23 m/s),
   layers growing at 1.15 to the 0.3 mm wall spacing; nutLowReWallFunction, k = 0 at the wall. About
   10x smaller time steps than `wf`; not in any queue.
@@ -163,7 +167,8 @@ Inlet: uniform U, k and omega at the target Tu (1 %) with free-stream decay cont
   revolution), so the T/720 cap does not bind at any queued lambda. The wall distance is
   recomputed every step (`--wdist N` to do it every N steps).
 
-Case names carry every option that is not the default (`_Tu`, `_sense`, `_beta`, `_yp`, `_walls`,
+Case names carry every option that is not the default (`_Ks<um>` and `_Cs<Cs>` for rough blades,
+`_Tu`, `_sense`, `_beta`, `_yp`, `_walls`,
 `_lt<m>` (length scale other than the decay mode's default), `_precomp` (`--decay precompensate`),
 `_Co..n..`, `_wd`, `_rev<nrev>` and `a<navg>` for rotating, `_conv<nconv>a<navgconv>` for
 static), so a queue line with a changed run length or free stream is a separate case. `--name`
@@ -242,6 +247,8 @@ python3 cfd/rotor2d/run_case.py --hyp A --U 23 --lam 0.15
 python3 cfd/rotor2d/run_case.py --hyp B --U 23 --theta 30
 python3 cfd/rotor2d/run_case.py ... --np 2 --name _test_x      # test: 2 ranks, folder runs/_test_x
 python3 cfd/rotor2d/run_case.py ... --decay precompensate      # the 7 Oct free stream (smoke tests)
+python3 cfd/rotor2d/run_case.py ... --ks 100                   # rough blades, Ks 100 um (section "Rough blades")
+python3 cfd/rotor2d/run_case.py ... --ks 0 --nutwf kRough      # their smooth reference (same wall function)
 python3 cfd/rotor2d/rotor_geometry.py               # layouts and pose numbers
 cfd/.venv/bin/python cfd/rotor2d/mesh/make_mesh.py --hyp A --level medium --U 23 --out /tmp/m --plot /tmp/m.png
 ```
@@ -308,6 +315,100 @@ exit code 3, timeout with the grandchild killed, missing, not executable, no `re
 queue loop with a stubbed solver, and `after_case.sh` on the decay-control test case (record
 with `kind` rotor, written in 5 s; ParaView renders of a rotor case: pvbatch exit 0 in 21 s;
 the test records were then deleted).
+
+## Rough blades (13 Oct 2026)
+
+Optional sand-grain roughness on the three blades, as Stage 2's rough wall functions
+(`../stage2/README.md` section 3; Ks values: `../docs/ROUGHNESS_KS.md`). Wall-function mesh
+(`wall wf`) only; a rough option on `lowRe` raises an error.
+
+| Option (queue key) | Effect |
+|---|---|
+| `--ks 0` (default; no key) | Smooth blades, nut `nutUSpaldingWallFunction`. The case, its name and every file it writes are those of the code before the option (tests below) |
+| `--ks <um>` > 0 (`ks=`) | nut `nutkRoughWallFunction` on `blade1..3` with Ks = ks and Cs = `--cs` (`cs=`, default 0.5). k, omega, mesh and tunnel side walls unchanged. Name suffix `_Ks<um>` after the level (`_Cs<Cs>` if Cs is not 0.5), e.g. `A_rot_U23.0_lam0.120_SST_medium_Ks100_senseCCW_rev50a45` |
+| `--ks 0 --nutwf kRough` (`ks=0 nutwf=kRough`) | The same rough condition with Ks 0: the smooth reference of the rough cases. Suffix `_Ks0` |
+
+**Why a separate smooth reference.** `nutkRoughWallFunction` (v2606 source, read 13 Oct) takes
+u* = Cmu^0.25 sqrt(k_P) and Ks+ = u* Ks/nu, divides E by the roughness function for Ks+ > 2.25, and
+sets nu_t,w = nu (y* kappa / ln(E' y*) - 1), limited to 0.5-2 times the larger of its previous
+value and nu; it has no viscous branch. `nutUSpaldingWallFunction` takes u_tau from the
+first-cell velocity through Spalding's law. The two differ at Ks 0, so a rough case minus a
+production (Spalding) case mixes the change of wall function into the roughness effect. As in
+Stage 2, the roughness effect is a rough case minus its `_Ks0` twin; a Spalding case minus `_Ks0`
+measures the change of wall function.
+
+**Validity.** The rough log law needs the first cell centre above the roughness. y_P = h0/2 is
+434.8 um on the 23 m/s medium meshes and 277 um at 38 m/s (calculated, `mesh_info.json`).
+`run_case.py` prints `[warn] ... outside its validity` when Ks > y_P. At 23 m/s, Ks/y_P = 0.230
+(100 um) and 0.920 (400 um).
+
+**Outputs** (rough cases only; smooth cases get none of these keys):
+- `case.json` and `system/caseParameters`: `nutWallFunction`, `KsBlade` (m), `Cs`, `h0`, `yP`,
+  `KsOverYp`.
+- `results.json` (`../post/rotor_summary.py`): `nut_wall_function`, `Ks_um`, `Cs`, `yP_m`,
+  `Ks_over_yP`, and `ksplus_blade_mean` / `_max` = y+ Ks/y_P (estimated: y_P = h0/2 holds away from
+  the corners).
+- CSVs: the same six columns, appended after the earlier ones in `rotor_cp.csv` and
+  `rotor_static.csv`. They are empty for smooth (Spalding) blades; `Ks_um` is 0 for `_Ks0`.
+- `../post/plot_rotor_cp.py` gives each Ks its own curve (variant tag `Ks<um>`), so no rough case
+  enters a production curve.
+
+**y+ differs in definition between the two conditions.** The `yPlus1` function object reports the
+nut condition's own y+. On `nutkRoughWallFunction` that is the k-based y* (velocity-gradient y+
+where y* < 11.53); on `nutUSpaldingWallFunction` it is Spalding's u_tau y/nu. `yplus_mean` of a
+rough and a Spalding case are therefore not like for like. On a rough case, y* Ks/y_P is the wall
+function's own Ks+ wherever the cell centre is at y_P.
+
+**Tests (13-14 Oct 2026, measured).**
+- *Smooth cases unchanged, old code (commit 763aae0) against new.*
+  - `--setup-only` of a static (A, theta 30) and a rotating case (A, lambda 0.15) into `_bytecmp_*`
+    folders: 28 and 29 files, identical under `diff -r`, also with `--ks 0` and with
+    `--ks 0 --cs 0.5 --nutwf spalding`.
+  - All 69 lines of priorities 0, A, B, C and D_rerun, with the sense variants `submit.py` adds:
+    identical parsed and normalised dicts, names, mesh keys, caseParameters, case.json and `0/`
+    files (483 files per code version).
+  - Full setups of 9 cases, including the five priorityD_rerun cases: 260 files, identical.
+  - `rotor_summary.py` re-run on `A_rot_U23.0_lam0.100_SST_medium_senseCCW_rev6` reproduces its
+    `results.json`.
+  - Review re-run (14 Oct, scratch copies of both code versions): every file `create_case` writes
+    for the same 69 lines, 1,288 per version (polyMesh reduced to `boundary`), identical; the 56
+    finished production cases regenerated from their own case.json inputs match their files on
+    disk byte for byte (55; the 56th, `B_sta_U23.0_th030.0_SST_medium`, differs only in nProcs
+    and `nProcs_before_migration`, set by its migration to Unity, under both versions); the 57
+    rotor sbatch scripts submitted so far give their job names under both; `rotor_summary.py`
+    reproduces the stored `results.json` of a rotating and a static case; the rebuilt CSVs equal
+    the committed ones plus six empty columns.
+- *Resume.* The new code resumes a case set up by the old code. Without `--force` it refuses to
+  continue a smooth case with a rough command, or a rough case with another Ks, another Cs or a
+  smooth command.
+- *Smoke test.* A, 23 m/s, sense CCW, lambda 0.12, Ks 200 um, 2 ranks at nice 10,
+  `--wall-limit 240`, stopped by writeNow at 200 s.
+  - 681 steps to t = 0.0153 s (0.066 revolution), 0.30 s/step, dt 2.25e-5 s, max Co 3.99, no
+    omega bounding. Forces (47 samples), probes and AMI weights were written.
+  - The solver read `nutkRoughWallFunction` with Ks uniform 0.0002 and Cs 0.5 on blade1-3 and
+    wrote it back.
+  - A one-step serial restart with the debug switch `nutkRoughWallFunction 1` printed y*, Ks+, E'
+    and nu_t,w for all 672 blade faces. y = Ks y*/Ks+ has a median of 435.9 um against y_P =
+    434.8 um, so the solver used Ks = 200 um; E' = E/fn(Ks+, 0.5) to 6e-8.
+  - In this start-up flow Ks+ had a median of 13.5 and a maximum of 46.2, and exceeded 2.25 on
+    96.7 % of the faces. Where the limiter did not act, nu_t,w was 1.48-1.94 times the smooth
+    log-law value.
+  - The `yPlus` utility gave per-blade maxima equal to those printed y* (78.93, 60.75, 102.8).
+  - The test folders were deleted.
+- *Review smoke run (14 Oct).* The queue's Ks 400 um line at lambda 0.10 on 2 ranks, nice 10,
+  stopped at 200 s: 783 steps to t = 0.0170 s, mean dt 2.17e-5 s, mean max Co 4.00, no omega
+  bounding, no solver errors. A two-step serial run from t = 0 with the debug switch gave
+  y = Ks y*/Ks+ with a median of 435.9 um (2,016 face evaluations) against y_P = 434.8 um, so the
+  solver used Ks = 400 um; Ks+ was 4.07-4.10 (4.07 from the inlet k); E' = E/fn(Ks+, 0.5) to 1.2e-8.
+  `rotor_summary.py` and `record_case.py --no-render` ran on the partial case. All in scratch
+  folders, nothing in `runs/`.
+
+**Queue `queues/priorityE_rough.txt`** (Unity, 16 ranks; its header gives the reasoning):
+- A, sense CCW, 23 m/s, lambda 0.10 and 0.12, 50 revolutions with the last 45 averaged.
+- Order: `_Ks0`, `_Ks400` and `_Ks100` at lambda 0.10, the same at 0.12, then the two Spalding
+  smooth cases (lambda 0.10, 0.12).
+- The rough wall function models a fully turbulent rough wall, with no roughness-induced
+  transition. Ks is a sensitivity parameter, not a measured value.
 
 ## Comparison with the rig (`../post/plot_rotor_cp.py`)
 

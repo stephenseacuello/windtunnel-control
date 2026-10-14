@@ -14,6 +14,13 @@ the mean C_Q (batch means, CQ_sem), Strouhal number (D-based) of C_Q.
 Free stream: Tu_upstream_probe_pct = 100 sqrt(2/3 k)/U from the mean k at the upstream
 probe (-2 D) over the averaging window (cases set up from 8 Oct probe k); freestream_decay
 ('control' or 'precompensate') and lt_m from case.json.
+Rough blades only (case.json nutWallFunction; cfd/rotor2d/README.md "Rough blades"; smooth
+cases get none of these keys): nut_wall_function, Ks_um, Cs, yP_m (= h0/2), Ks_over_yP, and
+ksplus_blade_{mean,max} = yplus_{mean,max} Ks/y_P (estimated: y_P = h0/2 holds away from the
+corners). On a nutkRoughWallFunction patch the yPlus function object (useWallFunction, the
+default) reports the wall function's y* = Cmu^0.25 sqrt(k_P) y/nu (velocity-gradient y+ where
+y* < 11.53), so Ks+ = y* Ks/y_P is the wall function's own Ks+ there; smooth cases report
+nutUSpaldingWallFunction's y+, a different definition.
 No OpenFOAM install is needed.
 """
 import json
@@ -205,6 +212,10 @@ def summarize(case):
                freestream_decay=P.get("freestreamDecay", "precompensate"), lt_m=P.get("turbulenceLengthScale"),
                maxCo=P["maxCo"], nOuter=P["nOuterCorrectors"], nProcs=P["nProcs"],
                wall_time_s=float(sum(x["wall_s"] for x in tim)), **{k: v for k, v in lg.items() if k != "ami_log_excerpt"})
+    if P.get("nutWallFunction"):
+        # rough blades (cfd/rotor2d/run_case.py --ks / --nutwf kRough); absent for smooth blades
+        out.update(nut_wall_function=P["nutWallFunction"], Ks_um=round(P.get("KsBlade", 0.0) * 1e6, 6),
+                   Cs=P.get("Cs"), yP_m=P.get("yP"), Ks_over_yP=P.get("KsOverYp"))
     out["ami"] = read_ami(case)
     if out["ami"]:
         out["ami_weight_min"] = min(min(e["src_min"], e["tgt_min"]) for e in out["ami"].values())
@@ -290,6 +301,10 @@ def summarize(case):
     if out.get("yplus"):
         out["yplus_mean"] = float(np.mean([e["mean_of_avg"] for k, e in out["yplus"].items() if k.startswith("blade")]))
         out["yplus_max"] = float(np.max([e["max"] for k, e in out["yplus"].items() if k.startswith("blade")]))
+    if P.get("nutWallFunction") == "nutkRoughWallFunction" and P.get("yP") and out.get("yplus_mean") is not None:
+        r = P.get("KsBlade", 0.0) / P["yP"]          # Ks+ = y* Ks / y_P (estimated, see the docstring)
+        out["ksplus_blade_mean"] = out["yplus_mean"] * r
+        out["ksplus_blade_max"] = out["yplus_max"] * r
     return out
 
 

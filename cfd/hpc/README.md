@@ -60,6 +60,33 @@ local folder gets a `MOVED_TO_UNITY` marker. Do not resume it on the Mac as well
 `pull_results.py` later replaces it with the finished case and moves the old `processor*/`
 folders to `<stage>/runs/_pre_unity/`.
 
+## Restarting a finished section case at another maxCo
+
+`hysteresis_restart.py` prepares a diagnostic restart: the α-0 hysteresis test of
+`cfd/analysis/2026-10-13/RESULTS.md` (addendum). It never changes the source folder.
+
+```zsh
+python3 cfd/hpc/hysteresis_restart.py cfd/section2d/runs/<case> _hyst_<name> --maxco 2.5 [--nconv 60] [--dry-run]
+```
+
+- **What it writes.** It copies `0/`, `constant/`, `system/`, `case.json`, `mesh_info.json` and the
+  final time folder (with `uniform/`). It sets maxCo, endTime (+`--nconv` c/U), nProcs and caseName
+  in `system/caseParameters`, `stopAt endTime` and `restartOnRestart true` (field means of the
+  restart only) in `system/controlDict`, and adds a `restart` record to `case.json`. The force
+  function objects are unchanged.
+- **The sbatch.** It writes `run_hysteresis.sbatch`: 8 ranks by default, `uri-cpu,cpu`, the container of
+  `job_env.sh`, then `decomposePar -force -latestTime`, `mpirun pimpleFoam -parallel` and
+  `reconstructPar -latestTime`. The time limit is 3 × (steps × the source's measured s/step) +
+  30 min, at least 2 h. The job refuses to start if the folder has a `RUNNING` marker or
+  `processor*/` folders.
+- **Folders.** Names start with `_`, so the results CSVs, `record_all.py` and `pull_results.py`
+  leave them out. Download a finished restart with
+  `rsync -az --exclude='/processor*/' unity:<RCFD>/section2d/runs/<name>/ cfd/section2d/runs/<name>/`.
+- **Tested.** On 13 Oct both directions were started locally on scratch copies (4 ranks, about 70 s
+  each). Each started from the source's final fields and continued its force history without a
+  step. The maximum Courant number reached the new limit after 1 step (5 → 2.5) and after 5 steps
+  (2.5 → 5; the solver lets the time step grow by at most a factor of 1.2 per step).
+
 ## Files
 
 | File | Role |
@@ -71,6 +98,7 @@ folders to `<stage>/runs/_pre_unity/`.
 | `remote_status.py` | Run on the login node by the others: case states and squeue as JSON |
 | `premesh.py` | Makes the meshes on the Mac, into `mesh_cache/` (git-ignored) |
 | `test_job.sh` | 45-min end-to-end test of each stage and of the migration path |
+| `hysteresis_restart.py` | Copies a finished section case's final fields into a new `_`-folder, sets a new maxCo and end time, and writes its sbatch (below) |
 
 ## Speed
 

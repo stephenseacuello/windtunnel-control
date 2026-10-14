@@ -13,7 +13,9 @@ Files and reruns: [README.md](README.md).
 the scripts in `src/`. An independent script per stage (`src/*_verify.py`) recomputed each number;
 `src/team_summary_check.py` recomputed the numbers of TEAM_SUMMARY.md and those added in the review
 of 13 Oct. Where a check corrected a claim, this document uses the corrected claim. The case folders (time
-histories, fields) were not read, because they were still downloading.
+histories, fields) were not read, because they were still downloading. The
+[addendum](#addendum-13-oct-force-histories) at the end, written after the download, reads the
+force histories of the section runs.
 
 **Labels.**
 - Provenance:
@@ -63,6 +65,8 @@ replicated prints.
 6. [Limits of 2D URANS and of these models](#6-limits-of-2d-urans-and-of-these-models)
 7. [Conclusions](#7-conclusions)
 8. [What to do next](#8-what-to-do-next)
+
+Addendum: [force histories](#addendum-13-oct-force-histories) (Stage 1, α 0 and 180).
 
 ---
 
@@ -1391,3 +1395,113 @@ The order puts first what would change the conclusions most per unit of effort (
   [meeting notes](../../../reports/roughness_2026-09/MEETING_2026-10-07_Jahangiri.md) (SAND2017-11288,
   Re_k) and in [ROUGHNESS_KS.md](../../docs/ROUGHNESS_KS.md). None was re-checked against the
   original sources here.
+
+---
+
+## Addendum (13 Oct): force histories
+
+This addendum is the first use of the downloaded case folders (§8.4, item 6). Its numbers are
+computed by `src/section_histories.py` from each run's force history
+(`postProcessing/forceCoeffs1/<t>/coefficient.dat`, a sample every 0.02 c/U, restarts joined), its
+blade y+ (`yPlus1`, once per c/U) and, for time steps and pressure residuals, its solver log.
+`src/section_histories_verify.py` recomputes every quoted number with separate code (0 CHECK
+lines; the Unity repeat's numbers from a copy of its files, `--repeat`). Times are in convective
+times c/U (c = 48 mm). The averaging window of every run below is
+50–150 c/U, as in the tables.
+
+![Cd and Cl against time for eight section runs](fig/section_alpha0_histories.png)
+
+**How to read.**
+- *Rows*: α 0, SST, 23 m/s, at maxCo 5 (Mac) and 2.5 (Unity), on the medium and then the coarse
+  mesh; the fine mesh at maxCo 2.5; LM at 10.2 m/s, the other noisy low-drag run of §2.3; α 180,
+  SST, medium mesh, at maxCo 5 (flagged) and 2.5.
+- *Lines*: Cd on the left and Cl on the right. Grey: the samples. Black: the running mean of Cd
+  over 8 c/U, about one shedding period at α 0. Dotted: Cd 2.5, the boundary between the two α-0
+  states. Grey band: the averaging window.
+- *Pink*: a 1-c/U interval in which Cd changes by more than 0.5 between two consecutive samples
+  (a *jump*). In the windows of the 18 healthy runs without jumps, no such change exceeds 0.097.
+
+**When does each run settle into its state?** (computed; established for these runs)
+- *The states separate during the start-up.* At maxCo 5 the start-up lift oscillation grows to a
+  peak-to-peak Cl of 3.0–3.2 by 24 c/U. At maxCo 2.5 it shrinks by a factor of 1.8–2.5 per cycle,
+  to 0.09 (medium) and 0.05 (coarse) by about 40 c/U.
+- *Entry.* The running mean of Cd enters the high-drag state, staying above 2.75, at 17.3 c/U
+  (medium) and 8.9 c/U (coarse) at maxCo 5. It enters the low-drag state, staying below 2.25, at
+  18.3 and 12.9 c/U at maxCo 2.5.
+- *Settling.* It stays within ±5 % of its mean over the last 50 c/U from 46.0 and 36.9 c/U
+  (medium, coarse) at maxCo 2.5, but only from 59.1 and 80.6 c/U at maxCo 5.
+- *The fine mesh*: its start-up oscillation also decays, but more slowly (peak-to-peak Cl 2.53 and
+  1.89 near 9 and 16 c/U, a factor of 1.34). It has jumps from 28 to 96 c/U, and its running mean
+  stays in the low-drag state from 97.0 c/U.
+- *LM at 10.2 m/s* has jumps from 21 c/U to the end and never settles.
+
+**Does any run switch state?** No switch is seen (computed; established for the medium and coarse
+runs; indicative for the fine and LM runs, whose jumps hide part of the record).
+- After the start-up, none of the six α-0 runs crosses Cd 2.5 except through jumps. From 30 c/U,
+  the running mean of the jump-free samples stays at 1.87–2.13 (fine) and 1.93–2.30 (LM), wherever
+  at least half of its 8 c/U are jump-free. For the fine run that is only from 95 c/U: between 28
+  and 96 c/U, only two of its 1-c/U intervals are jump-free.
+- The jump-free samples of these two runs have a positive mean Cl (+0.067 and +0.158), not the
+  negative mean lift of the high-drag state (−0.70 to −0.27, §2.3). The fine run's jump-free
+  samples lie almost all after its jumps. During the jumps, its 10-c/U means of Cl (all samples,
+  30–90 c/U) are +0.06 to +0.17, against −0.91 to −0.46 in the windows of the medium and coarse
+  maxCo-5 runs.
+- Without the jump intervals their Cd_std falls from 1.02 and 1.05 to 0.105 and 0.109. Their
+  scatter comes from the jumps, not from a mix of the two states, which §2.3 left open (for the fine
+  run, inferred from its lift during the jumps).
+
+**Is the averaging window inside one state?**
+- *Medium and coarse SST: yes.* The running mean stays at 3.09–3.50 and 2.97–3.40 (maxCo 5) and
+  at 1.74–1.81 and 1.79–1.83 (maxCo 2.5) through the window. The maxCo-5 windows still hold the
+  end of the start-up overshoot, so their means exceed those of the last 50 c/U by 1.7 % (medium,
+  3.190 against 3.137) and 3.0 % (coarse, 3.168 against 3.076).
+- *Fine mesh and LM: one state, with jumps* (indicative, above). Jumps fill 45 and 32 of the 100
+  window c/U. Without them the window means are 1.904 and 2.026 (tables: 1.925 and 2.013).
+- *The fine run's last 50 c/U have no jumps*: Cd 1.885, in the low-drag state, with 10-c/U means
+  still falling from 1.912 to 1.870. On the last 50 c/U of all three meshes, the α-0 values at
+  maxCo 2.5 are 1.789 / 1.740 / 1.885 (coarse / medium / fine): still not monotonic, with a spread
+  of 7.7 % of the fine value (9.0 % in §2.4).
+
+**α 180, medium mesh** (computed).
+- *maxCo 5 (flagged):* jumps fill 62 of the 100 window c/U, with Cd samples from −131 to 5.6.
+- *maxCo 2.5 (healthy in §2.2):* jumps fill 8 of the 100 window c/U. Every 10-c/U window block
+  with jumps has a smaller minimum time step (4.8e-5 to 3.2e-4 c/U) than every block without
+  (4.6e-4 to 6.8e-4 c/U). The y+ of 4.94 quoted in §2.4 falls in a jump interval; elsewhere in the
+  window y+ is at most 0.95.
+- *Grid.* Without the jump intervals the α-180 values at maxCo 2.5 are 1.669 / 1.496 / 1.661
+  (coarse / medium / fine). The medium run stays 10.4 % below the coarse run and 9.9 % below the
+  fine run: the jumps do not explain the medium outlier of §2.4.
+
+**Jumps in runs called healthy** (computed; numerical origin inferred).
+- *Which runs.* All 23 flagged runs have jumps, in 8–97 of their 100 window c/U, and so do 10 of
+  the 28 healthy runs: LM α 0 at 10.2 m/s and at 23 m/s with Tu 0.5, 1 and 3 %; LM α 15 and 30;
+  SST α 0 fine (maxCo 2.5); SST α 180 coarse (maxCo 5), fine and medium (maxCo 2.5). Their largest
+  change between two samples is 2.3–11.0, 24–114 times the largest in the other 18 runs, so any
+  limit from 0.1 to 2.3 selects the same 10 runs.
+- *Effect on the means.* Without the jump intervals the window means of the 10 change by −1.2 to
+  +2.6 %, except LM α 30 (+5.7 %) and LM α 15 (+17.0 %; not stationary, §5). No α-0 run changes
+  state. Their Cd_std, and the error bars drawn from it, are inflated by the jumps.
+- *Origin.* In the fine run the jumps come with large initial pressure residuals: per 10-c/U
+  block, the median initial residual of each step's first pressure solve is 0.19–0.38 at
+  30–90 c/U, against 0.0032–0.0080 at 0–20 and 100–150 c/U. In the α-180 medium run they come with
+  the time-step drops above. They are inferred to be an intermittent form of the corruption of
+  §2.2.
+
+**Time step, machine and the hysteresis test.**
+- *The machine does not select the state of the medium maxCo-5 run* (computed on Unity by
+  `run_case.py`; read from the case's `results.json` and force history on 14 Oct, not yet
+  downloaded). The medium maxCo-5 run repeated on Unity with 8 ranks (job 65650307,
+  [RUN_JOURNAL](../../docs/RUN_JOURNAL.md) 13 Oct) gives Cd 3.189, Cd_std 0.398, mean Cl −0.690 and
+  Cl_std 0.857, against 3.190, 0.399, −0.689 and 0.857 on the Mac, and it enters the high-drag state
+  at 17.2 c/U. On one machine and rank count, maxCo 5 gives the high-drag state and maxCo 2.5 the
+  low-drag state (established for this pair).
+- *The restarts* (prepared 13 Oct, not yet run; `cfd/hpc/hysteresis_restart.py`; Unity, 8 ranks).
+  (a) `_hyst_Co5to2p5_a000` continues the medium maxCo-5 run (high-drag) from its final fields at
+  150 c/U for 60 c/U at maxCo 2.5; (b) `_hyst_Co2p5to5_a000` continues the maxCo-2.5 run (low-drag)
+  at maxCo 5. A restart that keeps its state for the 60 c/U shows that the state persists at the
+  other time step. Two kept states would mean hysteresis (the start-up selects the state); two
+  switches, that maxCo selects it.
+- *Caveat for (b)* (estimated). It starts almost steady (Cl_std 3.3e-4 over its last 10 c/U). At
+  the growth rate of the maxCo-5 start-up (e-folding 21 c/U, from the cycles near 10–24 c/U), the
+  oscillation would need about 165 c/U to reach the high-drag level (Cl_std 0.80), so 60 c/U may
+  show only whether Cl_std grows or decays, not a completed switch (inferred).

@@ -131,8 +131,9 @@ deleted test record is not re-created.
   the mean (0.2009 against 0.2000) and to 6.5 % in the maximum (1.55 against 1.46, at a corner
   face) (measured, 7 Oct). The rotor cases write no wallShearStress field, so their tau_w there
   is (nu + nu_t,wall) |U_cell - U_wall| / d.
-- **p_inf** in Cp is 0 for the section (the far-field value) and the inlet-patch mean for the
-  rotor.
+- **p_inf** in Cp is 0 for the section (the value held on the far field's outflow faces; the
+  time-mean p on its most upstream face is 0.006-0.081 q higher in the 28 healthy Stage 1 runs,
+  LEARNING_LOG section 7) and the inlet-patch mean for the rotor.
 
 ## Test records (7 Oct 2026)
 
@@ -145,8 +146,8 @@ they appear, then delete these. Re-rendered on 8 Oct.
 
 | Record | Case status | Kept for |
 |---|---|---|
-| `section2d/results/records/_test_pipeline_coarse_N0.3/` | finished (0.3 c/U) | LEARNING_LOG sections 1 and 6 (wall y+, start-up history); full record, SST, coarse, fields and time-means |
-| `section2d/results/records/_test_pipeline_coarse_LM_N0.3/` | finished (0.3 c/U) | LEARNING_LOG sections 2, 3 and 7 (nu_t/nu, gammaInt, mean Cp); kOmegaSSTLM |
+| `section2d/results/records/_test_pipeline_coarse_N0.3/` | finished (0.3 c/U) | LEARNING_LOG section 6 (start-up history) and the y+ check under Limits; full record, SST, coarse, fields and time-means |
+| `section2d/results/records/_test_pipeline_coarse_LM_N0.3/` | finished (0.3 c/U) | LEARNING_LOG sections 3 and 7 (gammaInt, start-up mean Cp); kOmegaSSTLM |
 | `section2d/results/records/_smoke_a000_U23_SST_medium_Co5n2/` | stopped (timeout) | The sleep stall: clock 8886 s against CPU 282 s in session 2 (`timestep.png`); LEARNING_LOG section 5 |
 | `section2d/results/records/_smoke_a000_U23_SST_medium_Co10n2/` | finished, diverged, no fields kept | maxCo 10 divergence (`residuals.png`); LEARNING_LOG section 5 |
 | `section2d/results/records/_mesh/{coarse,medium,fine}_a000.0/` | mesh | Mesh levels for the mesh study |

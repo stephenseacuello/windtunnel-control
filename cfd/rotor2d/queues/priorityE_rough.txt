@@ -1,0 +1,53 @@
+# Priority E: smooth against rough blades on the rotor, 13 Oct 2026 (cfd/analysis/2026-10-13/
+# RESULTS.md sections 4.6 and 8.4 item 7; README "Rough blades"). Unity only: np=16, submit with
+# --ntasks 16 (cfd/hpc/README.md), and resubmit a stopped case with --ntasks 16 too: submit.py
+# otherwise makes 8-task rotor jobs, and run_case.py resumes on the case's 16-rank decomposition.
+#
+# Configuration: assembly A turning with the curled tip leading (sense=CCW; the only combination
+# with positive torque from rest through lambda 0.10 at 23 m/s, RESULTS.md 4.3), 23 m/s,
+# kOmegaSST, medium wall-function mesh (cached mesh A_medium_wf_U23.0_th000.0_senseCCW: h0
+# 0.8697 mm, first-cell centre y_P 434.8 um), maxCo 4, 2 outer correctors: the production
+# settings except the run length and the blade wall function.
+# lambda: 0.10 (the highest lambda with resolved positive torque in production, C_Q +0.0160 +-
+# 0.0068 (2u)) and 0.12 (the rig's peak C_P,el at 23 m/s is at lambda 0.120-0.122; measured).
+#
+# Run length: nrev=50 navg=45, i.e. 5 start-up revolutions (150 D/U at lambda 0.10, 125 D/U at
+# 0.12) and the last 45 averaged. With the analysis's noise model (sigma_rev 0.00586 in C_Q for A
+# at 23 m/s, from the last-two-revolution drifts; estimated) 2u of a rough-minus-smooth
+# difference of two 45-revolution means is 0.00247. The rig's gains imply 0.00259 (FS 0.20) and
+# 0.00204 (FS 0.10) at lambda 0.10 (an order-of-magnitude estimate, assumed; RESULTS.md 4.6): 45
+# revolutions resolve an FS 0.20-sized change at about 2u (1.05 x 2u), not an FS 0.10-sized one
+# (0.83 x 2u; that needs 66). The model assumes independent revolution means and the smooth runs'
+# sigma_rev for the rough runs. All runs share mesh and maxCo, so the time-step error (0.005-0.007
+# in C_Q at lambda 0.15, RESULTS.md 4.6) and the mesh error (not yet known; priorityD_rerun.txt)
+# are assumed, not shown, to cancel in the differences.
+#
+# Wall function. Ks > 0 puts nutkRoughWallFunction (Cs 0.5) on blade1..3; the production smooth
+# blades use nutUSpaldingWallFunction. The two differ even at Ks 0 (k-based u*, no viscous
+# branch, against Spalding's velocity-based u_tau), so a rough case minus a Spalding case mixes
+# the wall-function change into the roughness effect. As in Stage 2 (stage2/README.md section 3),
+# the roughness effect is Ks 100 / 400 minus the Ks 0 run with the SAME wall function
+# (ks=0 nutwf=kRough, case name _Ks0). The two Spalding runs (no ks key; the requested "ks 0")
+# tie the set to the production smooth curve and measure the wall-function change itself.
+#
+# Ks: 100 um ~ the measured FS 0.20 scan height k 84-97 um (ks = k, assumed;
+# ../docs/ROUGHNESS_KS.md sections 2-3); 400 um is near the top of the plausible range (about
+# 420 um for FS 0.20 from the nominal texture, an upper estimate; ROUGHNESS_KS.md section 3), the
+# largest round value below y_P (Ks/y_P 0.920; 100 um: 0.230), chosen to make an effect easier to
+# resolve. Ks+ at the flat-plate u* 1.39 m/s: 9.2 and 36.8 (transitionally rough; calculated,
+# ROUGHNESS_KS.md section 4).
+#
+# Cost (estimated): 11,725 steps per revolution at lambda 0.10 and 9,771 at 0.12 (dt 2.367e-5 s
+# measured at lambda 0.10), i.e. 586k and 489k steps per case; 14.3 h and 11.9 h at the 8-rank
+# Unity speed of the production run (0.0876 s/step, measured); 16 ranks are not measured on the
+# rotor mesh (61,910 cells). Logs about 1.0-1.2 GB per case (2.1 kB per step, measured).
+# Columns: rot HYP U_ms lambda MODEL LEVEL [key=value ...]   (see ../queue.py)
+rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=16 ks=0 nutwf=kRough
+rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=16 ks=400
+rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=16 ks=100
+rot A 23 0.12 SST medium sense=CCW nrev=50 navg=45 np=16 ks=0 nutwf=kRough
+rot A 23 0.12 SST medium sense=CCW nrev=50 navg=45 np=16 ks=400
+rot A 23 0.12 SST medium sense=CCW nrev=50 navg=45 np=16 ks=100
+# Smooth blades, production wall function (nutUSpaldingWallFunction), same run length.
+rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=16
+rot A 23 0.12 SST medium sense=CCW nrev=50 navg=45 np=16

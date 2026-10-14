@@ -307,26 +307,88 @@ Case 1 numbers (measured):
 The run folders of tests 1–4 are kept, git-ignored, in `runs/_smoke_*` and `runs/_test_*`; those of
 tests 5–8 were deleted after the checks.
 
-## 6. Cost per case (estimated)
+## 6. Cost per case
 
-Wall time for 150 c/U on 4 ranks. Inputs: 0.17–0.21 s/step for medium SST on an otherwise idle
-machine (measured, case 1); dt between 2.13 µs (measured at 1.08 c/U) and an assumed 3.0 µs once
-the start-up transient has passed. Other levels are scaled, not measured: cost per step with the
-cell count, and dt with the corner wall spacing (64 / 45 / 32 µm; the coarse test's dt was
-1.4 times medium's at the same flow time, matching 64/45). LM is taken as 1.05–1.2 times SST per
-step (1.05 in test 3). Steps per c/U do not depend on U while dt is Courant-limited.
+Measured on 8–13 Oct 2026 from the 51 finished cases, 47 on Unity and 4 on the Mac. Sources: each
+case's `results.json` (steps, run time, `s_per_step`); the session table and solver header of its
+record (`results/records/<case>/log_excerpt.txt`: sessions, ranks, node, solver clock time); the
+node CPU from `sinfo`; the job placement from `sacct`; and the 13 Oct health flag
+(`../analysis/2026-10-13/out/section_case_quality.csv`). Only the 28 runs not flagged as corrupted
+(`../analysis/2026-10-13/RESULTS.md` §2.2) count as healthy below. Seconds per step and wall times
+use runs with one solver session only: a resumed run's `run_time_s` covers its last session only,
+or sessions on two machines.
 
-| Level | SST, idle | LM, idle | SST, with background load (0.29–0.37 s/step) |
+**Steps per c/U** (measured: steps / 150, healthy runs). The time step is Courant-limited (§3), so
+the count depends on mesh, maxCo and flow state; U changed it by up to 17 % (SST, α 0, medium,
+maxCo 5: 708, 769 and 831 at 10.2, 23 and 38 m/s).
+
+| Level | maxCo 5 | maxCo 2.5 | Steps at 2.5 / at 5, same case |
 |---|---|---|---|
-| coarse | 1.8–3.2 h | 1.9–3.8 h | 3.1–5.6 h |
-| medium | 4.9–8.6 h | 5.2–10.3 h | 8.4–15.1 h |
-| fine | 13.4–23.4 h | 14.1–28.0 h | 22.9–41.2 h |
+| coarse | 411–559 (3 SST, Mac) | 756–825 (3 SST) | 1.35–1.94 |
+| medium | 624–955 (4 SST, 12 LM) | 959–1,208 (3 SST) | 1.57 (α 0), 1.80 (α 90) |
+| fine | none (all 3 diverged, RUN_JOURNAL 12 Oct) | 1,697–2,000 (3 SST) | – |
 
-Queue totals, idle machine: priority 1 70–122 h (the 3 fine cases are 40–70 h of it), priority 2
-51–96 h, priority 3 57–113 h; 1–3 together 178–332 h (7.4–13.8 days). The first queue case
-reports the real seconds per step and dt in its `results.json`; update these estimates from it.
-Ways to cut the cost if needed: fewer convective times (`nconv=100 navg=60` in a queue line saves
-a third), or dropping α 90 from the fine level.
+- Halving maxCo multiplied the steps by 1.35–1.94, not 2 (measured). The near-corner velocities
+  that set the step changed with maxCo as well (inferred); at α 0 the flow state switched and at
+  α 90 the shedding stopped (RESULTS.md §2.4). The medium α-90 maxCo-5 run, moved from the Mac,
+  repeated 1.0 % of its steps after its restarts; without them its ratio is 1.82 (calculated).
+- The cost model in `../hpc/hpc_common.py` scales 560 / 800 / 1,130 steps per c/U at maxCo 5 by
+  5/maxCo, i.e. 1,120 / 1,600 / 2,260 at maxCo 2.5: 13–67 % above the measured counts
+  (calculated), so its time limits are generous.
+- The 23 flagged runs (medium, maxCo 5) took 1,338–7,322 steps per c/U (200,665–1,098,317
+  steps). The extra steps are a symptom of the corruption, not a cost to plan with.
+
+**Seconds per step** (measured: `s_per_step` in `results.json`, run time / steps; healthy
+single-session runs, start-up included):
+
+| Level (cells) | Ranks | SST | LM |
+|---|---|---|---|
+| coarse (69k), Unity | 8 | 0.045 (6730P); 0.056 and 0.094 (8352Y) | – |
+| medium (131k), Unity | 8 | 0.0875–0.0893 (6730P, 3 runs); 0.134 and 0.183 (8352Y) | 0.097–0.132 (6730P, 10 runs); 0.141 and 0.159 (8352Y) |
+| fine (255k), Unity | 16 | 0.143–0.205 (8352Y, 3 runs) | – |
+| coarse, Mac M2 | 4 | 0.121–0.136 (3 runs) | – |
+| medium, Mac M2 | 4 | 0.294 (1 run) | – |
+
+6730P and 8352Y are the Intel Xeon 6730P and 8352Y nodes of the uri-cpu partition. On the Mac,
+the rotor and Stage 2 queues (2 ranks each) ran next to every Stage 1 case for most of its run
+(session start times in their records).
+- The coarse and medium runs on uri-cpu055 (8352Y) were the slowest Unity SST runs of their level:
+  0.094, 0.134 and 0.183. From 12 Oct 11:03 that node ran five Stage 1 jobs (these three and two
+  fine runs: 56 of its 64 cores) and a Stage 2 job on the other 8 until 13:08; jobs of other users
+  shared it from 14:14 (`sacct`). Whether the older CPU or the shared node slowed them is not
+  separated (inferred: either or both).
+- On the 6730P nodes, LM costs 1.1–1.5 times SST per step (the flows differ, so this is a bracket,
+  not a factor; `hpc_common.py` assumes 1.15).
+- The cost model's seconds per step (`S_PER_STEP` in `hpc_common.py`: 0.075 coarse and 0.135
+  medium at 8 ranks, 0.23 fine at 16; LM × 1.15) lie above every 6730P value in the table and
+  inside the 8352Y ranges, except fine, where they lie above all three runs (calculated).
+
+**Wall time per 150-c/U case** (measured, `run_time_s`; healthy single-session runs, number in
+brackets):
+
+| Level | maxCo | Ranks | SST | LM |
+|---|---|---|---|---|
+| coarse, Unity | 2.5 | 8 | 1.6 h (6730P); 1.9 and 2.9 h (8352Y) | – |
+| medium, Unity | 5 | 8 | 2.6–3.1 h (6730P, 2) | 2.7–4.0 h (6730P, 10); 5.3 and 6.2 h (8352Y) |
+| medium, Unity | 2.5 | 8 | 4.5 h (6730P); 6.4 and 7.3 h (8352Y) | none yet |
+| fine, Unity | 2.5 | 16 | 10.2–17.1 h (8352Y, 3) | – |
+| coarse, Mac | 5 | 4 | 2.1–3.2 h (3) | – |
+| medium, Mac | 5 | 4 | 9.4 h (1) | – |
+
+- **LM at maxCo 2.5** (the 13 Oct re-run set; estimated, RESULTS.md §2.2): roughly 4–11 h on 8
+  ranks, if halving maxCo multiplies the LM steps as it did for SST on the medium mesh (1.6–1.8
+  times).
+- **Totals** (calculated from the session tables, solver clock time × ranks): the solver sessions
+  of the 51 finished cases used 5,016 core-hours on Unity, 3,750 of them (75 %) in the 23 flagged
+  runs. The three fine runs that diverged at maxCo 5 have no record and are not included.
+- **The 8 Oct Mac estimate** (4.9–8.6 h for a medium SST case on 4 idle ranks) was low: the first
+  case took 9.4 h at 0.294 s/step, against the 0.17–0.21 s/step of the early smoke test. The
+  pressure iterations per step rose with the developing flow: 0.32 s/step at 08:01, before the
+  rotor and Stage 2 queues started next to it at 08:17 and 09:47 (RUN_JOURNAL 8 Oct; their
+  records).
+
+Ways to cut the cost if needed: fewer convective times (`nconv=100 navg=60` in a queue line saves a
+third).
 
 ## 7. Limitations
 

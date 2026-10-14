@@ -48,10 +48,12 @@ def _float(r, k):
 
 def variant_tag(r):
     """() for a production case (decay control, Tu 1 % at the rotor, the decay mode's default length
-    scale, maxCo 4, 2 outer correctors), else what differs, e.g. ('precompensate',) or ('Co2n2',):
-    a variant gets its own curve and static mean and never enters a production one (a second point at
-    the same lambda would also corrupt the parabola fit for the peak). An empty freestream_decay
-    column (results.json from before 8 Oct) had no decay control."""
+    scale, maxCo 4, 2 outer correctors, smooth blades), else what differs, e.g. ('precompensate',),
+    ('Co2n2',) or ('Ks100',): a variant gets its own curve and static mean and never enters a
+    production one (a second point at the same lambda would also corrupt the parabola fit for the
+    peak). An empty freestream_decay column (results.json from before 8 Oct) had no decay control;
+    an empty Ks_um column means smooth blades with nutUSpaldingWallFunction (Ks0 = the
+    nutkRoughWallFunction reference, rotor2d README "Rough blades")."""
     d = r.get("freestream_decay") or "precompensate"
     tag = () if d == "control" else (d,)
     tu = _float(r, "Tu_rotor_pct")
@@ -63,6 +65,9 @@ def variant_tag(r):
     co, no = _float(r, "maxCo"), _float(r, "nOuter")
     if (co is not None and abs(co - MAXCO_DEFAULT) > 1e-9) or (no is not None and abs(no - NOUTER_DEFAULT) > 1e-9):
         tag += (f"Co{co:g}n{no:g}",)
+    ks = _float(r, "Ks_um")
+    if ks is not None:
+        tag += (f"Ks{ks:g}",)
     return tag
 
 

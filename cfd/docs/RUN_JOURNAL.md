@@ -31,6 +31,48 @@ How to fill it fast:
 
 ---
 
+## 2026-10-14 (Unity: rough-blade rotor runs and alpha-0 restart test launched; records updated)
+
+**Rotor roughness option.**
+- Code: `rotor2d/run_case.py` keys `ks`, `cs`, `nutwf` (`rotor2d/README.md`). They put
+  nutkRoughWallFunction with Ks and Cs on the three blades.
+- Unchanged cases: smooth cases are byte-identical to the previous code. This was checked for
+  every line of queues 0, A, B, C and D_rerun, the sense variants included.
+- Smoke test (Mac): nutkRoughWallFunction was read with Ks 200 um on all 672 blade faces; Ks+
+  median 13.5.
+- Queue `rotor2d/queues/priorityE_rough.txt`: assembly A, sense CCW, 23 m/s, lambda 0.10 and
+  0.12, 50 revolutions with the last 45 averaged, 16 ranks.
+- Cases: rough wall function at Ks 0, 100 and 400 um, plus the smooth Spalding reference.
+  Ks 0 with the same wall function isolates the roughness effect.
+- Jobs 65666671-76 started 10:42 UTC. The two Spalding runs (65666807, 65666808) are pending.
+
+**Fixes to `submit.py`:**
+- sbatch's stderr note for 32 GB jobs leaked into the job id used for lane dependencies. Two
+  submissions failed with "Unable to open file INFO:". The id is now parsed from stdout only.
+- With lanes off, the loop's last test returned 1, so the script reported failure after
+  submitting. It now uses an if.
+
+**Alpha-0 flow states** (RESULTS.md, "Addendum (13 Oct): force histories"; computed):
+- The state separates within the first 40 c/U, and no run switches state.
+- The fine maxCo-2.5 run and LM at 10.2 m/s have force jumps that inflate Cd_std. Without the
+  jumps their Cd_std falls from about 1.0 to about 0.1.
+- 10 of the 28 healthy runs have such jumps.
+
+**Restart test.** `cfd/hpc/hysteresis_restart.py`; jobs 65666875 and 65666876.
+- The maxCo-5 high-drag field continued at maxCo 2.5, and the maxCo-2.5 low-drag field continued
+  at maxCo 5, each for 60 c/U.
+- If each keeps its state, the alpha-0 state depends on history (bistable), not only on the time
+  step.
+
+**Records updated.**
+- LEARNING_LOG: grid table, St against alpha, the health flag, the two alpha-0 states, and the
+  roughness sign and tripping.
+- RUN_JOURNAL 12 Oct: correction added.
+- section2d README section 6: measured costs.
+- RECORDS.md: p_inf offset noted.
+
+---
+
 ## 2026-10-13 (Unity: analysis of the 150 cases; re-run set submitted)
 
 **Download.** `pull_results.py` brought 140 Unity cases to the Mac with records, with no failures.
@@ -80,6 +122,10 @@ page is private until shared (https://claude.ai/artifact/UDDDEKWUKaGdQQ37N21qpy)
 2. **Time limit (12 cases).** All are kOmegaSSTLM medium section cases, stopped at 36-99 %.
    - Their time step is 0.14-2.2 us, against 2-3.4 us for SST (*measured*), because the
      transition model is far stiffer.
+   - *Correction, 13 Oct:* the small time steps (0.14-2.2 us) came from runs later flagged as
+     corrupted (13 Oct analysis, `cfd/analysis/2026-10-13/RESULTS.md` section 2.2), not from the
+     transition model's stiffness. All 12 cases are among the 23 flagged runs (each has 2-3 solver
+     sessions in its record), and healthy LM runs step as fast as healthy SST runs.
    - Resubmitted with limits from each case's own measured speed, using the new estimate in
      `submit.py`.
    - The slowest two, a180 at 10.2 m/s and a165, need about 1.5-2 days (*estimated*).

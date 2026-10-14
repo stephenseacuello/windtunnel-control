@@ -20,12 +20,23 @@ Free-stream turbulence (--decay, README "Free-stream turbulence"; as cfd/section
   precompensate  no decay control; inlet Tu raised so that the SST decay over the inlet-to-rotor
                  distance leaves the target (--lt default 10 mm). Case names get '_precomp'.
 
+Rough blades (--ks, --cs, --nutwf; README "Rough blades"; wall wf only; as cfd/stage2):
+  --ks 0 (default)  smooth blades, nut nutUSpaldingWallFunction: the case, its name and every file
+                    it writes are exactly those of the code before the option existed.
+  --ks <um> > 0     nut nutkRoughWallFunction on blade1..3 with Ks = ks, Cs = --cs (default 0.5);
+                    k, omega and the mesh unchanged. Name suffix _Ks<um> (and _Cs<Cs> if not 0.5).
+  --ks 0 --nutwf kRough   the same rough wall function with Ks 0: the smooth reference that differs
+                    from a rough case in Ks only (nutUSpalding and nutkRough differ at Ks 0). Suffix _Ks0.
+  A warning is printed when Ks exceeds the first-cell-centre height y_P = h0/2 (log law invalid);
+  case.json records nutWallFunction, KsBlade (m), Cs, h0, yP and KsOverYp.
+
 Options that change the physics or numerics appear in the case name, e.g.
   A_rot_U23.0_lam0.150_SST_medium            (defaults: wf walls, Tu 1 %, decay control, lt 1 mm,
-                                              auto sense, nrev 8)
+                                              auto sense, nrev 8, smooth blades)
   B_sta_U23.0_th030.0_SST_medium
   A_rot_U23.0_lam0.150_LM_medium_lowRe_Tu3.0_senseCW_beta79_Co1n3
   A_sta_U23.0_th000.0_SST_medium_precomp     (--decay precompensate)
+  A_rot_U23.0_lam0.120_SST_medium_Ks100_senseCCW_rev50a45   (--ks 100 --sense CCW --nrev 50 --navg 45)
 Cases go to cfd/rotor2d/runs/<name>/ (git-ignored). Re-running the same command
 skips a complete case (results.json complete) and otherwise resumes from the last
 write in processor*/ (startFrom latestTime): an interruption loses at most half a
@@ -91,6 +102,11 @@ DECAY_DEFAULT = "control"
 #    the section and the rotor; nu_t/nu = sqrt(3/2) Cmu^0.25 Tu U l / nu = 10.2 at 23 m/s, Tu 1 %.
 #  precompensate: 10 mm, the 7 Oct smoke-test value (kept for reproducibility).
 LT_DEFAULTS = {"control": 1.0e-3, "precompensate": 0.01}
+# Rough blades (README "Rough blades"; cfd/stage2/run_case.py, ../docs/ROUGHNESS_KS.md). Not in
+# DEFAULTS: normalise() drops ks, cs and nutwf for smooth blades, so a smooth case dict, its name,
+# case.json and every field file are unchanged by the option.
+CS_DEFAULT = 0.5                        # nutkRoughWallFunction roughness constant (0.5: uniform sand)
+NUTWF = ("spalding", "kRough")          # blade nut wall function: nutUSpaldingWallFunction / nutkRoughWallFunction
 DEFAULTS = dict(level="medium", model="SST", wall="wf", tu=1.0, decay=DECAY_DEFAULT, lt=None, nrev=8, navg=3,
                 nconv=40, navgconv=25, maxco=4.0, nouter=2, sense="auto", beta=None, np=int(os.environ.get("SLURM_NTASKS") or 4), yplus=None, walls=None,
                 side_bc="slip", wdist=1, name=None)
@@ -117,6 +133,10 @@ def case_name(c):
     s += f"_{c['model']}_{c['level']}"
     if c["wall"] != "wf":
         s += f"_{c['wall']}"
+    if c.get("nutwf") == "kRough":            # rough blades only (normalise drops the keys otherwise)
+        s += f"_Ks{_g(c['ks'])}"              # um; _Ks0 = the smooth reference with the rough wall function
+        if c["cs"] != CS_DEFAULT:
+            s += f"_Cs{_g(c['cs'])}"
     if c["tu"] != DEFAULTS["tu"]:
         s += f"_Tu{c['tu']:.1f}"
     if c["sense"] != "auto":
@@ -253,6 +273,12 @@ def case_parameters(c, mesh_info):
                  writeInterval=c["nconv"] * tc / 10, sampleInterval=tc / 50, amiInterval=tc,
                  yplusInterval=tc, deltaT0=1e-6, maxDeltaT=tc / 50, Omega=0.0, omegaZ=0.0)
     P["probeLocations"] = [(x * D, y * D, 0.5 * DZ) for x, y in PROBES_D]
+    if c.get("nutwf") == "kRough":
+        # Rough blades (README "Rough blades"), recorded as cfd/stage2 does: Ks in m; the rough log
+        # law needs the first cell centre y_P = h0/2 above the roughness (KsOverYp < 1).
+        h0 = float(mesh_info["h0_m"])
+        P.update(nutWallFunction="nutkRoughWallFunction", KsBlade=c["ks"] * 1e-6, Cs=c["cs"], h0=h0, yP=0.5 * h0,
+                 KsOverYp=c["ks"] * 1e-6 / (0.5 * h0))
     return P
 
 
@@ -331,9 +357,15 @@ def write_fields(case, c, P):
                       "[0 0 -1 0 0 0 0]")
     nw = ["type            nutUSpaldingWallFunction;", "value           uniform 0;"] if wf else \
         ["type            nutLowReWallFunction;", "value           uniform 0;"]
+    # Blades: nw (smooth, unchanged), or the rough wall function (README "Rough blades"; as
+    # cfd/stage2/case_template/0.orig/nut). Tunnel side walls (--walls, --side-bc noSlip) keep nw.
+    nb = nw
+    if c.get("nutwf") == "kRough":
+        nb = ["type            nutkRoughWallFunction;", f"Ks              uniform {P['KsBlade']:.10g};",
+              f"Cs              uniform {P['Cs']:.10g};", "value           uniform 0;"]
     calc = ["type            calculated;", f"value           uniform {nut:.10g};"]
     f["nut"] = ("volScalarField", "[0 2 -1 0 0 0 0]", f"uniform {nut:.10g}", {
-        "inlet": calc, "outlet": calc, **side(calc, calc, nw), blades: nw, **ami, **empty})
+        "inlet": calc, "outlet": calc, **side(calc, calc, nw), blades: nb, **ami, **empty})
     if c["model"] == "LM":
         zg = ["type            zeroGradient;"]
         f["gammaInt"] = turb("gammaInt", 1.0, zg, "[0 0 0 0 0 0 0]")
@@ -493,6 +525,36 @@ def normalise(c):
     out["lt"] = float(out["lt"])
     if out["lt"] <= 0:
         raise ValueError("lt must be positive (m)")
+    return _roughness(out)
+
+
+def _roughness(out):
+    """Blade-roughness keys of a normalised case dict, in place (README "Rough blades").
+    Smooth blades (ks 0 and nutwf not kRough; the default): ks, cs and nutwf are removed, so the
+    dict, the case name and every generated file are those of the code before this option.
+    Rough wall function (ks > 0, or nutwf=kRough with ks 0 for the smooth reference): ks (um),
+    cs and nutwf='kRough' are kept. Only the wall-function mesh (wall wf) can be rough."""
+    ks, cs, nutwf = out.pop("ks", None), out.pop("cs", None), out.pop("nutwf", None)
+    ks = 0.0 if ks is None else float(ks)
+    cs = CS_DEFAULT if cs is None else float(cs)
+    if not ks >= 0:
+        raise ValueError(f"ks must be >= 0 (um), not {ks!r}")
+    if nutwf is None:
+        nutwf = "kRough" if ks > 0 else "spalding"
+    if nutwf not in NUTWF:
+        raise ValueError(f"nutwf must be one of {', '.join(NUTWF)}, not {nutwf!r}")
+    if nutwf == "spalding":
+        if ks > 0:
+            raise ValueError("ks > 0 needs the rough wall function (nutwf=kRough, the default when ks > 0)")
+        if cs != CS_DEFAULT:
+            raise ValueError("cs applies only to rough blades (ks > 0 or nutwf=kRough)")
+        return out
+    if out["wall"] != "wf":
+        raise ValueError(f"rough blades (ks > 0 or nutwf=kRough) need the wall-function mesh (wall=wf), "
+                         f"not wall={out['wall']}")
+    if not cs > 0:
+        raise ValueError(f"cs must be positive, not {cs!r}")
+    out.update(ks=ks, cs=cs, nutwf="kRough")
     return out
 
 
@@ -532,14 +594,16 @@ def run(c, setup_only=False, force=False, wall_limit=None, keep_processors=False
             np_ = n_old
         # Never resume a case set up with other physics under the same name (e.g. a free stream
         # without decay control, set up before 8 Oct): compare with what this command would write.
-        # kAmbient/omegaAmbient are absent in cases set up before decay control (= no decay control).
+        # kAmbient/omegaAmbient are absent in cases set up before decay control (= no decay control);
+        # KsBlade, Cs and nutWallFunction are absent for smooth blades (README "Rough blades").
         # Omega and the mesh key (hypothesis, level, wall, U, theta, sense, beta, y+, walls) matter
         # with --name, where the folder name no longer carries them.
         if (case / "mesh_info.json").exists():
             new = case_parameters(c, json.loads((case / "mesh_info.json").read_text()))
-            diff = [k for k in ("Uinf", "kInlet", "omegaInlet", "kAmbient", "omegaAmbient", "endTime", "Omega")
-                    if abs(float(old.get(k, 0.0)) - float(new[k])) > 1e-9 * max(1.0, abs(float(new[k])))]
-            diff += [k for k in ("turbulenceModel", "mode") if old.get(k) != new[k]]
+            diff = [k for k in ("Uinf", "kInlet", "omegaInlet", "kAmbient", "omegaAmbient", "endTime", "Omega",
+                                "KsBlade", "Cs")
+                    if abs(float(old.get(k, 0.0)) - float(new.get(k, 0.0))) > 1e-9 * max(1.0, abs(float(new.get(k, 0.0))))]
+            diff += [k for k in ("turbulenceModel", "mode", "nutWallFunction") if old.get(k) != new.get(k)]
             if old.get("mesh") and old["mesh"] != mesh_key(c):
                 diff.append(f"mesh ({old['mesh']}, command: {mesh_key(c)})")
             if diff:
@@ -552,6 +616,9 @@ def run(c, setup_only=False, force=False, wall_limit=None, keep_processors=False
         md = ensure_mesh(c, quiet)
         P = case_parameters(c, json.loads((md / "mesh_info.json").read_text()))
         say(f"[setup] {name}")
+        if P.get("KsOverYp", 0.0) > 1:
+            say(f"[warn] {name}: Ks {c['ks']:g} um exceeds the first-cell-centre height {P['yP'] * 1e6:.0f} um "
+                f"(nutkRoughWallFunction outside its validity)")
         create_case(case, c, md, P)
         if setup_only:
             return "setup"
@@ -635,6 +702,13 @@ def build_parser():
     ap.add_argument("--walls", help="tunnel side walls 'y_lo,y_hi' in m (model frame); default open domain")
     ap.add_argument("--side-bc", choices=["slip", "noSlip"], default=DEFAULTS["side_bc"], help="tunnel-wall BC with --walls")
     ap.add_argument("--wdist", type=int, default=DEFAULTS["wdist"], help="wall-distance update interval (steps)")
+    ap.add_argument("--ks", type=float, default=0.0,
+                    help="sand-grain roughness height Ks of the blades, um (wall wf only). 0 (default): smooth, "
+                         "nutUSpaldingWallFunction; > 0: nutkRoughWallFunction, name suffix _Ks<um>")
+    ap.add_argument("--cs", type=float, default=CS_DEFAULT, help="roughness constant Cs (rough blades; default 0.5)")
+    ap.add_argument("--nutwf", choices=NUTWF, default=None,
+                    help="blade nut wall function: spalding (default with --ks 0) or kRough (default with --ks > 0; "
+                         "with --ks 0 it is the smooth reference of the rough cases, suffix _Ks0)")
     ap.add_argument("--setup-only", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--wall-limit", type=float, help="kill the solver after this many seconds (smoke tests)")
@@ -648,7 +722,7 @@ def args_to_case(a):
     return dict(hyp=a.hyp, U=a.U, lam=a.lam, theta=a.theta, model=a.model, level=a.level, wall=a.wall, np=a.np,
                 nrev=a.nrev, navg=a.navg, nconv=a.nconv, navgconv=a.navgconv, maxco=a.maxco, nouter=a.nouter,
                 tu=a.tu, decay=a.decay, lt=a.lt, sense=a.sense, beta=a.beta, yplus=a.yplus, walls=a.walls,
-                side_bc=a.side_bc, wdist=a.wdist, name=a.name)
+                side_bc=a.side_bc, wdist=a.wdist, name=a.name, ks=a.ks, cs=a.cs, nutwf=a.nutwf)
 
 
 def main():

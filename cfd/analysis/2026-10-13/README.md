@@ -5,7 +5,9 @@ This folder analyses the result tables of all 150 finished cases (13 Oct 2026). 
 - [RESULTS.md](RESULTS.md): the full, teaching-oriented account.
 
 The scripts read only the tables in `data/` and a few read-only files elsewhere in the repo (below).
-No case folder under `cfd/*/runs/` or `cfd/*/results/` is read or written. The folder is 2.5 MB.
+The exception is the addendum of RESULTS.md (force histories): `section_histories.py` and
+`section_histories_verify.py` read the downloaded section case folders `cfd/section2d/runs/<case>/`,
+read only. No case folder is written. The folder is 3.1 MB.
 
 ## Contents
 
@@ -16,7 +18,7 @@ No case folder under `cfd/*/runs/` or `cfd/*/results/` is read or written. The f
 | `data/` | Input tables (do not edit) |
 | `src/` | Analysis, figure and verification scripts |
 | `out/` | Tables and JSON written by the scripts |
-| `fig/` | 18 figures, PNG, 200 dpi |
+| `fig/` | 19 figures, PNG, 200 dpi |
 
 ### data/
 
@@ -51,6 +53,8 @@ No case folder under `cfd/*/runs/` or `cfd/*/results/` is read or written. The f
 | `roughness_analysis.py` | `data/stage2_polars.csv`, `data/section_polars.csv`, report build files (below) | `out/roughness_*.csv` (14), `out/roughness_numbers.json`, `fig/roughness_*.png` (7) |
 | `roughness_verify.py` | the same inputs | prints only |
 | `team_summary_check.py` | the four tables, report build files (below) | prints only: every number in TEAM_SUMMARY.md, quoted against recomputed, `OK` or `CHECK` |
+| `section_histories.py` | the section case folders (force and y+ histories; the solver logs of eight runs), `data/section_polars.csv`, `out/section_case_quality.csv` | `fig/section_alpha0_histories.png`, `out/section_histories*.{csv,json}` (3), `out/section_force_jumps.csv` |
+| `section_histories_verify.py` | the same case folders (two solver logs) and tables; `--repeat DIR` for the Unity repeat of the medium maxCo-5 α-0 run | prints only: every number of the RESULTS.md addendum, `OK` or `CHECK` |
 
 The `*_verify.py` scripts are independent recomputations. They share no code with the analysis
 scripts, and they were used to check every number quoted in RESULTS.md and TEAM_SUMMARY.md.
@@ -90,6 +94,10 @@ TEAM_SUMMARY.md number; it ends with the count of `CHECK` lines (0 on 13 Oct).
 | `roughness_alpha0_states.csv` | Every α-0 case at 23 m/s with its flow state |
 | `roughness_measured.csv`, `roughness_measured_by_speed.csv` | Measured peak-power changes (from the report build) |
 | `roughness_numbers.json` | Other Stage 2 numbers and quality checks |
+| `section_histories_runs.csv` | The eight runs of the history figure: states, entry and settling times, window statistics with and without jump intervals, y+ |
+| `section_histories_blocks.csv` | The same runs in 10-c/U blocks: forces, jumps, y+, time step, first pressure residual |
+| `section_force_jumps.csv` | All 51 section runs: largest Cd change between samples in the window, jump intervals at limits 0.1, 0.2 and 0.5, window mean without them |
+| `section_histories.json` | Every number of the RESULTS.md addendum |
 
 ### fig/
 
@@ -100,6 +108,7 @@ TEAM_SUMMARY.md number; it ends with the count of `CHECK` lines (0 on 13 Oct).
 | `section_grid.png` | Grid study (maxCo 2.5) and time-step check (maxCo 5), Cd and St | §2.4 |
 | `section_polar.png` | Cd, Cl, Cm against α (LM polar, 23 m/s), SST points, literature | §2.6 |
 | `section_strouhal.png` | St against α, with frequencies at 23 m/s | §2.7 |
+| `section_alpha0_histories.png` | Cd(t) and Cl(t) of eight section runs (α 0 pairs, fine, LM 10.2 m/s, α 180 pair), averaging window and jumps | Addendum |
 | `roughness_cd_vs_ks.png` | Cd against Ks at α 0, 90 and 180 (rough wall functions) | §3.2 |
 | `roughness_cl_vs_ks.png` | Mean Cl against Ks, same layout | §3.2 |
 | `roughness_drag_difference.png` | D against Ks and t, and the measured power change | §3.3 |
@@ -133,12 +142,23 @@ nice -n 10 python3 cfd/analysis/2026-10-13/src/rotor_verify.py
 nice -n 10 python3 cfd/analysis/2026-10-13/src/roughness_analysis.py
 nice -n 10 python3 cfd/analysis/2026-10-13/src/roughness_verify.py
 nice -n 10 python3 cfd/analysis/2026-10-13/src/team_summary_check.py
+nice -n 10 python3 cfd/analysis/2026-10-13/src/section_histories.py          # addendum, about 25 s
+nice -n 10 python3 cfd/analysis/2026-10-13/src/section_histories_verify.py   # add --repeat DIR, see the script
 ```
 
 - **Requirements.** Python 3 with numpy, pandas and matplotlib. They were checked on 13 Oct with
   `/opt/homebrew/bin/python3`: Python 3.14.8, numpy 2.5.4, pandas 3.0.1, matplotlib 3.11.2.
-- **Run time.** Each script takes under 2 s, and all eight together under 8 s. Paths resolve from
-  each script's own location, so the scripts can be started from any directory.
+- **Run time.** Each of the first eight scripts takes under 2 s, and all eight together under 8 s.
+  `section_histories.py` takes about 25 s (it parses the eight solver logs, 2.3 GB), and
+  `section_histories_verify.py` 3–60 s, depending on whether the logs are in the file cache. Paths
+  resolve from each script's own location, so the scripts can be started from any directory.
+- **Addendum, 14 Oct.** `section_histories.py` was rerun after a fix: the window's jump intervals
+  are counted over [50, 150) c/U with the bounds rounded (the raw bound 50.0000000187 had dropped
+  the interval [50, 51)). `section_histories_verify.py` ends with 0 `CHECK` lines with `--repeat`
+  (a copy of the Unity repeat's `case.json`, `results.json` and `coefficient.dat`) and without it.
+  In the review the same day, `fine_jumps_state` (what the fine run's jump-free samples cover, and
+  its lift during the jumps) was added to `out/section_histories.json` and to the checks; the
+  figure and the three CSVs came out byte-identical, and two reruns gave identical files.
 - **Reproducibility.** On 13 Oct all seven analysis and verify scripts were rerun. Every file in
   `out/` and `fig/` came out byte-identical to the version before the rerun (checked with `shasum`).
   In the review the same day, three figure labels were aligned with the text: "light-load λ" in
@@ -160,5 +180,5 @@ The download into `cfd/*/runs/` and `cfd/*/results/` started on 13 Oct.
   - rerun the eight scripts;
   - compare `out/` with the present version. Any changed number must be re-checked in RESULTS.md and
     TEAM_SUMMARY.md; `team_summary_check.py` flags each TEAM_SUMMARY.md number that moved.
-- **New evidence.** The time histories and fields that the download brings are not used here. The
-  checks they enable are listed in RESULTS.md §8.4, item 6.
+- **New evidence.** The force histories of the section runs are used in the RESULTS.md addendum
+  (`section_histories.py`). The fields and the Stage 2 and rotor histories are not used here.

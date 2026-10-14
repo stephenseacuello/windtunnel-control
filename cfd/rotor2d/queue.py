@@ -12,7 +12,8 @@ Queue files (paths relative to cfd/rotor2d/ or absolute): one case per line,
     sta  HYP  U_ms  theta   MODEL  LEVEL  [key=value ...]      static (3a)
 HYP A, B or measured; MODEL SST or LM; LEVEL coarse, medium or fine. Keys (run_case.py
 options): wall, np, nrev, navg, nconv, navgconv, maxco, nouter, tu, decay
-(control|precompensate), lt, sense, beta, yplus, walls (y_lo,y_hi), side_bc, wdist.
+(control|precompensate), lt, sense, beta, yplus, walls (y_lo,y_hi), side_bc, wdist,
+ks (um; rough blades, wall wf only), cs, nutwf (spalding|kRough; README "Rough blades").
 '#' starts a comment.
 
 Behaviour
@@ -23,7 +24,9 @@ Behaviour
   * after every completed case results/rotor_cp.csv (rotating) and
     results/rotor_static.csv (static) are rebuilt from all runs/*/results.json, one
     row per case, so rows never duplicate (folders starting with '_', i.e. _mesh and
-    _test_* / _smoke_* tests, are left out);
+    _test_* / _smoke_* tests, are left out); the roughness columns (ROUGH, last) are
+    empty for smooth blades (nutUSpaldingWallFunction) and hold Ks_um (0 for the
+    nutkRoughWallFunction reference), Cs, yP_m, Ks_over_yP and the estimated Ks+ otherwise;
   * then, if cfd/post/after_case.sh exists and is executable, it runs as
     'after_case.sh <case dir>' (records, plots, field images; output into this log,
     30 min limit, its process group killed at the limit); a missing, failing or
@@ -67,13 +70,16 @@ COMMON = ["name", "hypothesis", "U_ms", "model", "level", "wall", "n_cells", "h0
           "Tu_rotor_pct", "freestream_decay", "lt_m", "Tu_upstream_probe_pct", "maxCo", "nOuter", "nProcs"]
 TAIL = ["Cx_mean", "Cy_mean", "yplus_mean", "yplus_max", "ami_weight_min", "ami_weight_max", "dt_mean_s",
         "Co_max_mean", "n_steps", "wall_time_s", "s_per_step", "omega_bounded_steps"]
+# Rough blades (13 Oct 2026; ../post/rotor_summary.py): appended after the earlier columns, which
+# keep their order; empty for smooth blades.
+ROUGH = ["Ks_um", "Cs", "yP_m", "Ks_over_yP", "ksplus_blade_mean", "ksplus_blade_max"]
 COLS_CP = COMMON + ["lam", "Omega", "rpm", "n_rev_done", "n_avg_rev", "avg_window_complete", "CP_mean", "CQ_mean",
-                    "CQ_std", "CQ_min", "CQ_max", "CQ_pressure_mean", "CQ_drift_last_two_rev"] + TAIL
+                    "CQ_std", "CQ_min", "CQ_max", "CQ_pressure_mean", "CQ_drift_last_two_rev"] + TAIL + ROUGH
 COLS_ST = COMMON + ["theta_deg", "t_end_conv", "avg_window_conv", "avg_window_complete", "CQ_mean", "CQ_std",
-                    "CQ_sem", "CQ_pressure_mean", "Cx_std", "Cy_std", "St_D"] + TAIL
+                    "CQ_sem", "CQ_pressure_mean", "Cx_std", "Cy_std", "St_D"] + TAIL + ROUGH
 KEYS = {"wall": str, "np": int, "nrev": int, "navg": int, "nconv": int, "navgconv": int, "maxco": float,
         "nouter": int, "tu": float, "decay": str, "lt": float, "sense": str, "beta": float, "yplus": float,
-        "walls": str, "side_bc": str, "wdist": int}
+        "walls": str, "side_bc": str, "wdist": int, "ks": float, "cs": float, "nutwf": str}
 # post-case hook (records, plots): run after each completed case if present and executable
 AFTER_CASE = HERE.parent / "post" / "after_case.sh"
 HOOK_TIMEOUT_S = 1800
