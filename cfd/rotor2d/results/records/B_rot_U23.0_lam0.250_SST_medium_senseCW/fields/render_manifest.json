@@ -1,0 +1,37 @@
+{
+ "case": "/Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/B_rot_U23.0_lam0.250_SST_medium_senseCW",
+ "kind": "rotor",
+ "images": [
+  "cp_near.png",
+  "lic_near.png",
+  "mesh_ami.png",
+  "mesh_cornerA_0p1mm.png",
+  "mesh_cornerA_0p8mm.png",
+  "mesh_cornerA_6mm.png",
+  "mesh_domain.png",
+  "mesh_near.png",
+  "nut_ratio_near.png",
+  "nut_ratio_wake.png",
+  "streamlines_near.png",
+  "surface_inst.png",
+  "velocity_near.png",
+  "velocity_wake.png",
+  "vorticity_near.png",
+  "vorticity_wake.png"
+ ],
+ "notes": [
+  "no animation: 1 saved field time(s) (purgeWrite keeps the last 3; finished cases keep only the last)"
+ ],
+ "read_as": "reconstructed",
+ "time": 0.88816922048,
+ "times_available": [
+  0.0,
+  0.88816922048
+ ],
+ "yplus_inst": {
+  "min": 1.61306883035395,
+  "mean": 26.942880550853975,
+  "max": 68.03902325327996,
+  "p95": 55.452845322250006
+ }
+}

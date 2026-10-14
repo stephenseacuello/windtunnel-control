@@ -1,0 +1,37 @@
+{
+ "case": "/Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/A_rot_U10.2_lam0.080_SST_medium_rev4a2",
+ "kind": "rotor",
+ "images": [
+  "cp_near.png",
+  "lic_near.png",
+  "mesh_ami.png",
+  "mesh_cornerA_0p1mm.png",
+  "mesh_cornerA_0p8mm.png",
+  "mesh_cornerA_6mm.png",
+  "mesh_domain.png",
+  "mesh_near.png",
+  "nut_ratio_near.png",
+  "nut_ratio_wake.png",
+  "streamlines_near.png",
+  "surface_inst.png",
+  "velocity_near.png",
+  "velocity_wake.png",
+  "vorticity_near.png",
+  "vorticity_wake.png"
+ ],
+ "notes": [
+  "no animation: 1 saved field time(s) (purgeWrite keeps the last 3; finished cases keep only the last)"
+ ],
+ "read_as": "reconstructed",
+ "time": 3.1292726824,
+ "times_available": [
+  0.0,
+  3.1292726824
+ ],
+ "yplus_inst": {
+  "min": 1.4407735560319124,
+  "mean": 22.277747107261128,
+  "max": 62.651522783114174,
+  "p95": 48.45445757108328
+ }
+}

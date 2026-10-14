@@ -1,0 +1,109 @@
+{
+ "caseName": "a000.0_U23.0_LM_medium_Tu0.5",
+ "alphaDeg": 0.0,
+ "Uinf": 23.0,
+ "Ux": 23.0,
+ "Uy": 0.0,
+ "dragDir": [
+  1.0,
+  0.0,
+  0.0
+ ],
+ "liftDir": [
+  -0.0,
+  1.0,
+  0.0
+ ],
+ "turbulenceModel": "kOmegaSSTLM",
+ "nOuterCorrectors": 2,
+ "nProcs": 8,
+ "rhoInf": 1.204,
+ "nu": 1.516e-05,
+ "cRef": 0.048,
+ "dz": 0.001,
+ "Aref": 4.8e-05,
+ "CofR": [
+  0.0,
+  0.0,
+  0.0
+ ],
+ "TuBodyPercent": 0.5,
+ "TuInletPercent": 0.5,
+ "kInlet": 0.0198375,
+ "omegaInlet": 257.14781741247583,
+ "nutInlet": 7.714434522374275e-05,
+ "ReThetatInlet": 879.6744000000001,
+ "freestreamDecay": "control",
+ "freestreamDecayControl": "yes",
+ "kAmbient": 0.0198375,
+ "omegaAmbient": 257.14781741247583,
+ "turbulenceLengthScale": 0.001,
+ "viscosityRatioFarField": 5.088677125576698,
+ "viscosityRatioBody": 5.088677125576698,
+ "convTime": 0.0020869565217391307,
+ "yPlusInterval": 0.0020869565217391307,
+ "endTime": 0.3130434782608696,
+ "averageStart": 0.10434782608695653,
+ "writeInterval": 0.020869565217391306,
+ "sampleInterval": 4.173913043478261e-05,
+ "deltaT0": 2.0869565217391308e-08,
+ "maxDeltaT": 0.00010434782608695654,
+ "maxCo": 5.0,
+ "nConv": 150.0,
+ "nAvg": 100.0,
+ "level": "medium",
+ "model": "LM",
+ "ReChord": 72823.21899736149,
+ "probeLocations": [
+  [
+   0.048,
+   0.0,
+   0.0005
+  ],
+  [
+   0.048,
+   0.024,
+   0.0005
+  ],
+  [
+   0.048,
+   -0.024,
+   0.0005
+  ],
+  [
+   0.096,
+   0.0,
+   0.0005
+  ],
+  [
+   0.096,
+   0.024,
+   0.0005
+  ],
+  [
+   0.096,
+   -0.024,
+   0.0005
+  ],
+  [
+   0.192,
+   0.0,
+   0.0005
+  ],
+  [
+   0.192,
+   0.024,
+   0.0005
+  ],
+  [
+   0.192,
+   -0.024,
+   0.0005
+  ],
+  [
+   -0.096,
+   0.0,
+   0.0005
+  ]
+ ]
+}

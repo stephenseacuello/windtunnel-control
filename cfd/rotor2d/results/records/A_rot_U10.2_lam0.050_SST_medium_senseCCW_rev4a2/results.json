@@ -1,0 +1,112 @@
+{
+ "name": "A_rot_U10.2_lam0.050_SST_medium_senseCCW_rev4a2",
+ "mode": "rotating",
+ "hypothesis": "A",
+ "U_ms": 10.2,
+ "model": "kOmegaSST",
+ "level": "medium",
+ "wall": "wf",
+ "n_cells": 60648,
+ "h0_m": 0.0015,
+ "sense": "CCW",
+ "R_m": 0.1016,
+ "r_max_m": 0.10641986662039699,
+ "dz_m": 0.01,
+ "Tu_rotor_pct": 1.0,
+ "Tu_inlet_pct": 1.0,
+ "freestream_decay": "control",
+ "lt_m": 0.001,
+ "maxCo": 4.0,
+ "nOuter": 2,
+ "nProcs": 8,
+ "wall_time_s": 5826.9,
+ "n_steps": 70464,
+ "t_first": 1.19999872782e-06,
+ "t_last": 5.006836292,
+ "dt_mean_s": 7.105523801805461e-05,
+ "dt_last_half_mean_s": 7.141662554390896e-05,
+ "dt_min_s": 1.1999987e-06,
+ "dt_max_s": 0.00012094192,
+ "Co_max_mean": 4.000237771742402,
+ "Co_max_max": 4.4378044,
+ "clock_s": 5822.0,
+ "s_per_step_recent": 0.08338655879639487,
+ "s_per_step": 0.08262492371883116,
+ "omega_bounded_steps": 0,
+ "ami_log_sum_min": 1.0,
+ "ami_log_sum_max": 1.0000182,
+ "ami_log_n": 140930,
+ "ami": {
+  "AMI1": {
+   "src_min": 1.0,
+   "src_max": 1.00001809,
+   "tgt_min": 1.0,
+   "tgt_max": 1.00001809,
+   "src_avg": 1.000012023888889,
+   "tgt_avg": 1.000012023888889,
+   "n": 288
+  }
+ },
+ "ami_weight_min": 1.0,
+ "ami_weight_max": 1.00001809,
+ "t_end": 5.006836292,
+ "n_samples": 2880,
+ "lam": 0.05,
+ "Omega": 5.019685039370079,
+ "rpm": 47.934461206811,
+ "Trev_s": 1.251709072959698,
+ "n_rev_done": 4.00000000012879,
+ "n_rev_target": 4,
+ "n_avg_rev": 2.0,
+ "avg_window_complete": true,
+ "CQ_mean": 0.03787006992381197,
+ "CP_mean": 0.0018935034961905985,
+ "CQ_std": 0.1193535058879217,
+ "CQ_min": -0.2180643626939936,
+ "CQ_max": 0.33227709354732454,
+ "CQ_pressure_mean": 0.037264068878694,
+ "Cx_mean": 0.7018507850620374,
+ "Cy_mean": -0.03754816778422467,
+ "CQ_per_rev": [
+  0.03938112670880291,
+  0.044700077040111676,
+  0.04175467969134277,
+  0.034234194779735376
+ ],
+ "CP_per_rev": [
+  0.0019690563354401456,
+  0.002235003852005584,
+  0.002087733984567139,
+  0.001711709738986769
+ ],
+ "CQ_drift_last_two_rev": -0.007520484911607395,
+ "CQ_blade_mean": [
+  0.012799358048816737,
+  0.01244730533811304,
+  0.012623406553635651
+ ],
+ "yplus": {
+  "blade1": {
+   "min": 1.1178329,
+   "max": 70.4107663,
+   "mean_of_avg": 20.72339095,
+   "n": 16
+  },
+  "blade2": {
+   "min": 1.60257855,
+   "max": 65.7569108,
+   "mean_of_avg": 20.4649106625,
+   "n": 16
+  },
+  "blade3": {
+   "min": 0.621228016,
+   "max": 69.4165715,
+   "mean_of_avg": 22.47020946875,
+   "n": 16
+  }
+ },
+ "Tu_upstream_probe_pct": 1.0001105080347379,
+ "yplus_mean": 21.21950369375,
+ "yplus_max": 70.4107663,
+ "complete": true
+}

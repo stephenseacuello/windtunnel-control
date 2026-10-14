@@ -1,0 +1,125 @@
+{
+ "caseName": "A_rot_U10.2_lam0.080_SST_medium_senseCCW_rev4a2",
+ "mode": "rotating",
+ "hypothesis": "A",
+ "Uinf": 10.2,
+ "rhoInf": 1.204,
+ "nu": 1.516e-05,
+ "dz": 0.01,
+ "R": 0.1016,
+ "D": 0.21283973324079397,
+ "rMax": 0.10641986662039699,
+ "sense": 1,
+ "turbulenceModel": "kOmegaSST",
+ "wall": "wf",
+ "nOuterCorrectors": 2,
+ "maxCo": 4.0,
+ "nProcs": 8,
+ "wallDistInterval": 1,
+ "TuRotorPercent": 1.0,
+ "TuInletPercent": 1.0,
+ "kInlet": 0.015605999999999998,
+ "omegaInlet": 228.07893370497854,
+ "nutInlet": 6.842368011149356e-05,
+ "ReThetatInlet": 584.3016,
+ "freestreamDecay": "control",
+ "freestreamDecayControl": "yes",
+ "kAmbient": 0.015605999999999998,
+ "omegaAmbient": 228.07893370497854,
+ "decayDistance": 2.371580133379603,
+ "turbulenceLengthScale": 0.001,
+ "viscosityRatioInlet": 4.513435363554985,
+ "viscosityRatioRotor": 4.513435363554985,
+ "ReChordTip": 30014.64379947229,
+ "qRef": 62.632079999999995,
+ "Aref": 0.2032,
+ "lam": 0.08,
+ "Omega": 8.031496062992126,
+ "omegaZ": 8.031496062992126,
+ "Trev": 0.7823181705998112,
+ "rpm": 76.6951379308976,
+ "nRev": 4,
+ "nAvgRev": 2,
+ "endTime": 3.129272682399245,
+ "averageStart": 1.5646363411996225,
+ "writeInterval": 0.3911590852999056,
+ "sampleInterval": 0.00108655301472196,
+ "amiInterval": 0.010865530147219601,
+ "yplusInterval": 0.0977897713249764,
+ "deltaT0": 1e-06,
+ "maxDeltaT": 0.00108655301472196,
+ "thetaDeg": 0.0,
+ "probeLocations": [
+  [
+   0.21283973324079397,
+   0.0,
+   0.005
+  ],
+  [
+   0.21283973324079397,
+   0.10641986662039699,
+   0.005
+  ],
+  [
+   0.21283973324079397,
+   -0.10641986662039699,
+   0.005
+  ],
+  [
+   0.42567946648158794,
+   0.0,
+   0.005
+  ],
+  [
+   0.42567946648158794,
+   0.10641986662039699,
+   0.005
+  ],
+  [
+   0.42567946648158794,
+   -0.10641986662039699,
+   0.005
+  ],
+  [
+   0.8513589329631759,
+   0.0,
+   0.005
+  ],
+  [
+   -0.42567946648158794,
+   0.0,
+   0.005
+  ],
+  [
+   0.0,
+   0.0,
+   0.005
+  ]
+ ],
+ "inputs": {
+  "level": "medium",
+  "model": "SST",
+  "wall": "wf",
+  "tu": 1.0,
+  "decay": "control",
+  "lt": 0.001,
+  "nrev": 4,
+  "navg": 2,
+  "nconv": 40,
+  "navgconv": 25,
+  "maxco": 4.0,
+  "nouter": 2,
+  "sense": "CCW",
+  "beta": null,
+  "np": 8,
+  "yplus": null,
+  "walls": null,
+  "side_bc": "slip",
+  "wdist": 1,
+  "name": null,
+  "hyp": "A",
+  "U": 10.2,
+  "lam": 0.08
+ },
+ "mesh": "A_medium_wf_U10.2_th000.0_senseCCW"
+}

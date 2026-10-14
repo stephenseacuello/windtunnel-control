@@ -1,0 +1,125 @@
+{
+ "caseName": "a000.0_U23.0_SST_tex0.200_s1_Tu1.0_N80A50",
+ "alphaDeg": 0.0,
+ "Uinf": 23.0,
+ "Ux": 23.0,
+ "Uy": 0.0,
+ "dragDir": [
+  1.0,
+  0.0,
+  0.0
+ ],
+ "liftDir": [
+  -0.0,
+  1.0,
+  0.0
+ ],
+ "turbulenceModel": "kOmegaSST",
+ "nOuterCorrectors": 2,
+ "nProcs": 16,
+ "rhoInf": 1.204,
+ "nu": 1.516e-05,
+ "cRef": 0.048,
+ "dz": 0.001,
+ "Aref": 4.8e-05,
+ "CofR": [
+  0.0,
+  0.0,
+  0.0
+ ],
+ "TuBodyPercent": 1.0,
+ "TuInletPercent": 1.0,
+ "kInlet": 0.07935,
+ "omegaInlet": 514.2956348249517,
+ "nutInlet": 0.0001542886904474855,
+ "ReThetatInlet": 584.3016,
+ "freestreamDecay": "control",
+ "freestreamDecayControl": "yes",
+ "kAmbient": 0.07935,
+ "omegaAmbient": 514.2956348249517,
+ "turbulenceLengthScale": 0.001,
+ "viscosityRatioFarField": 10.177354251153396,
+ "viscosityRatioBody": 10.177354251153396,
+ "convTime": 0.0020869565217391307,
+ "yPlusInterval": 0.0020869565217391307,
+ "endTime": 0.16695652173913045,
+ "averageStart": 0.06260869565217392,
+ "writeInterval": 0.011130434782608696,
+ "sampleInterval": 4.173913043478261e-05,
+ "deltaT0": 2.0869565217391308e-08,
+ "maxDeltaT": 0.00010434782608695654,
+ "maxCo": 5.0,
+ "nConv": 80.0,
+ "nAvg": 50.0,
+ "level": "tex",
+ "model": "SST",
+ "ReChord": 72823.21899736149,
+ "stage": 2,
+ "wall": "tex",
+ "KsBlade": 0.0,
+ "KsEnds": 0.0,
+ "Cs": 0.5,
+ "texT": 0.0002,
+ "texSeed": 1,
+ "texNseg": 5,
+ "nonOrthLimit": 0.33,
+ "nNonOrthCorr": 1,
+ "probeLocations": [
+  [
+   0.048,
+   0.0,
+   0.0005
+  ],
+  [
+   0.048,
+   0.024,
+   0.0005
+  ],
+  [
+   0.048,
+   -0.024,
+   0.0005
+  ],
+  [
+   0.096,
+   0.0,
+   0.0005
+  ],
+  [
+   0.096,
+   0.024,
+   0.0005
+  ],
+  [
+   0.096,
+   -0.024,
+   0.0005
+  ],
+  [
+   0.192,
+   0.0,
+   0.0005
+  ],
+  [
+   0.192,
+   0.024,
+   0.0005
+  ],
+  [
+   0.192,
+   -0.024,
+   0.0005
+  ],
+  [
+   -0.096,
+   0.0,
+   0.0005
+  ]
+ ],
+ "h0": 4.5e-06,
+ "yP": 2.25e-06,
+ "nCells": 215550,
+ "meshNonOrthMax": 63.211989,
+ "meshDir": "runs/_mesh/tex0.200_s1_n5_a000.0",
+ "meshCheck": "relaxed: max skewness 4.48 (20 faces > 4), max non-orthogonality 63.2 deg"
+}

@@ -1,0 +1,123 @@
+{
+ "n_points": 426104,
+ "n_cells": 217025,
+ "n_faces": 864127,
+ "n_internal_faces": 426506,
+ "n_wall_faces": 3471,
+ "n_blade_faces": 3425,
+ "n_bladeEnds_faces": 46,
+ "n_farfield_faces": 100,
+ "level": "tex",
+ "alpha_deg_wake": 180.0,
+ "params": {
+  "h0": 4.5e-06,
+  "r_bl": 1.15,
+  "dn_max": 6e-05,
+  "ring_min": 0.0006,
+  "ds_end_max": 0.00012,
+  "g_t": 1.12,
+  "s_near": 0.0003,
+  "d_near": 0.006,
+  "s_wake": 0.0006,
+  "s_wake2": 0.0012,
+  "g_out": 0.1,
+  "s_far": 0.08
+ },
+ "lambda_fan": 2.0,
+ "r_farfield_m": 1.296,
+ "c_ref_m": 0.048,
+ "dz_m": 0.001,
+ "wake_chords": {
+  "x_up": -0.6,
+  "x1": 4.0,
+  "x2": 8.0,
+  "w1": 0.75,
+  "w2": 1.5
+ },
+ "h0_m": 4.5e-06,
+ "ring": {
+  "n_layers": 23,
+  "n_wall_nodes": 3471,
+  "thickness_m": 0.0006369531493812027,
+  "first_cell_m": 4.5e-06,
+  "last_layer_m": 6.000000000000005e-05,
+  "edge_spacing_m": {
+   "min": 3.7432798457265546e-05,
+   "median": 4.03990414166241e-05,
+   "max": 0.00018356400464242215
+  },
+  "quad_angle_deg": [
+   46.6777744273938,
+   135.05848162769058
+  ],
+  "aspect_max": 26.262036146659693,
+  "min_cell_area_m2": 1.6079609842787387e-10
+ },
+ "outer": {
+  "n_cells": 137192,
+  "n_tri": 11517,
+  "n_quad": 125675
+ },
+ "wall_vs_csv_max_m": 4.7793139887287044e-05,
+ "frame": {
+  "centroid_cad_m": [
+   0.017620123320014388,
+   0.03150692208442688
+  ],
+  "body_x_dir_deg_in_cad": -4.7636414938898834,
+  "body_y_dir_deg_in_cad": 85.23635850611012,
+  "wall_m": 0.0018542294841820239,
+  "area_m2": 0.0001270868709773303,
+  "corners_body_m": {
+   "B_outer": [
+    -0.012365198605818707,
+    0.01871864633298522
+   ],
+   "B_inner": [
+    -0.011232981943450628,
+    0.017250227996997134
+   ],
+   "A_inner": [
+    -0.013214477787764847,
+    -0.025791898077446557
+   ],
+   "A_outer": [
+    -0.012365198605818707,
+    -0.027440197762310575
+   ]
+  },
+  "note": "x_body = R (x_cad - centroid); R rows = (body x, body y) unit vectors in CAD"
+ },
+ "patches": {
+  "blade": "outer + inner surface (painted, fuzzy skin)",
+  "bladeEnds": "two square end faces (not painted)"
+ },
+ "generator": "cfd/stage2/mesh/make_mesh.py",
+ "texture": {
+  "t_m": 5e-05,
+  "seed": 1,
+  "dl_nominal_m": 0.0002,
+  "dl_m": [
+   0.00020005418048672246,
+   0.00020017867608821316
+  ],
+  "n_intervals": [
+   358,
+   327
+  ],
+  "delta_rms_m": 2.844807670497101e-05,
+  "delta_absmax_m": 4.9902588232393755e-05,
+  "Ra_m": 2.4629166421498592e-05,
+  "facet_slope_max": 0.49036854880207437,
+  "facet_slope_mean": 0.16162605247565376,
+  "facet_tilt_max_deg": 26.121879422921552,
+  "facet_tilt_p99_deg": 23.7268927055922,
+  "note": "Ra_m, delta_rms_m: of the sample values (the linear profile between samples has smaller moments: for independent uniform samples Ra of the profile is about 0.8 x this; see README)",
+  "nseg": 5,
+  "wall_spacing_m": 4e-05,
+  "fade_out_D_m": 0.000225,
+  "fade_rule": "w(d) = 1 - smoothstep(d/D), D = 2.5 t + 0.1 mm",
+  "max_relative_height_change": 0.33333333333333337
+ },
+ "seconds": 21.3
+}

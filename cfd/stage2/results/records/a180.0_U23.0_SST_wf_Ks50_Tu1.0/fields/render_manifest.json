@@ -1,0 +1,50 @@
+{
+ "case": "/Users/stepheneacuello/Projects/windtunnel-control/cfd/stage2/runs/a180.0_U23.0_SST_wf_Ks50_Tu1.0",
+ "kind": "section",
+ "images": [
+  "cp_mean_near.png",
+  "cp_near.png",
+  "lic_mean_near.png",
+  "lic_near.png",
+  "mesh_cornerA_0p1mm.png",
+  "mesh_cornerA_0p8mm.png",
+  "mesh_cornerA_6mm.png",
+  "mesh_domain.png",
+  "mesh_near.png",
+  "nut_ratio_near.png",
+  "nut_ratio_wake.png",
+  "streamlines_mean_near.png",
+  "streamlines_near.png",
+  "surface_inst.png",
+  "surface_mean.png",
+  "velocity_mean_near.png",
+  "velocity_mean_wake.png",
+  "velocity_near.png",
+  "velocity_wake.png",
+  "vorticity_near.png",
+  "vorticity_wake.png",
+  "vorticity_anim.gif"
+ ],
+ "notes": [
+  "vorticity_anim.gif: frame spacing 37 c/U; shedding period 1/St = 4.2 c/U (NOT resolved: frames alias the shedding)"
+ ],
+ "read_as": "reconstructed",
+ "time": 0.3130434783,
+ "times_available": [
+  0.0,
+  0.2357548723,
+  0.3130434783
+ ],
+ "yplus_inst": {
+  "min": 7.4592773990705865,
+  "mean": 25.52860583858684,
+  "max": 47.4968314657654,
+  "p95": 43.554809293008475
+ },
+ "yplus_mean": {
+  "min": 7.594643139961347,
+  "mean": 25.585780739516483,
+  "max": 44.255817593567336,
+  "p95": 41.82424492518357
+ }
+}

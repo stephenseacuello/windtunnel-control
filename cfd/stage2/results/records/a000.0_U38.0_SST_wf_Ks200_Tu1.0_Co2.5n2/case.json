@@ -1,0 +1,126 @@
+{
+ "caseName": "a000.0_U38.0_SST_wf_Ks200_Tu1.0_Co2.5n2",
+ "alphaDeg": 0.0,
+ "Uinf": 38.0,
+ "Ux": 38.0,
+ "Uy": 0.0,
+ "dragDir": [
+  1.0,
+  0.0,
+  0.0
+ ],
+ "liftDir": [
+  -0.0,
+  1.0,
+  0.0
+ ],
+ "turbulenceModel": "kOmegaSST",
+ "nOuterCorrectors": 2,
+ "nProcs": 8,
+ "rhoInf": 1.204,
+ "nu": 1.516e-05,
+ "cRef": 0.048,
+ "dz": 0.001,
+ "Aref": 4.8e-05,
+ "CofR": [
+  0.0,
+  0.0,
+  0.0
+ ],
+ "TuBodyPercent": 1.0,
+ "TuInletPercent": 1.0,
+ "kInlet": 0.21660000000000001,
+ "omegaInlet": 849.7058314499202,
+ "nutInlet": 0.000254911749434976,
+ "ReThetatInlet": 584.3016,
+ "freestreamDecay": "control",
+ "freestreamDecayControl": "yes",
+ "kAmbient": 0.21660000000000001,
+ "omegaAmbient": 849.7058314499202,
+ "turbulenceLengthScale": 0.001,
+ "viscosityRatioFarField": 16.814759197557784,
+ "viscosityRatioBody": 16.814759197557784,
+ "convTime": 0.0012631578947368421,
+ "yPlusInterval": 0.0012631578947368421,
+ "endTime": 0.18947368421052632,
+ "averageStart": 0.06315789473684211,
+ "writeInterval": 0.01263157894736842,
+ "sampleInterval": 2.526315789473684e-05,
+ "deltaT0": 1.2631578947368422e-08,
+ "maxDeltaT": 6.31578947368421e-05,
+ "maxCo": 2.5,
+ "nConv": 150.0,
+ "nAvg": 100.0,
+ "level": "wf",
+ "model": "SST",
+ "ReChord": 120316.62269129288,
+ "stage": 2,
+ "wall": "wf",
+ "KsBlade": 0.00019999999999999998,
+ "KsEnds": 0.0,
+ "Cs": 0.5,
+ "texT": 0.0,
+ "texSeed": 1,
+ "texNseg": 5,
+ "nonOrthLimit": 0.5,
+ "nNonOrthCorr": 0,
+ "probeLocations": [
+  [
+   0.048,
+   0.0,
+   0.0005
+  ],
+  [
+   0.048,
+   0.024,
+   0.0005
+  ],
+  [
+   0.048,
+   -0.024,
+   0.0005
+  ],
+  [
+   0.096,
+   0.0,
+   0.0005
+  ],
+  [
+   0.096,
+   0.024,
+   0.0005
+  ],
+  [
+   0.096,
+   -0.024,
+   0.0005
+  ],
+  [
+   0.192,
+   0.0,
+   0.0005
+  ],
+  [
+   0.192,
+   0.024,
+   0.0005
+  ],
+  [
+   0.192,
+   -0.024,
+   0.0005
+  ],
+  [
+   -0.096,
+   0.0,
+   0.0005
+  ]
+ ],
+ "h0": 0.0008800000000000002,
+ "yP": 0.0004400000000000001,
+ "KsOverYp": 0.45454545454545436,
+ "nCells": 102251,
+ "meshNonOrthMax": 40.407733,
+ "meshDir": "runs/_mesh/wf_U38.0_a000.0",
+ "meshCheck": "OK"
+}
