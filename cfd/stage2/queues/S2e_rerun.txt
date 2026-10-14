@@ -1,0 +1,31 @@
+# Stage 2 re-runs, 13 Oct 2026 (cfd/analysis/2026-10-13/RESULTS.md section 8.4).
+# Time-step check of the wall-function sweeps at alpha 90 and 180 (maxCo 2.5).
+90   23.0  SST  wf  ks=0    maxco=2.5
+90   23.0  SST  wf  ks=50   maxco=2.5
+90   23.0  SST  wf  ks=100  maxco=2.5
+90   23.0  SST  wf  ks=200  maxco=2.5
+90   23.0  SST  wf  ks=400  maxco=2.5
+180  23.0  SST  wf  ks=0    maxco=2.5
+180  23.0  SST  wf  ks=50   maxco=2.5
+180  23.0  SST  wf  ks=100  maxco=2.5
+180  23.0  SST  wf  ks=200  maxco=2.5
+180  23.0  SST  wf  ks=400  maxco=2.5
+# Meshed texture at maxCo 2.5 with 150 c/U, averaged over the last 100 (resolves the +18.6 %
+# smooth-mesh difference and checks the +13.7 % alpha-180 result).
+0    23.0  SST  tex  t=0     maxco=2.5 nconv=150 navg=100
+0    23.0  SST  tex  t=0.2   maxco=2.5 nconv=150 navg=100
+180  23.0  SST  tex  t=0     maxco=2.5 nconv=150 navg=100
+180  23.0  SST  tex  t=0.2   maxco=2.5 nconv=150 navg=100
+0    23.0  LM   tex  t=0     maxco=2.5 nconv=150 navg=100
+0    23.0  LM   tex  t=0.1   maxco=2.5 nconv=150 navg=100
+0    23.0  LM   tex  t=0.2   maxco=2.5 nconv=150 navg=100
+180  23.0  LM   tex  t=0     maxco=2.5 nconv=150 navg=100
+180  23.0  LM   tex  t=0.1   maxco=2.5 nconv=150 navg=100
+180  23.0  LM   tex  t=0.2   maxco=2.5 nconv=150 navg=100
+# LM texture runs bracketing the measured onset of the gains (20-26 m/s), alpha 180.
+180  18.8  LM   tex  t=0     maxco=2.5 nconv=150 navg=100
+180  18.8  LM   tex  t=0.2   maxco=2.5 nconv=150 navg=100
+180  20.9  LM   tex  t=0     maxco=2.5 nconv=150 navg=100
+180  20.9  LM   tex  t=0.2   maxco=2.5 nconv=150 navg=100
+180  25.2  LM   tex  t=0     maxco=2.5 nconv=150 navg=100
+180  25.2  LM   tex  t=0.2   maxco=2.5 nconv=150 navg=100

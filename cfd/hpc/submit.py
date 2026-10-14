@@ -42,7 +42,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import hpc_common as H  # noqa: E402
 import premesh  # noqa: E402
 
-PARTITION = "uri-cpu"           # URI nodes, not preemptible, 30-day limit (README, "Unity")
+PARTITION = "uri-cpu,cpu"       # URI nodes first, else the general cpu partition; neither is preemptible (README, "Unity")
 MEM_PER_TASK_G = 2
 SUBMIT_SH = r"""q=$(squeue -u "$USER" -h -o %j)
 declare -A last

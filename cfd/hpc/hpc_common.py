@@ -34,12 +34,15 @@ STAGES = {
     # default queue files: everything that is (or will be) queued for production
     "section2d": dict(queue_mod="hpc_q_section2d", queues=["queues/priority1.txt", "queues/priority2.txt",
                                                             "queues/priority3.txt", "queues/priority4.txt",
-                                                            "queues/priority5_co25.txt"]),
+                                                            "queues/priority5_co25.txt",
+                                                            "queues/priority6_rerun.txt"]),
     "rotor2d": dict(queue_mod="hpc_q_rotor2d", queues=["queues/priority0.txt", "queues/priorityA.txt",
-                                                        "queues/priorityC.txt"]),
+                                                        "queues/priorityC.txt",
+                                                        "queues/priorityD_rerun.txt"]),
     "stage2": dict(queue_mod="hpc_q_stage2", queues=["queues/S2a_ks_U23.txt", "queues/S2b_speeds.txt",
                                                       "queues/S2c_texture.txt",
-                                                      "queues/S2d_co25.txt"]),
+                                                      "queues/S2d_co25.txt",
+                                                      "queues/S2e_rerun.txt"]),
 }
 
 _LOADED = {}

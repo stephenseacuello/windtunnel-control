@@ -31,6 +31,37 @@ How to fill it fast:
 
 ---
 
+## 2026-10-13 (Unity: analysis of the 150 cases; re-run set submitted)
+
+**Download.** `pull_results.py` brought 140 Unity cases to the Mac with records, with no failures.
+The rebuilt tables match the analysed ones exactly: 150 cases, no differing value.
+
+**Analysis.** See `cfd/analysis/2026-10-13/`: RESULTS.md, TEAM_SUMMARY.md, 18 figures. The team
+page is private until shared (https://claude.ai/artifact/UDDDEKWUKaGdQQ37N21qpy).
+
+**Re-run set, submitted 21:5x EDT** (RESULTS.md section 8.4; 106 jobs):
+
+| Stage | Queue file | Jobs | Contents |
+|---|---|---|---|
+| Section | `section2d/queues/priority6_rerun.txt` | 74 | the 23 flagged runs at maxCo 2.5; a maxCo 1.25 check at alpha 0 and 180 (SST, LM); the transition test, LM against SST at alpha 150-210 at 10.2/23/38 m/s with LM also at Tu 0.5 and 3 % |
+| Stage 2 | `stage2/queues/S2e_rerun.txt` | 26 | wall-function sweeps at alpha 90 and 180 at maxCo 2.5; meshed texture at maxCo 2.5 with 150 c/U averaged over the last 100 (SST and LM, alpha 0 and 180, t 0/0.2, LM also t 0.1); LM texture at 18.8, 20.9 and 25.2 m/s (alpha 180, t 0 and 0.2) |
+| Rotor | `rotor2d/queues/priorityD_rerun.txt` | 5 | coarse and fine meshes for A (sense CCW) at lambda 0.10 and 0.15; the 38 m/s, lambda 0.30 case run longer (16 revolutions, last 8 averaged) |
+| Section | manual job 65650307 | 1 | `_unity_a000.0_U23.0_SST_medium_Tu1.0`: the Mac's maxCo-5 case repeated on Unity, to separate time step from machine |
+
+**Scheduling.**
+- Lanes allow at most about 700 cores, of the lab's 768.
+- uri-cpu was 97 % allocated, so every pending job was moved to `uri-cpu,cpu` (`scontrol
+  update`), and `submit.py` now defaults to that.
+- At submission, 17 jobs (192 cores) were running.
+- Cost model, once running: section about 21 h, Stage 2 about 34 h (the texture runs).
+
+**Not in this set:**
+- a rough-blade rotor case (the rotor code has no rough-wall option yet);
+- the alpha-0 hysteresis restart and the Cd(t) history plots (analysis tasks on the downloaded
+  cases).
+
+---
+
 ## 2026-10-12 (Unity: status after the weekend; fixes and resubmissions)
 
 **Status at 06:53 EDT** (`cfd/hpc/status.py`; `sacct`, *measured*):

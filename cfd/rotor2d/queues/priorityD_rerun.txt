@@ -1,0 +1,8 @@
+# Rotor checks, 13 Oct 2026 (cfd/analysis/2026-10-13/RESULTS.md section 8.4).
+# Mesh check: coarse and fine for A, rotating with the curled tip leading (sense CCW), at 23 m/s.
+rot A 23 0.10 SST coarse nrev=6 sense=CCW
+rot A 23 0.10 SST fine   nrev=6 sense=CCW
+rot A 23 0.15 SST coarse sense=CCW
+rot A 23 0.15 SST fine   sense=CCW
+# Longer run of the 38 m/s, lambda 0.30 case (its last two revolutions differed by 0.049).
+rot A 38 0.30 SST medium sense=CCW nrev=16 navg=8
