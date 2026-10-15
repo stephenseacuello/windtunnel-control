@@ -1,0 +1,145 @@
+SOLVER SESSIONS (each restart of the solver is one session)
+ExecutionTime is CPU time of rank 0; ClockTime is elapsed wall time. A clock/CPU ratio far above 1
+means the solver was waiting (machine asleep or throttled, or oversubscribed cores).
+
+ # date         start     ranks    steps   t_first (s)    t_last (s)    CPU (s)  clock (s) clock/CPU
+ 0 Oct 14 2026  10:47:05     16   480839   1.19999e-06       11.5647    27291.4    27661.0      1.01
+
+WARNINGS (grouped; numbers replaced by #)
+
+[1x, t None .. None] --> FOAM Warning : allowSystemOperations : Allowing user-supplied system call operations.
+      This can be a security risk if running untrusted cases
+      through e.g. 'coded' on-the-fly-compilation functionality.
+
+SOLVER HEADER (first session)
+
+Date   : Oct 14 2026
+Time   : 10:47:05
+Host   : uri-cpu110
+PID    : 492468
+I/O    : uncollated
+Case   : /work/pi_sodhi_uri_edu/seacuello/windtunnel-cfd/repo/cfd/rotor2d/runs/A_rot_U23.0_lam0.120_SST_medium_senseCCW_rev50a45
+nProcs : 16
+Hosts  :
+(
+    (uri-cpu110 16)
+)
+Pstream initialized with:
+    node communication : off [type=host] (16 ranks, 1 nodes)
+    topology controls  : none
+    consensus exchange : 0 (tuning: 0)
+    exchange algorithm : 0
+    commsType          : nonBlocking
+    polling iterations : 0
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+memory pool : not available
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+
+--> FOAM Warning : allowSystemOperations : Allowing user-supplied system call operations.
+                   This can be a security risk if running untrusted cases
+                   through e.g. 'coded' on-the-fly-compilation functionality.
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+Selecting dynamicFvMesh dynamicMotionSolverFvMesh
+Selecting motion solver: solidBody
+Applying motion to cellZone: rotor
+Selecting solid-body motion function rotatingMotion
+
+PIMPLE: no residual control data found. Calculations will employ 2 corrector loops
+
+Reading field p
+
+Reading field U
+
+Reading/calculating face flux field phi
+
+AMI: Patch source sum(weights) min:1 max:1 average:1
+AMI: Patch target sum(weights) min:1 max:1 average:1
+Selecting incompressible transport model Newtonian
+Selecting turbulence model type RAS
+Selecting RAS turbulence model kOmegaSST
+Selecting patchDistMethod meshWave
+    Employing decay control with kInf:kInf [0 2 -2 0 0 0 0] 0.07935 and omegaInf:omegaInf [0 0 -1 0 0 0 0] 514.29563
+kOmegaSSTCoeffs
+{
+    decayControl    yes;
+    kInf            0.07935;
+    omegaInf        514.29563;
+    alphaK1         0.85;
+    alphaK2         1;
+    alphaOmega1     0.5;
+    alphaOmega2     0.856;
+    gamma1          0.55555556;
+    gamma2          0.44;
+    beta1           0.075;
+    beta2           0.0828;
+    betaStar        0.09;
+    a1              0.31;
+    b1              1;
+    c1              10;
+    F3              false;
+}
+
+No MRF models present
+
+No finite volume options present
+Constructing face velocity Uf
+
+Courant Number mean: 0.00027504846 max: 0.16015762
+
+LAST 50 LINES
+
+AMI: Patch source sum(weights) min:1.0000027 max:1.0000027 average:1.0000027
+AMI: Patch target sum(weights) min:1.0000027 max:1.0000027 average:1.0000027
+GAMG:  Solving for pcorr, Initial residual = 1, Final residual = 0.00063041085, No Iterations 16
+time step continuity errors : sum local = 4.474785e-12, global = 3.974549e-13, cumulative = -1.5858998e-08
+smoothSolver:  Solving for Ux, Initial residual = 6.0171879e-05, Final residual = 1.9073247e-07, No Iterations 1
+smoothSolver:  Solving for Uy, Initial residual = 0.0015569548, Final residual = 5.0527573e-06, No Iterations 1
+GAMG:  Solving for p, Initial residual = 0.010245185, Final residual = 4.2941377e-05, No Iterations 4
+time step continuity errors : sum local = 4.6106905e-11, global = -1.5858663e-12, cumulative = -1.5860584e-08
+GAMG:  Solving for p, Initial residual = 0.0046512529, Final residual = 2.2820532e-05, No Iterations 4
+time step continuity errors : sum local = 2.4496397e-11, global = -1.1362997e-12, cumulative = -1.586172e-08
+PIMPLE: iteration 2
+smoothSolver:  Solving for Ux, Initial residual = 2.7425781e-07, Final residual = 2.4943229e-09, No Iterations 1
+smoothSolver:  Solving for Uy, Initial residual = 4.0258308e-06, Final residual = 1.0681038e-09, No Iterations 2
+GAMG:  Solving for p, Initial residual = 0.0074564608, Final residual = 4.0677658e-05, No Iterations 4
+time step continuity errors : sum local = 4.3682563e-11, global = -4.9217336e-13, cumulative = -1.5862212e-08
+GAMG:  Solving for p, Initial residual = 0.0033704316, Final residual = 5.8658308e-08, No Iterations 11
+time step continuity errors : sum local = 6.3017558e-14, global = -6.9003956e-15, cumulative = -1.5862219e-08
+smoothSolver:  Solving for omega, Initial residual = 7.023611e-06, Final residual = 1.9369887e-09, No Iterations 2
+smoothSolver:  Solving for k, Initial residual = 2.6417672e-05, Final residual = 6.0232183e-09, No Iterations 2
+ExecutionTime = 27291.35 s  ClockTime = 27660 s
+
+Courant Number mean: 0.0064272365 max: 4.21231
+deltaT = 2.3922563e-05
+Time = 11.56470339
+
+PIMPLE: iteration 1
+AMI: Patch source sum(weights) min:1 max:1 average:1
+AMI: Patch target sum(weights) min:1 max:1 average:1
+GAMG:  Solving for pcorr, Initial residual = 1, Final residual = 0.00074187324, No Iterations 16
+time step continuity errors : sum local = 5.2694577e-12, global = 4.8346304e-13, cumulative = -1.5861736e-08
+smoothSolver:  Solving for Ux, Initial residual = 6.0140746e-05, Final residual = 1.9060679e-07, No Iterations 1
+smoothSolver:  Solving for Uy, Initial residual = 0.0015570992, Final residual = 5.060538e-06, No Iterations 1
+GAMG:  Solving for p, Initial residual = 0.010914122, Final residual = 4.5160402e-05, No Iterations 4
+time step continuity errors : sum local = 4.8520035e-11, global = -9.1620666e-13, cumulative = -1.5862652e-08
+GAMG:  Solving for p, Initial residual = 0.0046358878, Final residual = 2.3528639e-05, No Iterations 4
+time step continuity errors : sum local = 2.5288636e-11, global = -5.1966927e-13, cumulative = -1.5863172e-08
+PIMPLE: iteration 2
+smoothSolver:  Solving for Ux, Initial residual = 2.7492336e-07, Final residual = 2.5109804e-09, No Iterations 1
+smoothSolver:  Solving for Uy, Initial residual = 4.0189508e-06, Final residual = 1.0955169e-09, No Iterations 2
+GAMG:  Solving for p, Initial residual = 0.0074451145, Final residual = 4.0439811e-05, No Iterations 4
+time step continuity errors : sum local = 4.3482058e-11, global = -3.6463034e-13, cumulative = -1.5863536e-08
+GAMG:  Solving for p, Initial residual = 0.0034256124, Final residual = 8.3816958e-08, No Iterations 11
+time step continuity errors : sum local = 9.0150021e-14, global = -4.9559359e-15, cumulative = -1.5863541e-08
+smoothSolver:  Solving for omega, Initial residual = 7.0149221e-06, Final residual = 1.9090972e-09, No Iterations 2
+smoothSolver:  Solving for k, Initial residual = 2.642517e-05, Final residual = 6.0395557e-09, No Iterations 2
+ExecutionTime = 27291.41 s  ClockTime = 27661 s
+
+End
+
+Finalising parallel run

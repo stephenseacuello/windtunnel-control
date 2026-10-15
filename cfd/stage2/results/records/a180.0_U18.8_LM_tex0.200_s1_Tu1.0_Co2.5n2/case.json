@@ -1,0 +1,125 @@
+{
+ "caseName": "a180.0_U18.8_LM_tex0.200_s1_Tu1.0_Co2.5n2",
+ "alphaDeg": 180.0,
+ "Uinf": 18.8,
+ "Ux": -18.8,
+ "Uy": 2.3023359823970243e-15,
+ "dragDir": [
+  -1.0,
+  1.2246467991473532e-16,
+  0.0
+ ],
+ "liftDir": [
+  -1.2246467991473532e-16,
+  -1.0,
+  0.0
+ ],
+ "turbulenceModel": "kOmegaSSTLM",
+ "nOuterCorrectors": 2,
+ "nProcs": 16,
+ "rhoInf": 1.204,
+ "nu": 1.516e-05,
+ "cRef": 0.048,
+ "dz": 0.001,
+ "Aref": 4.8e-05,
+ "CofR": [
+  0.0,
+  0.0,
+  0.0
+ ],
+ "TuBodyPercent": 1.0,
+ "TuInletPercent": 1.0,
+ "kInlet": 0.053016,
+ "omegaInlet": 420.38077976996044,
+ "nutInlet": 0.00012611423393098814,
+ "ReThetatInlet": 584.3016,
+ "freestreamDecay": "control",
+ "freestreamDecayControl": "yes",
+ "kAmbient": 0.053016,
+ "omegaAmbient": 420.38077976996044,
+ "turbulenceLengthScale": 0.001,
+ "viscosityRatioFarField": 8.318880866160168,
+ "viscosityRatioBody": 8.318880866160168,
+ "convTime": 0.002553191489361702,
+ "yPlusInterval": 0.002553191489361702,
+ "endTime": 0.3829787234042553,
+ "averageStart": 0.1276595744680851,
+ "writeInterval": 0.02553191489361702,
+ "sampleInterval": 5.106382978723404e-05,
+ "deltaT0": 2.5531914893617022e-08,
+ "maxDeltaT": 0.0001276595744680851,
+ "maxCo": 2.5,
+ "nConv": 150.0,
+ "nAvg": 100.0,
+ "level": "tex",
+ "model": "LM",
+ "ReChord": 59525.06596306069,
+ "stage": 2,
+ "wall": "tex",
+ "KsBlade": 0.0,
+ "KsEnds": 0.0,
+ "Cs": 0.5,
+ "texT": 0.0002,
+ "texSeed": 1,
+ "texNseg": 5,
+ "nonOrthLimit": 0.33,
+ "nNonOrthCorr": 1,
+ "probeLocations": [
+  [
+   -0.048,
+   5.8783046359072955e-18,
+   0.0005
+  ],
+  [
+   -0.048,
+   -0.023999999999999994,
+   0.0005
+  ],
+  [
+   -0.047999999999999994,
+   0.024000000000000007,
+   0.0005
+  ],
+  [
+   -0.096,
+   1.1756609271814591e-17,
+   0.0005
+  ],
+  [
+   -0.096,
+   -0.02399999999999999,
+   0.0005
+  ],
+  [
+   -0.096,
+   0.02400000000000001,
+   0.0005
+  ],
+  [
+   -0.192,
+   2.3513218543629182e-17,
+   0.0005
+  ],
+  [
+   -0.192,
+   -0.023999999999999976,
+   0.0005
+  ],
+  [
+   -0.192,
+   0.02400000000000002,
+   0.0005
+  ],
+  [
+   0.096,
+   -1.1756609271814591e-17,
+   0.0005
+  ]
+ ],
+ "h0": 4.5e-06,
+ "yP": 2.25e-06,
+ "nCells": 217025,
+ "meshNonOrthMax": 63.211989,
+ "meshDir": "runs/_mesh/tex0.200_s1_n5_a180.0",
+ "meshCheck": "relaxed: max skewness 4.48 (20 faces > 4), max non-orthogonality 63.2 deg"
+}
