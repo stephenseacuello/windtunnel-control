@@ -1,0 +1,183 @@
+{
+ "quality": {
+  "n_cases": 69,
+  "n_new": 26,
+  "n_wf": 37,
+  "n_tex": 32,
+  "flagged": 0,
+  "any_symptom": 0,
+  "dt_anomaly": 0,
+  "with_jumps": [
+   "a000.0_U23.0_LM_tex0.000_s1_Tu1.0_Co2.5n2"
+  ],
+  "dt_ratio_max_new": 1.2672050985057726,
+  "dt_ratio_max_new_case": "a000.0_U23.0_LM_tex0.000_s1_Tu1.0_Co2.5n2",
+  "u_co_range_by_family": {
+   "tex a0 Co2.5": [
+    3.1879764829350803,
+    4.55744580684223
+   ],
+   "tex a0 Co5": [
+    3.223859656362352,
+    3.6486988922185297
+   ],
+   "tex a180 Co2.5": [
+    5.394432255425073,
+    6.840151607856298
+   ],
+   "tex a180 Co5": [
+    5.54912935547695,
+    5.789151015214468
+   ],
+   "wf a0 U10.2 Co2.5": [
+    3.1538263672247306,
+    3.1677054206281996
+   ],
+   "wf a0 U23 Co2.5": [
+    3.4082633207881976,
+    3.4236792061884778
+   ],
+   "wf a0 U23 Co5": [
+    3.4063994664215875,
+    3.430129295293657
+   ],
+   "wf a0 U38 Co2.5": [
+    3.4068040144688325,
+    3.42381565080915
+   ],
+   "wf a0 U38 Co5": [
+    3.434445940412775,
+    3.444028780784193
+   ],
+   "wf a180 U23 Co2.5": [
+    3.9495818498703903,
+    3.9932641620115192
+   ],
+   "wf a180 U23 Co5": [
+    3.9573539706704666,
+    3.9893070613527506
+   ],
+   "wf a90 U23 Co2.5": [
+    2.6207637450671983,
+    2.7532628780704873
+   ],
+   "wf a90 U23 Co5": [
+    2.6244370254525777,
+    2.753479089666771
+   ]
+  },
+  "yplus_tex_max": 1.17451,
+  "yplus_tex_max_case": "a000.0_U23.0_LM_tex0.000_s1_Tu1.0_Co2.5n2",
+  "Cd_std_over_Cd_max_tex": 0.1580739745599164,
+  "excluded": [
+   "a000.0_U23.0_LM_tex0.000_s1_Tu1.0_Co2.5n2"
+  ],
+  "tex_dt_us": {
+   "0 2.5": [
+    0.954005,
+    1.36382
+   ],
+   "0 5": [
+    2.38322,
+    2.6972799999999997
+   ],
+   "180 2.5": [
+    0.635633,
+    0.8059839999999999
+   ],
+   "180 5": [
+    1.50206,
+    1.56703
+   ]
+  },
+  "wf_new_absdrift_max": {
+   "90": 0.000167567,
+   "180": 0.00175685
+  },
+  "tex25_drift_range": [
+   -0.33584,
+   -0.00509653
+  ],
+  "tex25_cycles": [
+   1.50652,
+   21.8471
+  ],
+  "tex25_end_slope_range": [
+   -2.18768,
+   -0.00138771
+  ],
+  "omega_bounded_steps_total": 0,
+  "Tu_probe_range_new": [
+   1.00102,
+   1.01366
+  ],
+  "mesh_check_new": [
+   "OK",
+   "relaxed: max skewness 4.48 (20 faces > 4), max non-orthogonality 63.2 deg"
+  ],
+  "St_peak_frac_wf_new": [
+   0.96645,
+   0.999997
+  ]
+ },
+ "bottom_line": {
+  "n": 52,
+  "n_resolved": 21,
+  "n_resolved_needed_sign": 0,
+  "n_needed_sign_any": 8,
+  "resolved_needed": [],
+  "largest_needed_sign_ratio": 0.7429953591722845,
+  "largest_needed_sign_config": "alpha 0, 23 m/s, maxCo 5, 30-80 c/U, t 0.2 vs 0"
+ },
+ "measured_extra": {
+  "stepV": {
+   "Plain": "24--26",
+   "FS 0.05": "22--24",
+   "FS 0.10": "22",
+   "FS 0.20": "20"
+  },
+  "steepest_rise_by_run": [
+   {
+    "rotor": "Plain",
+    "run": 1,
+    "steepest_rise_mps": 26.227
+   },
+   {
+    "rotor": "Plain",
+    "run": 2,
+    "steepest_rise_mps": 24.095
+   },
+   {
+    "rotor": "FS 0.05",
+    "run": 1,
+    "steepest_rise_mps": 24.095
+   },
+   {
+    "rotor": "FS 0.05",
+    "run": 2,
+    "steepest_rise_mps": 21.963
+   },
+   {
+    "rotor": "FS 0.10",
+    "run": 1,
+    "steepest_rise_mps": 21.963
+   },
+   {
+    "rotor": "FS 0.10",
+    "run": 2,
+    "steepest_rise_mps": 21.963
+   },
+   {
+    "rotor": "FS 0.20",
+    "run": 1,
+    "steepest_rise_mps": 19.831
+   },
+   {
+    "rotor": "FS 0.20",
+    "run": 2,
+    "steepest_rise_mps": 19.831
+   }
+  ]
+ },
+ "lam": 0.125
+}

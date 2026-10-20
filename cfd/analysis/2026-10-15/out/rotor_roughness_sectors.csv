@@ -1,0 +1,51 @@
+lam,a,b,sector,contrib_a,contrib_b,d,two_u,resolved_2u
+0.1,Ks400,Ks0,"upwind, convex side to the wind",0.0680377,0.0695437,-0.001506,0.000595315,True
+0.1,Ks400,Ks0,"advancing, edge-on (tip A first)",0.0235509,0.0143647,0.00918615,0.000590101,True
+0.1,Ks400,Ks0,"downwind, cup to the wind",-0.00978561,-0.0129462,0.00316061,0.00113501,True
+0.1,Ks400,Ks0,"returning, edge-on (curl first)",-0.0468883,-0.0420632,-0.00482508,0.00215876,True
+0.1,Ks400,Ks0,the four 30° gaps between,-0.0112041,-0.0102899,-0.000914235,0.00164538,False
+0.1,Ks100,Ks0,"upwind, convex side to the wind",0.06932,0.0695437,-0.000223736,0.000522387,False
+0.1,Ks100,Ks0,"advancing, edge-on (tip A first)",0.0154808,0.0143647,0.00111605,0.000387747,True
+0.1,Ks100,Ks0,"downwind, cup to the wind",-0.0125546,-0.0129462,0.000391667,0.00114486,False
+0.1,Ks100,Ks0,"returning, edge-on (curl first)",-0.042639,-0.0420632,-0.000575825,0.00222749,False
+0.1,Ks100,Ks0,the four 30° gaps between,-0.00958997,-0.0102899,0.000699906,0.0013852,False
+0.1,Ks0,spalding,"upwind, convex side to the wind",0.0695437,0.0670034,0.00254034,0.000606959,True
+0.1,Ks0,spalding,"advancing, edge-on (tip A first)",0.0143647,0.0215558,-0.00719106,0.000455447,True
+0.1,Ks0,spalding,"downwind, cup to the wind",-0.0129462,-0.0115876,-0.00135864,0.00141472,False
+0.1,Ks0,spalding,"returning, edge-on (curl first)",-0.0420632,-0.0489312,0.00686798,0.00255822,True
+0.1,Ks0,spalding,the four 30° gaps between,-0.0102899,-0.0110013,0.000711429,0.0015729,False
+0.1,Ks400,spalding,"upwind, convex side to the wind",0.0680377,0.0670034,0.00103434,0.000622483,True
+0.1,Ks400,spalding,"advancing, edge-on (tip A first)",0.0235509,0.0215558,0.00199509,0.000605397,True
+0.1,Ks400,spalding,"downwind, cup to the wind",-0.00978561,-0.0115876,0.00180197,0.00126316,True
+0.1,Ks400,spalding,"returning, edge-on (curl first)",-0.0468883,-0.0489312,0.0020429,0.00218945,False
+0.1,Ks400,spalding,the four 30° gaps between,-0.0112041,-0.0110013,-0.000202806,0.00188248,False
+0.1,Ks100,spalding,"upwind, convex side to the wind",0.06932,0.0670034,0.0023166,0.000553148,True
+0.1,Ks100,spalding,"advancing, edge-on (tip A first)",0.0154808,0.0215558,-0.00607501,0.00041065,True
+0.1,Ks100,spalding,"downwind, cup to the wind",-0.0125546,-0.0115876,-0.000966978,0.00127203,False
+0.1,Ks100,spalding,"returning, edge-on (curl first)",-0.042639,-0.0489312,0.00629215,0.00225725,True
+0.1,Ks100,spalding,the four 30° gaps between,-0.00958997,-0.0110013,0.00141133,0.00165988,False
+0.12,Ks400,Ks0,"upwind, convex side to the wind",0.0626752,0.0647414,-0.00206629,0.000701224,True
+0.12,Ks400,Ks0,"advancing, edge-on (tip A first)",0.0224383,0.0139177,0.00852059,0.000527372,True
+0.12,Ks400,Ks0,"downwind, cup to the wind",-0.00935829,-0.0111843,0.00182604,0.00168465,True
+0.12,Ks400,Ks0,"returning, edge-on (curl first)",-0.0390363,-0.0366828,-0.00235351,0.00212271,True
+0.12,Ks400,Ks0,the four 30° gaps between,-0.015646,-0.0154798,-0.000166111,0.00164081,False
+0.12,Ks100,Ks0,"upwind, convex side to the wind",0.0634931,0.0647414,-0.00124832,0.000906232,True
+0.12,Ks100,Ks0,"advancing, edge-on (tip A first)",0.0147856,0.0139177,0.000867812,0.00047247,True
+0.12,Ks100,Ks0,"downwind, cup to the wind",-0.0104551,-0.0111843,0.000729281,0.00163371,False
+0.12,Ks100,Ks0,"returning, edge-on (curl first)",-0.0390728,-0.0366828,-0.00238999,0.00244917,False
+0.12,Ks100,Ks0,the four 30° gaps between,-0.0163519,-0.0154798,-0.000872031,0.00171063,False
+0.12,Ks0,spalding,"upwind, convex side to the wind",0.0647414,0.060909,0.00383244,0.000848989,True
+0.12,Ks0,spalding,"advancing, edge-on (tip A first)",0.0139177,0.01854,-0.00462222,0.000443305,True
+0.12,Ks0,spalding,"downwind, cup to the wind",-0.0111843,-0.0101674,-0.00101693,0.00161537,False
+0.12,Ks0,spalding,"returning, edge-on (curl first)",-0.0366828,-0.0409444,0.00426159,0.00218568,True
+0.12,Ks0,spalding,the four 30° gaps between,-0.0154798,-0.0152415,-0.000238315,0.00174247,False
+0.12,Ks400,spalding,"upwind, convex side to the wind",0.0626752,0.060909,0.00176614,0.000796825,True
+0.12,Ks400,spalding,"advancing, edge-on (tip A first)",0.0224383,0.01854,0.00389837,0.000485399,True
+0.12,Ks400,spalding,"downwind, cup to the wind",-0.00935829,-0.0101674,0.000809108,0.00139153,False
+0.12,Ks400,spalding,"returning, edge-on (curl first)",-0.0390363,-0.0409444,0.00190808,0.0018306,True
+0.12,Ks400,spalding,the four 30° gaps between,-0.015646,-0.0152415,-0.000404426,0.00190329,False
+0.12,Ks100,spalding,"upwind, convex side to the wind",0.0634931,0.060909,0.00258411,0.000982075,True
+0.12,Ks100,spalding,"advancing, edge-on (tip A first)",0.0147856,0.01854,-0.0037544,0.00042511,True
+0.12,Ks100,spalding,"downwind, cup to the wind",-0.0104551,-0.0101674,-0.000287652,0.00132941,False
+0.12,Ks100,spalding,"returning, edge-on (curl first)",-0.0390728,-0.0409444,0.0018716,0.00220083,False
+0.12,Ks100,spalding,the four 30° gaps between,-0.0163519,-0.0152415,-0.00111035,0.0019638,False
