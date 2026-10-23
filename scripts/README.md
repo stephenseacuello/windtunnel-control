@@ -47,3 +47,21 @@ capability.
 It is self-consistent with the Feb 13 data but has not been checked against the
 hardware. One anemometer reading settles it — see `verify` in the playbook.
 Change that constant and everything else follows.
+
+## section_balance_logger.py and section_balance_analyze.py
+
+The blade-section force test: two load cells on a Nano 33 BLE Sense running
+`firmware/section_balance/`. Wiring, procedure and conventions are in
+`firmware/section_balance/README.md`.
+
+```bash
+python scripts/section_balance_logger.py --set Plain --session a_sweep
+python scripts/section_balance_analyze.py logs/section_balance/<session> --rig rig.yaml
+```
+
+The logger records dwells (wind-off zeros, wind points, support tares,
+calibration loads, accelerometer bursts) and never commands the fan; the
+analysis gives Cd and Cl with uncertainty, the CFD overlaid. `--simulate`
+runs the logger against a simulated board with known forces. Neither imports
+anything from `src/`; the analysis imports the logger's file-format
+definitions so the two cannot drift apart.
