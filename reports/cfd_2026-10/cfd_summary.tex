@@ -1,0 +1,138 @@
+\documentclass[11pt]{article}
+\newcommand{\ReportDate}{27 October 2026}
+\input{../roughness_2026-09/report/preamble}
+\fancyhead[L]{\sffamily\footnotesize\color{ink2}CFD of the textured-blade turbine}
+\hypersetup{pdftitle={CFD of the textured-blade turbine: summary of results},pdfauthor={Stephen Eacuello}}
+\graphicspath{{./}}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{flushleft}
+{\sffamily\small\color{ink2} SUMMARY \quad·\quad 27 OCTOBER 2026}\\[0.4em]
+{\sffamily\LARGE\bfseries\color{navy} CFD of the textured-blade turbine}\\[0.3em]
+{\sffamily\normalsize What 263 simulations show about blade roughness, and what to test next}\\[0.3em]
+{\sffamily\small Stephen Eacuello \quad·\quad for Dr.\ Sodhi, Dr.\ Jahangiri and Dr.\ Jeong}
+\end{flushleft}
+{\color{rule}\hrule height 0.6pt}
+\vspace{0.6em}
+
+\begin{keybox}
+\textbf{In short.} In the simulations, rough blades can increase the turbine's torque. The gain
+comes mostly from the moment a blade moves edge-on into the wind, not from the cup-versus-back drag
+that we expected to matter. With very rough blades (\SI{400}{\micro\metre}) the simulated torque rose
+by about a third, the same direction as our wind-tunnel gains. With roughness closer to our printed
+blades (\SI{100}{\micro\metre}) there was no clear change. The simulations are two-dimensional and
+sensitive to their settings, so they cannot confirm the mechanism on their own: a direct force
+measurement on a blade is the next step.
+\end{keybox}
+
+\section{Why we ran these simulations}
+On 1 October, the FS~0.10 and FS~0.20 textured blades produced 12.8\,\% and 16.2\,\% more peak
+electrical power than the Plain blades (averaged over 10.2--\SI{38}{m/s}). We used OpenFOAM to ask
+two questions: how does roughness change the forces on a single blade, and how does it change the
+torque of the whole rotor?
+
+\section{What we simulated}
+All runs are two-dimensional slices through the middle of the blade, at 23~m/s unless stated, run
+on URI's Unity computing cluster.
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}l c X@{}}
+\toprule
+Model & Cases & What was varied \\
+\midrule
+Single blade & 194 & Angle to the wind (all the way round), wind speed (10.2, 23, \SI{38}{m/s}), roughness
+height (smooth to \SI{400}{\micro\metre}), and the printed texture shape itself \\
+Whole rotor (3 blades) & 69 & Tip-speed ratio (blade-tip speed divided by wind speed), wind speed,
+roughness height, mesh resolution \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Roughness enters the model as a uniform ``sand-grain'' height. Our blades' measured texture height
+is about \SIrange{84}{97}{\micro\metre} for FS~0.20, so the \SI{100}{\micro\metre} cases are the
+closest to the real blades; \SI{400}{\micro\metre} is a deliberately rough upper case.
+
+\section{Results}
+
+\subsection{On a single blade, roughness mostly changes the edge-on forces}
+When the blade faces the wind cup-first or back-first, \SI{400}{\micro\metre} roughness changes the
+drag by only about 6\,\%. When the blade is edge-on, the same roughness raises the drag by 45\,\% and
+the lift by 67\,\% (Fig.~\ref{fig:blade}). At \SI{100}{\micro\metre} all changes are small (10\,\% or
+less).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{fig1_single_blade}
+\caption{Change in drag and lift on a single blade from roughness, compared with a smooth blade, for
+three orientations (23~m/s).}
+\label{fig:blade}
+\end{figure}
+
+\subsection{On the rotor, heavy roughness raises the torque}
+With \SI{400}{\micro\metre} roughness, the rotor's torque rose by 27\,\% at a tip-speed ratio of 0.10
+and by 38\,\% at 0.12 (Fig.~\ref{fig:rotor}). Our turbine reached peak power near a tip-speed ratio of
+0.12--0.13 in the wind tunnel. At \SI{100}{\micro\metre} the changes (+8\,\% and $-19$\,\%) are within
+the simulations' noise, so we cannot say whether realistic roughness helps or hurts in this model.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\linewidth]{fig2_rotor_torque}
+\caption{Rotor torque with smooth and rough blades at two tip-speed ratios (23~m/s, averaged over 45
+revolutions). Error bars show the simulations' noise; a change is clear when it is larger than the
+bar.}
+\label{fig:rotor}
+\end{figure}
+
+\subsection{The gain comes from the blade moving edge-on with the wind}
+Splitting the turn into positions shows where the extra torque comes from (Fig.~\ref{fig:where}). The
+blade moving edge-on with the wind contributes the most (+49\,\% of the smooth rotor's torque). Some
+is lost when the blade moves edge-on against the wind ($-26$\,\%). This matches the single-blade
+result: the edge-on forces are the ones roughness changes most. Our earlier, simpler estimate (13
+October) looked only at the cup-facing and back-facing positions, which is why it predicted a loss.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{fig3_where_in_the_turn}
+\caption{Where in each turn the \SI{400}{\micro\metre} blades gain or lose torque, as a percentage of
+the smooth rotor's torque (tip-speed ratio 0.10). The parts add up to the +27\,\% of
+Fig.~\ref{fig:rotor}.}
+\label{fig:where}
+\end{figure}
+
+\section{How much to trust this}
+\begin{itemize}
+\item \textbf{The simulations are two-dimensional.} Flow around a curved blade is three-dimensional,
+  and 2D simulations of this kind usually overstate drag. The results are best read as comparisons
+  between cases rather than as absolute values.
+\item \textbf{The rotor result is promising but not yet firm.} The rotor's torque changes more between
+  mesh resolutions than it does with roughness. We assumed that this affects smooth and rough runs
+  the same way, but have not shown it.
+\item \textbf{The model's roughness is not our texture.} The printed fuzzy skin is not a uniform sand-grain
+  surface, and we do not yet know which roughness height represents it.
+\item \textbf{One flow pattern is uncertain.} With the cup facing the wind, the simulated flow can settle
+  into either of two stable patterns, one with nearly twice the drag of the other. Only a measurement can
+  tell which one the real blade has.
+\end{itemize}
+
+\section{Proposed next steps}
+\begin{enumerate}
+\item \textbf{Measure lift and drag on single blades} (the ``airfoil slice'' test). An existing Plain
+  blade and a textured blade, half in the wind, on a small two-load-cell balance under the tunnel
+  floor, at the cup-facing, edge-on and back-facing angles. This tests the main simulation result
+  directly. The design is ready; parts cost about \$250--450.
+\item \textbf{Test rougher blades.} Print FS~0.40 and FS~0.80 (the ``\SI{320}{\micro\metre}'' set)
+  together with a fresh Plain set and repeats of FS~0.10 and FS~0.20, all with the same print
+  settings, and test them in one session. I will ask the Print Lab for time and cost estimates.
+\item \textbf{Record the rig details} the simulations had to assume: how the blades attach to the arms,
+  which way the rotor turns, and the tunnel's test-section size.
+\end{enumerate}
+Since the MCE labs now also use the tunnel, I am coordinating test times with Jim Byrnes and Rob
+D'Ambrosca.
+
+\vspace{0.6em}
+{\small\color{ink2}Details, all figures and the scripts behind every number:
+\texttt{cfd/analysis/2026-10-15/} in the project repository.}
+
+\end{document}
