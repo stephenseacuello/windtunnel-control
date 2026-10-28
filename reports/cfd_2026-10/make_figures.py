@@ -116,3 +116,27 @@ save(fig, "fig3_where_in_the_turn")
 print("drag %", {k: [round(v, 1) for v in vs] for k, vs in drag.items()})
 print("lift %", {k: [round(v, 1) for v in vs] for k, vs in lift.items()})
 print("sectors %", {label[k]: round(d[k][0], 1) for k in order}, "sum", round(net, 1))
+
+
+# ---------------------------------------------------------------- figures 4-5: flow pictures (ParaView renders from the case records)
+from PIL import Image
+
+def crop_header(path, top=78):
+    im = Image.open(path).convert("RGB")
+    return im.crop((0, top, im.width, im.height))
+
+CFD = REPO / "cfd"
+rotor = crop_header(CFD / "rotor2d/results/records/A_rot_U23.0_lam0.100_SST_medium_Ks400_senseCCW_rev50a45/fields/lic_near.png")
+fig, ax = plt.subplots(figsize=(7.0, 4.4))
+ax.imshow(rotor); ax.axis("off")
+fig.tight_layout(pad=0.1)
+save(fig, "fig4_rotor_flow")
+
+hi = crop_header(CFD / "section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0/fields/streamlines_near.png")
+lo = crop_header(CFD / "section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0_Co2.5n2/fields/streamlines_near.png")
+fig, axes = plt.subplots(1, 2, figsize=(7.2, 2.7))
+for ax, im, t in ((axes[0], hi, "High-drag pattern (drag coefficient about 3.2)"),
+                  (axes[1], lo, "Low-drag pattern (drag coefficient about 1.75)")):
+    ax.imshow(im); ax.axis("off"); ax.set_title(t, fontsize=9, loc="left")
+fig.tight_layout(pad=0.3)
+save(fig, "fig5_two_flow_patterns")

@@ -4,6 +4,10 @@
 \fancyhead[L]{\sffamily\footnotesize\color{ink2}CFD of the textured-blade turbine}
 \hypersetup{pdftitle={CFD of the textured-blade turbine: summary of results},pdfauthor={Stephen Eacuello}}
 \graphicspath{{./}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}\renewcommand{\floatpagefraction}{0.8}
+\renewcommand{\bottomtitlespace}{0.05\textheight}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{4}
 
 \begin{document}
 \thispagestyle{empty}
@@ -29,12 +33,18 @@ measurement on a blade is the next step.
 {\small\textit{A note on how this was done: I am not trained in aerodynamics or CFD. The simulations were set up, run and analyzed with the help of AI tools (Claude), which also helped draft this summary. Please treat the results as preliminary.}}
 
 \section{Answers to the questions from our 7 October meeting}
-\begin{table}[H]
-\centering\small
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.27\linewidth} X@{}}
+{\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.25\linewidth} >{\raggedright\arraybackslash}p{0.71\linewidth}@{}}
 \toprule
 Question & Answer \\
 \midrule
+\endfirsthead
+\toprule
+Question & Answer (continued) \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
 Lift and drag coefficients of the blade (theory and experiment) &
 \textbf{From the CFD} (smooth blade, 23~m/s, 2D, chord \SI{48}{mm}):
 cup facing the wind, drag 1.8--2.0 or about 3.2, depending on which of two flow patterns forms, with lift
@@ -70,9 +80,8 @@ drag-driven at low Reynolds numbers, where roughness can make the boundary layer
 so Sandia does not predict a loss for us. Its roughness criterion suggests FS~0.20 reaches that point
 at our higher wind speeds, and that rougher blades should start gaining at lower wind speeds and then
 level off. The FS~0.40 and FS~0.80 tests can check this. \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\end{longtable}
+}
 
 \section{Why we ran these simulations}
 On 1 October, the FS~0.10 and FS~0.20 textured blades produced 12.8\,\% and 16.2\,\% more peak
@@ -81,8 +90,9 @@ two questions: how does roughness change the forces on a single blade, and how d
 torque of the whole rotor?
 
 \section{What we simulated}
-All runs are two-dimensional slices through the middle of the blade, at 23~m/s unless stated, run
-on URI's Unity computing cluster.
+All runs are two-dimensional slices through the middle of the blade, at 23~m/s unless stated. They
+ran on URI's Unity research computing cluster: 281 jobs and about 17{,}400 core-hours, using up to
+512 processor cores at once. On a laptop this would have taken months.
 
 \begin{table}[H]
 \centering\small
@@ -98,6 +108,15 @@ roughness height, mesh resolution \\
 \end{tabularx}
 \end{table}
 
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.85\linewidth]{fig4_rotor_flow}
+\caption{A snapshot of the simulated rotor at 23~m/s, turning at 216~rpm (tip-speed ratio 0.10, rough
+blades). The streaks follow the airflow; colour shows the local air speed relative to the oncoming wind
+(yellow faster, dark slower). Each blade sheds swirls into the wake behind the rotor.}
+\label{fig:rotorflow}
+\end{figure}
+
 Roughness enters the model as a uniform ``sand-grain'' height. Our blades' measured texture height
 is about \SIrange{84}{97}{\micro\metre} for FS~0.20, so the \SI{100}{\micro\metre} cases are the
 closest to the real blades; \SI{400}{\micro\metre} is a deliberately rough upper case.
@@ -110,7 +129,7 @@ drag by only about 6\,\%. When the blade is edge-on, the same roughness raises t
 the lift by 67\,\% (Fig.~\ref{fig:blade}). At \SI{100}{\micro\metre} all changes are small (10\,\% or
 less).
 
-\begin{figure}[H]
+\begin{figure}[tbp]
 \centering
 \includegraphics[width=0.95\linewidth]{fig1_single_blade}
 \caption{Change in drag and lift on a single blade from roughness, compared with a smooth blade, for
@@ -124,7 +143,7 @@ and by 38\,\% at 0.12 (Fig.~\ref{fig:rotor}). Our turbine reached peak power nea
 0.12--0.13 in the wind tunnel. At \SI{100}{\micro\metre} the changes (+8\,\% and $-19$\,\%) are within
 the simulations' noise, so we cannot say whether realistic roughness helps or hurts in this model.
 
-\begin{figure}[H]
+\begin{figure}[tbp]
 \centering
 \includegraphics[width=0.72\linewidth]{fig2_rotor_torque}
 \caption{Rotor torque with smooth and rough blades at two tip-speed ratios (23~m/s, averaged over 45
@@ -140,7 +159,7 @@ is lost when the blade moves edge-on against the wind ($-26$\,\%). This matches 
 result: the edge-on forces are the ones roughness changes most. Our earlier, simpler estimate (13
 October) looked only at the cup-facing and back-facing positions, which is why it predicted a loss.
 
-\begin{figure}[H]
+\begin{figure}[tbp]
 \centering
 \includegraphics[width=0.8\linewidth]{fig3_where_in_the_turn}
 \caption{Where in each turn the \SI{400}{\micro\metre} blades gain or lose torque, as a percentage of
@@ -161,8 +180,17 @@ Fig.~\ref{fig:rotor}.}
   surface, and we do not yet know which roughness height represents it.
 \item \textbf{One flow pattern is uncertain.} With the cup facing the wind, the simulated flow can settle
   into either of two stable patterns, one with nearly twice the drag of the other. Only a measurement can
-  tell which one the real blade has.
+  tell which one the real blade has (Fig.~\ref{fig:patterns}).
 \end{itemize}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{fig5_two_flow_patterns}
+\caption{The two flow patterns the simulation can settle into with the cup facing the wind (smooth
+blade, 23~m/s). Left: the wake swings from side to side and sheds large swirls. Right: two steady
+swirls sit behind the cup. The blade and mesh are the same; only the simulation's time step differs.}
+\label{fig:patterns}
+\end{figure}
 
 \section{Proposed next steps}\label{sec:next}
 \begin{enumerate}
