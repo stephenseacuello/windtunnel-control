@@ -26,6 +26,52 @@ sensitive to their settings, so they cannot confirm the mechanism on their own: 
 measurement on a blade is the next step.
 \end{keybox}
 
+\section{Answers to the questions from our 7 October meeting}
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.27\linewidth} X@{}}
+\toprule
+Question & Answer \\
+\midrule
+Lift and drag coefficients of the blade (theory and experiment) &
+\textbf{From the CFD} (smooth blade, 23~m/s, 2D, chord \SI{48}{mm}):
+cup facing the wind, drag 1.8--2.0 or about 3.2, depending on which of two flow patterns forms, with lift
+near zero; edge-on, drag 0.35--0.42 and lift 0.7--1.1; back facing the wind, drag 1.5--1.7, falling to
+1.1--1.2 with a finer time step. For comparison, published values for a thin half-tube are 2.3 (cup
+facing) and 1.2 (back facing). \textbf{By experiment}: not yet measured; the force test is designed
+(Section~\ref{sec:next}). \\
+\addlinespace
+A CFD model in OpenFOAM &
+Done: 263 two-dimensional simulations of the blade and the rotor, summarised in the rest of this report. \\
+\addlinespace
+Cost and time per blade; a shorter blade? &
+Print Lab slicer estimates, per blade: FS~0.10, 7~h~40~min, \SI{39}{g}, \$4.61; FS~0.20, 8~h~41~min,
+\SI{41}{g}, \$5.15 (both with a \SI{0.2}{mm} nozzle); FS~0.80, 15~h~54~min, \SI{72}{g}, \$9.38 (with
+a \SI{0.4}{mm} nozzle). The Print Lab charges \$0.50 per print hour plus material. A shorter blade
+saves time and material roughly in proportion, but it changes the rotor, so it would need its own
+Plain set for comparison. \\
+\addlinespace
+A rougher set (``\SI{320}{\micro\metre}'', \SI{0.805}{mm} fuzzy skin) &
+The Print Lab has the print settings ready. We propose printing FS~0.40 and FS~0.80 together with a
+fresh Plain set and repeats of FS~0.10 and FS~0.20, all with the same settings. ``Ra~320'' is a
+label: FS~0.20 (``Ra~80'') measured Ra~\SI{10}{\micro\metre}, so we will scan the new blades. \\
+\addlinespace
+Is there a best roughness? &
+Not known yet. In the CFD, very rough blades help the rotor, but realistic roughness gives no clear
+change. The new print round (five levels, two prints each, tested in mixed order) is designed to find
+it. \\
+\addlinespace
+What the Sandia report predicts for us &
+Sandia (SAND2017-11288) tested lift-driven airfoils at much higher Reynolds numbers, where roughness
+lowers lift and raises drag (4.9--6.8\,\% energy loss at \SI{200}{\micro\metre}). Our rotor is
+drag-driven at low Reynolds numbers, where roughness can make the boundary layer turbulent earlier,
+so Sandia does not predict a loss for us. Its roughness criterion suggests FS~0.20 reaches that point
+at our higher wind speeds, and that rougher blades should start gaining at lower wind speeds and then
+level off. The FS~0.40 and FS~0.80 tests can check this. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \section{Why we ran these simulations}
 On 1 October, the FS~0.10 and FS~0.20 textured blades produced 12.8\,\% and 16.2\,\% more peak
 electrical power than the Plain blades (averaged over 10.2--\SI{38}{m/s}). We used OpenFOAM to ask
@@ -116,7 +162,7 @@ Fig.~\ref{fig:rotor}.}
   tell which one the real blade has.
 \end{itemize}
 
-\section{Proposed next steps}
+\section{Proposed next steps}\label{sec:next}
 \begin{enumerate}
 \item \textbf{Measure lift and drag on single blades} (the ``airfoil slice'' test). An existing Plain
   blade and a textured blade, half in the wind, on a small two-load-cell balance under the tunnel
