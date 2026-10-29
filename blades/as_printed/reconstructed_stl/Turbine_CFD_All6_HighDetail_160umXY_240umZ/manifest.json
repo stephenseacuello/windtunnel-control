@@ -1,0 +1,43 @@
+{
+  "quality": "HIGH",
+  "xy_mm": 0.16,
+  "z_mm": 0.24,
+  "models": [
+    {
+      "specimen": "Baseline",
+      "filename": "Turbine_Baseline_160umXY_240umZ.stl",
+      "triangles": 2478480,
+      "bytes": 123924084
+    },
+    {
+      "specimen": "Ra10",
+      "filename": "Turbine_Ra10_160umXY_240umZ.stl",
+      "triangles": 2680652,
+      "bytes": 134032684
+    },
+    {
+      "specimen": "Ra20",
+      "filename": "Turbine_Ra20_160umXY_240umZ.stl",
+      "triangles": 2490732,
+      "bytes": 124536684
+    },
+    {
+      "specimen": "Ra40",
+      "filename": "Turbine_Ra40_160umXY_240umZ.stl",
+      "triangles": 2983132,
+      "bytes": 149156684
+    },
+    {
+      "specimen": "Ra80",
+      "filename": "Turbine_Ra80_160umXY_240umZ.stl",
+      "triangles": 3418806,
+      "bytes": 170940384
+    },
+    {
+      "specimen": "Ra320",
+      "filename": "Turbine_320_FuzzySkin_160umXY_240umZ.stl",
+      "triangles": 6170528,
+      "bytes": 308526484
+    }
+  ]
+}

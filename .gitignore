@@ -25,3 +25,8 @@ data/snapshots/*SIMULATED*.json
 
 # Office lock files
 ~$*
+
+# As-printed blade files (cfd/../blades/as_printed): G-code and reconstructed STLs are 11-309 MB each,
+# over GitHub limits; they stay local. README, manifests and checksums are tracked.
+blades/as_printed/gcode/*.gcode
+blades/as_printed/reconstructed_stl/**/*.stl
