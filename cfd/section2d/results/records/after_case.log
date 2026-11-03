@@ -28,3 +28,608 @@
 [render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_coarse_Tu1.0/fields)
 [record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_coarse_Tu1.0 : 4.03 MB, 42 files
 
+=== 2026-10-13 19:57:04 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U10.2_LM_medium_Tu1.0
+[record] a000.0_U10.2_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U10.2_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U10.2_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U10.2_LM_medium_Tu1.0 : 4.28 MB, 44 files
+
+=== 2026-10-13 19:57:28 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U10.2_SST_medium_Tu1.0
+[record] a000.0_U10.2_SST_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U10.2_SST_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U10.2_SST_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U10.2_SST_medium_Tu1.0 : 4.31 MB, 42 files
+
+=== 2026-10-13 19:57:43 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_LM_medium_Tu0.5
+[record] a000.0_U23.0_LM_medium_Tu0.5 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu0.5
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu0.5/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu0.5 : 4.49 MB, 44 files
+
+=== 2026-10-13 19:58:00 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_LM_medium_Tu1.0
+[record] a000.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu1.0 : 4.20 MB, 44 files
+
+=== 2026-10-13 19:58:16 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_LM_medium_Tu3.0
+[record] a000.0_U23.0_LM_medium_Tu3.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu3.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu3.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu3.0 : 4.41 MB, 44 files
+
+=== 2026-10-13 19:58:33 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_coarse_Tu1.0_Co2.5n2
+[record] a000.0_U23.0_SST_coarse_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_coarse_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_coarse_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_coarse_Tu1.0_Co2.5n2 : 3.67 MB, 42 files
+
+=== 2026-10-13 19:58:49 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_fine_Tu1.0_Co2.5n2
+[record] a000.0_U23.0_SST_fine_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_fine_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_fine_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_fine_Tu1.0_Co2.5n2 : 4.11 MB, 42 files
+
+=== 2026-10-13 19:59:11 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[record] a000.0_U23.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0_Co2.5n2 : 3.84 MB, 42 files
+
+=== 2026-10-13 19:59:29 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U38.0_LM_medium_Tu1.0
+[record] a000.0_U38.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U38.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U38.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U38.0_LM_medium_Tu1.0 : 4.55 MB, 44 files
+
+=== 2026-10-13 19:59:46 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U38.0_SST_medium_Tu1.0
+[record] a000.0_U38.0_SST_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U38.0_SST_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U38.0_SST_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U38.0_SST_medium_Tu1.0 : 4.28 MB, 42 files
+
+=== 2026-10-13 20:00:02 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a015.0_U23.0_LM_medium_Tu1.0
+[record] a015.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a015.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a015.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a015.0_U23.0_LM_medium_Tu1.0 : 4.29 MB, 44 files
+
+=== 2026-10-13 20:00:19 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a030.0_U23.0_LM_medium_Tu1.0
+[record] a030.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a030.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a030.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a030.0_U23.0_LM_medium_Tu1.0 : 4.47 MB, 44 files
+
+=== 2026-10-13 20:00:35 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a045.0_U23.0_LM_medium_Tu1.0
+[record] a045.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a045.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a045.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a045.0_U23.0_LM_medium_Tu1.0 : 4.43 MB, 44 files
+
+=== 2026-10-13 20:00:51 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a060.0_U23.0_LM_medium_Tu1.0
+[record] a060.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a060.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a060.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a060.0_U23.0_LM_medium_Tu1.0 : 4.22 MB, 44 files
+
+=== 2026-10-13 20:01:08 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a075.0_U23.0_LM_medium_Tu1.0
+[record] a075.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a075.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a075.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a075.0_U23.0_LM_medium_Tu1.0 : 4.77 MB, 44 files
+
+=== 2026-10-13 20:01:35 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_LM_medium_Tu1.0
+[record] a090.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_LM_medium_Tu1.0 : 4.48 MB, 44 files
+
+=== 2026-10-13 20:01:57 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_SST_coarse_Tu1.0_Co2.5n2
+[record] a090.0_U23.0_SST_coarse_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_coarse_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_coarse_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_coarse_Tu1.0_Co2.5n2 : 3.93 MB, 42 files
+
+=== 2026-10-13 20:02:12 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_SST_fine_Tu1.0_Co2.5n2
+[record] a090.0_U23.0_SST_fine_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_fine_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_fine_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_fine_Tu1.0_Co2.5n2 : 4.20 MB, 42 files
+
+=== 2026-10-13 20:02:33 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_SST_medium_Tu1.0
+[record] a090.0_U23.0_SST_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_medium_Tu1.0 : 4.22 MB, 43 files
+
+=== 2026-10-13 20:02:49 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[record] a090.0_U23.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_SST_medium_Tu1.0_Co2.5n2 : 3.98 MB, 42 files
+
+=== 2026-10-13 20:03:06 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a105.0_U23.0_LM_medium_Tu1.0
+[record] a105.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a105.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a105.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a105.0_U23.0_LM_medium_Tu1.0 : 4.53 MB, 44 files
+
+=== 2026-10-13 20:03:35 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a120.0_U23.0_LM_medium_Tu1.0
+[record] a120.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a120.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a120.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a120.0_U23.0_LM_medium_Tu1.0 : 4.70 MB, 44 files
+
+=== 2026-10-13 20:04:03 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a135.0_U23.0_LM_medium_Tu1.0
+[record] a135.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a135.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a135.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a135.0_U23.0_LM_medium_Tu1.0 : 4.62 MB, 44 files
+
+=== 2026-10-13 20:04:33 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U23.0_LM_medium_Tu1.0
+[record] a150.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu1.0 : 4.64 MB, 44 files
+
+=== 2026-10-13 20:05:08 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U23.0_LM_medium_Tu1.0
+[record] a165.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu1.0 : 4.51 MB, 44 files
+
+=== 2026-10-13 20:05:46 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U10.2_LM_medium_Tu1.0
+[record] a180.0_U10.2_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu1.0 : 4.47 MB, 44 files
+
+=== 2026-10-13 20:06:38 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U10.2_SST_medium_Tu1.0
+[record] a180.0_U10.2_SST_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_SST_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_SST_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_SST_medium_Tu1.0 : 4.29 MB, 42 files
+
+=== 2026-10-13 20:07:06 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_LM_medium_Tu0.5
+[record] a180.0_U23.0_LM_medium_Tu0.5 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu0.5
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu0.5/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu0.5 : 4.60 MB, 44 files
+
+=== 2026-10-13 20:07:48 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_LM_medium_Tu1.0
+[record] a180.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu1.0 : 4.52 MB, 44 files
+
+=== 2026-10-13 20:08:26 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_LM_medium_Tu3.0
+[record] a180.0_U23.0_LM_medium_Tu3.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu3.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu3.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu3.0 : 4.38 MB, 44 files
+
+=== 2026-10-13 20:09:07 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_SST_coarse_Tu1.0_Co2.5n2
+[record] a180.0_U23.0_SST_coarse_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_coarse_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_coarse_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_coarse_Tu1.0_Co2.5n2 : 3.94 MB, 42 files
+
+=== 2026-10-13 20:09:22 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_SST_fine_Tu1.0_Co2.5n2
+[record] a180.0_U23.0_SST_fine_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_fine_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_fine_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_fine_Tu1.0_Co2.5n2 : 4.44 MB, 42 files
+
+=== 2026-10-13 20:09:43 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_SST_medium_Tu1.0
+[record] a180.0_U23.0_SST_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_medium_Tu1.0 : 4.15 MB, 42 files
+
+=== 2026-10-13 20:10:04 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[record] a180.0_U23.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_medium_Tu1.0_Co2.5n2 : 4.15 MB, 42 files
+
+=== 2026-10-13 20:10:20 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U38.0_LM_medium_Tu1.0
+[record] a180.0_U38.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu1.0 : 4.47 MB, 44 files
+
+=== 2026-10-13 20:10:48 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U38.0_SST_medium_Tu1.0
+[record] a180.0_U38.0_SST_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_SST_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_SST_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_SST_medium_Tu1.0 : 4.09 MB, 42 files
+
+=== 2026-10-13 20:11:07 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U23.0_LM_medium_Tu1.0
+[record] a195.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu1.0 : 4.45 MB, 44 files
+
+=== 2026-10-13 20:11:33 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U23.0_LM_medium_Tu1.0
+[record] a210.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu1.0 : 4.67 MB, 44 files
+
+=== 2026-10-13 20:12:03 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a225.0_U23.0_LM_medium_Tu1.0
+[record] a225.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a225.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a225.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a225.0_U23.0_LM_medium_Tu1.0 : 4.66 MB, 44 files
+
+=== 2026-10-13 20:12:29 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a240.0_U23.0_LM_medium_Tu1.0
+[record] a240.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a240.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a240.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a240.0_U23.0_LM_medium_Tu1.0 : 4.70 MB, 44 files
+
+=== 2026-10-13 20:13:08 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a255.0_U23.0_LM_medium_Tu1.0
+[record] a255.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a255.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a255.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a255.0_U23.0_LM_medium_Tu1.0 : 4.59 MB, 44 files
+
+=== 2026-10-13 20:13:35 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a270.0_U23.0_LM_medium_Tu1.0
+[record] a270.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a270.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a270.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a270.0_U23.0_LM_medium_Tu1.0 : 4.41 MB, 44 files
+
+=== 2026-10-13 20:13:50 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a285.0_U23.0_LM_medium_Tu1.0
+[record] a285.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a285.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a285.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a285.0_U23.0_LM_medium_Tu1.0 : 4.67 MB, 44 files
+
+=== 2026-10-13 20:14:14 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a300.0_U23.0_LM_medium_Tu1.0
+[record] a300.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a300.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a300.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a300.0_U23.0_LM_medium_Tu1.0 : 4.60 MB, 44 files
+
+=== 2026-10-13 20:14:37 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a315.0_U23.0_LM_medium_Tu1.0
+[record] a315.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a315.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a315.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a315.0_U23.0_LM_medium_Tu1.0 : 4.39 MB, 44 files
+
+=== 2026-10-13 20:14:54 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a330.0_U23.0_LM_medium_Tu1.0
+[record] a330.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a330.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a330.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a330.0_U23.0_LM_medium_Tu1.0 : 4.52 MB, 44 files
+
+=== 2026-10-13 20:15:18 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a345.0_U23.0_LM_medium_Tu1.0
+[record] a345.0_U23.0_LM_medium_Tu1.0 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a345.0_U23.0_LM_medium_Tu1.0
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a345.0_U23.0_LM_medium_Tu1.0/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a345.0_U23.0_LM_medium_Tu1.0 : 4.08 MB, 44 files
+
+=== 2026-10-15 16:36:22 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_LM_medium_Tu1.0_Co1.25n2
+[record] a000.0_U23.0_LM_medium_Tu1.0_Co1.25n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu1.0_Co1.25n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu1.0_Co1.25n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_LM_medium_Tu1.0_Co1.25n2 : 4.13 MB, 44 files
+
+=== 2026-10-15 16:37:02 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_medium_Tu1.0_Co1.25n2
+[record] a000.0_U23.0_SST_medium_Tu1.0_Co1.25n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0_Co1.25n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0_Co1.25n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0_Co1.25n2 : 4.06 MB, 42 files
+
+=== 2026-10-15 16:37:38 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a075.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a075.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a075.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a075.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a075.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.28 MB, 44 files
+
+=== 2026-10-15 16:38:03 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a090.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a090.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.32 MB, 44 files
+
+=== 2026-10-15 16:38:39 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a105.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a105.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a105.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a105.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a105.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.39 MB, 44 files
+
+=== 2026-10-15 16:39:17 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a120.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a120.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a120.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a120.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a120.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.29 MB, 44 files
+
+=== 2026-10-15 16:39:54 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a135.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a135.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a135.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a135.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a135.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.17 MB, 44 files
+
+=== 2026-10-15 16:40:28 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[record] a150.0_U10.2_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_LM_medium_Tu0.5_Co2.5n2 : 4.45 MB, 44 files
+
+=== 2026-10-15 16:40:53 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[record] a150.0_U10.2_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_LM_medium_Tu1.0_Co2.5n2 : 4.35 MB, 44 files
+
+=== 2026-10-15 16:41:18 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[record] a150.0_U10.2_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_LM_medium_Tu3.0_Co2.5n2 : 4.23 MB, 44 files
+
+=== 2026-10-15 16:41:53 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[record] a150.0_U10.2_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U10.2_SST_medium_Tu1.0_Co2.5n2 : 4.29 MB, 42 files
+
+=== 2026-10-15 16:42:35 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[record] a150.0_U23.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu0.5_Co2.5n2 : 4.32 MB, 44 files
+
+=== 2026-10-15 16:43:21 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a150.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.16 MB, 44 files
+
+=== 2026-10-15 16:44:05 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[record] a150.0_U23.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_LM_medium_Tu3.0_Co2.5n2 : 4.18 MB, 44 files
+
+=== 2026-10-15 16:44:53 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[record] a150.0_U23.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U23.0_SST_medium_Tu1.0_Co2.5n2 : 4.25 MB, 42 files
+
+=== 2026-10-15 16:45:46 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[record] a150.0_U38.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_LM_medium_Tu0.5_Co2.5n2 : 4.62 MB, 44 files
+
+=== 2026-10-15 16:46:40 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[record] a150.0_U38.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_LM_medium_Tu1.0_Co2.5n2 : 4.17 MB, 44 files
+
+=== 2026-10-15 16:47:15 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[record] a150.0_U38.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_LM_medium_Tu3.0_Co2.5n2 : 4.59 MB, 44 files
+
+=== 2026-10-15 16:47:52 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a150.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[record] a150.0_U38.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a150.0_U38.0_SST_medium_Tu1.0_Co2.5n2 : 4.08 MB, 42 files
+
+=== 2026-10-15 16:48:25 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[record] a165.0_U10.2_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_LM_medium_Tu0.5_Co2.5n2 : 4.36 MB, 44 files
+
+=== 2026-10-15 16:48:58 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[record] a165.0_U10.2_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_LM_medium_Tu1.0_Co2.5n2 : 4.09 MB, 44 files
+
+=== 2026-10-15 16:49:27 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[record] a165.0_U10.2_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_LM_medium_Tu3.0_Co2.5n2 : 4.13 MB, 44 files
+
+=== 2026-10-15 16:49:50 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[record] a165.0_U10.2_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U10.2_SST_medium_Tu1.0_Co2.5n2 : 4.33 MB, 42 files
+
+=== 2026-10-15 16:50:10 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[record] a165.0_U23.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu0.5_Co2.5n2 : 4.21 MB, 44 files
+
+=== 2026-10-15 16:50:29 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a165.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.20 MB, 44 files
+
+=== 2026-10-15 16:50:47 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[record] a165.0_U23.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_LM_medium_Tu3.0_Co2.5n2 : 4.15 MB, 44 files
+
+=== 2026-10-15 16:51:03 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[record] a165.0_U23.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U23.0_SST_medium_Tu1.0_Co2.5n2 : 4.28 MB, 42 files
+
+=== 2026-10-15 16:51:21 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[record] a165.0_U38.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_LM_medium_Tu0.5_Co2.5n2 : 4.56 MB, 44 files
+
+=== 2026-10-15 16:51:42 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[record] a165.0_U38.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_LM_medium_Tu1.0_Co2.5n2 : 4.11 MB, 44 files
+
+=== 2026-10-15 16:51:59 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[record] a165.0_U38.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_LM_medium_Tu3.0_Co2.5n2 : 4.51 MB, 44 files
+
+=== 2026-10-15 16:52:19 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a165.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[record] a165.0_U38.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a165.0_U38.0_SST_medium_Tu1.0_Co2.5n2 : 4.35 MB, 42 files
+
+=== 2026-10-15 16:52:38 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[record] a180.0_U10.2_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu0.5_Co2.5n2 : 4.31 MB, 44 files
+
+=== 2026-10-15 16:52:54 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[record] a180.0_U10.2_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu1.0_Co2.5n2 : 4.11 MB, 44 files
+
+=== 2026-10-15 16:53:11 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[record] a180.0_U10.2_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_LM_medium_Tu3.0_Co2.5n2 : 3.93 MB, 44 files
+
+=== 2026-10-15 16:53:27 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[record] a180.0_U10.2_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U10.2_SST_medium_Tu1.0_Co2.5n2 : 4.21 MB, 42 files
+
+=== 2026-10-15 16:53:45 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[record] a180.0_U23.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu0.5_Co2.5n2 : 4.24 MB, 44 files
+
+=== 2026-10-15 16:54:02 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_LM_medium_Tu1.0_Co1.25n2
+[record] a180.0_U23.0_LM_medium_Tu1.0_Co1.25n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu1.0_Co1.25n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu1.0_Co1.25n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu1.0_Co1.25n2 : 3.93 MB, 44 files
+
+=== 2026-10-15 16:54:21 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a180.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.16 MB, 44 files
+
+=== 2026-10-15 16:54:37 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[record] a180.0_U23.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_LM_medium_Tu3.0_Co2.5n2 : 3.91 MB, 44 files
+
+=== 2026-10-15 16:54:53 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U23.0_SST_medium_Tu1.0_Co1.25n2
+[record] a180.0_U23.0_SST_medium_Tu1.0_Co1.25n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_medium_Tu1.0_Co1.25n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_medium_Tu1.0_Co1.25n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U23.0_SST_medium_Tu1.0_Co1.25n2 : 3.68 MB, 42 files
+
+=== 2026-10-15 16:55:12 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[record] a180.0_U38.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu0.5_Co2.5n2 : 4.36 MB, 44 files
+
+=== 2026-10-15 16:55:31 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[record] a180.0_U38.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu1.0_Co2.5n2 : 4.33 MB, 44 files
+
+=== 2026-10-15 16:55:50 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[record] a180.0_U38.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_LM_medium_Tu3.0_Co2.5n2 : 4.47 MB, 44 files
+
+=== 2026-10-15 16:56:08 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a180.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[record] a180.0_U38.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a180.0_U38.0_SST_medium_Tu1.0_Co2.5n2 : 4.16 MB, 42 files
+
+=== 2026-10-15 16:56:26 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[record] a195.0_U10.2_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_LM_medium_Tu0.5_Co2.5n2 : 4.55 MB, 44 files
+
+=== 2026-10-15 16:56:43 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[record] a195.0_U10.2_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_LM_medium_Tu1.0_Co2.5n2 : 4.28 MB, 44 files
+
+=== 2026-10-15 16:57:00 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[record] a195.0_U10.2_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_LM_medium_Tu3.0_Co2.5n2 : 3.96 MB, 44 files
+
+=== 2026-10-15 16:57:15 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[record] a195.0_U10.2_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U10.2_SST_medium_Tu1.0_Co2.5n2 : 4.27 MB, 42 files
+
+=== 2026-10-15 16:57:34 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[record] a195.0_U23.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu0.5_Co2.5n2 : 4.33 MB, 44 files
+
+=== 2026-10-15 16:57:50 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a195.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.18 MB, 44 files
+
+=== 2026-10-15 16:58:06 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[record] a195.0_U23.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_LM_medium_Tu3.0_Co2.5n2 : 4.03 MB, 44 files
+
+=== 2026-10-15 16:58:21 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[record] a195.0_U23.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U23.0_SST_medium_Tu1.0_Co2.5n2 : 4.27 MB, 42 files
+
+=== 2026-10-15 16:58:39 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[record] a195.0_U38.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_LM_medium_Tu0.5_Co2.5n2 : 4.57 MB, 44 files
+
+=== 2026-10-15 16:58:59 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[record] a195.0_U38.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_LM_medium_Tu1.0_Co2.5n2 : 4.54 MB, 44 files
+
+=== 2026-10-15 16:59:19 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[record] a195.0_U38.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_LM_medium_Tu3.0_Co2.5n2 : 4.52 MB, 44 files
+
+=== 2026-10-15 16:59:42 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a195.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[record] a195.0_U38.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a195.0_U38.0_SST_medium_Tu1.0_Co2.5n2 : 4.30 MB, 42 files
+
+=== 2026-10-15 17:00:08 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[record] a210.0_U10.2_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_LM_medium_Tu0.5_Co2.5n2 : 4.52 MB, 44 files
+
+=== 2026-10-15 17:00:36 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[record] a210.0_U10.2_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_LM_medium_Tu1.0_Co2.5n2 : 4.32 MB, 44 files
+
+=== 2026-10-15 17:01:02 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[record] a210.0_U10.2_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_LM_medium_Tu3.0_Co2.5n2 : 4.05 MB, 44 files
+
+=== 2026-10-15 17:01:25 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[record] a210.0_U10.2_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U10.2_SST_medium_Tu1.0_Co2.5n2 : 4.35 MB, 42 files
+
+=== 2026-10-15 17:01:51 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[record] a210.0_U23.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu0.5_Co2.5n2 : 4.32 MB, 44 files
+
+=== 2026-10-15 17:02:22 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a210.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.22 MB, 44 files
+
+=== 2026-10-15 17:03:01 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[record] a210.0_U23.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_LM_medium_Tu3.0_Co2.5n2 : 4.06 MB, 44 files
+
+=== 2026-10-15 17:03:42 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[record] a210.0_U23.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U23.0_SST_medium_Tu1.0_Co2.5n2 : 4.22 MB, 42 files
+
+=== 2026-10-15 17:04:18 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[record] a210.0_U38.0_LM_medium_Tu0.5_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_LM_medium_Tu0.5_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_LM_medium_Tu0.5_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_LM_medium_Tu0.5_Co2.5n2 : 4.61 MB, 44 files
+
+=== 2026-10-15 17:04:53 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[record] a210.0_U38.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_LM_medium_Tu1.0_Co2.5n2 : 4.49 MB, 44 files
+
+=== 2026-10-15 17:05:26 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[record] a210.0_U38.0_LM_medium_Tu3.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_LM_medium_Tu3.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_LM_medium_Tu3.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_LM_medium_Tu3.0_Co2.5n2 : 4.26 MB, 44 files
+
+=== 2026-10-15 17:05:55 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a210.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[record] a210.0_U38.0_SST_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_SST_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_SST_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a210.0_U38.0_SST_medium_Tu1.0_Co2.5n2 : 4.02 MB, 42 files
+
+=== 2026-10-15 17:06:19 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a225.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a225.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a225.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a225.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a225.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.07 MB, 44 files
+
+=== 2026-10-15 17:06:41 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a240.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a240.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a240.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a240.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a240.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.15 MB, 44 files
+
+=== 2026-10-15 17:07:06 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a255.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a255.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a255.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a255.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a255.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.32 MB, 44 files
+
+=== 2026-10-15 17:07:31 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a285.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a285.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a285.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a285.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a285.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.35 MB, 44 files
+
+=== 2026-10-15 17:07:54 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a300.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a300.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a300.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a300.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a300.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.18 MB, 44 files
+
+=== 2026-10-15 17:08:18 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a330.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[record] a330.0_U23.0_LM_medium_Tu1.0_Co2.5n2 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a330.0_U23.0_LM_medium_Tu1.0_Co2.5n2
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a330.0_U23.0_LM_medium_Tu1.0_Co2.5n2/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a330.0_U23.0_LM_medium_Tu1.0_Co2.5n2 : 4.14 MB, 44 files
+
