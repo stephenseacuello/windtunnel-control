@@ -1,0 +1,105 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2606                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _481094fdf3-20260618 OPENFOAM=2606 version=v2606
+Arch   : "LSB;label=32;scalar=64"
+Exec   : checkMesh
+Date   : Oct 09 2026
+Time   : 08:53:37
+Host   : Manbirs-MacBook-Air.local
+PID    : 18409
+I/O    : uncollated
+Case   : /Users/stepheneacuello/Projects/windtunnel-control/cfd/hpc/mesh_cache/stage2/tex0.050_s1_n5_a180.0
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+memory pool : not available
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+
+--> FOAM Warning : allowSystemOperations : Allowing user-supplied system call operations.
+                   This can be a security risk if running untrusted cases
+                   through e.g. 'coded' on-the-fly-compilation functionality.
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+--> FOAM Warning : 
+    From static Foam::instantList Foam::timeSelector::select0(Time &, const argList &)
+    in file db/Time/timeSelector.C at line 284
+    No time specified or available, selecting 'constant'
+Create mesh for time = constant
+
+Check mesh...
+
+Time = constant
+
+Mesh stats 
+    points:           426104
+    internal points:  0
+    faces:            864127
+    internal faces:   426506
+    cells:            217025
+    faces per cell:   5.9469324
+    boundary patches: 4
+    point zones:      0
+    face zones:       0
+    cell zones:       0
+
+Overall number of cells of each type:
+    hexahedra:     205508
+    prisms:        11517
+    wedges:        0
+    pyramids:      0
+    tet wedges:    0
+    tetrahedra:    0
+    polyhedra:     0
+
+Checking topology...
+    Boundary definition OK.
+    Cell to face addressing OK.
+    Point usage OK.
+    Upper triangular ordering OK.
+    Face vertices OK.
+    Number of regions: 1 (OK).
+
+Checking patch topology for multiply connected surfaces...
+    Patch               Faces    Points     Surface topology
+    blade               3425     6854     ok (non-closed singly connected)  
+    bladeEnds           46       96       ok (non-closed singly connected)  
+    farfield            100      200      ok (non-closed singly connected)  
+    frontAndBack        434050   426104   ok (non-closed singly connected)  
+    ".*"                437621   426104   ok (closed singly connected)      
+
+
+Checking faceZone topology for multiply connected surfaces...
+    No faceZones found.
+
+Checking basic cellZone addressing...
+    No cellZones found.
+
+Checking basic pointZone addressing...
+    No pointZones found.
+
+Checking geometry...
+    Overall domain bounding box (-1.296 -1.296 0) (1.296 1.296 0.001)
+    Mesh has 2 geometric (non-empty/wedge) directions (1 1 0)
+    Mesh has 2 solution (non-empty) directions (1 1 0)
+    All edges aligned with or perpendicular to non-empty directions.
+    Boundary openness (-3.8521827e-21 -1.8297868e-20 -2.0267546e-14) OK.
+    Max cell openness = 5.0981298e-16 OK.
+    Max aspect ratio = 10.128927 OK.
+    Minimum face area = 1.607961e-10. Maximum face area = 0.0092031056.  Face area magnitudes OK.
+    Min volume = 1.607961e-13. Max volume = 9.2031056e-06.  Total volume = 0.005273071.  Cell volumes OK.
+    Mesh non-orthogonality Max: 38.612944 average: 5.2982213
+    Non-orthogonality check OK.
+    Face pyramids OK.
+    Max skewness = 2.4183299 OK.
+    Coupled point location match (average 0) OK.
+
+Mesh OK.
+
+End
+
