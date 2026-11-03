@@ -5,6 +5,10 @@ coefficients of the blade section, measured and from theory. It is also step 2 o
 `cfd/analysis/2026-10-15/TEAM_SUMMARY.md`: Cd and Cl of Plain against fuzzy-skin (FS) blades at
 α 0, 90 and 180, and whether the convex side sheds vortices.
 
+**Status, 3 Nov 2026: on hold, not built.** The approach is to be reviewed with R. Cassin and
+Y. Kim first, and the MCE lab asked whether an existing force balance can be borrowed. A static-torque
+test (the whole rotor held at set angles) is the simpler alternative to weigh against it.
+
 **Status, 22 Oct 2026: designed, not built.** Nothing here is a measurement of the section test.
 Every calculated number comes from `docs/diagrams/build_section_test.py`, which writes them to
 `docs/diagrams/section_test_numbers.json` and draws the three figures; the prices of §4 are

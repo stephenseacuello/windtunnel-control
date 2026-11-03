@@ -9,8 +9,8 @@ nobody in the section or diffuser. ☐ Before it and on leaving: rotor seated, n
 section; mark blades with a marker, not tape. ☐ Magnet firmly glued (let new glue set first).
 ☐ No people in photos (public repo).
 
-**Kit:** phone, 5 m tape, 300 mm rule, calipers, plumb line, marker, kitchen scale, T. Kang's
-tachometer DAQ (1 Oct set-up). **Saving:** photos as `cfd/inputs/photos/YYYYMMDD_<code>.jpg` (rule
+**Kit:** phone, 5 m tape, 300 mm rule, calipers, plumb line, marker, kitchen scale, the
+tachometer and its logger (1 Oct set-up). **Saving:** photos as `cfd/inputs/photos/YYYYMMDD_<code>.jpg` (rule
 in frame, camera square); values into `cfd/inputs/rig_geometry.json` (§5 JSON block).
 
 **1 · How the blades attach to the arms ☐**
