@@ -10,10 +10,9 @@
 # the queue with --hook cfd/post/after_case.sh, or delete this file's body and exec it.
 # Never fails the caller: always exits 0.
 #
-# Known defect: cfd/post/render_fields.py orders the wall of patch 'blade' as one closed loop.
-# Stage 2 splits the wall into blade (painted faces, two disconnected pieces) and bladeEnds, so the
-# wall-distribution plots (fields/surface_*: Cp, Cf, y+) follow only one connected run of 'blade'.
-# Forces, coefficients and the other images are not affected (README section 8).
+# Fixed 15 Nov 2026: cfd/post/render_fields.py walks the patches 'blade' and 'bladeEnds' as one
+# closed loop, so the wall-distribution plots (fields/surface_*: Cp, Cf, y+) cover every wall face;
+# all 69 records were re-made that day (README section 8).
 
 case_dir=$1
 here=$(cd "$(dirname "$0")" && pwd)

@@ -4,7 +4,7 @@
  "stage": "section2d",
  "status": "finished",
  "status_reason": "solver log ends with End",
- "recorded_at": "2026-10-15T17:17:42",
+ "recorded_at": "2026-11-15T14:13:23",
  "record_version": 1,
  "source": "cfd/stage2/runs/a090.0_U23.0_SST_wf_Ks400_Tu1.0_Co2.5n2",
  "source_log": {
@@ -99,7 +99,7 @@
  },
  "renders": {
   "rc": 0,
-  "seconds": 10.3,
+  "seconds": 11.7,
   "images": [
    "cp_mean_near.png",
    "cp_near.png",
@@ -129,19 +129,19 @@
    "no animation: 1 saved field time(s) (purgeWrite keeps the last 3; finished cases keep only the last)"
   ],
   "yplus_inst": {
-   "min": 12.628248774375175,
-   "mean": 38.229546983233945,
-   "max": 73.11009228343096,
-   "p95": 68.54625978864932
+   "min": 2.425729417318098,
+   "mean": 29.0853677353372,
+   "max": 83.58574318222627,
+   "p95": 76.92801337137722
   },
   "yplus_mean": {
-   "min": 12.64059778094653,
-   "mean": 38.34661901056449,
-   "max": 73.35276607697455,
-   "p95": 68.77227852884238
+   "min": 2.702375625368391,
+   "mean": 28.860445172224384,
+   "max": 83.79877628774446,
+   "p95": 77.10637417398006
   }
  },
- "record_bytes": 3822481,
+ "record_bytes": 3897297,
  "files": [
   "case.json",
   "checkMesh.log",

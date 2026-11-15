@@ -1,6 +1,6 @@
 # Record: `a180.0_U23.0_SST_tex0.000_s1_Tu1.0_N80A50`
 
-Recorded 2026-10-13T20:33:25 by `cfd/post/record_case.py` from `cfd/stage2/runs/a180.0_U23.0_SST_tex0.000_s1_Tu1.0_N80A50`. Status when recorded: **finished** (solver log ends with End).
+Recorded 2026-11-15T14:19:48 by `cfd/post/record_case.py` from `cfd/stage2/runs/a180.0_U23.0_SST_tex0.000_s1_Tu1.0_N80A50`. Status when recorded: **finished** (solver log ends with End).
 
 > The averaging window holds 9.2 shedding cycles; about 10 or more are needed before means and St are converged (cfd/docs/LEARNING_LOG.md section 6).
 

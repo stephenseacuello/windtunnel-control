@@ -1,6 +1,6 @@
 # Record: `a090.0_U23.0_SST_wf_Ks100_Tu1.0_Co2.5n2`
 
-Recorded 2026-10-15T17:17:16 by `cfd/post/record_case.py` from `cfd/stage2/runs/a090.0_U23.0_SST_wf_Ks100_Tu1.0_Co2.5n2`. Status when recorded: **finished** (solver log ends with End).
+Recorded 2026-11-15T14:12:29 by `cfd/post/record_case.py` from `cfd/stage2/runs/a090.0_U23.0_SST_wf_Ks100_Tu1.0_Co2.5n2`. Status when recorded: **finished** (solver log ends with End).
 
 ## Key numbers
 

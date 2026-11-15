@@ -4,7 +4,7 @@
  "stage": "section2d",
  "status": "finished",
  "status_reason": "solver log ends with End",
- "recorded_at": "2026-10-13T20:35:08",
+ "recorded_at": "2026-11-15T14:23:38",
  "record_version": 1,
  "source": "cfd/stage2/runs/a180.0_U23.0_SST_wf_Ks50_Tu1.0",
  "source_log": {
@@ -121,7 +121,7 @@
  },
  "renders": {
   "rc": 0,
-  "seconds": 11.2,
+  "seconds": 13.1,
   "images": [
    "cp_mean_near.png",
    "cp_near.png",
@@ -152,19 +152,19 @@
    "vorticity_anim.gif: frame spacing 37 c/U; shedding period 1/St = 4.2 c/U (NOT resolved: frames alias the shedding)"
   ],
   "yplus_inst": {
-   "min": 7.4592773990705865,
-   "mean": 25.52860583858684,
-   "max": 47.4968314657654,
-   "p95": 43.554809293008475
+   "min": 6.724851282591904,
+   "mean": 35.90896372220336,
+   "max": 100.0957629981664,
+   "p95": 89.46357380367768
   },
   "yplus_mean": {
    "min": 7.594643139961347,
-   "mean": 25.585780739516483,
-   "max": 44.255817593567336,
-   "p95": 41.82424492518357
+   "mean": 30.228562299128406,
+   "max": 64.9367851814895,
+   "p95": 59.41268502908573
   }
  },
- "record_bytes": 4111708,
+ "record_bytes": 4180955,
  "files": [
   "case.json",
   "checkMesh.log",

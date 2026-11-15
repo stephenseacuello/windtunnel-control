@@ -1,3 +1,4 @@
+wall loop blade+bladeEnds: 475 of 475 faces (blade 459, bladeEnds 16), closed: True
 mesh images
   mesh_domain.png
   mesh_near.png

@@ -4,7 +4,7 @@
  "stage": "section2d",
  "status": "finished",
  "status_reason": "solver log ends with End",
- "recorded_at": "2026-10-15T17:23:06",
+ "recorded_at": "2026-11-15T14:22:52",
  "record_version": 1,
  "source": "cfd/stage2/runs/a180.0_U23.0_SST_wf_Ks200_Tu1.0_Co2.5n2",
  "source_log": {
@@ -99,7 +99,7 @@
  },
  "renders": {
   "rc": 0,
-  "seconds": 10.5,
+  "seconds": 12.2,
   "images": [
    "cp_mean_near.png",
    "cp_near.png",
@@ -130,18 +130,18 @@
   ],
   "yplus_inst": {
    "min": 7.431462609841031,
-   "mean": 27.0908646572394,
-   "max": 55.29650582818878,
-   "p95": 50.78132877970182
+   "mean": 39.774776974963565,
+   "max": 101.88562161644376,
+   "p95": 78.77144418902274
   },
   "yplus_mean": {
    "min": 7.652752742599486,
-   "mean": 27.691946241588834,
-   "max": 53.145803590652854,
-   "p95": 49.68749416374445
+   "mean": 34.506026653328604,
+   "max": 79.48742611149594,
+   "p95": 72.90398890154353
   }
  },
- "record_bytes": 3973491,
+ "record_bytes": 4046913,
  "files": [
   "case.json",
   "checkMesh.log",

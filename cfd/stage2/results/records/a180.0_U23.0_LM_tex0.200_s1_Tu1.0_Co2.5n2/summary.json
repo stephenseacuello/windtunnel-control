@@ -4,7 +4,7 @@
  "stage": "section2d",
  "status": "finished",
  "status_reason": "solver log ends with End",
- "recorded_at": "2026-10-15T17:21:05",
+ "recorded_at": "2026-11-15T14:18:23",
  "record_version": 1,
  "source": "cfd/stage2/runs/a180.0_U23.0_LM_tex0.200_s1_Tu1.0_Co2.5n2",
  "source_log": {
@@ -102,7 +102,7 @@
  },
  "renders": {
   "rc": 0,
-  "seconds": 12.8,
+  "seconds": 14.4,
   "images": [
    "cp_mean_near.png",
    "cp_near.png",
@@ -134,19 +134,19 @@
    "no animation: 1 saved field time(s) (purgeWrite keeps the last 3; finished cases keep only the last)"
   ],
   "yplus_inst": {
-   "min": 0.00220702341947337,
-   "mean": 0.12378533815430348,
-   "max": 0.654968201669321,
-   "p95": 0.3132341705117301
+   "min": 0.0007577114482482683,
+   "mean": 0.07620960110081526,
+   "max": 0.9535959120637781,
+   "p95": 0.24065289361679026
   },
   "yplus_mean": {
-   "min": 0.0013698778575541855,
-   "mean": 0.12423109325221661,
-   "max": 0.6582870660425845,
-   "p95": 0.3142176869967217
+   "min": 0.00031520013276266297,
+   "mean": 0.07640543827075608,
+   "max": 0.9571048314252733,
+   "p95": 0.2409860017624194
   }
  },
- "record_bytes": 4125474,
+ "record_bytes": 4496201,
  "files": [
   "case.json",
   "checkMesh.log",

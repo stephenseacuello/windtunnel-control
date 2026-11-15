@@ -33,7 +33,9 @@ the 2D slab, sliced at mid-depth:
                                    time-mean UMean when fieldAverage wrote it)
   gammaInt_near                    intermittency (kOmegaSSTLM runs only), 0 to 1
   *_mean_*                         the same for UMean / pMean when they exist
-  surface_<time>.csv / .png        Cp, Cf and y+ along the blade wall (ordered loop, s/c)
+  surface_inst.csv / .png, surface_mean.csv / .png
+                                   Cp, Cf and y+ on every wall face, in wall-loop order (s/c);
+                                   see "Wall loops" below
   vorticity_anim.gif or vorticity_frames.png
                                    vorticity at every saved write time (only if two or
                                    more exist); labelled with the frame spacing against
@@ -43,6 +45,18 @@ Values outside a range take the end colour of the bar (e.g. Cp > 1 in an impulsi
 Surfaces are drawn unlit, so a pixel has exactly the colour-bar colour of its value, and the
 palette quantisation keeps 128 entries sampled along the colour map(s) on screen. Every field
 image states its view height (the length scale).
+
+Wall loops (surface_*, the gammaInt_wall view, the rotor corner close-ups): the faces of one group
+of wall patches are chained edge to edge into a single loop, counter-clockwise; a section loop starts
+at tip A's outer corner (mesh_info.json frame.corners_body_m). Groups (case_info 'walls'): the
+section's 'blade' and 'bladeEnds' together, and one loop per rotor blade patch. A Stage 1 section
+wall is one closed patch 'blade'. Stage 2 (cfd/stage2/mesh/make_mesh.py) splits it into 'blade'
+(convex and concave faces: two open chains) and 'bladeEnds' (the two end faces), so before
+15 Nov 2026, when 'blade' was walked alone, the walk stopped at a chain end and the Stage 2 records'
+surface tables held 896 of the 3,425 'blade' faces on the texture meshes and 121 of 459 on the
+wall-function meshes (cfd/analysis/2026-10-15/README.md). The CSV column 'patch' is each face's own
+patch. render_manifest.json 'wall_loops' gives, per loop, the faces of each patch, how many the walk
+reached and whether it closed; a walk that misses faces is also listed under 'notes'.
 """
 import argparse
 import json
@@ -87,20 +101,23 @@ def _try(obj, prop, val):
 
 # --------------------------------------------------------------------------- case info
 def case_info(case, kind):
+    """Case parameters for the renders. 'walls': groups of wall patches, each group walked as one
+    closed loop (wall_loops); a patch the mesh does not have is dropped (Scene)."""
     P = rl.load_json(case / "case.json", {}) or {}
     M = rl.load_json(case / "mesh_info.json", {}) or {}
     info = dict(name=case.name, kind=kind, P=P, M=M)
     if kind == "section":
         c = P.get("cRef", M.get("c_ref_m", 0.048))
+        # Stage 1: 'blade' alone (closed); Stage 2: 'blade' (two open chains) + 'bladeEnds' close the loop
         info.update(L=c, Lname="c", dz=P.get("dz", M.get("dz_m", 1e-3)), U=P.get("Uinf"),
                     nu=P.get("nu", 1.516e-5), alpha=P.get("alphaDeg", M.get("alpha_deg_wake", 0.0)),
                     model=P.get("turbulenceModel", ""), level=P.get("level", M.get("level", "")),
-                    t_ref=P.get("convTime"), t_lab="c/U", c_s=c, patches=["blade"])
+                    t_ref=P.get("convTime"), t_lab="c/U", c_s=c, walls=[("blade", "bladeEnds")])
     else:
         D = P.get("D", M.get("D_rotor_m", 0.2128))
         info.update(L=D, Lname="D", dz=P.get("dz", M.get("dz_m", 0.01)), U=P.get("Uinf"),
                     nu=P.get("nu", 1.516e-5), alpha=0.0, model=P.get("turbulenceModel", ""),
-                    level=M.get("level", ""), c_s=0.048, patches=["blade1", "blade2", "blade3"])
+                    level=M.get("level", ""), c_s=0.048, walls=[("blade1",), ("blade2",), ("blade3",)])
         if P.get("mode") == "rotating":
             info.update(t_ref=P["Trev"], t_lab="rev")
         else:
@@ -132,7 +149,8 @@ class Scene:
             pass
         self.r.UpdatePipelineInformation()
         avail = list(self.r.GetProperty("MeshRegions").Available)
-        self.patches = [p for p in info["patches"] if f"patch/{p}" in avail]
+        self.walls = [g for g in (tuple(p for p in grp if f"patch/{p}" in avail) for grp in info["walls"]) if g]
+        self.patches = [p for g in self.walls for p in g]
         regions = ["internalMesh"] + [f"patch/{p}" for p in self.patches]
         if "patch/inlet" in avail:
             regions.append("patch/inlet")
@@ -387,8 +405,10 @@ def views(info, S):
 
 
 def wall_loops(S, t):
-    """Ordered wall loops per blade patch at time t: list of dicts with arrays."""
-    info = S.info
+    """Ordered wall loops at time t, one per group of wall patches (S.walls): the faces of the group's
+    patches are appended into one set and chained edge to edge. List of dicts: arrays in loop order
+    (fpatch = each face's own patch), faces = number of faces per patch, closed = the walk came back
+    to its first face."""
     d_int = sm.Fetch(S.internal)
     ug = None
     it = d_int.NewIterator()
@@ -405,22 +425,28 @@ def wall_loops(S, t):
     loc.BuildLocator()
     W = dsa.WrapDataObject(ug)
     loops = []
-    for patch in S.patches:
-        b = ExtractBlock(Input=S.r, Selectors=[f"/Root/boundary/{patch}"])
-        b.UpdatePipeline(t)
-        dp = sm.Fetch(b)
+    for group in S.walls:
         app = vtkAppendFilter()
-        it = dp.NewIterator()
-        it.InitTraversal()
-        while not it.IsDoneWithTraversal():
-            app.AddInputData(it.GetCurrentDataObject())
-            it.GoToNextItem()
+        fpatch = []                     # the patch of each appended face (vtkAppendFilter keeps input order)
+        for patch in group:
+            b = ExtractBlock(Input=S.r, Selectors=[f"/Root/boundary/{patch}"])
+            b.UpdatePipeline(t)
+            dp = sm.Fetch(b)
+            it = dp.NewIterator()
+            it.InitTraversal()
+            while not it.IsDoneWithTraversal():
+                blk = it.GetCurrentDataObject()
+                app.AddInputData(blk)
+                fpatch += [patch] * blk.GetNumberOfCells()
+                it.GoToNextItem()
         app.SetMergePoints(True)
         app.Update()
         pd = app.GetOutput()
         n = pd.GetNumberOfCells()
         if n == 0:
             continue
+        if len(fpatch) != n:
+            raise RuntimeError(f"{'+'.join(group)}: {n} faces appended but {len(fpatch)} counted by patch")
         pts = dsa.WrapDataObject(pd).Points
         zmid = float(np.median(pts[:, 2]))
         edge = []
@@ -456,6 +482,7 @@ def wall_loops(S, t):
             cur = nxt[0]
             a_, b_ = (canon[x] for x in edge[cur])
             via = b_ if a_ == via else a_
+        closed = len(order) > 2 and start in p2c.get(via, [])      # the last face touches the first
         order = np.array(order)
         fc = vtkCellCenters()
         fc.SetInputData(pd)
@@ -467,7 +494,9 @@ def wall_loops(S, t):
             order, fcent, xy = order[::-1], fcent[::-1], xy[::-1]
         P = dsa.WrapDataObject(pd).CellData
         nb = np.array([loc.FindClosestPoint(fcent[i]) for i in range(len(order))])
-        loops.append(dict(patch=patch, order=order, xy=xy, fcent=fcent, nb=nb, cpts=cpts,
+        loops.append(dict(patch="+".join(group), order=order, xy=xy, fcent=fcent, nb=nb, cpts=cpts,
+                          fpatch=np.asarray(fpatch)[order], faces={p: fpatch.count(p) for p in group},
+                          closed=bool(closed),
                           face={k: np.asarray(P[k])[order] for k in P.keys()},
                           cell={k: np.asarray(W.CellData[k])[nb] for k in W.CellData.keys()
                                 if k in ("U", "UMean", "nut")}))
@@ -475,7 +504,8 @@ def wall_loops(S, t):
 
 
 def surface_table(S, loops, mean=False):
-    """Per-face table along each wall loop: s/c, x, y, Cp, Cf, y+, first-cell distance."""
+    """Per-face table along each wall loop: (face's patch, s/c, x, y, Cp, Cf, y+, first-cell distance,
+    loop name). The CSV gets the first eight; the plot draws one line per loop name."""
     info = S.info
     U, nu = info["U"], info["nu"]
     q = 0.5 * U * U
@@ -508,7 +538,8 @@ def surface_table(S, loops, mean=False):
         Cp = (F[pk] - S.pinf) / q
         Cf = sign * tau / q
         for i in range(n):
-            rows.append((L["patch"], s[i] / info["c_s"], xy[i, 0], xy[i, 1], Cp[i], Cf[i], yplus[i], d[i]))
+            rows.append((str(L["fpatch"][i]), s[i] / info["c_s"], xy[i, 0], xy[i, 1], Cp[i], Cf[i], yplus[i], d[i],
+                         L["patch"]))
     return rows, (src if loops else "")
 
 
@@ -520,7 +551,7 @@ def rotate_start(loops, info):
     a = np.array(cn["A_outer"])
     for L in loops:
         k = int(np.argmin(np.linalg.norm(L["xy"] - a, axis=1)))
-        for key in ("order", "xy", "fcent", "nb"):
+        for key in ("order", "xy", "fcent", "nb", "fpatch"):
             L[key] = np.roll(L[key], -k, axis=0)
         for grp in ("face", "cell"):
             L[grp] = {kk: np.roll(v, -k, axis=0) for kk, v in L[grp].items()}
@@ -551,14 +582,14 @@ def plot_surface(rows, info, out_png, title, src, corner_s=None):
     except Exception as e:  # noqa: BLE001
         print(f"  (no matplotlib in pvbatch: {e})")
         return
-    patches = sorted(set(r[0] for r in rows))
+    loops = sorted(set(r[8] for r in rows))          # one line per wall loop (r[0] is the face's patch)
     fig = plt.figure(figsize=(9.0, 8.0))
     gs = fig.add_gridspec(3, 4)
     axs = [fig.add_subplot(gs[i, :3]) for i in range(3)]
     axo = fig.add_subplot(gs[0, 3])
-    for p in patches:
-        R = np.array([r[1:] for r in rows if r[0] == p], float)
-        lab = p if len(patches) > 1 else None
+    for p in loops:
+        R = np.array([r[1:8] for r in rows if r[8] == p], float)
+        lab = p if len(loops) > 1 else None
         axs[0].plot(R[:, 0], R[:, 3], lw=1.2, label=lab)
         axs[1].plot(R[:, 0], R[:, 4], lw=1.2)
         axs[2].semilogy(R[:, 0], np.maximum(R[:, 5], 1e-3), lw=1.2)
@@ -567,7 +598,7 @@ def plot_surface(rows, info, out_png, title, src, corner_s=None):
         k = max(1, len(R) // 12)
         axo.annotate("", xy=(R[k, 1] * 1e3, R[k, 2] * 1e3), xytext=(R[0, 1] * 1e3, R[0, 2] * 1e3),
                      arrowprops=dict(arrowstyle="->", color="k", lw=1))
-    allR = np.array([r[1:] for r in rows], float)
+    allR = np.array([r[1:8] for r in rows], float)
     for ax, col in ((axs[0], 3), (axs[1], 4)):
         lo, hi = np.percentile(allR[:, col], [1.5, 98.5])
         pad = 0.15 * (hi - lo + 1e-9)
@@ -598,7 +629,7 @@ def plot_surface(rows, info, out_png, title, src, corner_s=None):
                        (0.5 * (cs["B inner"] + cs["A inner"]), "concave (inner) side"),
                        (cs["B outer"], "tip B"), (cs["A inner"], "tip A")):
             axs[0].text(x, 1.02, txt, transform=tr, fontsize=8, ha="center", va="bottom", color="0.25")
-    if len(patches) > 1:
+    if len(loops) > 1:
         axs[0].legend(fontsize=7)
     axo.set_aspect("equal")
     axo.set_title("s = 0 (dot), direction", fontsize=8)
@@ -856,6 +887,15 @@ def main(argv=None):
             S.loops = rotate_start(wall_loops(S, t), info)
         except Exception as e:  # noqa: BLE001
             manifest["notes"].append(f"wall loop extraction failed: {e}")
+        manifest["wall_loops"] = [dict(loop=L["patch"], faces=L["faces"], walked=int(len(L["order"])),
+                                       closed=L["closed"]) for L in S.loops]
+        for L in S.loops:
+            n = sum(L["faces"].values())
+            print(f"wall loop {L['patch']}: {len(L['order'])} of {n} faces "
+                  f"({', '.join(f'{p} {k}' for p, k in L['faces'].items())}), closed: {L['closed']}", flush=True)
+            if len(L["order"]) < n:
+                manifest["notes"].append(f"wall loop {L['patch']}: the walk reached {len(L['order'])} of {n} faces "
+                                         "(the patches do not form one closed loop); surface_* cover only those")
         render_mesh(S, info, out, V)
         if S.fields and field_times:
             print(f"fields at t = {t:.6g} s", flush=True)

@@ -305,12 +305,14 @@ superseded by R2.
 therefore uses its own `after_case.sh`, which calls the same `record_case.py` with `--out`. Once
 `after_case.sh` routes `*/stage2/*` to `cfd/stage2/results/records/`, run the queue with
 `--hook cfd/post/after_case.sh`. Tested 8 Oct on the alpha 180 test case: record written in 44 s
-(33 files, ParaView images included). **Known defect:** `render_fields.py` orders the wall of patch
-`blade` as one closed loop; with the end faces split off, `blade` is two disconnected pieces and the
-wall-distribution plots (`fields/surface_*.png/.csv`: Cp, Cf, y+ along the wall) follow only one
-connected run (in the test, half of the convex face). Forces, coefficients, the CSV and the other
-images are not affected. Fix (in `cfd/post/`, when no queue depends on it): read the patches
-`blade` and `bladeEnds` together and order them as one loop.
+(33 files, ParaView images included). **Surface tables, fixed 15 Nov 2026:** `render_fields.py` used to
+order only the patch `blade` as one closed loop; with the end faces split off, `blade` is two
+disconnected pieces, so the wall-distribution plots (`fields/surface_*.png/.csv`) covered 896 of the
+3,425 texture faces (121 of 459 on the wall-function meshes). It now walks `blade` and `bladeEnds` as
+one loop: every face once, the `patch` column giving each face's patch, and a `wall_loops` entry in
+`render_manifest.json`. All 69 records were re-made on 15 Nov. Forces and coefficients were never
+affected. On textured walls s/c runs along the textured surface (3.53 c around, against 2.93 c
+smooth); `../analysis/2026-11-15/src/surface_extract.py` uses the smooth arc length instead.
 
 ## 9. Limitations
 
