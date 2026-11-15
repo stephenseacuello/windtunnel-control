@@ -94,7 +94,8 @@ sets \\
 (GCI \nGciCdNinety\,\%) but the lift diverges (spread \nSpreadClNinety\,\%); at α~0 and 180 the meshes
 zig-zag by \nSpreadCdZero\ and \nSpreadCdOneEighty\,\%. Halving the time step lowers Cd(180) by
 \nTsDropSST\,\% (SST) and \nTsDropLM\,\% (LM) and stops the shedding; no smaller step has been run, and at
-fixed maxCo the step shrinks with the cells. \emph{Converged only for the edge-on drag.}
+fixed maxCo the step shrinks with the cells. \emph{Mesh-converged only for the edge-on drag, and only at
+maxCo~2.5; whether the edge-on forces hold at a smaller step is a B1 check.}
 
 \textbf{Rough-wall blade} (SST, rough wall function). From maxCo 5 to 2.5 every roughness effect keeps its
 sign and moves by at most \nWfMaxMove\ point (α~90, Ks~400\um: +\nWfNinetyFive\ to +\nWfNinetyTwoFive\,\%);

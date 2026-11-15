@@ -1,0 +1,48 @@
+# Stage 2 mechanisms (B2), prepared 15 Nov 2026; NOT SUBMITTED. Gate: after the B1 results
+# (S2f_verify.txt, priority7_verify.txt, priorityF_verify.txt) have been read with R. Cassin.
+# Not listed in hpc_common.STAGES on purpose, so a plain submit.py or sync_up.sh cannot send it
+# early; add it there at the go. Report: reports/cfd_verification_2026-12/ (sections 3-5).
+#
+# Settings below are B1's current ones (nseg 5, maxCo 2.5, 150 c/U averaged over the last 100). If
+# B1 adopts maxCo 1.25 or nseg 10, change every texture line before submitting (cost x 1.4-3.1).
+#
+# P2   resolved texture edge-on, where the rotor runs put the roughness response: alpha 90 for the
+#      levels B1 does not cover (t 0.025, 0.05, 0.10; B1 has t 0 and 0.20) and alpha 270 for all
+#      five. t 0.025 is the case closest to every tested set on measured Ra (Ra / 0.397 gives
+#      0.021-0.032 mm). SST only (the LM time-step check, S2f T3, has not run).
+# SEED one random pattern so far: two more seeds at alpha 90, t 0.20 (the t 0 reference is
+#      the same mesh for every seed).
+# P1   rough wall function: an equivalent Ks for each FS level by matching P2 (alpha 90, 180),
+#      Ks 25/38/90/211 um (the mapping candidates: 38 = scanned k, 90 = FS 0.20 scanned k,
+#      211 = FS 0.10 nominal); alpha 270 never run with any roughness model.
+# Cost (estimated from stage2_polars.csv): texture 161-468 core-h per run (16 ranks, 10-29 h);
+# wall function 23-70 per run (8 ranks); about 3,300-7,100 core-h for this file.
+# Submit (at the go): python3 cfd/hpc/submit.py --stage stage2 cfd/stage2/queues/S2g_mechanisms.txt
+#
+# P2: texture, alpha 90 (levels not in B1) and alpha 270
+90   23.0  SST  tex  t=0.025 maxco=2.5 nconv=150 navg=100
+90   23.0  SST  tex  t=0.05  maxco=2.5 nconv=150 navg=100
+90   23.0  SST  tex  t=0.1   maxco=2.5 nconv=150 navg=100
+270  23.0  SST  tex  t=0     maxco=2.5 nconv=150 navg=100
+270  23.0  SST  tex  t=0.025 maxco=2.5 nconv=150 navg=100
+270  23.0  SST  tex  t=0.05  maxco=2.5 nconv=150 navg=100
+270  23.0  SST  tex  t=0.1   maxco=2.5 nconv=150 navg=100
+270  23.0  SST  tex  t=0.2   maxco=2.5 nconv=150 navg=100
+# SEED: alpha 90, t 0.20, seeds 2 and 3
+90   23.0  SST  tex  t=0.2   seed=2 maxco=2.5 nconv=150 navg=100
+90   23.0  SST  tex  t=0.2   seed=3 maxco=2.5 nconv=150 navg=100
+# P1: rough wall function, equivalent-Ks candidates at alpha 90 and 180
+90   23.0  SST  wf  ks=25   maxco=2.5
+90   23.0  SST  wf  ks=38   maxco=2.5
+90   23.0  SST  wf  ks=90   maxco=2.5
+90   23.0  SST  wf  ks=211  maxco=2.5
+180  23.0  SST  wf  ks=25   maxco=2.5
+180  23.0  SST  wf  ks=38   maxco=2.5
+180  23.0  SST  wf  ks=90   maxco=2.5
+180  23.0  SST  wf  ks=211  maxco=2.5
+# P1: alpha 270, never run with any roughness model
+270  23.0  SST  wf  ks=0    maxco=2.5
+270  23.0  SST  wf  ks=50   maxco=2.5
+270  23.0  SST  wf  ks=100  maxco=2.5
+270  23.0  SST  wf  ks=200  maxco=2.5
+270  23.0  SST  wf  ks=400  maxco=2.5

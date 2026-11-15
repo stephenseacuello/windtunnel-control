@@ -1,0 +1,43 @@
+# Priority G: rotor mechanisms (B2), prepared 15 Nov 2026; NOT SUBMITTED. Gate: after the B1
+# results have been read with R. Cassin, and only if priorityF_verify.txt shows the Ks-400 gain on
+# the fine mesh and at maxCo 2 (otherwise the rotor gain is mesh-dependent and P3 is dropped).
+# Not listed in hpc_common.STAGES on purpose; add it there at the go.
+#
+# P3   Ks sweep between the two Ks the rough set ran (100, 400 um) and below it: is the rotor's
+#      response threshold-like (a sector change below 2u at 25-50 um and resolved at 200)? Same
+#      configuration and window as priorityE_rough.txt (assembly A, sense=CCW, 23 m/s, SST, medium
+#      mesh, maxCo 4, 50 revolutions with the last 45 averaged, the kRough wall function). Note
+#      cfd/analysis/2026-11-15/README.md: the revolution-to-revolution 2u is probably 1.6-2 x too
+#      narrow, so a "resolved" sector change needs that margin.
+# STATIC rough-blade static rotor (theta 0-105 deg), for the quasi-steady check of the sector
+#      budget; the smooth static set exists (rotor_static.csv, Spalding wall function), so Ks 0
+#      runs with the same kRough wall function as Ks 400.
+# Rotor surface sampling (pressure and wall shear on each blade through the turn) needs the opt-in
+# surf=1 key, which does not exist yet; those lines are added when it has passed a smoke test.
+# Cost (estimated; priorityE_rough.txt and rotor_static.csv): P3 586k steps (lambda 0.10) or 489k
+# (0.12) x 0.0876 s on 8 ranks = about 114 or 95 core-h per run, about 630 for the six; static
+# about 3 core-h each (wall time at most about 19 min on 8 ranks).
+# Submit (at the go): python3 cfd/hpc/submit.py --stage rotor2d cfd/rotor2d/queues/priorityG_mechanisms.txt
+# Columns: rot|sta HYP U_ms lambda|theta MODEL LEVEL [key=value ...]   (see ../queue.py)
+rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=8 ks=25
+rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=8 ks=50
+rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=8 ks=200
+rot A 23 0.12 SST medium sense=CCW nrev=50 navg=45 np=8 ks=25
+rot A 23 0.12 SST medium sense=CCW nrev=50 navg=45 np=8 ks=50
+rot A 23 0.12 SST medium sense=CCW nrev=50 navg=45 np=8 ks=200
+sta A 23 0   SST medium ks=0 nutwf=kRough
+sta A 23 15  SST medium ks=0 nutwf=kRough
+sta A 23 30  SST medium ks=0 nutwf=kRough
+sta A 23 45  SST medium ks=0 nutwf=kRough
+sta A 23 60  SST medium ks=0 nutwf=kRough
+sta A 23 75  SST medium ks=0 nutwf=kRough
+sta A 23 90  SST medium ks=0 nutwf=kRough
+sta A 23 105 SST medium ks=0 nutwf=kRough
+sta A 23 0   SST medium ks=400
+sta A 23 15  SST medium ks=400
+sta A 23 30  SST medium ks=400
+sta A 23 45  SST medium ks=400
+sta A 23 60  SST medium ks=400
+sta A 23 75  SST medium ks=400
+sta A 23 90  SST medium ks=400
+sta A 23 105 SST medium ks=400
