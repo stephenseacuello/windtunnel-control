@@ -26,6 +26,11 @@ RJOBS = f"{ROOT}/jobs"                 # generated sbatch scripts, submission lo
 IMAGE = f"{ROOT}/containers/openfoam-run_2606.sif"
 RPY = f"{ROOT}/venv/bin/python"        # Python 3.12 + numpy/scipy on Unity (run_case.py, summaries)
 ACCOUNT = "pi_sodhi_uri_edu"
+# Longest job Slurm accepts: MaxTime 5-00:00:00 on uri-cpu and cpu, EnforcePartLimits=ALL (checked
+# 15 Nov 2026; October's 7-8-day limits ran then, but a longer request is now rejected at sbatch).
+# A case that needs longer stops at the limit and resumes on the next submission.
+MAX_JOB_S = 5 * 86400 - 60
+LAB_CORES = 768                        # the lab's share of uri-cpu (LEARNING_LOG.md, Unity notes)
 
 STAGING = HPC / "mesh_cache"           # meshes made by premesh.py (git-ignored), <stage>/<key>/
 JOBS = HPC / "jobs"                    # local copies of the generated sbatch scripts (git-ignored)
@@ -35,15 +40,18 @@ STAGES = {
     "section2d": dict(queue_mod="hpc_q_section2d", queues=["queues/priority1.txt", "queues/priority2.txt",
                                                             "queues/priority3.txt", "queues/priority4.txt",
                                                             "queues/priority5_co25.txt",
-                                                            "queues/priority6_rerun.txt"]),
+                                                            "queues/priority6_rerun.txt",
+                                                            "queues/priority7_verify.txt"]),
     "rotor2d": dict(queue_mod="hpc_q_rotor2d", queues=["queues/priority0.txt", "queues/priorityA.txt",
                                                         "queues/priorityC.txt",
                                                         "queues/priorityD_rerun.txt",
-                                                        "queues/priorityE_rough.txt"]),
+                                                        "queues/priorityE_rough.txt",
+                                                        "queues/priorityF_verify.txt"]),
     "stage2": dict(queue_mod="hpc_q_stage2", queues=["queues/S2a_ks_U23.txt", "queues/S2b_speeds.txt",
                                                       "queues/S2c_texture.txt",
                                                       "queues/S2d_co25.txt",
-                                                      "queues/S2e_rerun.txt"]),
+                                                      "queues/S2e_rerun.txt",
+                                                      "queues/S2f_verify.txt"]),
 }
 
 _LOADED = {}
@@ -171,6 +179,15 @@ STEPS_PER_CONV = {"coarse": 560, "medium": 800, "fine": 1130}
 STEPS_PER_CONV_STAGE2 = {"wf": 200, "tex": 1750}       # tex: README section 6 upper estimate (139k / 80)
 STEPS_PER_DU_ROTOR_STATIC = 480
 STEPS_PER_REV_ROTOR_015 = 10000                         # smoke test at lambda 0.15 (README); scales with 0.15/lambda
+ROTOR_MAXCO_DEFAULT = 4.0                               # rotor2d/run_case.py DEFAULTS
+# Rotor mesh levels against medium (rotor2d/results/rotor_cp.csv, assembly A, 23 m/s):
+# steps per revolution (time step set by the corner spacing) and cells (61,910 medium).
+ROTOR_LEVEL_STEPS = {"coarse": 0.62, "medium": 1.0, "fine": 1.59}
+ROTOR_LEVEL_CELLS = {"coarse": 0.53, "medium": 1.0, "fine": 1.92}
+# Resolved texture with nseg wall cells per 0.2 mm (default 5): cells about 1 + 0.53 (nseg/5 - 1)
+# (nseg 10: about 1.53 x, estimated from the ring size in mesh_info.json); steps taken as
+# proportional to nseg (upper bound; the 15 Nov review put nseg 10 at 1-2 x).
+TEX_NSEG_DEFAULT = 5
 
 # Unity seconds per step at 16 ranks for each kind (developed flow); filled from the test job.
 # Each entry: {ntasks: s_per_step}. Missing ntasks are scaled with the nearest entry (ideal scaling).
@@ -205,11 +222,24 @@ def est_steps(stage, c):
     if stage == "section2d":
         return STEPS_PER_CONV[n["level"]] * float(n["nconv"]) * co
     if stage == "stage2":
-        return STEPS_PER_CONV_STAGE2[n["wall"]] * float(n["nconv"]) * co
+        f = float(n.get("nseg") or TEX_NSEG_DEFAULT) / TEX_NSEG_DEFAULT if n["wall"] == "tex" else 1.0
+        return STEPS_PER_CONV_STAGE2[n["wall"]] * float(n["nconv"]) * co * f
     if n.get("lam") is None:
         return STEPS_PER_DU_ROTOR_STATIC * float(n["nconv"])
     f = 1.3 if n["U"] > 30 else 1.0          # thinner first cell at 38 m/s (h0 0.55 mm against 0.87 mm)
-    return STEPS_PER_REV_ROTOR_015 * float(n["nrev"]) * 0.15 / float(n["lam"]) * f
+    co = ROTOR_MAXCO_DEFAULT / float(n.get("maxco") or ROTOR_MAXCO_DEFAULT)
+    return (STEPS_PER_REV_ROTOR_015 * float(n["nrev"]) * 0.15 / float(n["lam"]) * f * co
+            * ROTOR_LEVEL_STEPS.get(n.get("level"), 1.0))
+
+
+def cells_factor(stage, c):
+    """Cells of the case's mesh against the mesh S_PER_STEP was measured on."""
+    n = norm(stage, c)
+    if stage == "stage2" and n["wall"] == "tex":
+        return 1 + 0.53 * (float(n.get("nseg") or TEX_NSEG_DEFAULT) / TEX_NSEG_DEFAULT - 1)
+    if stage == "rotor2d" and n.get("lam") is not None:
+        return ROTOR_LEVEL_CELLS.get(n.get("level"), 1.0)
+    return 1.0
 
 
 def s_per_step(kind, ntasks, model="SST"):
@@ -224,7 +254,8 @@ def s_per_step(kind, ntasks, model="SST"):
 
 def est_seconds(stage, c, ntasks, frac_left=1.0):
     n = norm(stage, c)
-    return est_steps(stage, c) * s_per_step(kind_of(stage, c), ntasks, n.get("model", "SST")) * frac_left
+    return (est_steps(stage, c) * s_per_step(kind_of(stage, c), ntasks, n.get("model", "SST"))
+            * cells_factor(stage, c) * frac_left)
 
 
 def fmt_h(s):

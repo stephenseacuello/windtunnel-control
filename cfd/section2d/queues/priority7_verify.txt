@@ -1,0 +1,36 @@
+# Stage 1 verification of the smooth section (B1), 15 Nov 2026. Prof. Jahangiri's first point
+# (1 Nov): mesh convergence and time-step sensitivity. Report: reports/cfd_verification_2026-12/.
+#
+# What exists (cfd/analysis/2026-10-13/out/section_grid.csv; cfd/analysis/2026-10-15/out/
+# section_timestep_changes.csv): at maxCo 2.5, Cd converges with the mesh only at alpha 90
+# (GCI 7.6 %), and Cl there diverges; at alpha 0 and 180 the three meshes zig-zag (9.0 and 11.5 %).
+# From maxCo 2.5 to 1.25, Cd(180) falls 17.5 % (SST); no run uses a smaller step. At fixed maxCo the
+# step also shrinks with the mesh, so mesh and step are mixed. The texture mesh's smooth Cd(180)
+# is 39 % below the medium mesh's; at a matched time step the gap is about 9 % (15 Nov review), so
+# the time step, not the 40 um wall spacing, is the leading suspect.
+#
+# S1   alpha 180: maxCo 0.625 on medium (does Cd keep falling?), and coarse and fine at 1.25
+#      (a grid study at one smaller step).
+# E90  alpha 90: coarse, medium and fine at maxCo 1.25 (its step was never tested; Cl diverges).
+# S2   alpha 0, the two flow states (Cd about 3.2 or 1.75 depending on maxCo): maxCo 0.625 on
+#      medium and 1.25 on coarse and fine, run to 300 c/U (the maxCo 1.25 medium run was still
+#      drifting at 150). Its medium/1.25 partner of the same length is the restart
+#      runs/_cont_Co1p25to1p25_a000 (the 150-c/U Co1.25n2 case continued to 300 c/U, made with
+#      cfd/hpc/hysteresis_restart.py, submitted with its own sbatch); runs/_hyst_Co5to1p25_a000
+#      continues the maxCo-5 high-drag case at 1.25 (does that state decay?). The maxCo-2.5 grid
+#      cases ran 150 c/U, so comparing them with these mixes the step with the run length.
+# SST, 23 m/s, Tu 1 %. Cost (estimated from section_polars.csv): about 2,100-2,900 core-h (the
+# cost model, an upper bound, gives about 4,400 at these ranks).
+# Submit, in this order (each case keeps the rank count of its first job):
+#   python3 cfd/hpc/submit.py --stage section2d cfd/section2d/queues/priority7_verify.txt --only 'Co0.625' --ntasks 16
+#   python3 cfd/hpc/submit.py --stage section2d cfd/section2d/queues/priority7_verify.txt --only 'a000.0_U23.0_SST_fine' --ntasks 32
+#   python3 cfd/hpc/submit.py --stage section2d cfd/section2d/queues/priority7_verify.txt   (the rest: 8 ranks, fine 16)
+180  23.0  SST  medium  1.0  maxco=0.625
+180  23.0  SST  coarse  1.0  maxco=1.25
+180  23.0  SST  fine    1.0  maxco=1.25
+90   23.0  SST  coarse  1.0  maxco=1.25
+90   23.0  SST  medium  1.0  maxco=1.25
+90   23.0  SST  fine    1.0  maxco=1.25
+0    23.0  SST  medium  1.0  maxco=0.625 nconv=300 navg=100
+0    23.0  SST  coarse  1.0  maxco=1.25 nconv=300 navg=100
+0    23.0  SST  fine    1.0  maxco=1.25 nconv=300 navg=100

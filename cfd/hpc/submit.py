@@ -19,15 +19,17 @@ yet (run sync_up.sh; a mesh made inside a job could race with another job needin
 
 Ranks per job: DEFAULT_NTASKS in hpc_common.py (8 for medium meshes: the better use of cores;
 16 for fine and resolved-texture meshes), or --ntasks. The time limit is the estimate from the
-cost model times --time-factor, plus 30 min, at least 2 h. Slurm sends SIGTERM 15 min before
-the limit; the solver stops and a later submit.py resumes the case from its last write.
+cost model times --time-factor, plus 30 min, at least 2 h, at most Unity's MaxTime of 5 days
+(hpc_common.MAX_JOB_S). Slurm sends SIGTERM 15 min before the limit; the solver stops and a
+later submit.py resumes the case from its last write.
 
 Lanes keep the lab's share of uri-cpu free for others: the jobs are dealt into --lanes8 lanes
-(8-rank jobs) and --lanes16 lanes (16-rank jobs), each job waiting for the one before it in its
-lane (Slurm --dependency=afterany), so at most 8 x lanes8 + 16 x lanes16 cores are in use
-(default 26 and 19: 512 of the lab's 768, with the 19 large jobs all running at once). Jobs
-are dealt in priority order (ORDER) to the lane that frees first by the cost model.
---lanes8 0 --lanes16 0 submits everything at once.
+(8-rank jobs) and --lanes16 lanes (jobs of more than 8 ranks), each job waiting for the one
+before it in its lane (Slurm --dependency=afterany), so at most one job per lane runs. With
+16-rank jobs that is 8 x lanes8 + 16 x lanes16 cores (default 26 and 19: 512 of the lab's 768);
+jobs of 32 or more ranks count at their size, and a plan whose lanes could exceed 768 cores is
+refused (lower --lanes16). Jobs are dealt in priority order (ORDER) to the lane that frees first
+by the cost model. --lanes8 0 --lanes16 0 submits everything at once.
 """
 import argparse
 import json
@@ -108,16 +110,20 @@ def local_complete(stage, name):
 
 
 def deal(todo, lanes8, lanes16):
-    """Assign each job a lane ('8-3', '16-0', ...), in list order, to the lane that frees first."""
+    """Assign each job a lane ('8-3', '16-0', ...), in list order, to the lane that frees first.
+    Returns (span s, peak cores): one job runs per lane, so the peak is the sum over the lanes
+    of the largest job dealt to each."""
     if not lanes8 and not lanes16:
-        return None
+        return None, sum(r["ntasks"] for r in todo)
     free = {8: [0.0] * max(lanes8, 1), 16: [0.0] * max(lanes16, 1)}
+    big = {}
     for r in todo:
         g = 8 if r["ntasks"] <= 8 else 16
         i = min(range(len(free[g])), key=lambda k: free[g][k])
         r["lane"] = f"{g}-{i}"
         free[g][i] += r["est_left_s"]
-    return max(max(v) for v in free.values())
+        big[r["lane"]] = max(big.get(r["lane"], 0), r["ntasks"])
+    return max(max(v) for v in free.values()), sum(big.values())
 
 
 def plan(stages, files, sense, only, ntasks_override, factor):
@@ -131,7 +137,8 @@ def plan(stages, files, sense, only, ntasks_override, factor):
             if only and not re.search(only, name):
                 continue
             kind = H.kind_of(st, c)
-            n = ntasks_override or H.DEFAULT_NTASKS[kind]
+            # a rotor line's np= is the decomposition run_case.py keeps on every resume
+            n = ntasks_override or (c.get("np") if st == "rotor2d" else None) or H.DEFAULT_NTASKS[kind]
             rows.append(dict(stage=st, name=name, case=c, kind=kind, ntasks=n, mesh=H.mesh_key(st, c),
                              queue=str(Path(f).name), est_s=H.est_seconds(st, c, n)))
     rows.sort(key=lambda r: (ORDER[r["kind"]], r["stage"], r["queue"]))
@@ -168,6 +175,13 @@ def main():
     for r in rows:
         info = st["cases"][r["stage"]][r["name"]]
         state = info.get("state", "?")
+        if state == "partial" and info.get("n_proc") and info["n_proc"] != r["ntasks"]:
+            # run_case.py resumes on the existing processor*/ decomposition whatever the job's size
+            # (mpirun -np <old>), so the job must have that many tasks
+            print(f"note: {r['name']} is decomposed for {info['n_proc']} ranks; resubmitting at {info['n_proc']}, "
+                  f"not {r['ntasks']}")
+            r["ntasks"] = info["n_proc"]
+            r["est_s"] = H.est_seconds(r["stage"], r["case"], r["ntasks"])
         frac = 1.0
         t = (info.get("log") or {}).get("t") or (float(info["proc_latest"]) if info.get("proc_latest") else None)
         if state in ("partial", "migrated") and t and info.get("endTime"):
@@ -177,7 +191,7 @@ def main():
         if state != "complete" and lg.get("s_per_simtime") and lg.get("t") is not None and info.get("endTime"):
             # measured: this case's own clock seconds per simulated second (last 200 steps)
             est = max(est * 0.1, (float(info["endTime"]) - lg["t"]) * lg["s_per_simtime"])
-        limit = min(13 * 86400, max(2 * 3600, est * a.time_factor * EXTRA_FACTOR.get(r["kind"], 1.0) + 1800))
+        limit = min(H.MAX_JOB_S, max(2 * 3600, est * a.time_factor * EXTRA_FACTOR.get(r["kind"], 1.0) + 1800))
         if state == "complete":
             act = "skip: complete"
         elif local_complete(r["stage"], r["name"]):
@@ -198,14 +212,22 @@ def main():
                 core_h += r["ntasks"] * est / 3600
         print(f"{r['stage']:9s} {r['name'][:52]:52s} {state:9s} {'ok' if info.get('mesh_ok') else 'no':4s} "
               f"{r['ntasks']:3d} {H.fmt_h(est):>9s} {H.slurm_time(limit):>11s}  {act}")
-    print(f"\n{len(todo)} jobs, {cores} cores if all ran at once (lab cap on {a.partition}: 768), "
+    print(f"\n{len(todo)} jobs, {cores} cores if all ran at once (lab cap on {a.partition}: {H.LAB_CORES}), "
           f"about {core_h:.0f} core-hours by the cost model")
     if not todo:
         return
-    span = deal(todo, a.lanes8, a.lanes16)
+    long_ = [r["name"] for r in todo if r["est_left_s"] * EXTRA_FACTOR.get(r["kind"], 1.0) > H.MAX_JOB_S]
+    if long_:
+        print(f"note: {len(long_)} case(s) may need more than one 5-day job; resubmit after the limit: "
+              + ", ".join(long_))
+    span, peak = deal(todo, a.lanes8, a.lanes16)
     if span is not None:
-        print(f"lanes: {a.lanes8} x 8 ranks + {a.lanes16} x 16 ranks = at most {8 * a.lanes8 + 16 * a.lanes16} cores; "
-              f"all done in about {H.fmt_h(span)} by the cost model, once the jobs start")
+        print(f"lanes: {a.lanes8} x 8 ranks + {a.lanes16} x up to {max(r['ntasks'] for r in todo)} ranks; "
+              f"at most {peak} cores at once; all done in about {H.fmt_h(span)} by the cost model, once the jobs start")
+    if span is not None and peak > H.LAB_CORES:
+        sys.exit(f"refused: up to {peak} cores at once is more than the lab's {H.LAB_CORES}; lower --lanes16")
+    if span is None and peak > H.LAB_CORES:
+        print(f"note: no lanes; {peak} cores requested at once, beyond the lab's {H.LAB_CORES} (Slurm queues the rest)")
 
     stamp = time.strftime("%Y%m%d_%H%M%S")
     H.JOBS.mkdir(parents=True, exist_ok=True)

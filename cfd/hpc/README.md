@@ -14,7 +14,7 @@ Records (plots, ParaView renders) are still made on the Mac, after the results a
 | Ranks | `--np`, else `$SLURM_NTASKS`, else 4. 8 ranks for medium meshes, 16 for fine and resolved-texture meshes (`DEFAULT_NTASKS` in `hpc_common.py`). |
 | Meshes | Made on the Mac (`premesh.py`), uploaded by `sync_up.sh` to `<stage>/runs/_mesh/` on Unity. A missing mesh is made inside the job with the Unity venv (gmsh 4.15.2, as on the Mac). |
 | Python on Unity | `$ROOT/venv` (Python 3.12, numpy, scipy, matplotlib, gmsh); `repo/cfd/.venv` links to it. |
-| Jobs | `submit.py`: partition `uri-cpu` (URI nodes, 64 cores, not preemptible, 30-day limit), account `pi_sodhi_uri_edu`, 1 node, time limit 3 × estimate + 30 min. The lab can use up to 768 cores on uri-cpu; jobs beyond that wait in the queue. |
+| Jobs | `submit.py`: partition `uri-cpu` (URI nodes, 64 cores, not preemptible), account `pi_sodhi_uri_edu`, 1 node, time limit 3 × estimate + 30 min, at most 5 days. Unity's MaxTime is 5-00:00:00 on `uri-cpu` and `cpu` and is enforced at submission (`EnforcePartLimits=ALL`, checked 15 Nov 2026; it was longer in October). A case that needs longer stops at the limit and resumes on the next `submit.py`. The lab can use up to 768 cores on uri-cpu; `submit.py` refuses a lane plan that could exceed that. |
 | Stop and resume | Slurm sends SIGTERM 15 min before the time limit. The solver is stopped and the case keeps its last written time, so the next `submit.py` run resumes it. A job never runs a case that is complete or already queued. |
 
 `$ROOT` = `/work/pi_sodhi_uri_edu/seacuello/windtunnel-cfd` (1 TB group quota; snapshots for

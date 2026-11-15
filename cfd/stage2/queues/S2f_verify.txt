@@ -1,0 +1,39 @@
+# Stage 2 verification of the resolved texture (B1), 15 Nov 2026. Prof. Jahangiri's first point
+# (1 Nov): mesh convergence and time-step sensitivity before more simulations. Report:
+# reports/cfd_verification_2026-12/; background: cfd/analysis/2026-10-15/UPDATE.md sections 2, 6 and 10.
+#
+# What the 32 texture runs show so far (cfd/analysis/2026-10-15/out/roughness_tex_timestep.csv):
+# one mesh (nseg 5, 40 um wall spacing) and two time steps. From maxCo 5 to 2.5 the SST levels at
+# alpha 180 fall 16-17.5 % and the shedding pattern swaps; only the sign of the +13.6 % drag
+# effect (t 0.20) is established. Alpha 90 and 270 were never run with texture, although the rotor
+# runs put the roughness response on the edge-on blade.
+#
+# T1   time step: alpha 180, maxCo 1.25 (against S2e_rerun.txt's maxCo 2.5 pair).
+# T2a  wall spacing 20 um (nseg 10) at maxCo 2.5: about 1.5 x the cells.
+# E90  edge-on, alpha 90: the texture effect at maxCo 2.5, and its time step at 1.25.
+# Same run length as S2e (150 c/U, last 100 averaged), SST, 23 m/s, seed 1.
+#
+# Acceptance (judged with R. Cassin before Stage 2 production): keep nseg 5 / maxCo 2.5 if the
+# smooth Cd(180) moves <= 5 % and the t 0.20 effect stays within +-5 points of +13.6 % with the
+# same sign of the lift change and the same dominant shedding pattern; otherwise adopt the finer
+# setting (texture cost x 1.4-3.1).
+#
+# Cost (estimated from stage2_polars.csv): T1 690-2,560 core-h, T2a 1,200-3,600, E90 about
+# 970-2,800; the longest job about 3.6 days on 16 ranks (inside the 5-day limit).
+# Submit, in this order (the first command must come first, or the nseg-10 cases go at 16 ranks):
+#   python3 cfd/hpc/submit.py --stage stage2 cfd/stage2/queues/S2f_verify.txt --only '_n10_' --ntasks 32
+#   python3 cfd/hpc/submit.py --stage stage2 cfd/stage2/queues/S2f_verify.txt     (the rest, 16 ranks)
+# A case stopped at the 5-day limit resumes on its own decomposition: submit.py now resubmits a
+# partial case at its existing rank count (32 for the nseg-10 cases).
+180  23.0  SST  tex  t=0     maxco=1.25 nconv=150 navg=100
+180  23.0  SST  tex  t=0.2   maxco=1.25 nconv=150 navg=100
+180  23.0  SST  tex  t=0     nseg=10 maxco=2.5 nconv=150 navg=100
+180  23.0  SST  tex  t=0.2   nseg=10 maxco=2.5 nconv=150 navg=100
+90   23.0  SST  tex  t=0     maxco=2.5 nconv=150 navg=100
+90   23.0  SST  tex  t=0.2   maxco=2.5 nconv=150 navg=100
+90   23.0  SST  tex  t=0     maxco=1.25 nconv=150 navg=100
+90   23.0  SST  tex  t=0.2   maxco=1.25 nconv=150 navg=100
+# Optional T3: the LM texture effects did not survive halving the time step (maxCo 5 to 2.5);
+# needed before any LM texture claim (about 1,040 core-h).
+# 180  23.0  LM   tex  t=0     maxco=1.25 nconv=150 navg=100
+# 180  23.0  LM   tex  t=0.2   maxco=1.25 nconv=150 navg=100

@@ -35,7 +35,8 @@ the parent), and NAME must not exist yet. Steps:
      marker or processor*/ folders, i.e. when it has run before: decomposePar -force would delete
      that progress.
 
-Time limit = --time-factor (3) x estimate + 30 min, at least 2 h, as in submit.py. Estimate =
+Time limit = --time-factor (3) x estimate + 30 min, at least 2 h and at most Unity's 5-day MaxTime,
+as in submit.py. Estimate =
 steps x s/step:
   steps   = nconv c/U / dt_new, dt_new = the source's mean dt over the last half of its steps
             (results.json dt_last_half_mean_s) x maxCo_new / maxCo_source. The step is
@@ -228,12 +229,16 @@ def main():
     end_time = t_final + a.nconv * tc
     nconv_total = float(P["nConv"]) + a.nconv
     steps, sps, est_s, how = estimate(P, R, a.maxco, a.nconv, a.ntasks, a.s_per_step)
-    limit_s = max(2 * 3600, est_s * a.time_factor + 1800)
+    limit_s = min(H.MAX_JOB_S, max(2 * 3600, est_s * a.time_factor + 1800))     # Unity MaxTime 5 days
+    if est_s * a.time_factor + 1800 > H.MAX_JOB_S:
+        # this sbatch cannot resume: a job killed at the limit leaves processor*/ and RUNNING behind
+        print(f"warning: the limit is capped at Unity's 5 days, below {a.time_factor:g} x the estimate; "
+              f"use more --ntasks or a smaller --nconv")
     print(f"source   {src.name}: maxCo {float(P['maxCo']):g}, final time {t_name} s ({t_final / tc:.2f} c/U), "
           f"{int(P['nProcs'])} ranks")
     print(f"restart  {dst}: maxCo {a.maxco:g}, end time {end_time:.12g} s ({end_time / tc:.2f} c/U, +{a.nconv:g} c/U)")
     print(f"estimate {steps:,.0f} steps x {sps:.4g} s/step = {est_s / 3600:.2f} h ({how})")
-    print(f"limit    {H.slurm_time(limit_s)} = {a.time_factor:g} x estimate + 30 min (at least 2 h); "
+    print(f"limit    {H.slurm_time(limit_s)} = {a.time_factor:g} x estimate + 30 min (at least 2 h, at most 5 days); "
           f"{a.ntasks} ranks, partition {a.partition}")
     if a.dry_run:
         print("dry run: nothing written")
