@@ -12,9 +12,11 @@
 # STATIC rough-blade static rotor (theta 0-105 deg), for the quasi-steady check of the sector
 #      budget; the smooth static set exists (rotor_static.csv, Spalding wall function), so Ks 0
 #      runs with the same kRough wall function as Ks 400.
-# Rotor surface sampling (pressure and wall shear on each blade through the turn) needs the opt-in
-# surf=1 key, which does not exist yet; those lines are added when it has passed a smoke test.
-# Cost (estimated; priorityE_rough.txt and rotor_static.csv): P3 586k steps (lambda 0.10) or 489k
+# SURF wall pressure and shear on each blade through the turn (J3), with the opt-in surf=1 key
+#      (README "Surface sampling"; smoke-tested 15 Nov): smooth (Ks 0, kRough) and Ks 400 at lambda
+#      0.10 and 0.12, the rough set's window (50 revolutions, last 45), samples every 5 deg; about 25 h
+#      on 8 ranks and 0.4 GB of samples per run. cfd/post/rotor_surface.py makes the s-theta tables.
+# Cost (estimated; priorityE_rough.txt and rotor_static.csv): SURF as P3 (sampling adds no steps); P3 586k steps (lambda 0.10) or 489k
 # (0.12) x 0.0876 s on 8 ranks = about 114 or 95 core-h per run, about 630 for the six; static
 # about 3 core-h each (wall time at most about 19 min on 8 ranks).
 # Submit (at the go): python3 cfd/hpc/submit.py --stage rotor2d cfd/rotor2d/queues/priorityG_mechanisms.txt
@@ -41,3 +43,7 @@ sta A 23 60  SST medium ks=400
 sta A 23 75  SST medium ks=400
 sta A 23 90  SST medium ks=400
 sta A 23 105 SST medium ks=400
+rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=8 surf=1 ks=0 nutwf=kRough
+rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=8 surf=1 ks=400
+rot A 23 0.12 SST medium sense=CCW nrev=50 navg=45 np=8 surf=1 ks=0 nutwf=kRough
+rot A 23 0.12 SST medium sense=CCW nrev=50 navg=45 np=8 surf=1 ks=400

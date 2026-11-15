@@ -30,6 +30,14 @@ Rough blades (--ks, --cs, --nutwf; README "Rough blades"; wall wf only; as cfd/s
   A warning is printed when Ks exceeds the first-cell-centre height y_P = h0/2 (log law invalid);
   case.json records nutWallFunction, KsBlade (m), Cs, h0, yP and KsOverYp.
 
+Surface sampling (--surf; README "Surface sampling"; rotating cases only; read by cfd/post/rotor_surface.py):
+  --surf 0 (default)  nothing sampled: the case, its name and every file it writes are exactly those of
+                    the code before the option existed.
+  --surf 1          p and wallShearStress on blade1..3 every T/72 (5 deg of rotation) from averageStart
+                    ((nrev - navg) T, the start of the force averaging window) to the end: system/functionsSurf,
+                    included at the end of system/functions. Name suffix _surf.
+  --surf 2          the same plus a mid-span plane of U and p every T/36 over the last 2 revolutions. Suffix _surf2.
+
 Options that change the physics or numerics appear in the case name, e.g.
   A_rot_U23.0_lam0.150_SST_medium            (defaults: wf walls, Tu 1 %, decay control, lt 1 mm,
                                               auto sense, nrev 8, smooth blades)
@@ -37,6 +45,7 @@ Options that change the physics or numerics appear in the case name, e.g.
   A_rot_U23.0_lam0.150_LM_medium_lowRe_Tu3.0_senseCW_beta79_Co1n3
   A_sta_U23.0_th000.0_SST_medium_precomp     (--decay precompensate)
   A_rot_U23.0_lam0.120_SST_medium_Ks100_senseCCW_rev50a45   (--ks 100 --sense CCW --nrev 50 --navg 45)
+  A_rot_U23.0_lam0.100_SST_medium_Ks0_senseCCW_rev15a10_surf   (--surf 1: sampling only, last in the name)
 Cases go to cfd/rotor2d/runs/<name>/ (git-ignored). Re-running the same command
 skips a complete case (results.json complete) and otherwise resumes from the last
 write in processor*/ (startFrom latestTime): an interruption loses at most half a
@@ -107,9 +116,17 @@ LT_DEFAULTS = {"control": 1.0e-3, "precompensate": 0.01}
 # case.json and every field file are unchanged by the option.
 CS_DEFAULT = 0.5                        # nutkRoughWallFunction roughness constant (0.5: uniform sand)
 NUTWF = ("spalding", "kRough")          # blade nut wall function: nutUSpaldingWallFunction / nutkRoughWallFunction
+# Surface sampling (README "Surface sampling"; 15 Nov 2026), rotating cases only. surf is in DEFAULTS (0), but
+# normalise() drops the key at 0, as it drops ks for smooth blades, so a case without it, its name, case.json
+# and every file it writes are unchanged by the option. 1: blade surfaces; 2: blade surfaces and mid-span plane.
+SURF_LEVELS = (0, 1, 2)
+SURF_PER_REV = 72                       # blade p and wall shear every T/72: 5 deg of rotation, two per 10-deg bin
+PLANE_PER_REV = 36                      # surf 2: mid-span plane every T/36 (10 deg) ...
+PLANE_REVS = 2                          # ... over the last 2 revolutions
+PLANE_BOX_D = ((-1.5, -1.5), (4.0, 1.5))   # surf 2: plane limited to this box (x, y in rotor diameters D)
 DEFAULTS = dict(level="medium", model="SST", wall="wf", tu=1.0, decay=DECAY_DEFAULT, lt=None, nrev=8, navg=3,
                 nconv=40, navgconv=25, maxco=4.0, nouter=2, sense="auto", beta=None, np=int(os.environ.get("SLURM_NTASKS") or 4), yplus=None, walls=None,
-                side_bc="slip", wdist=1, name=None)
+                side_bc="slip", wdist=1, surf=0, name=None)
 
 
 def lt_default(decay=DECAY_DEFAULT):
@@ -164,6 +181,10 @@ def case_name(c):
             s += f"a{c['navg']}" if c["nrev"] != DEFAULTS["nrev"] else f"_rev{c['nrev']}a{c['navg']}"
     elif c["nconv"] != DEFAULTS["nconv"] or c["navgconv"] != DEFAULTS["navgconv"]:
         s += f"_conv{c['nconv']}a{c['navgconv']}"
+    # Surface sampling (normalise drops surf 0): appended last, after the run length, so the rest of the name is
+    # unchanged and no other option's suffix starts with or contains '_surf'.
+    if c.get("surf"):
+        s += "_surf" if c["surf"] == 1 else f"_surf{c['surf']}"
     return s
 
 
@@ -279,6 +300,16 @@ def case_parameters(c, mesh_info):
         h0 = float(mesh_info["h0_m"])
         P.update(nutWallFunction="nutkRoughWallFunction", KsBlade=c["ks"] * 1e-6, Cs=c["cs"], h0=h0, yP=0.5 * h0,
                  KsOverYp=c["ks"] * 1e-6 / (0.5 * h0))
+    if c.get("surf"):
+        # Surface sampling (README "Surface sampling"; write_surface_functions): read by system/functionsSurf and
+        # cfd/post/rotor_surface.py. Blades from the start of the force averaging window to the end.
+        T = P["Trev"]
+        P.update(surfLevel=c["surf"], surfInterval=T / SURF_PER_REV, surfStart=P["averageStart"])
+        if c["surf"] >= 2:
+            (x0, y0), (x1, y1) = PLANE_BOX_D
+            P.update(planeInterval=T / PLANE_PER_REV, planeStart=max(0, c["nrev"] - PLANE_REVS) * T,
+                     planePoint=(0.0, 0.0, 0.5 * DZ),
+                     planeBounds=f"({x0 * D:.6g} {y0 * D:.6g} {-DZ:g}) ({x1 * D:.6g} {y1 * D:.6g} {2 * DZ:g})")
     return P
 
 
@@ -489,6 +520,119 @@ def set_stop_at(case, value):
     cd.write_text(re.sub(r"^stopAt\s+\w+;", f"stopAt          {value};", s, flags=re.M))
 
 
+SURF_INCLUDE = ('// Surface sampling (surf; cfd/rotor2d/README.md "Surface sampling"): system/functionsSurf, written by\n'
+                '// cfd/rotor2d/run_case.py; a no-op if that file is absent.\n#includeIfPresent "functionsSurf"\n\n')
+
+
+def write_surface_functions(case, P):
+    """surf >= 1 (README "Surface sampling"): write system/functionsSurf and include it at the end of the case's
+    system/functions. The include line goes into the case, not the template, so a case without surf keeps the
+    template's files byte for byte. Intervals and start times are caseParameters entries (case_parameters).
+
+    v2606 behaviour this relies on (source of the Mac app, read 15 Nov 2026):
+      * timeStart: a function object is active from timeStart - dt/2 (timeControlFunctionObject.C active());
+      * writeControl runTime writes in the first step whose time + dt/2 reaches startTime + k writeInterval,
+        startTime being the time the run started or restarted from (timeControl.C), so a sample lies within
+        half a time step of the 5-deg grid (0.015 deg in the smoke test) and the solver's time steps are not
+        touched. Not adjustableRunTime: that lengthens or shortens the last steps before every write to hit it
+        (timeControlFunctionObject.C adjustTimeStep, up to 1.5 times the Courant step). In the 15 Nov twin test
+        (README "Surface sampling") it changed the step before the first sample by +17 % (Courant 4.67 at
+        maxCo 4) and the blade forces by up to 1 % within 40 deg, while runTime left all 906 steps and every
+        force row bitwise identical to the run without sampling;
+      * a restart from a half-revolution write keeps the 5-deg grid; one from a writeNow pause shifts it, which
+        rotor_surface.py allows for (it bins by the times written). The first sample is at averageStart and the
+        last at (or within half a step of) the end time, both field-write times the solver lands on;
+      * timeControl write() executes the wrapped function object first if it has not run in this time step, so
+        wallShearStress with executeControl none is computed only at its writes, and it is listed before the
+        sampler, which reads its field in the same step (function objects run in dictionary order);
+      * sampledPatch with interpolate false samples the patch (boundary) values that the forces function
+        objects integrate; the raw writer with 'normal yes' adds the face area vector to every row."""
+    lv = int(P["surfLevel"])
+    blades = "\n".join(f"        blade{k}\n        {{\n            type        patch;\n            patches     (blade{k});\n"
+                       f"            interpolate false;\n        }}" for k in (1, 2, 3))
+    txt = f"""/*--- written by cfd/rotor2d/run_case.py (surf {lv}); edit run_case.py, not this file ---*/
+// Included at the end of system/functions (inside controlDict's functions{{}}; caseParameters already read).
+// cfd/rotor2d/README.md "Surface sampling"; read by cfd/post/rotor_surface.py.
+
+// writeControl runTime, not adjustableRunTime: the samples fall within half a time step of the 5-deg grid and
+// the solver's time steps stay those of the case without sampling (run_case.py write_surface_functions).
+
+// Wall shear stress (kinematic, m^2/s^2; (-n) & R_eff, the stress of the wall on the fluid) on the blades, computed
+// only when it writes (executeControl none), i.e. at the sample times below, just before the sampler reads it.
+// writeFields false: no volume field in the time folders; wallShearStress.dat logs min/max per blade per sample.
+wallShearStressSurf
+{{
+    type            wallShearStress;
+    libs            (fieldFunctionObjects);
+    patches         (blade1 blade2 blade3);
+    writeFields     false;
+    executeControl  none;
+    writeControl    runTime;
+    writeInterval   $surfInterval;     // T/72: 5 deg of rotation
+    timeStart       $surfStart;        // averageStart: the force averaging window
+    log             false;
+}}
+
+// p and wallShearStress on each blade's wall faces, the boundary values the forces function objects integrate
+// (interpolate false). raw: postProcessing/surfacesBlades/<t>/<field>_blade<k>.raw, one row per face: centre
+// x y z, value, face area vector out of the fluid (|S| = face length x dz), model frame at time t.
+surfacesBlades
+{{
+    type            surfaces;
+    libs            (sampling);
+    fields          (p wallShearStress);
+    surfaceFormat   raw;
+    formatOptions
+    {{
+        raw
+        {{
+            normal          yes;
+        }}
+    }}
+    writeControl    runTime;
+    writeInterval   $surfInterval;
+    timeStart       $surfStart;
+    surfaces
+    {{
+{blades}
+    }}
+}}
+"""
+    if lv >= 2:
+        txt += """
+// Mid-span plane (surf 2): U (absolute) and p on the cut z = dz/2, cell values, in a box round the rotor and the
+// near wake (planeBounds, model frame), every T/36 over the last 2 revolutions:
+// postProcessing/planeMidspan/<t>/midspan.vtp (VTK XML, binary).
+planeMidspan
+{
+    type            surfaces;
+    libs            (sampling);
+    fields          (U p);
+    surfaceFormat   vtk;
+    writeControl    runTime;
+    writeInterval   $planeInterval;    // T/36: 10 deg of rotation
+    timeStart       $planeStart;       // (nRev - 2) T
+    surfaces
+    {
+        midspan
+        {
+            type        cuttingPlane;
+            point       $planePoint;
+            normal      (0 0 1);
+            bounds      $planeBounds;
+            interpolate false;
+        }
+    }
+}
+"""
+    sysd = Path(case) / "system"
+    (sysd / "functionsSurf").write_text(txt + "\n// " + "*" * 73 + " //\n")
+    fn = sysd / "functions"
+    s = fn.read_text()
+    i = s.rfind("\n// ****")               # before the template's closing rule line
+    fn.write_text(s[:i + 1] + SURF_INCLUDE + s[i + 1:] if i >= 0 else s + "\n" + SURF_INCLUDE)
+
+
 def create_case(case, c, md, P):
     if case.exists():
         shutil.rmtree(case)
@@ -505,6 +649,8 @@ def create_case(case, c, md, P):
             shutil.copy(md / f, case / f)
     write_case_parameters(case / "system" / "caseParameters", P)
     write_fields(case, c, P)
+    if c.get("surf"):
+        write_surface_functions(case, P)
     (case / "case.json").write_text(json.dumps(dict(P, inputs=c, mesh=md.name), indent=1))
     (case / "case.foam").touch()
 
@@ -525,7 +671,7 @@ def normalise(c):
     out["lt"] = float(out["lt"])
     if out["lt"] <= 0:
         raise ValueError("lt must be positive (m)")
-    return _roughness(out)
+    return _surface(_roughness(out))
 
 
 def _roughness(out):
@@ -555,6 +701,23 @@ def _roughness(out):
     if not cs > 0:
         raise ValueError(f"cs must be positive, not {cs!r}")
     out.update(ks=ks, cs=cs, nutwf="kRough")
+    return out
+
+
+def _surface(out):
+    """Surface-sampling key of a normalised case dict, in place (README "Surface sampling").
+    surf 0 (the default): the key is removed, so the dict, the case name and every generated file are those of
+    the code before this option. surf 1 or 2: rotating cases only; kept as an int."""
+    surf = out.pop("surf", None)
+    surf = 0 if surf is None else surf
+    if isinstance(surf, bool) or not isinstance(surf, (int, float)) or surf != int(surf) or int(surf) not in SURF_LEVELS:
+        raise ValueError(f"surf must be one of {', '.join(map(str, SURF_LEVELS))}, not {surf!r}")
+    surf = int(surf)
+    if surf == 0:
+        return out
+    if out.get("lam") is None:
+        raise ValueError("surf needs a rotating case (lam): the samples are binned by blade azimuth over revolutions")
+    out["surf"] = surf
     return out
 
 
@@ -595,7 +758,8 @@ def run(c, setup_only=False, force=False, wall_limit=None, keep_processors=False
         # Never resume a case set up with other physics under the same name (e.g. a free stream
         # without decay control, set up before 8 Oct): compare with what this command would write.
         # kAmbient/omegaAmbient are absent in cases set up before decay control (= no decay control);
-        # KsBlade, Cs and nutWallFunction are absent for smooth blades (README "Rough blades").
+        # KsBlade, Cs and nutWallFunction are absent for smooth blades (README "Rough blades"), surfLevel
+        # without surface sampling (README "Surface sampling").
         # Omega and the mesh key (hypothesis, level, wall, U, theta, sense, beta, y+, walls) matter
         # with --name, where the folder name no longer carries them.
         if (case / "mesh_info.json").exists():
@@ -603,7 +767,7 @@ def run(c, setup_only=False, force=False, wall_limit=None, keep_processors=False
             diff = [k for k in ("Uinf", "kInlet", "omegaInlet", "kAmbient", "omegaAmbient", "endTime", "Omega",
                                 "KsBlade", "Cs")
                     if abs(float(old.get(k, 0.0)) - float(new.get(k, 0.0))) > 1e-9 * max(1.0, abs(float(new.get(k, 0.0))))]
-            diff += [k for k in ("turbulenceModel", "mode", "nutWallFunction") if old.get(k) != new.get(k)]
+            diff += [k for k in ("turbulenceModel", "mode", "nutWallFunction", "surfLevel") if old.get(k) != new.get(k)]
             if old.get("mesh") and old["mesh"] != mesh_key(c):
                 diff.append(f"mesh ({old['mesh']}, command: {mesh_key(c)})")
             if diff:
@@ -709,6 +873,10 @@ def build_parser():
     ap.add_argument("--nutwf", choices=NUTWF, default=None,
                     help="blade nut wall function: spalding (default with --ks 0) or kRough (default with --ks > 0; "
                          "with --ks 0 it is the smooth reference of the rough cases, suffix _Ks0)")
+    ap.add_argument("--surf", type=int, choices=SURF_LEVELS, default=DEFAULTS["surf"],
+                    help="surface sampling (rotating cases): 1 = p and wall shear on the blades every 5 deg over the "
+                         "averaging window, suffix _surf; 2 = also a mid-span plane of U and p every 10 deg over the "
+                         "last 2 revolutions, suffix _surf2; 0 (default) = none")
     ap.add_argument("--setup-only", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--wall-limit", type=float, help="kill the solver after this many seconds (smoke tests)")
@@ -722,7 +890,7 @@ def args_to_case(a):
     return dict(hyp=a.hyp, U=a.U, lam=a.lam, theta=a.theta, model=a.model, level=a.level, wall=a.wall, np=a.np,
                 nrev=a.nrev, navg=a.navg, nconv=a.nconv, navgconv=a.navgconv, maxco=a.maxco, nouter=a.nouter,
                 tu=a.tu, decay=a.decay, lt=a.lt, sense=a.sense, beta=a.beta, yplus=a.yplus, walls=a.walls,
-                side_bc=a.side_bc, wdist=a.wdist, name=a.name, ks=a.ks, cs=a.cs, nutwf=a.nutwf)
+                side_bc=a.side_bc, wdist=a.wdist, name=a.name, ks=a.ks, cs=a.cs, nutwf=a.nutwf, surf=a.surf)
 
 
 def main():

@@ -27,6 +27,7 @@ values or geometry), *assumed* (an input chosen without data), *estimated* (an e
 | `results/` | CSVs, queue logs, smoke-test summaries (`results/smoke/`), comparison plots |
 | `../post/rotor_summary.py` | Loads, C_Q, C_P, AMI weights, y+, upstream-probe Tu, timing from one case (works on partial runs) |
 | `../post/after_case.sh` | Post-case hook: record of one case (`../post/record_case.py --kind rotor`) in `results/records/<case>/` |
+| `../post/rotor_surface.py` | Cp and Cf on each blade's wall against azimuth from the `surf=1` samples (section "Surface sampling") |
 | `../post/plot_rotor_cp.py` | C_P against lambda, CFD against the rig; static C_Q(theta) |
 | `../post/plot_rotor_case.py` | Time history of one case (rotor and per-blade C_Q, C_x, C_y, time step) |
 | `mesh/check_variants.py` | Rebuilds and checkMeshes the 16 mesh variants; `mesh/logs/variants_summary.json` |
@@ -409,6 +410,56 @@ function's own Ks+ wherever the cell centre is at y_P.
   smooth cases (lambda 0.10, 0.12).
 - The rough wall function models a fully turbulent rough wall, with no roughness-induced
   transition. Ks is a sensitivity parameter, not a measured value.
+
+## Surface sampling (15 Nov 2026)
+
+Pressure and wall shear on the turning blades, for Prof. Jahangiri's J3 (separation, pressure, lift, drag and
+torque through the rotation). Opt-in, rotating cases only (a `sta` line with `surf=` is refused).
+
+| Option (queue key) | Effect |
+|---|---|
+| `--surf 0` (default; no key) | Nothing sampled; the case, its name and every file it writes are those of the code before the option |
+| `--surf 1` (`surf=1`) | p and wall shear stress on `blade1..3` every T/72 (5 deg) from `averageStart` = (nrev - navg) T, the start of the force averaging window, to the end. Suffix `_surf`, last in the name |
+| `--surf 2` (`surf=2`) | Also U and p on the mid-span plane every T/36 over the last 2 revolutions, box x -1.5 to 4 D, y +-1.5 D. Suffix `_surf2` |
+
+`run_case.py` writes `system/functionsSurf` and appends `#includeIfPresent "functionsSurf"` to the case's own
+`system/functions` (the template is unchanged); `caseParameters` and `case.json` gain `surfLevel`,
+`surfInterval`, `surfStart` (surf 2 also `planeInterval`, `planeStart`, `planePoint`, `planeBounds`). Output:
+`postProcessing/surfacesBlades/<t>/{p,wallShearStress}_blade<k>.raw` (face centre, value, face area vector: the
+boundary values the `forces` objects integrate) and `postProcessing/planeMidspan/<t>/midspan.vtp`. Keywords and
+behaviour checked in the v2606 source and tutorials of the Mac app (notes in `write_surface_functions`).
+
+**`writeControl runTime`, not `adjustableRunTime`.** Twin test (coarse, 2 ranks, one shared decomposition, 0 to
+41.5 deg; measured): adjustableRunTime lengthened the step before the first sample by 17 % (Courant 4.67 at
+maxCo 4) to land on it, and the blades' streamwise forces then differed from the twin without sampling by up to
+1 % of their maximum; with runTime all 906 steps and every forces row were bitwise identical. A sample then lies
+within half a step of the 5-deg grid (0.015 deg). Sample times count from the start of each run: a resume from a
+half-revolution write keeps the grid, one after `--pause` shifts it (0.4 deg in the smoke test), and
+`rotor_surface.py` bins by the times written. Scotch gave different decompositions on repeated `decomposePar`
+(16,407/16,408 and 16,254/16,561 cells), so a surf run is not a bitwise twin of an existing run.
+
+**Post-processing:** `python3 cfd/post/rotor_surface.py cfd/rotor2d/runs/<case>` (finished or running case):
+`surface_phase.csv` (Cp and signed Cf on every wall face, 10-deg azimuth bins over the averaging window, per
+blade and three-blade mean, 2u from the revolution scatter), `surface_phase.png` (s-theta carpets) and
+`surface_phase.json` (geometry, force and stagnation checks). Conventions in its docstring.
+
+**Disk** (calculated from the smoke-test files): 180 B per wall face per sample; on the medium mesh (224 faces
+per blade) with nrev 15, navg 10: 721 samples, about 87 MB. surf 2 adds about 2.9 MB per plane write (45,800
+cells in the box), 0.21 GB. The run's own log is about 0.37 GB (176k steps at 2.1 kB); Unity had 900 GB free on
+15 Nov.
+
+**Tests (15 Nov 2026, measured).** surf 0 is unchanged: every line of `queues/*.txt` and every sense variant
+(105 lines, 97 cases) gives the same names, mesh keys, case parameters and files as before (1,714 files).
+Smoke test on the coarse mesh (`runs/_smoke_surf_A_coarse_lam0.10_Ks0`, 2 ranks): pressure and shear summed
+over each blade equal its forcesBlade row to 2e-8 at all 16 samples; with runTime sampling the run is
+step-for-step identical to its no-sampling twin (adjustableRunTime changed the step and the forces by up
+to 1 %, so it is not used); peak Cp on blade 1 (theta 30-80 deg, convex face) and blade 3 (270-320 deg) is
+0.84-1.11 times the quasi-steady (|W|/U)^2 after 2.5 D/U.
+
+**Queue lines** (`queues/priorityG_mechanisms.txt`): `rot A 23 0.10 SST medium sense=CCW nrev=50 navg=45 np=8
+surf=1 ks=0 nutwf=kRough` and its `ks=400` twin, at lambda 0.10 and 0.12. 45 averaged revolutions, as the
+rough set: with 10, 2u of C_Q would be about 23 % of the mean (11 % with 45). About 25 h on 8 ranks and
+about 0.4 GB of samples per run.
 
 ## Comparison with the rig (`../post/plot_rotor_cp.py`)
 

@@ -13,8 +13,8 @@ Queue files (paths relative to cfd/rotor2d/ or absolute): one case per line,
 HYP A, B or measured; MODEL SST or LM; LEVEL coarse, medium or fine. Keys (run_case.py
 options): wall, np, nrev, navg, nconv, navgconv, maxco, nouter, tu, decay
 (control|precompensate), lt, sense, beta, yplus, walls (y_lo,y_hi), side_bc, wdist,
-ks (um; rough blades, wall wf only), cs, nutwf (spalding|kRough; README "Rough blades").
-'#' starts a comment.
+ks (um; rough blades, wall wf only), cs, nutwf (spalding|kRough; README "Rough blades"),
+surf (0|1|2, rotating only; README "Surface sampling"). '#' starts a comment.
 
 Behaviour
   * a case whose results.json says complete is skipped;
@@ -79,7 +79,7 @@ COLS_ST = COMMON + ["theta_deg", "t_end_conv", "avg_window_conv", "avg_window_co
                     "CQ_sem", "CQ_pressure_mean", "Cx_std", "Cy_std", "St_D"] + TAIL + ROUGH
 KEYS = {"wall": str, "np": int, "nrev": int, "navg": int, "nconv": int, "navgconv": int, "maxco": float,
         "nouter": int, "tu": float, "decay": str, "lt": float, "sense": str, "beta": float, "yplus": float,
-        "walls": str, "side_bc": str, "wdist": int, "ks": float, "cs": float, "nutwf": str}
+        "walls": str, "side_bc": str, "wdist": int, "ks": float, "cs": float, "nutwf": str, "surf": int}
 # post-case hook (records, plots): run after each completed case if present and executable
 AFTER_CASE = HERE.parent / "post" / "after_case.sh"
 HOOK_TIMEOUT_S = 1800

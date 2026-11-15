@@ -151,6 +151,8 @@ def main():
             bx.axvline(x, color="0.6", ls=":", lw=1)
     groups = {}
     for r in cfd:
+        if "_surf" in r.get("name", ""):        # surface-sampling repeats (rotor2d README) are not
+            continue                                  # extra points of a C_P curve
         groups.setdefault((r["hypothesis"], r["model"], r["wall"], r["sense"]) + variant_tag(r), []).append(r)
     for i, (key, rows) in enumerate(sorted(groups.items())):
         rows.sort(key=lambda r: float(r["lam"]))
