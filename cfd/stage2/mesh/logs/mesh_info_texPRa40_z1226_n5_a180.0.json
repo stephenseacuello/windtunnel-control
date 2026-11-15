@@ -1,0 +1,161 @@
+{
+ "n_points": 426104,
+ "n_cells": 217025,
+ "n_faces": 864127,
+ "n_internal_faces": 426506,
+ "n_wall_faces": 3471,
+ "n_blade_faces": 3425,
+ "n_bladeEnds_faces": 46,
+ "n_farfield_faces": 100,
+ "level": "tex",
+ "alpha_deg_wake": 180.0,
+ "params": {
+  "h0": 4.5e-06,
+  "r_bl": 1.15,
+  "dn_max": 6e-05,
+  "ring_min": 0.0006,
+  "ds_end_max": 0.00012,
+  "g_t": 1.12,
+  "s_near": 0.0003,
+  "d_near": 0.006,
+  "s_wake": 0.0006,
+  "s_wake2": 0.0012,
+  "g_out": 0.1,
+  "s_far": 0.08
+ },
+ "lambda_fan": 2.0,
+ "r_farfield_m": 1.296,
+ "c_ref_m": 0.048,
+ "dz_m": 0.001,
+ "wake_chords": {
+  "x_up": -0.6,
+  "x1": 4.0,
+  "x2": 8.0,
+  "w1": 0.75,
+  "w2": 1.5
+ },
+ "h0_m": 4.5e-06,
+ "ring": {
+  "n_layers": 23,
+  "n_wall_nodes": 3471,
+  "thickness_m": 0.0006369531493812027,
+  "first_cell_m": 4.5e-06,
+  "last_layer_m": 6.000000000000005e-05,
+  "edge_spacing_m": {
+   "min": 3.7432798457265546e-05,
+   "median": 4.03990414166241e-05,
+   "max": 0.00018356400464242215
+  },
+  "quad_angle_deg": [
+   27.23882326632687,
+   152.78102236123212
+  ],
+  "aspect_max": 26.262036146659693,
+  "min_cell_area_m2": 1.6076690984869434e-10
+ },
+ "outer": {
+  "n_cells": 137192,
+  "n_tri": 11517,
+  "n_quad": 125675
+ },
+ "wall_vs_csv_max_m": 4.7793139887287044e-05,
+ "frame": {
+  "centroid_cad_m": [
+   0.017620123320014388,
+   0.03150692208442688
+  ],
+  "body_x_dir_deg_in_cad": -4.7636414938898834,
+  "body_y_dir_deg_in_cad": 85.23635850611012,
+  "wall_m": 0.0018542294841820239,
+  "area_m2": 0.0001270868709773303,
+  "corners_body_m": {
+   "B_outer": [
+    -0.012365198605818707,
+    0.01871864633298522
+   ],
+   "B_inner": [
+    -0.011232981943450628,
+    0.017250227996997134
+   ],
+   "A_inner": [
+    -0.013214477787764847,
+    -0.025791898077446557
+   ],
+   "A_outer": [
+    -0.012365198605818707,
+    -0.027440197762310575
+   ]
+  },
+  "note": "x_body = R (x_cad - centroid); R rows = (body x, body y) unit vectors in CAD"
+ },
+ "patches": {
+  "blade": "outer + inner surface (painted, fuzzy skin)",
+  "bladeEnds": "two square end faces (not painted)"
+ },
+ "generator": "cfd/stage2/mesh/make_mesh.py",
+ "texture": {
+  "profile": "Ra40_z1226",
+  "file": "cfd/geometry/gcode_profiles/Ra40_z1226.json",
+  "sha256": "254773027fb478ba6967f50a17898f7fd2dde407c2318ee0be5a196587df1793",
+  "source": {
+   "gcode": "blades/as_printed/gcode/Ra40Turbine.gcode",
+   "sha256": "c405365cd9de270d4e6d0ee77095b4a797c5b7658c1b47d85bb47bd175dbc0ad",
+   "slicer": "BambuStudio 02.08.02.61",
+   "layer": 1226,
+   "z_mm": 122.6,
+   "reference_gcode": "blades/as_printed/gcode/BaselineTurbine.gcode",
+   "reference_sha256": "26d77951a199892df7ac95caec4d4ab60958aaf0b7f1d171d2c0a0d8bec0fe03",
+   "reference_layer": 1226,
+   "section": "cfd/geometry/section_v1.json",
+   "fuzzy_skin_thickness_mm_nominal": 0.101,
+   "fuzzy_skin_config_block": {
+    "fuzzy_skin": "none",
+    "fuzzy_skin_first_layer": "0",
+    "fuzzy_skin_mode": "displacement",
+    "fuzzy_skin_noise_type": "classic",
+    "fuzzy_skin_octaves": "4",
+    "fuzzy_skin_persistence": "0.5",
+    "fuzzy_skin_point_distance": "0.2",
+    "fuzzy_skin_scale": "1",
+    "fuzzy_skin_thickness": "0.3"
+   },
+   "note": "the config block's fuzzy_skin = none / thickness 0.3 is the plate default; the painted faces' thickness is in the slicer project (Print Lab README)"
+  },
+  "t_m": 0.00010219999999999643,
+  "seed": null,
+  "dl_nominal_m": 0.0002,
+  "dl_m": [
+   0.00020005418048672246,
+   0.00020017867608821316
+  ],
+  "n_intervals": [
+   358,
+   327
+  ],
+  "n_knots": [
+   777,
+   688
+  ],
+  "delta_mean_m": -5.369783145671975e-07,
+  "delta_rms_m": 4.7461586218453404e-05,
+  "delta_absmax_m": 0.00010219999999999643,
+  "Ra_m": 4.019687473490048e-05,
+  "facet_slope_max": 3.849358974357864,
+  "facet_slope_mean": 0.3022895072341775,
+  "facet_tilt_max_deg": 75.43740276310689,
+  "facet_tilt_p99_deg": 42.49709315711394,
+  "note": "profile texture: Ra_m, delta_rms_m about the mean on a 1 um grid of the faces' cores (0.8 mm from the corners); t_m = delta_absmax_m = largest |delta| as applied (corner taper); slopes between knots",
+  "nseg": 5,
+  "wall_spacing_m": 4e-05,
+  "fade_out_D_m": 0.0003554999999999911,
+  "fade_rule": "w(d) = 1 - smoothstep(d/D), D = 2.5 t + 0.1 mm",
+  "max_relative_height_change": 0.4312236286919789,
+  "as_meshed": {
+   "nseg": 5,
+   "Ra_m": 3.9833317596497397e-05,
+   "delta_rms_m": 4.698127288095309e-05,
+   "delta_absmax_m": 9.933972930317822e-05
+  }
+ },
+ "seconds": 21.5
+}

@@ -127,6 +127,29 @@ Mapping of the measured surfaces to Ks (`../docs/ROUGHNESS_KS.md`): plausible ks
 25-170 um, scan height k 38-97 um, nominal FS 0.20 texture about 420 um); the sweep covers it. ks is
 a sensitivity parameter here, not a value derived for each rotor.
 
+### Mesh study (`wfmesh`, 15 Nov 2026; `queues/S2h_wf_mesh.txt`, not submitted)
+
+Until now one wf mesh per speed and angle. Levels `wf_coarse` and `wf_fine` (`mesh/make_mesh.py`) multiply
+or divide the tangential and outer sizes of `wf` (`ds_max`, `ds_corner`, `ds_end_max`, `s_near`,
+`s_wake`, `s_wake2`, `s_far`) and its two rates (`g_t - 1`, `g_out`) by sqrt(2), so the whole size field
+scales; h0, the two-layer ring and `d_near` stay, so y_P is 0.44 mm at 23 m/s on all three. Queue key
+`wfmesh=coarse|fine` (default `medium` = `wf`: names unchanged) adds `_wfC` / `_wfF` after the Ks part of
+the name and `_coarse` / `_fine` to the mesh folder.
+
+| 23 m/s, alpha 90 / 180 (*measured*, checkMesh) | coarse | medium (`wf`) | fine |
+|---|---|---|---|
+| Cells | 52,049 / 51,967 | 102,851 / 103,300 | 204,829 / 205,139 |
+| Painted / end faces | 325 / 12 | 459 / 16 | 649 / 22 |
+| Max non-orthogonality (deg), skewness, aspect ratio | 40.1, 1.90, 3.06 | 40.4, 2.06, 4.12 | 41.2, 2.18, 5.55 |
+| checkMesh | Mesh OK | Mesh OK | Mesh OK |
+
+Refinement ratio (N_fine / N_medium)^(1/2) = 1.41 at both steps (*calculated*). `S2h_wf_mesh.txt` runs
+Ks 0 and 400 um at alpha 90 and 180 on the coarse and fine meshes (maxCo 2.5); the medium runs are in
+`S2e_rerun.txt`. Its header gives the acceptance rule (GCI of Cd and of the Ks-400 change) and the cost
+(*estimated* 100-200 core-h). Not handled yet: the cost model (`hpc_common`) gives every wf run the
+medium estimate, and `compare_roughness.py` groups wf runs by the suffix after `_Tu`, so it compares a
+`_wfC` / `_wfF` run with the medium Ks 0 run; pair each mesh with its own Ks 0 for the study.
+
 ## 4. Stage 2e: resolved fuzzy-skin texture
 
 ### Mesh: level `tex`
@@ -194,6 +217,45 @@ t = 0 / 0.20 / 0.10 / 0.05 mm, alpha 180 then 0, LM before SST; 80 c/U, averaged
   line doubles it).
 - LM's response to geometric ridges is outside its calibration.
 
+### Texture of the printed blades' own slices (`prof`, 15 Nov 2026)
+
+`../geometry/gcode_profile.py` reads one layer of each slice in `blades/as_printed/gcode/` (not in git)
+and writes `../geometry/gcode_profiles/<set>_z<z in 0.1 mm>.json` (mid-span z 122.6 mm and 61.3, 183.8 mm):
+delta(s) of the outer-wall path on each painted face, in the mesher's arc length s. The reference wall is
+the CAD outline offset inward by the inset fitted to the same layer of `BaselineTurbine.gcode` (rigid
+fit; inset 0.109-0.110 mm, half the 0.22 mm line width); the textured layer is placed by a rigid fit of
+its inner walls, which carry no fuzzy skin, to the Baseline's (1.2-1.6 um rms). The Baseline path itself
+(15 arcs) departs from that offset by 6.6-6.7 um rms (up to 12.6 um), the same in every layer, so delta
+measured from it (kept as a check) has a spurious layer-to-layer correlation (0.2-0.3 for Ra10).
+
+| Set (t, slicer project) | Ra / Rq / max abs delta (um) | Ra / t | Spanwise Ra, lambda_c 0.25 mm (um) | Scan Ra_lc025 (um) |
+|---|---|---|---|---|
+| Ra10 (0.025 mm) | 9.6-9.8 / 11.5-11.6 / 28-29 | 0.385-0.394 | 4.5-4.6 | not tested |
+| Ra40 (0.101 mm) | 40.1-41.0 / 47.5-48.4 / 102-109 | 0.397-0.406 | 18.5-18.8 | 8.2 (FS 0.10) |
+| Ra80 (0.202 mm) | 79.6-81.6 / 93.6-96.5 / 203 | 0.394-0.404 | 37.0-37.8 | 10.3 (FS 0.20) |
+
+(*calculated*, three layers, both faces 0.8 mm from the corners; scans: `surface_roughness.csv`, Plain
+12.7 um.) Ra20 has no fuzzy skin: against the Baseline path, Ra 0.2-1.2 um.
+- Amplitude as the synthetic texture (Ra 0.385-0.406 t against 0.397 t; delta/t distributed alike), but
+  the slicer's points are 0.16-0.62 mm apart (5-95 %; Ra40, median 0.23 mm) and 0.16-0.47 mm (Ra80,
+  0.21 mm), and arc fitting turns 51-55 % (Ra40), 28-32 % (Ra80) and 96-97 % (Ra10) of the path into arcs.
+- Each layer is a new draw (correlation between layers |r| <= 0.12).
+- The scans are spanwise profiles across the layers. Printed as programmed, the texture would read the
+  spanwise values above, 2.3 (FS 0.10) and 3.6 (FS 0.20) times the measured ones, which lie below
+  Plain's. So the prints carry at most a fraction of the programmed displacement (*inferred*: the bead
+  and the layer below smooth it, or the scanned fields miss it): a profile mesh, like the synthetic
+  texture, is the programmed upper bound, not the printed surface.
+
+`mesh/make_mesh.py --tex-profile <json>` interpolates delta(s) onto the tex wall nodes, with the same
+corner taper and fade-out rule (t = max |delta| as applied). Queue key `prof=<name>` (tex; t and seed do
+not apply): name `..._texP<name>[_n<nseg>]_Tu...`, mesh `texP<name>_n<nseg>_a<alpha>`, `texProfile` and
+`texProfileMaxDelta` in `case.json` (`texT` 0). Mid-span meshes at alpha 90 and 180 (*measured*): 216,603
+and 217,025 cells, the ring of t = 0; Ra40 max non-orthogonality 62.0 deg, skewness 2.68; Ra80 68.7 deg,
+3.51; all Mesh OK (the synthetic t 0.20 fails skewness, 4.48); as meshed (40 um nodes) Ra 39.8 and 79.0 um.
+Candidate runs: end of `S2g_mechanisms.txt`, commented. Before their results are compared:
+`compare_roughness.py` needs `_s<seed>` in a tex name and stops on a texP name, and the CSV's
+`tex_t_mm` is 0 for them.
+
 ## 5. Running
 
 ```zsh
@@ -220,7 +282,8 @@ in `runs/_mesh/` (wf per speed and alpha, tex per t, seed, nseg and alpha), chec
 `mesh_info` copies in `mesh/logs/`, results in `results/`.
 
 Queue lines: `alpha U model wall [key=value ...]`, keys `ks`, `ksends` (um), `cs`, `t` (mm),
-`seed`, `nseg`, `tu`, `maxco`, `nouter`, `nconv`, `navg`, `lt`, `decay`. Case names:
+`seed`, `nseg`, `tu`, `maxco`, `nouter`, `nconv`, `navg`, `lt`, `decay`, and the opt-in `wfmesh`
+(section 3) and `prof` (section 4). Case names:
 `a180.0_U23.0_SST_wf_Ks100_Tu1.0`, `a180.0_U23.0_LM_tex0.200_s1_Tu1.0_N80A50`, plus Stage 1's suffixes
 for non-default settings; folders starting with `_` are tests and stay out of the CSV.
 

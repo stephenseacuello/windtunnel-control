@@ -11,7 +11,9 @@
 Queue files (paths relative to cfd/stage2/ or absolute): one case per line,
     alpha_deg  U_ms  model  wall  [key=value ...]
 model SST or LM, wall wf or tex; keys ks, ksends (um), cs, t (mm), seed, nseg, tu (%),
-maxco, nouter, nconv, navg, lt (m), decay (run_case.py options). '#' starts a comment.
+maxco, nouter, nconv, navg, lt (m), decay (run_case.py options), and the opt-in wfmesh
+(coarse / medium / fine, wf; default medium) and prof (tex: a profile name,
+cfd/geometry/gcode_profiles/<prof>.json, instead of t and seed). '#' starts a comment.
 
 Behaviour (as Stage 1)
   * a case whose results.json says complete is skipped; a partial case resumes from its last
@@ -61,7 +63,8 @@ COLUMNS = ["name", "wall", "alpha_deg", "U_ms", "Re_c", "model", "Ks_um", "KsEnd
            "ksplus_blade_mean", "ksplus_blade_max",
            "dt_mean_s", "Co_max_mean", "n_steps", "wall_time_s", "run_time_s", "s_per_step", "omega_bounded_steps"]
 KEYS = {"ks": float, "ksends": float, "cs": float, "t": float, "seed": int, "nseg": int, "tu": float,
-        "maxco": float, "nouter": int, "nconv": float, "navg": float, "lt": float, "decay": str}
+        "maxco": float, "nouter": int, "nconv": float, "navg": float, "lt": float, "decay": str,
+        "wfmesh": str, "prof": str}
 KEYMAP = {"ksends": "ks_ends"}
 HOOK = HERE / "after_case.sh"
 HOOK_TIMEOUT_S = 1800

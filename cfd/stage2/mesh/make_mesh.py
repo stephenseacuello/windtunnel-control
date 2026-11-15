@@ -28,6 +28,12 @@ split (below). New here:
         D = 2.5 t + 0.1 mm, so the first cells keep h0 and no cell inverts
         (cell heights change by at most 1.5 t / D < 60 %); the ring is at least
         max(0.6 mm, D) thick and its edge, where gmsh starts, is not displaced.
+        --tex-profile <json> (instead of --tex, --seed): delta(s) of each painted face from a
+        profile file, e.g. the slice of a printed blade (cfd/geometry/gcode_profile.py),
+        interpolated linearly onto the same wall nodes; same corner taper; t = the largest |delta|
+        as applied sets D (ProfileTexture).
+  wf_coarse, wf_fine  the wf mesh with its tangential and outer sizes (and the rates g_t - 1,
+        g_out) times sqrt(2) or divided by it; same h0 and ring (mesh study, 15 Nov 2026).
 
 Patches: blade (wall: outer and inner surfaces, the fuzzy-skin "painted" faces),
 bladeEnds (wall: the two square end faces, not painted), farfield (patch), frontAndBack
@@ -39,10 +45,13 @@ origin at the section centroid, alpha = 0 is "cup into the wind".
 Usage (venv python, which has gmsh):
     cfd/.venv/bin/python cfd/stage2/mesh/make_mesh.py --level wf --U 23 --alpha 0 --out <caseDir> [--plot p.png]
     cfd/.venv/bin/python cfd/stage2/mesh/make_mesh.py --level tex --tex 0.2e-3 --seed 1 --alpha 0 --out <caseDir>
+    cfd/.venv/bin/python cfd/stage2/mesh/make_mesh.py --level tex --tex-profile cfd/geometry/gcode_profiles/Ra40_z1226.json --alpha 180 --out <caseDir>
+    cfd/.venv/bin/python cfd/stage2/mesh/make_mesh.py --level wf_fine --U 23 --alpha 90 --out <caseDir>
     cfd/.venv/bin/python cfd/stage2/mesh/make_mesh.py --level medium --alpha 0 --out <caseDir>   # Stage 1 mesh, split walls
 Writes <caseDir>/constant/polyMesh/* and <caseDir>/mesh_info.json.
 """
 import argparse
+import hashlib
 import json
 import math
 import shutil
@@ -84,6 +93,25 @@ LEVELS = {
                    s_near=0.30e-3, d_near=6e-3, s_wake=0.60e-3, s_wake2=1.2e-3,
                    g_out=0.10, s_far=0.08),
 }
+# Wall-function mesh study (J1, 15 Nov 2026): wf_coarse and wf_fine around wf, a refinement ratio of
+# sqrt(2) for a Celik et al. (2008) GCI. The tangential and outer sizes are multiplied (coarse) or
+# divided (fine) by sqrt(2), and so are the two rates: g_t as g_t - 1 (the wall spacing grows as
+# ds_corner + (g_t - 1) x, see distribute) and g_out (size per unit distance), so the whole size
+# field scales and the cell count changes by about 2 either way. h0 (wf_first_cell: y_P stays above
+# Ks 400 um), n_layers, r_bl and d_near (a distance, not a size) are those of wf.
+WF_STUDY_RATIO = math.sqrt(2.0)
+WF_STUDY_SIZES = ("ds_max", "ds_corner", "ds_end_max", "s_near", "s_wake", "s_wake2", "s_far", "g_out")
+
+
+def _wf_study(f):
+    p = dict(LEVELS["wf"])
+    p.update({k: p[k] * f for k in WF_STUDY_SIZES}, g_t=1.0 + (p["g_t"] - 1.0) * f)
+    return p
+
+
+LEVELS["wf_coarse"] = _wf_study(WF_STUDY_RATIO)
+LEVELS["wf_fine"] = _wf_study(1.0 / WF_STUDY_RATIO)
+WF_LEVELS = ("wf", "wf_coarse", "wf_fine")
 R_FF_CHORDS = 27.0     # far-field radius in reference chords (1.296 m)
 WAKE = dict(x_up=-0.6, x1=4.0, x2=8.0, w1=0.75, w2=1.5)   # in chords, free-stream frame
 LAMBDA_FAN = 2.0       # width of the corner fan blend, in units of the layer distance
@@ -309,6 +337,95 @@ class Texture:
                     note="Ra_m, delta_rms_m: of the sample values (the linear profile between samples "
                          "has smaller moments: for independent uniform samples Ra of the profile "
                          "is about 0.8 x this; see README)")
+
+
+class ProfileTexture(Texture):
+    """Texture from a profile file instead of t u(s): delta(s) on each painted face as knots
+    (s_mm from the face's first corner, delta_mm + into the fluid; linear between them), e.g. the
+    slice of a printed blade, cfd/geometry/gcode_profiles/<set>_z<z>.json (gcode_profile.py).
+    Same wall nodes (Texture.nodes: 0.2 mm / nseg on each face) and corner taper as Texture, so the
+    mesh has the topology of the t = 0 reference where the ring is as thick; t is the largest |delta|
+    as applied (taper included), so the fade-out D = 2.5 t + 0.1 mm follows the profile. The face
+    lengths in the file must match this section's to 1 um (the same s)."""
+
+    def __init__(self, sec, path, dl=TEX_DL):
+        path = Path(path)
+        raw = path.read_bytes()
+        d = json.loads(raw)
+        try:                                    # recorded in mesh_info.json: repository path, not a local one
+            rel = str(path.resolve().relative_to(CFD.parent))
+        except ValueError:
+            rel = path.name
+        self.path, self.name, self.seed, self.dl_nominal = rel, d["name"], None, float(dl)
+        self.sha256 = hashlib.sha256(raw).hexdigest()
+        self.source = d.get("source", {})
+        self.L = float(sec.L)
+        self.faces = []
+        for name, s_start, L in (("outer", 0.0, sec.L_o), ("inner", sec.s_corner[1], sec.L_i)):
+            f = d["faces"][name]
+            if abs(f["L_mm"] * 1e-3 - L) > 1e-6:
+                raise RuntimeError(f"{path.name}: face {name} is {f['L_mm']:.6f} mm long in the file, "
+                                   f"{L * 1e3:.6f} mm in this section")
+            s, v = np.asarray(f["s_mm"], float) * 1e-3, np.asarray(f["delta_mm"], float) * 1e-3
+            if s.size < 2 or np.any(np.diff(s) <= 0):
+                raise RuntimeError(f"{path.name}: face {name}: s_mm must increase")
+            n = max(1, int(round(L / dl)))
+            self.faces.append(dict(name=name, s0=float(s_start), L=float(L), n=n, dl=L / n, s=s, v=v))
+        sg = np.concatenate([f["s0"] + np.r_[f["s"], np.linspace(0.0, f["L"], int(f["L"] / 1e-6) + 1)]
+                             for f in self.faces])
+        self.t = float(np.abs(self.delta(sg)).max())
+
+    def delta(self, s_loop, taper=True):
+        """As Texture.delta, with the profile in place of t u(s)."""
+        s_loop = np.mod(np.asarray(s_loop, float), self.L)
+        out = np.zeros_like(s_loop)
+        for f in self.faces:
+            m = (s_loop >= f["s0"] - 1e-12) & (s_loop <= f["s0"] + f["L"] + 1e-12)
+            sf = s_loop[m] - f["s0"]
+            a = smoothstep01(np.minimum(sf, f["L"] - sf) / TEX_CORNER_TAPER) if taper else 1.0
+            out[m] = np.interp(sf, f["s"], f["v"]) * a
+        return out
+
+    def _cores(self, nodes=None):
+        """delta on a 1 um grid of each face's core (TEX_CORNER_TAPER from the corners): of the
+        profile, or, with the wall nodes of each face, of the wall as meshed (linear between nodes)."""
+        out = []
+        for k, f in enumerate(self.faces):
+            x = np.arange(TEX_CORNER_TAPER, f["L"] - TEX_CORNER_TAPER, 1e-6)
+            if nodes is None:
+                out.append(np.interp(x, f["s"], f["v"]))
+            else:
+                sn = nodes[k] - f["s0"]
+                out.append(np.interp(x, sn, np.interp(sn, f["s"], f["v"])))
+        return np.concatenate(out)
+
+    def as_meshed(self, nseg):
+        """Ra, Rq and max |delta| of the wall as meshed with nseg wall cells per 0.2 mm, over the
+        faces' cores: peaks between two wall nodes are cut (the synthetic texture's samples are nodes)."""
+        g = self._cores(self.nodes(nseg))
+        gc = g - g.mean()
+        return dict(nseg=nseg, Ra_m=float(np.mean(np.abs(gc))), delta_rms_m=float(np.sqrt(np.mean(gc ** 2))),
+                    delta_absmax_m=float(np.abs(g).max()))
+
+    def stats(self):
+        g = self._cores()
+        gc = g - g.mean()
+        sl = []
+        for f in self.faces:
+            m = (f["s"][1:] > TEX_CORNER_TAPER) & (f["s"][:-1] < f["L"] - TEX_CORNER_TAPER)
+            sl.append(np.abs(np.diff(f["v"]) / np.diff(f["s"]))[m])
+        sl = np.concatenate(sl)
+        return dict(profile=self.name, file=self.path, sha256=self.sha256, source=self.source, t_m=self.t,
+                    seed=None, dl_nominal_m=self.dl_nominal, dl_m=[f["dl"] for f in self.faces],
+                    n_intervals=[f["n"] for f in self.faces], n_knots=[int(f["s"].size) for f in self.faces],
+                    delta_mean_m=float(g.mean()), delta_rms_m=float(np.sqrt(np.mean(gc ** 2))),
+                    delta_absmax_m=self.t, Ra_m=float(np.mean(np.abs(gc))),
+                    facet_slope_max=float(sl.max()), facet_slope_mean=float(sl.mean()),
+                    facet_tilt_max_deg=float(np.degrees(np.arctan(sl.max()))),
+                    facet_tilt_p99_deg=float(np.degrees(np.arctan(np.percentile(sl, 99)))),
+                    note="profile texture: Ra_m, delta_rms_m about the mean on a 1 um grid of the faces' cores "
+                         "(0.8 mm from the corners); t_m = delta_absmax_m = largest |delta| as applied "
+                         "(corner taper); slopes between knots")
 
 
 def tex_wall_nodes(sec, p, tex, nseg):
@@ -711,15 +828,16 @@ def plot_mesh(path, nodes, cells, sec, alpha_deg, title, tex_view=None):
 
 
 # --------------------------------------------------------------------------- main
-def build(level, alpha_deg, out, plot=None, verbose=False, U=None, tex_t=None, seed=1, nseg=TEX_NSEG):
+def build(level, alpha_deg, out, plot=None, verbose=False, U=None, tex_t=None, seed=1, nseg=TEX_NSEG,
+          tex_profile=None):
     t0 = time.time()
     p = dict(LEVELS[level])
     sec = Section()
     extra = {}
     tex = None
-    if level == "wf":
+    if level in WF_LEVELS:
         if U is None:
-            raise ValueError("--U is required for level wf")
+            raise ValueError(f"--U is required for level {level}")
         h0, u_tau, yp_fp = wf_first_cell(U)
         p["h0"] = h0
         extra["wall_function"] = dict(U_design=U, h0_m=h0, y_p_m=0.5 * h0, u_tau_flat_plate=u_tau,
@@ -727,10 +845,14 @@ def build(level, alpha_deg, out, plot=None, verbose=False, U=None, tex_t=None, s
                                       yp_over_ks_min=WF_YP_OVER_KS, h0_max_m=WF_H0_MAX, x_flat_plate_m=X_FP,
                                       ks_valid_max_m=0.5 * h0,
                                       note="nutkRoughWallFunction: keep Ks below y_p (first cell centre)")
+        if level != "wf":
+            extra["wall_function"]["mesh_study"] = dict(
+                size_factor=WF_STUDY_RATIO if level == "wf_coarse" else 1.0 / WF_STUDY_RATIO,
+                scaled=list(WF_STUDY_SIZES) + ["g_t - 1"], note="sizes of wf times size_factor; h0, ring as wf")
     if level == "tex":
-        if tex_t is None:
-            raise ValueError("--tex is required for level tex (0 for the smooth reference)")
-        tex = Texture(sec, tex_t, seed)
+        if (tex_t is None) == (tex_profile is None):
+            raise ValueError("level tex needs --tex (0 for the smooth reference) or --tex-profile, not both")
+        tex = ProfileTexture(sec, tex_profile) if tex_profile else Texture(sec, tex_t, seed)
         D = TEX_BLEND[0] * tex.t + TEX_BLEND[1]
         ring_thk = max(p["ring_min"], D)
         sw, s0 = tex_wall_nodes(sec, p, tex, nseg)
@@ -745,6 +867,8 @@ def build(level, alpha_deg, out, plot=None, verbose=False, U=None, tex_t=None, s
         extra["texture"] = dict(tex.stats(), nseg=nseg, wall_spacing_m=TEX_DL / nseg, fade_out_D_m=D,
                                 fade_rule="w(d) = 1 - smoothstep(d/D), D = 2.5 t + 0.1 mm",
                                 max_relative_height_change=float(1.5 * tex.t / D))
+        if tex_profile:
+            extra["texture"]["as_meshed"] = tex.as_meshed(nseg)
     area, ang, ar = quad_quality(X)
     if (area <= 0).any():
         raise RuntimeError(f"ring has {(area <= 0).sum()} non-positive cells")
@@ -780,8 +904,10 @@ def build(level, alpha_deg, out, plot=None, verbose=False, U=None, tex_t=None, s
         if tex is not None:
             tv, _ = sec.point(np.array([0.5 * sec.L_o]))
             tv = tv[0]
-        if level == "wf":
+        if level in WF_LEVELS:
             lab = f"wall functions, h0 {d[1] * 1e3:.3f} mm (U {U:g} m/s)"
+        elif level == "tex" and tex_profile:
+            lab = f"texture profile {tex.name}, max |delta| {tex.t * 1e3:.3f} mm, h0 {d[1] * 1e6:.1f} um"
         elif level == "tex":
             lab = f"texture t {tex_t * 1e3:.3f} mm seed {seed}, h0 {d[1] * 1e6:.1f} um"
         else:
@@ -800,13 +926,18 @@ def main():
     ap.add_argument("--tex", type=float, help="level tex: fuzzy-skin amplitude t, m (0 = smooth reference)")
     ap.add_argument("--seed", type=int, default=1, help="level tex: random seed (default 1)")
     ap.add_argument("--nseg", type=int, default=TEX_NSEG, help="level tex: wall cells per 0.2 mm (default %(default)d)")
+    ap.add_argument("--tex-profile", help="level tex: texture from a profile JSON (cfd/geometry/gcode_profiles/) "
+                                          "instead of --tex and --seed")
     ap.add_argument("--out", help="case directory to write constant/polyMesh into")
     ap.add_argument("--plot", help="PNG of the mesh")
     ap.add_argument("-v", "--verbose", action="store_true")
     a = ap.parse_args()
     if not a.out:
         ap.error("--out is required")
-    info = build(a.level, a.alpha, a.out, a.plot, a.verbose, U=a.U, tex_t=a.tex, seed=a.seed, nseg=a.nseg)
+    if a.tex_profile and a.level != "tex":
+        ap.error("--tex-profile needs --level tex")
+    info = build(a.level, a.alpha, a.out, a.plot, a.verbose, U=a.U, tex_t=a.tex, seed=a.seed, nseg=a.nseg,
+                 tex_profile=a.tex_profile)
     keys = ("level", "n_cells", "n_points", "h0_m", "ring", "outer", "n_blade_faces", "n_bladeEnds_faces",
             "wall_vs_csv_max_m", "wall_function", "texture", "seconds")
     print(json.dumps({k: info[k] for k in keys if k in info}, indent=1))

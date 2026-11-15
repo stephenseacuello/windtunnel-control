@@ -6,6 +6,9 @@
     python3 cfd/stage2/run_case.py --alpha 0 --U 23 --wall wf --ks 0          # smooth reference, same mesh
     # 2e resolved texture: low-Re mesh with the fuzzy-skin displacement t (mm), SST or LM
     python3 cfd/stage2/run_case.py --alpha 0 --U 23 --wall tex --tex 0.2 --model LM
+    # opt-in (15 Nov 2026): the texture of a printed blade's slice; the wf mesh study
+    python3 cfd/stage2/run_case.py --alpha 180 --U 23 --wall tex --prof Ra40_z1226
+    python3 cfd/stage2/run_case.py --alpha 90 --U 23 --wall wf --ks 400 --wfmesh fine
     python3 cfd/stage2/run_case.py ... --setup-only | --wall-limit 600 | --np 2 --name _test_x
 
 Copied from cfd/section2d/run_case.py (8 Oct 2026) and extended; the Stage 1 files are not
@@ -31,10 +34,17 @@ runs/_mesh/wf_U<U>_a<alpha>/ and runs/_mesh/tex<t>_s<seed>_n<nseg>_a<alpha>/ and
 checkMesh test first (wf: 'Mesh OK'; tex: 'Mesh OK', or only the skewness check failing with
 max skewness <= TEX_MAX_SKEW and max non-orthogonality <= TEX_MAX_NONORTH, recorded as
 'relaxed' in case.json and the CSV).
+Opt-in keys, whose defaults leave every name above unchanged:
+  --wfmesh coarse|fine (wf; default medium = the wf mesh): make_mesh.py level wf_coarse / wf_fine,
+       name ..._wf_Ks<um>_wfC|_wfF_Tu..., mesh runs/_mesh/wf_U<U>_a<alpha>_coarse|_fine/;
+  --prof <name> (tex): texture from cfd/geometry/gcode_profiles/<name>.json (make_mesh.py
+       --tex-profile) instead of t and seed, name ..._texP<name>[_n<nseg>]_Tu...,
+       mesh runs/_mesh/texP<name>_n<nseg>_a<alpha>/; case.json records texProfile and
+       texProfileMaxDelta (m; texT stays 0).
 
 Resume-safe as Stage 1: a complete case (results.json) is skipped; a partial one restarts from
 its last write; it refuses to resume, without --force, if U, the free stream, the end time, the
-model, Ks, Cs or the texture differ. runs/<name>/RUNNING exists while the solver runs.
+model, Ks, Cs, the texture or the wf mesh differ. runs/<name>/RUNNING exists while the solver runs.
 
 OpenFOAM only through the launcher: openfoam2606 -c "cd <case> && ...". The mesh generator
 runs in cfd/.venv (gmsh); everything else in the system python3.
@@ -90,6 +100,14 @@ TEX_MAX_SKEW = 8.0          # tex meshes: largest accepted checkMesh skewness (O
 TEX_MAX_NONORTH = 85.0      # deg, largest accepted checkMesh non-orthogonality (tex meshes)
 NONORTH_SWITCH = 60.0       # deg; above it: limited corrected 0.33 + 1 non-orthogonal corrector
                             # (tex: always, so that t and its t = 0 reference share the numerics)
+# wf mesh study (opt-in, 15 Nov 2026): wfmesh -> make_mesh.py level; medium is the wf mesh of every
+# earlier case, and only coarse / fine add to the names (_wfC / _wfF, mesh folder _coarse / _fine)
+WF_MESHES = {"coarse": "wf_coarse", "medium": "wf", "fine": "wf_fine"}
+WF_MESH_DEFAULT = "medium"
+WF_MESH_TAG = {"coarse": "C", "fine": "F"}
+# texture from a profile file (opt-in): prof=<name> -> PROFILES/<name>.json (cfd/geometry/gcode_profile.py)
+PROFILES = CFD / "geometry" / "gcode_profiles"
+PROF_RE = re.compile(r"[A-Za-z][A-Za-z0-9_.-]{0,63}")
 
 
 def lt_default(decay=DECAY_DEFAULT):
@@ -99,7 +117,7 @@ def lt_default(decay=DECAY_DEFAULT):
 # --------------------------------------------------------------------------- names
 def case_name(alpha, U, model, wall, tu=1.0, ks=0.0, ks_ends=0.0, cs=CS_DEFAULT, t=0.0, seed=SEED_DEFAULT,
               nseg=NSEG_DEFAULT, maxco=MAXCO_DEFAULT, nouter=NOUTER_DEFAULT, nconv=NCONV_DEFAULT,
-              navg=NAVG_DEFAULT, lt=None, decay=DECAY_DEFAULT):
+              navg=NAVG_DEFAULT, lt=None, decay=DECAY_DEFAULT, wfmesh=WF_MESH_DEFAULT, prof=None):
     """ks, ks_ends in micrometres; t in millimetres."""
     s = f"a{alpha:05.1f}_U{U:04.1f}_{model}_"
     if wall == "wf":
@@ -108,8 +126,10 @@ def case_name(alpha, U, model, wall, tu=1.0, ks=0.0, ks_ends=0.0, cs=CS_DEFAULT,
             s += f"_KsE{ks_ends:g}"
         if cs != CS_DEFAULT:
             s += f"_Cs{cs:g}"
+        if wfmesh != WF_MESH_DEFAULT:
+            s += f"_wf{WF_MESH_TAG[wfmesh]}"
     else:
-        s += f"tex{t:.3f}_s{seed}"
+        s += f"texP{prof}" if prof else f"tex{t:.3f}_s{seed}"
         if nseg != NSEG_DEFAULT:
             s += f"_n{nseg}"
     s += f"_Tu{tu:.1f}"
@@ -124,10 +144,19 @@ def case_name(alpha, U, model, wall, tu=1.0, ks=0.0, ks_ends=0.0, cs=CS_DEFAULT,
     return s
 
 
-def mesh_dir(wall, alpha, U=None, t=0.0, seed=SEED_DEFAULT, nseg=NSEG_DEFAULT):
+def mesh_dir(wall, alpha, U=None, t=0.0, seed=SEED_DEFAULT, nseg=NSEG_DEFAULT, wfmesh=WF_MESH_DEFAULT, prof=None):
     if wall == "wf":
-        return MESHES / f"wf_U{U:04.1f}_a{alpha:05.1f}"
+        return MESHES / (f"wf_U{U:04.1f}_a{alpha:05.1f}" + ("" if wfmesh == WF_MESH_DEFAULT else f"_{wfmesh}"))
+    if prof:
+        return MESHES / f"texP{prof}_n{nseg}_a{alpha:05.1f}"
     return MESHES / f"tex{t:.3f}_s{seed}_n{nseg}_a{alpha:05.1f}"
+
+
+def profile_path(prof):
+    p = PROFILES / f"{prof}.json"
+    if not p.is_file():
+        raise FileNotFoundError(f"texture profile {p} not found (make it with cfd/geometry/gcode_profile.py)")
+    return p
 
 
 # --------------------------------------------------------------------------- free stream (Stage 1)
@@ -226,6 +255,13 @@ def case_parameters(c, name, nprocs, mesh_info=None, nonorth_max=None):
         P["nCells"] = mesh_info.get("n_cells", 0)
     if nonorth_max is not None:
         P["meshNonOrthMax"] = nonorth_max
+    # opt-in features: keys only when used, so every earlier case's parameters are unchanged
+    if c.get("wfmesh", WF_MESH_DEFAULT) != WF_MESH_DEFAULT:
+        P["wfMesh"] = c["wfmesh"]
+    if c.get("prof"):
+        P["texProfile"] = c["prof"]                 # texT stays 0: t does not apply
+        if mesh_info and "texture" in mesh_info:
+            P["texProfileMaxDelta"] = mesh_info["texture"]["delta_absmax_m"]   # m, as applied (corner taper)
     return P
 
 
@@ -316,19 +352,23 @@ def check_mesh_log(log, relaxed):
 
 
 def ensure_mesh(c):
-    d = mesh_dir(c["wall"], c["alpha"], c["U"], c["t"], c["seed"], c["nseg"])
+    d = mesh_dir(c["wall"], c["alpha"], c["U"], c["t"], c["seed"], c["nseg"], c["wfmesh"], c["prof"])
     ok = d / "MESH_OK"
     if ok.exists():
         st = json.loads(ok.read_text())
         return d, st
+    prof = profile_path(c["prof"]) if c["prof"] else None
     if d.exists():
         shutil.rmtree(d)
     d.mkdir(parents=True)
     shutil.copytree(TEMPLATE / "system", d / "system")
-    cmd = [str(VENV_PY), str(MAKE_MESH), "--level", c["wall"], "--alpha", f"{c['alpha']:g}", "--out", str(d),
+    level = WF_MESHES[c["wfmesh"]] if c["wall"] == "wf" else c["wall"]
+    cmd = [str(VENV_PY), str(MAKE_MESH), "--level", level, "--alpha", f"{c['alpha']:g}", "--out", str(d),
            "--plot", str(d / "mesh.png")]
     if c["wall"] == "wf":
         cmd += ["--U", f"{c['U']:g}"]
+    elif prof:
+        cmd += ["--tex-profile", str(prof), "--nseg", str(c["nseg"])]
     else:
         cmd += ["--tex", f"{c['t'] * 1e-3:.9g}", "--seed", str(c["seed"]), "--nseg", str(c["nseg"])]
     r = subprocess.run(cmd, capture_output=True, text=True)
@@ -397,7 +437,7 @@ def n_processor_dirs(case):
 
 DEFAULTS = dict(model="SST", tu=1.0, ks=0.0, ks_ends=0.0, cs=CS_DEFAULT, t=0.0, seed=SEED_DEFAULT,
                 nseg=NSEG_DEFAULT, nconv=NCONV_DEFAULT, navg=NAVG_DEFAULT, maxco=MAXCO_DEFAULT,
-                nouter=NOUTER_DEFAULT, lt=None, decay=DECAY_DEFAULT)
+                nouter=NOUTER_DEFAULT, lt=None, decay=DECAY_DEFAULT, wfmesh=WF_MESH_DEFAULT, prof=None)
 
 
 def normalise(c):
@@ -408,9 +448,20 @@ def normalise(c):
         raise ValueError(f"model must be one of {tuple(MODELS)}")
     if c["wall"] == "wf" and c["model"] != "SST":
         raise ValueError("wall wf runs kOmegaSST only: the transition model needs the low-Re wall (wall tex)")
+    if c["wfmesh"] not in WF_MESHES:
+        raise ValueError(f"wfmesh must be one of {tuple(WF_MESHES)}")
+    if c["prof"] is not None and not (isinstance(c["prof"], str) and PROF_RE.fullmatch(c["prof"])):
+        raise ValueError(f"prof {c['prof']!r}: a profile name (a letter, then letters, digits, '_', '.', '-'; "
+                         f"{PROFILES.relative_to(CFD.parent)}/<prof>.json)")
     if c["wall"] == "wf":
+        if c["prof"]:
+            raise ValueError("prof (a texture profile) applies to wall tex only")
         c.update(t=0.0)
     else:
+        if c["wfmesh"] != WF_MESH_DEFAULT:
+            raise ValueError("wfmesh applies to wall wf only")
+        if c["prof"] and (c["t"] or c["seed"] != SEED_DEFAULT):
+            raise ValueError("t and seed do not apply with prof (the profile is the texture)")
         c.update(ks=0.0, ks_ends=0.0)
     if c["decay"] not in DECAY_MODES:
         raise ValueError(f"decay must be one of {DECAY_MODES}")
@@ -423,7 +474,7 @@ def name_of(c):
     c = normalise(c)
     return case_name(c["alpha"], c["U"], c["model"], c["wall"], c["tu"], c["ks"], c["ks_ends"], c["cs"],
                      c["t"], c["seed"], c["nseg"], c["maxco"], c["nouter"], c["nconv"], c["navg"], c["lt"],
-                     c["decay"])
+                     c["decay"], wfmesh=c["wfmesh"], prof=c["prof"])
 
 
 def run(c, setup_only=False, force=False, wall_limit=None, keep_processors=False, quiet=False, np=NP, name=None):
@@ -450,7 +501,8 @@ def run(c, setup_only=False, force=False, wall_limit=None, keep_processors=False
                 "Cs", "texT")
         if any(abs(float(old.get(k, 0.0)) - float(P[k])) > 1e-9 * max(1.0, abs(float(P[k]))) for k in keys) \
                 or old["turbulenceModel"] != P["turbulenceModel"] or old.get("wall") != P["wall"] \
-                or int(old.get("texSeed", SEED_DEFAULT)) != P["texSeed"]:
+                or int(old.get("texSeed", SEED_DEFAULT)) != P["texSeed"] \
+                or old.get("wfMesh") != P.get("wfMesh") or old.get("texProfile") != P.get("texProfile"):
             raise RuntimeError(f"{name}: existing case has different parameters; use --force to restart it")
         n_old = n_processor_dirs(case)
         if n_old != np:
@@ -535,6 +587,10 @@ def main():
     ap.add_argument("--tex", type=float, default=0.0, help="tex: fuzzy-skin amplitude t, mm (0 = smooth)")
     ap.add_argument("--seed", type=int, default=SEED_DEFAULT, help="tex: random seed (default 1)")
     ap.add_argument("--nseg", type=int, default=NSEG_DEFAULT, help="tex: wall cells per 0.2 mm (default 5)")
+    ap.add_argument("--prof", help="tex: texture profile cfd/geometry/gcode_profiles/<prof>.json instead of "
+                                   "--tex and --seed")
+    ap.add_argument("--wfmesh", choices=WF_MESHES, default=WF_MESH_DEFAULT,
+                    help="wf: mesh of the mesh study (default medium, the wf mesh)")
     ap.add_argument("--tu", type=float, default=1.0, help="Tu reaching the section, %% (default 1)")
     ap.add_argument("--decay", choices=DECAY_MODES, default=DECAY_DEFAULT)
     ap.add_argument("--lt", type=float, default=None, help="free-stream length scale, m (default 1 mm)")
@@ -553,7 +609,7 @@ def main():
         signal.signal(s, _on_signal)
     c = dict(alpha=a.alpha, U=a.U, wall=a.wall, model=a.model, ks=a.ks, ks_ends=a.ks_ends, cs=a.cs, t=a.tex,
              seed=a.seed, nseg=a.nseg, tu=a.tu, decay=a.decay, lt=a.lt, nconv=a.nconv, navg=a.navg,
-             maxco=a.maxco, nouter=a.nouter)
+             maxco=a.maxco, nouter=a.nouter, wfmesh=a.wfmesh, prof=a.prof)
     st = run(c, a.setup_only, a.force, a.wall_limit, a.keep_processors, np=a.np, name=a.name)
     sys.exit(0 if st in ("complete", "skipped", "setup", "timeout", "stopped") else 1)
 

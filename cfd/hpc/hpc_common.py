@@ -51,7 +51,8 @@ STAGES = {
                                                       "queues/S2c_texture.txt",
                                                       "queues/S2d_co25.txt",
                                                       "queues/S2e_rerun.txt",
-                                                      "queues/S2f_verify.txt"]),
+                                                      "queues/S2f_verify.txt",
+                                                      "queues/S2h_wf_mesh.txt"]),
 }
 
 _LOADED = {}
@@ -120,7 +121,8 @@ def mesh_key(stage, c):
     n = rc.normalise(dict(c))
     if stage == "rotor2d":
         return rc.mesh_key(n)
-    return rc.mesh_dir(n["wall"], n["alpha"], n["U"], n["t"], n["seed"], n["nseg"]).name
+    # wfmesh, prof: opt-in (stage2/run_case.py); their defaults give the earlier keys
+    return rc.mesh_dir(n["wall"], n["alpha"], n["U"], n["t"], n["seed"], n["nseg"], n["wfmesh"], n["prof"]).name
 
 
 def local_mesh(stage, key):

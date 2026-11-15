@@ -46,3 +46,14 @@
 270  23.0  SST  wf  ks=100  maxco=2.5
 270  23.0  SST  wf  ks=200  maxco=2.5
 270  23.0  SST  wf  ks=400  maxco=2.5
+#
+# PROF candidates (15 Nov 2026; not part of B2; uncomment to add): the printed blades' own texture, the
+#      mid-span layer (z 122.6 mm) of the Ra40 (FS 0.10) and Ra80 (FS 0.20) slices, make_mesh.py
+#      --tex-profile (cfd/geometry/gcode_profiles/, gcode_profile.py; README section 4): programmed Ra
+#      40.2 / 79.6 um, 0.39-0.40 t like the synthetic texture. Smooth references: the t 0 runs at the same alpha
+#      (S2e, S2f). Meshes made (cfd/hpc/mesh_cache/stage2/texPRa{40,80}_z1226_n5_a{090,180}.0), 'Mesh OK'.
+#      Cost as P2's texture runs: about 160-470 core-h each (16 ranks), 650-1,900 for the four.
+# 180  23.0  SST  tex  prof=Ra40_z1226  maxco=2.5 nconv=150 navg=100
+# 180  23.0  SST  tex  prof=Ra80_z1226  maxco=2.5 nconv=150 navg=100
+# 90   23.0  SST  tex  prof=Ra40_z1226  maxco=2.5 nconv=150 navg=100
+# 90   23.0  SST  tex  prof=Ra80_z1226  maxco=2.5 nconv=150 navg=100
