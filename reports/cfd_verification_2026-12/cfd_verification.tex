@@ -1,0 +1,393 @@
+\documentclass[10pt]{article}
+% Verification report for Dr. Sodhi, Dr. Jahangiri and Dr. Jeong (separate from ../cfd_2026-10/cfd_summary.tex).
+% Build: python3 make_figures.py && latexmk -pdf -interaction=nonstopmode -halt-on-error cfd_verification.tex
+% Every result, estimate, count and cost is a macro from numbers.tex (written by make_figures.py, source in a
+% comment on each line); a number with no data yet prints "pending". Case labels (alpha, lambda, Ks, t, maxCo,
+% FS, set numbers) and dates are typed. 10 pt (the 28 Oct summary used 11 pt) keeps the draft to six pages.
+% figB1_checks.pdf (B1 results against the existing values) is drawn for the revision after B1; not used here.
+\newcommand{\ReportDate}{Draft, 15 November 2026}
+\input{../roughness_2026-09/report/preamble}
+\input{numbers}
+\input{provenance}
+\fancyhead[L]{\sffamily\footnotesize\color{ink2}Verifying the textured-blade CFD}
+\hypersetup{pdftitle={Verifying the textured-blade CFD: where each request stands},pdfauthor={Stephen Eacuello}}
+\graphicspath{{./}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}\renewcommand{\floatpagefraction}{0.95}
+\renewcommand{\bottomtitlespace}{0.05\textheight}
+\setcounter{topnumber}{3}\setcounter{bottomnumber}{2}\setcounter{totalnumber}{4}
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+% Greek letters typed in the text, for pdflatex
+\DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha}}
+\DeclareUnicodeCharacter{03B3}{\ensuremath{\gamma}}
+\DeclareUnicodeCharacter{03B8}{\ensuremath{\theta}}
+\DeclareUnicodeCharacter{03BB}{\ensuremath{\lambda}}
+\DeclareUnicodeCharacter{03C9}{\ensuremath{\omega}}
+\newcommand{\indic}{\textit{(indicative)}}
+\newcommand{\um}{\,\si{\micro\metre}}
+\newcommand{\pmu}{\,$\pm$\,}
+\newcommand{\Ksp}{Ks$^{+}$}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1\linewidth}}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{flushleft}
+{\sffamily\small\color{ink2} REPORT \quad·\quad DRAFT OF 15 NOVEMBER 2026}\\[0.4em]
+{\sffamily\LARGE\bfseries\color{navy} Verifying the textured-blade CFD}\\[0.3em]
+{\sffamily\normalsize Where each of Dr.\ Jahangiri's requests of 1 November stands, and what will close it}\\[0.3em]
+{\sffamily\small Stephen Eacuello \quad·\quad for Dr.\ Sodhi, Dr.\ Jahangiri and Dr.\ Jeong}
+\end{flushleft}
+{\color{rule}\hrule height 0.6pt}
+\vspace{0.6em}
+
+\begin{keybox}
+\textbf{In short.} No CFD model family has yet shown that its roughness effect exceeds its own mesh and
+time-step changes: halving the time step moves the single-blade drag by up to \nTsDropSST\,\%, and the
+rotor's fine and coarse meshes differ by \nRotMeshOverEff\ times its gain at Ks~400\um. The \nBoneJobs\
+verification runs (B1) went to Unity on 15 November. Whether our blades are ``high roughness'' depends on
+how the printed surface maps to a sand-grain height: from the scans, \Ksp\ \nKspSecLo--\nKspSecHi, where
+the model is nearly smooth and the rotor's net change is within its noise; from the slicer's nominal
+texture, FS~0.20 is the 400\um\ case that gained. The textured runs are a synthetic stand-in, not our
+surface. The main gap is experimental: there is no balance for the blade-force test.
+\end{keybox}
+
+{\small\textit{A note on how this was done: I am not trained in aerodynamics or CFD. The simulations were set up, run and analyzed with the help of AI tools (Claude), which also helped draft this summary. Please treat the results as preliminary.}}
+
+\section{Where each request stands}\label{sec:status}
+J1--J7: Dr.\ Jahangiri's requests of 1 November; ``7 Oct'': items of our 7 October meeting.
+{\footnotesize
+\begin{longtable}{@{}L{0.245} L{0.115} L{0.4} L{0.16}@{}}
+\toprule
+Request & Status & Evidence now & What closes it \\
+\midrule
+\endfirsthead
+\toprule
+Request & Status & Evidence now & What closes it \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+J1 mesh, time step: smooth blade & partial & Edge-on drag converges (GCI \nGciCdNinety\,\%), the rest does
+not; half the step: Cd(180) $-$\nTsDropSST\,\% & B1 (S1, E90, S2) \\
+J1: rough-wall blade & partial & Holds at half the step; no mesh study & Not in B1 \\
+J1: textured blade & need run & One mesh; half the step moves both levels \nTexDropTex--\nTexDropSmooth\,\%;
+only the sign is known & B1 (T1, T2a, E90) \\
+J1: rotor & need run & Mesh change \nRotMeshOverEff\ times the Ks-400 gain & B1 (R1) \\
+J2 turbulence and roughness & have & Section~\ref{sec:j2} & --- \\
+J3 separation, pressure, forces through the turn & partial & Wall data of \nSurfCases\ blade runs, forces
+of \nPfRuns\ rotor runs; no turning-blade surfaces & B1 (E90), B2 \\
+J4 gains only at high roughness & partial & Depends on how the surface maps to Ks
+(Section~\ref{sec:j4}) & B2 Ks sweeps \\
+J5 blade forces; 7 Oct: section lift, drag, a validated model & blocked & No balance
+(Section~\ref{sec:tunnel}); nothing measured to validate against & Decision, about 24 Nov \\
+J6 roughness levels; 7 Oct: rougher set, the optimum & need experiment & Sets 1--3 due about 23 Nov; one print
+per level; FS~1.60, 3.20 unprintable (slicer limit \nSlicerMax~mm) & Tunnel from about 18 Dec; second
+prints \\
+J7 speed through the loading & have (4 sets) & \nDwells\ load steps (Fig.~\ref{fig:speed}) & Logger, new
+sets \\
+7 Oct: cost; Sandia report & have & Section~\ref{sec:tunnel}; answered 28 Oct & --- \\
+\end{longtable}
+}
+
+\section{J1: mesh and time step}\label{sec:j1}
+\textbf{Smooth blade} (Fig.~\ref{fig:numerics}; 23~m/s, SST, wall resolved, three meshes at maxCo~2.5). Edge-on (α~90) the drag converges
+(GCI \nGciCdNinety\,\%) but the lift diverges (spread \nSpreadClNinety\,\%); at α~0 and 180 the meshes
+zig-zag by \nSpreadCdZero\ and \nSpreadCdOneEighty\,\%. Halving the time step lowers Cd(180) by
+\nTsDropSST\,\% (SST) and \nTsDropLM\,\% (LM) and stops the shedding; no smaller step has been run, and at
+fixed maxCo the step shrinks with the cells. \emph{Converged only for the edge-on drag.}
+
+\textbf{Rough-wall blade} (SST, rough wall function). From maxCo 5 to 2.5 every roughness effect keeps its
+sign and moves by at most \nWfMaxMove\ point (α~90, Ks~400\um: +\nWfNinetyFive\ to +\nWfNinetyTwoFive\,\%);
+the smooth reference moves by up to \nWfLevelMove\,\%. No mesh study, none in B1. \emph{Time step adequate;
+mesh untested.}
+
+\textbf{Textured blade} (one mesh, 40\um\ wall spacing). From maxCo 5 to 2.5 the drag at α~180 falls by
+\nTexDropSmooth\,\% (smooth) and \nTexDropTex\,\% (t~0.20~mm) over the same window, and the wake changes; the
+texture's drag rise is +\nTexEffFive\ and +\nTexEffTwoFiveShort\,\% (+\nTexEffLong\,\% over
+\nWinLongLo--\nWinLongHi\ c/U). This mesh's smooth Cd(180) is \nTexGapPct\,\% below the smooth-blade mesh's,
+but only \nTexGapMatched\,\% at matched time steps (windows \nWinShortLo--\nWinShortHi\ and
+\nWinLongLo--\nWinLongHi\ c/U): the step, not the wall spacing, is the likely cause.
+\emph{Only the sign of the drag rise is established.}
+
+\textbf{Rotor} (medium mesh, maxCo~4, 45 averaged revolutions). At λ~0.10 the fine and coarse meshes differ
+by \nRotMeshFC\pmu\nRotMeshFCU\ in C\textsubscript{Q} (\nRotNrevGrid-revolution means), against a Ks-400
+effect of \nRotEffTen\pmu\nRotEffTenU; the time step was checked only at λ~0.15 (maxCo 4 to 2:
+\nRotTs\pmu\nRotTsU). The 28 October summary assumed these errors cancel between smooth and rough runs;
+that is not shown. \emph{Not verified.}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{fig1_numerics}
+\caption{Each roughness effect (navy) next to its family's change with the mesh (grey) and with a halved time
+step (gold: maxCo 5 to 2.5 for the rough-wall and textured blades, 2.5 to 1.25 smooth, 4 to 2 rotor).
+×: no such run.}
+\label{fig:numerics}
+\end{figure}
+
+\textbf{B1} repeats each comparison at a smaller step and on other meshes (Table~\ref{tab:b1}). The texture setting stays if the smooth Cd(180) moves by at most \nAccLevel\,\% and the
+drag rise stays within \nAccEff\ points of +\nTexEffLong\,\% with the same lift sign and shedding;
+otherwise the finer setting is adopted (B2's texture runs then cost \nAccCostLo--\nAccCostHi\ times more).
+The rotor gain stands if it is resolved on the fine mesh and at maxCo~2 and lies within \nAccRot\ of
+\nRotEffTen; otherwise it is reported as mesh-dependent and no more rotor roughness runs are made.
+
+\begin{table}[tbp]
+\centering\footnotesize
+\caption{The B1 runs (submitted 15 November); ``now'': before B1. Results fill in as the runs finish
+(\nBoneDone\ of \nBoneQueueJobs\ so far); changes in \%, rotor in C\textsubscript{Q}.}\label{tab:b1}
+\begin{tabularx}{\linewidth}{@{}L{0.3} X L{0.36}@{}}
+\toprule
+Check (now) & Runs & B1 result \\
+\midrule
+T1 texture, α 180 (rise +\nTexEffLong) & maxCo 1.25, t 0 and 0.20~mm & level \nBoneTOneLevel; rise
+\nBoneTOneEff \\
+T2a texture, α 180, finer wall & 20\um\ spacing, maxCo 2.5 & level \nBoneTTwoLevel; rise \nBoneTTwoEff \\
+E90 texture, edge-on (never run) & maxCo 2.5 and 1.25 & rise \nBoneTexNinetyA, \nBoneTexNinetyB \\
+S1 smooth, α 180 (Cd \nMedCdTwoFive, \nMedCdOneTwoFive) & maxCo 0.625; coarse, fine at 1.25 & step
+\nBoneSOneStep; meshes \nBoneSOneSpread \\
+E90 smooth, edge-on (lift spread \nSpreadClNinety) & three meshes at maxCo 1.25 & Cd \nBoneNinetyCd; Cl
+\nBoneNinetyCl \\
+S2 smooth, α 0 (Cd \nZeroCdFive\ or \nZeroCdTwoFive) & 0.625; coarse, fine at 1.25; to 300 c/U; two
+restarts & Cd \nBoneSTwoMed, \nBoneSTwoCoarse, \nBoneSTwoFine; restarts \pending \\
+R1 rotor, λ 0.10 (\nRotEffTen\pmu\nRotEffTenU) & Ks 0, 400\um: fine; medium at maxCo 2; coarse &
+\nBoneROneFine, \nBoneROneMedTwo, \nBoneROneCoarse; 2u \pending \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{J2: how turbulence and roughness are modelled}\label{sec:j2}
+All runs are 2D unsteady RANS (OpenFOAM v2606), mostly at 23~m/s, Tu~1\,\% and a 1~mm length scale
+(Table~\ref{tab:families}; every setting: \nolinkurl{cfd/docs/SETUP_REVIEW_2026-11.md}).
+
+\begin{table}[tbp]
+\centering\footnotesize
+\caption{The model families of the \nRunsAll\ October runs. SST: k-ω SST, fully turbulent. LM: k-ω SST with
+γ--Re\textsubscript{θt} transition. Cells in thousands.}\label{tab:families}
+\begin{tabularx}{\linewidth}{@{}L{0.2} L{0.17} X L{0.3}@{}}
+\toprule
+Family (runs) & Model (runs) & Wall; cells & How roughness enters \\
+\midrule
+Smooth blade (\nRunsSec) & SST (\nRunsSecSST), LM (\nRunsSecLM) & Resolved, y\textsuperscript{+} $<$ 1;
+\nCellsSecLo--\nCellsSecHi & Not at all \\
+Rough-wall blade (\nRunsWf) & SST & Wall function, y\textsuperscript{+} \nYplusWfLo--\nYplusWfHi;
+\nCellsWf & Sand-grain Ks 0--400\um\ (Ks/y\textsubscript{P} $\le$ \nKsOverYpMax) \\
+Textured blade (\nRunsTex) & SST (\nRunsTexSST), LM (\nRunsTexLM) & Resolved; \nCellsTex & Slicer's nominal
+texture in the wall: ±t every 0.2~mm, one random pattern, 2D ridges \\
+Rotor, 3 blades (\nRunsRotor) & SST & Wall functions; \nCellsRotLo--\nCellsRotHi; rotating & Ks 0, 100 or
+400\um \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{What none of the families represents.}
+(1)~\emph{Transition triggered by roughness.} OpenFOAM v2606 has no such model. LM predicts transition from
+free-stream turbulence and pressure gradient, not roughness, and the rough wall function assumes a
+turbulent layer. Only the textured LM runs could show tripping, outside LM's calibration.
+(2)~\emph{Our surface.} Ks was never measured (it needs a drag test, not a scan). The textured mesh uses the
+slicer's nominal displacement, and in 2D it becomes ridges along the span, expected to trip a layer more
+easily than the print's random 3D texture.
+(3)~\emph{The tunnel and rig}: Tu and length scale are assumed; there are no tunnel walls, arms, hub or
+blade tips, and the assembly is inferred from CAD.
+The families also disagree on the smooth blade (α~180, maxCo~2.5: Cd \nCdWfSmooth, \nMedCdTwoFive\ and
+\nTexCdSmooth\ on the rough-wall, smooth-blade and texture meshes), so this report compares only within a
+family.
+
+\section{J3: the flow around the blade and through the turn}\label{sec:j3}
+On 15 November the wall pressure and friction of \nSurfCases\ single-blade runs (Fig.~\ref{fig:surface})
+and each blade's torque, drag and lift through the turn in \nPfRuns\ rotor runs (Fig.~\ref{fig:phase}) were
+extracted (\texttt{cfd/analysis/2026-11-15/}); all of it carries the uncertainty of Section~\ref{sec:j1}.
+
+\textbf{Edge-on, rough wall} \indic. Ks~400\um\ moves the convex-side separation \nSSepShiftNinety\,c
+upstream and weakens the convex side's suction peak (Cp \nSCpWfNinetyZero\ to \nSCpWfNinetyFour); the
+convex face's pressure drag rises from \nSCdpWfNinetyZero\ to \nSCdpWfNinetyFour.
+
+\textbf{Convex side to the wind, texture} \indic. At maxCo~2.5 the texture weakens the suction peak on the
+tip-B side (Cp \nSCpTexZeroTwoFive\ to \nSCpTexTwoTwoFive) and moves separation \nSSepShiftTex\,c upstream.
+At maxCo~5 the smooth run already has a weak peak (\nSCpTexZeroFive); the texture changes neither the peak
+(\nSCpTexTwoFive) nor the separation, yet the drag rise is similar (+\nTexEffFive\,\%). Halving the time
+step does the same to the smooth blade (peak \nSCpMedTwoFive\ to \nSCpMedOneTwoFive, separation
+\nSSepShiftMed\,c upstream). The texture's drag rise is not yet tied to a mechanism.
+
+\textbf{Through the turn, rotor} \indic. The Ks-400 gain comes from the advancing blade (θ~60--120°,
+moving downwind edge-on): its drag about the relative wind rises by \nPfAdvCD\pmu\nPfAdvCDU\
+(\nPfAdvCDPct\,\%) and there points along its path, so it drives; its lift changes more
+(\nPfAdvCL\pmu\nPfAdvCLU) but acts along the arm. The returning blade's drag rises
+(\nPfRetCD\pmu\nPfRetCDU) and brakes. Torque by sector: advancing \nSecAdv\pmu\nSecAdvU, returning
+\nSecRet\pmu\nSecRetU, downwind \nSecDown\pmu\nSecDownU, upwind \nSecUp\pmu\nSecUpU. The blades differ by
+more than 2u in \nPfBladeShare\,\% of the azimuth bins (\nPfBladeExpect\,\% expected), so these intervals
+may be too narrow. Missing: surfaces on a turning blade (B2) and the texture edge-on (B1).
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{fig2_surface}
+\caption{Time-mean wall pressure and friction round the blade (1-mm means; 23~m/s, SST, maxCo~2.5)
+\nSurfFigState. (a) Edge-on. (b) Convex side to the wind; the textured wall's friction is omitted (it
+reverses in the texture's valleys).}
+\label{fig:surface}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{fig3_rotor_phase}
+\caption{One blade's torque, drag and lift (about the relative wind) against azimuth: three-blade mean,
+10° bins, λ~0.10, 23~m/s. Top: Ks~0 and 400\um; bottom: changes from Ks~0, ±2u. Shaded: advancing and
+returning sectors.}
+\label{fig:phase}
+\end{figure}
+
+\section{J4: why the gain appears only at high roughness}\label{sec:j4}
+The CFD describes roughness by a sand-grain height Ks, never measured for a printed skin; three mappings give
+different answers (Table~\ref{tab:mapping}).
+
+\begin{table}[tbp]
+\centering\footnotesize
+\caption{Three mappings of the printed surfaces to Ks; \Ksp: blade mean of the runs at the nearest Ks.}\label{tab:mapping}
+\begin{tabularx}{\linewidth}{@{}X L{0.2} L{0.12} L{0.2} L{0.11}@{}}
+\toprule
+Mapping & Plain, FS 0.05, FS 0.10 & FS 0.20 & \Ksp & Nearest case \\
+\midrule
+Ks = scanned height k (half the 1--99\,\% range) & \nKLow\um & \nKHighLo--\nKHighHi\um & section
+\nKspSecLo--\nKspSecHi, rotor \nKspRotLo--\nKspRotHi & Ks 50--100\um \\
+Measured Ra through the texture model (t = Ra/\nRaPerT, Ks = \nKsPerT\,t) & \multicolumn{2}{l}{all four:
+\nKsEqLo--\nKsEqHi\um} & similar & Ks 50\um \\
+Nominal slicer texture (Ks = \nKsPerT\,t) & 0, \nKsNomFsFive, \nKsNomFsTen\um & \nKsNomFsTwenty\um &
+at 400\um: section \nKspSecFourLo--\nKspSecFourHi, rotor \nKspRotFour & Ks 200, 400\um \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{From the scans} the blades sit at \Ksp\ \nKspSecLo--\nKspSecHi. The rough wall function is smooth
+below \Ksp~\nKspSmoothLimit\ and transitional to \nKspRoughLimit, so it changes little there: at Ks 50 and
+100\um\ the drag changes by \nWfNinetyFifty\ and \nWfNinetyHundred\,\% edge-on, \nWfOneEightyFifty\ and
+\nWfOneEightyHundred\,\% at α~180 (Fig.~\ref{fig:ksplus}a). On the rotor the net change at Ks~100\um\ is
+within its noise (\nRotHunTen\pmu\nRotHunTenU\ at λ~0.10, \nRotHunTwelve\pmu\nRotHunTwelveU\ at 0.12), but
+the advancing sector's is resolved: \nAdvHun\pmu\nAdvHunU\ at λ~0.10, with the sign and place of the Ks-400
+gain (Fig.~\ref{fig:ksplus}b). If the rotor's intervals are too narrow, as the blade-to-blade check in
+Section~\ref{sec:j3} suggests, it is only marginally resolved. Growing linearly with Ks (assumed), the change would be \nTrendLo--\nTrendHi\
+at \nKLow--\nKHighHi\um, below the 2u of \nRotTwoULo--\nRotTwoUHi\ from \nRevNow\ revolutions; resolving
+it at \nKHighHi\um\ would take about \nRevNeeded\ revolutions per run.
+
+\textbf{From the nominal texture}, FS~0.20 is the 400\um\ case, where the rotor gained \nRotEffTenPct\ and
+\nRotEffTwelvePct\,\% (λ~0.10, 0.12). So ``gains only at high roughness'' may read ``gains at the Ks the
+nominal texture implies, unresolved at the Ks the scans imply''. Only this mapping orders the sets as the
+gains do (FS~0.10: \nGainFsTen\,\% [\nGainFsTenLo, \nGainFsTenHi]; the scans give it the same or a lower Ks
+than Plain), but its Ra is \nNomOverRaLo--\nNomOverRaHi\ times the measured one. B2's Ks sweeps (rotor 25,
+50, 200\um; section 25--211\um) will give each FS an equivalent Ks: \pending. \Ksp\ describes a turbulent
+rough wall; tripping a laminar layer is a separate question that no family represents.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{fig4_ksplus}
+\caption{Roughness effect against \Ksp: (a) single-blade drag, rough wall (filled: maxCo~2.5; open: 5;
+ticks: nominal Ks of FS~0.10, 0.20); (b) rotor torque, all blades and advancing sector (±2u). Grey: the
+printed blades if Ks equals the scanned height.}
+\label{fig:ksplus}
+\end{figure}
+
+\section{The tunnel and the blades}\label{sec:tunnel}
+\textbf{Blades.} Each tested level has one print, and Plain was printed with thicker layers than the
+textured sets (Table~\ref{tab:blades}). On measured Ra all four tested sets look like a nominal t of \nTeqLo--\nTeqHi~mm,
+nearest the new FS~0.025 set; Plain is the roughest.
+
+\begin{table}[tbp]
+\centering\footnotesize
+\caption{Blade sets and their CFD stand-ins (t: fuzzy-skin thickness; layer from the scans unless marked;
+G-code: \texttt{blades/as\_printed/}).}\label{tab:blades}
+\begin{tabularx}{\linewidth}{@{}L{0.14} L{0.12} X L{0.08} L{0.15} L{0.15}@{}}
+\toprule
+Set (t, mm) & Nozzle; layer (mm) & G-code & Ra (µm) & Stand-in, nominal & Stand-in, measured \\
+\midrule
+Plain (0) & \nNozzleSmall$^{a}$; \nLayerPlain & no slicer record & \nRaPlain & t 0 & t \nTeqPlain; k
+\nKLow\um \\
+FS 0.05 (\nTFsFive) & \nNozzleSmall; \nLayerFsFive & ``Ra20'' file has no fuzzy skin; source unconfirmed
+& \nRaFsFive & t 0.05 (maxCo 5); Ks \nKsNomFsFive\um & t \nTeqFsFive; k \nKLow\um \\
+FS 0.10 (\nTFsTen) & \nNozzleSmall; \nLayerFsTen & ``Ra40'' (plate 40~RA) & \nRaFsTen & t 0.10; Ks
+\nKsNomFsTen\um & t \nTeqFsTen; k \nKLow\um \\
+FS 0.20 (\nTFsTwenty) & \nNozzleSmall; \nLayerSlicer\ (slicer) & ``Ra80'' (plate 80~RA) & \nRaFsTwenty & t
+0.20; Ks \nKsNomFsTwenty\um & t \nTeqFsTwenty; k \nKHighLo--\nKHighHi\um \\
+\addlinespace
+Sets 1--3: Plain, FS 0.40, FS 0.025 (\nTFsQuarter) & Plain \nNozzleLarge; others to confirm & due about
+23 Nov; ``10 RA'' G-code exists & --- & t 0; no mesh (Ks \nKsNomFsForty\um); t 0.025 (Ks
+\nKsNomFsQuarter\um) & after scans \\
+FS 0.805 (\nTFsEighty) & \nNozzleLarge; \nLayerFsEighty\ (slicer) & ``320 RA'', sliced only & --- & no mesh & --- \\
+\bottomrule
+\end{tabularx}
+\par\smallskip\raggedright $^{a}$Stated by the Print Lab, but Plain's \nLayerPlain-mm layers exceed the
+\nLayerLimit-mm limit of its \nNozzleSmall-mm profile.
+\end{table}
+
+\textbf{Rotor speed through the loading (J7)} was logged at all \nDwells\ load steps of the tested sets
+(\nDwellsOk\ valid). At 23~m/s the tip-speed ratio falls from \nLamLightLo--\nLamLightHi\ at the lightest
+load to \nLamHeavyLo--\nLamHeavyHi\ at the heaviest, through the CFD's λ~0.10 and 0.12; peak power is at
+\nLamPmaxLo--\nLamPmaxHi\ (Fig.~\ref{fig:speed}). The new sets need the same record.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=\linewidth]{fig5_rotor_speed}
+\caption{Tip-speed ratio against generator torque (electromagnetic, without bearing friction) through each
+load sweep of 1 October; solid: run~1, dashed: run~2.}
+\label{fig:speed}
+\end{figure}
+
+\textbf{Blade forces (J5)}, to decide with R.\ Cassin and Y.\ Kim by about 24 November:
+(1)~\emph{build the docs/12 balance} (two load cells under the floor, a blade half in the wind; parts \$\nBalLentLo--\nBalLentHi\ if the lab lends the pitot tube, manometer and plate
+stock, \$\nBalLo--\nBalHi\ otherwise; on hold); (2)~\emph{borrow a balance} from another lab (the MCE lab
+has none to lend, 4 November);
+(3)~\emph{static torque}, the rotor held at set angles (simpler, but rotor torque only, not blade lift and
+drag); (4)~\emph{pressure taps} on a printed section (cheap; Cp for J3, but no viscous drag, which is up to
+\nPressViscMax\,\% of Cd in the \nHealthyRuns\ healthy smooth-blade runs).
+
+\textbf{Replicates and cost.} Second prints on one nozzle and layer height, with a matched Plain, would
+separate texture from print and mounting effects. Print Lab estimates per blade
+(\$\nPrintRate\ per print hour plus filament at \$\nFilament/kg, its 12 October rate, assumed here): Plain on
+the \nNozzleLarge-mm nozzle \nPrintPlainFourH~h, \nPrintPlainFourG~g, \$\nPrintPlainFourUsd; FS~0.40
+\nPrintFsFortyH~h, \nPrintFsFortyG~g, \$\nPrintFsFortyUsd; FS~0.025 \nPrintFsQuarterH~h, \nPrintFsQuarterG~g,
+\$\nPrintFsQuarterUsd. The new sets and J5--J7 need about \nTunnelLo--\nTunnelHi\ tunnel hours, from about
+18 December.
+
+\section{Computing and the decisions needed}\label{sec:computing}
+The October runs used about \nOctCoreH\ core-hours in \nOctJobs\ Unity jobs (28 October summary); the job
+records on the Mac cover \nLocalJobs\ jobs and \nLocalCoreH\ core-hours. Unity now rejects any job that
+asks for more than \nUnityDays\ days; the longest B1 job is estimated at \nBoneLongestDays\ days
+(plan: Table~\ref{tab:compute}). COMSOL on Unity is licensed to UMass Amherst and would not remove the cost
+of resolving the texture; we do not plan to use it.
+
+\begin{table}[tbp]
+\centering\footnotesize
+\caption{Computing planned (estimates; B1 from its queue files, the rest from the plan of 15 November).}\label{tab:compute}
+\begin{tabularx}{\linewidth}{@{}L{0.28} L{0.33} X@{}}
+\toprule
+Item & Core-hours & Status \\
+\midrule
+B1 verification, \nBoneJobs\ jobs & \nBoneCoreLo--\nBoneCoreHi & Submitted 15 Nov \\
+B2 mechanisms (SST) & \nBTwoLo--\nBTwoHi & After B1 is read \\
+Textured 2D rotor & \nTexRotRevLo--\nTexRotRevHi\ per revolution (now \nCoreHPerRev); 15-revolution pair
+\nTexRotPairLo--\nTexRotPairHi & After B1 and B2 \\
+LM rotor (transition) & \nLmRotLo--\nLmRotHi & After B1 and B2 \\
+3D strip, 1--2~mm of span & \nStripLo--\nStripHi\ per case & Exploratory \\
+Full 3D blade, \nBladeCellsLo--\nBladeCellsHi\ billion cells & \nBladeCoreLo--\nBladeCoreHi\ million per
+case (\nBladeOverOctLo--\nBladeOverOctHi\ × October) & Not feasible \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\textbf{Decisions needed.} (1)~The force test (J5), about 24 November. (2)~B2: go or no-go, with R.\ Cassin, after
+reading B1 (about 23--25 November). (3)~A mesh check for the rough-wall blade, which B1 lacks: add it to
+B2? (4)~Second prints on one nozzle and layer height, with a matched Plain. (5)~A speed record for the new
+sets (J7). (6)~The textured or LM rotor, a mesher for FS~0.40 and 0.805, or the 3D strip: after B2.
+
+\section{Corrections to the 28 October summary}\label{sec:corrections}
+(1)~It said the single-blade runs varied ``the printed texture shape itself''. The \nRunsTex\ texture runs
+use a synthetic stand-in: the slicer's nominal displacement as 2D ridges, with an Ra
+\nNomOverRaLo--\nNomOverRaHi\ times the measured one.
+(2)~It said the 100\um\ cases ``are the closest to the real blades''. That holds only if Ks equals the
+scanned height; with the nominal texture, FS~0.10 and FS~0.20 correspond to about \nKsNomFsTen\ and
+\nKsNomFsTwenty\um, the latter the 400\um\ case that gained (Section~\ref{sec:j4}).
+(3)~It gave the balance parts as \$\nBalOldLo--\nBalOldHi; the design gives \$\nBalLentLo--\nBalLentHi\ with
+borrowed parts, \$\nBalLo--\nBalHi\ without.
+
+{\tiny\color{ink2}\textbf{Provenance.} Built \BuildDate, git \BuildGit, by \texttt{make\_figures.py}
+(every number, with its source, in \texttt{numbers.tex}). Inputs and SHA-256 prefixes (tracked in git unless
+marked local, git-ignored and on the analysis Mac only, or untracked, not yet committed): \ProvenanceList\par}
+
+\end{document}
