@@ -49,10 +49,10 @@
 \newcommand{\nRestartCoreH}{304}% cfd/section2d/runs/{_cont,_hyst}*/case.json restart estimates (local)
 \newcommand{\nBoneLongestDays}{3.6}% stated_values.csv b1_longest_days: cfd/stage2/queues/S2f_verify.txt (header, Cost)
 \newcommand{\nRunsSec}{125}% cfd/section2d/results/section_polars.csv rows (October)
-\newcommand{\nRunsWf}{37}% cfd/stage2/results/stage2_polars.csv rows, wall wf
+\newcommand{\nRunsWf}{45}% cfd/stage2/results/stage2_polars.csv rows, wall wf
 \newcommand{\nRunsTex}{32}% cfd/stage2/results/stage2_polars.csv rows, wall tex
 \newcommand{\nRunsRotor}{69}% cfd/rotor2d/results/rotor_cp.csv + rotor_static.csv rows
-\newcommand{\nRunsAll}{263}% sum of the four
+\newcommand{\nRunsAll}{271}% sum of the four
 \newcommand{\nRunsSecSST}{35}% section_polars.csv rows, model SST
 \newcommand{\nRunsSecLM}{90}% section_polars.csv rows, model LM
 \newcommand{\nRunsTexSST}{12}% stage2_polars.csv rows, wall tex, model SST
@@ -263,19 +263,19 @@
 \newcommand{\nPrintFsQuarterSet}{17.31}% 3 x nPrintFsQuarterUsd
 \newcommand{\nBoneTOneLevel}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.000 Co1.25n2 Cd_mean vs Co2.5n2, % [no data yet]
 \newcommand{\nBoneTOneEff}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.200 vs tex0.000, Co1.25n2, % [no data yet]
-\newcommand{\nBoneTTwoLevel}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.000 n10 vs nseg 5, Co2.5n2, % [no data yet]
-\newcommand{\nBoneTTwoEff}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.200 vs tex0.000, n10, % [no data yet]
-\newcommand{\nBoneTexNinetyA}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 tex0.200 vs tex0.000, Co2.5n2, % [no data yet]
+\newcommand{\nBoneTTwoLevel}{+16.0}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.000 n10 vs nseg 5, Co2.5n2, %
+\newcommand{\nBoneTTwoEff}{+5.9}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.200 vs tex0.000, n10, %
+\newcommand{\nBoneTexNinetyA}{+48.7}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 tex0.200 vs tex0.000, Co2.5n2, %
 \newcommand{\nBoneTexNinetyB}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 tex0.200 vs tex0.000, Co1.25n2, % [no data yet]
-\newcommand{\nBoneSOneStep}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a180 medium Co0.625n2 vs Co1.25n2, % [no data yet]
-\newcommand{\nBoneSOneSpread}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a180 coarse/medium/fine at Co1.25n2, spread % of fine [no data yet]
-\newcommand{\nBoneNinetyCd}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 Co1.25n2 Cd spread % of fine [no data yet]
-\newcommand{\nBoneNinetyCl}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 Co1.25n2 Cl spread % of fine [no data yet]
+\newcommand{\nBoneSOneStep}{\textminus{}26.0}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a180 medium Co0.625n2 vs Co1.25n2, %
+\newcommand{\nBoneSOneSpread}{5.0}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a180 coarse/medium/fine at Co1.25n2, spread % of fine
+\newcommand{\nBoneNinetyCd}{16.8}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 Co1.25n2 Cd spread % of fine
+\newcommand{\nBoneNinetyCl}{303.2}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 Co1.25n2 Cl spread % of fine
 \newcommand{\nBoneSTwoMed}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 medium Co0.625n2_N300A100 Cd_mean [no data yet]
-\newcommand{\nBoneSTwoCoarse}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 coarse Co1.25n2_N300A100 Cd_mean [no data yet]
+\newcommand{\nBoneSTwoCoarse}{1.65}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 coarse Co1.25n2_N300A100 Cd_mean
 \newcommand{\nBoneSTwoFine}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 fine Co1.25n2_N300A100 Cd_mean [no data yet]
 \newcommand{\nBoneROneFine}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): fine Ks400 - Ks0 CQ_mean [no data yet]
 \newcommand{\nBoneROneMedTwo}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): medium maxCo 2 Ks400 - Ks0 CQ_mean [no data yet]
-\newcommand{\nBoneROneCoarse}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): coarse Ks400 - Ks0 CQ_mean [no data yet]
-\newcommand{\nBoneDone}{2}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): finished B1 cases in the tables
+\newcommand{\nBoneROneCoarse}{+0.0106}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): coarse Ks400 - Ks0 CQ_mean
+\newcommand{\nBoneDone}{14}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): finished B1 cases in the tables
 \newcommand{\nSurfFigState}{}% cfd/analysis/2026-11-15/out/surface_profiles.csv: data
