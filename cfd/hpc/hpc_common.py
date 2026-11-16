@@ -190,6 +190,10 @@ ROTOR_LEVEL_CELLS = {"coarse": 0.53, "medium": 1.0, "fine": 1.92}
 # (nseg 10: about 1.53 x, estimated from the ring size in mesh_info.json); steps taken as
 # proportional to nseg (upper bound; the 15 Nov review put nseg 10 at 1-2 x).
 TEX_NSEG_DEFAULT = 5
+# Rough-wall mesh study (stage2 wfmesh): cells of wf_coarse / wf / wf_fine at 23 m/s, alpha 90 (52,049 /
+# 102,851 / 204,829; mesh logs), and steps scaled by the corner spacing ratio sqrt(2) (estimate).
+WF_MESH_CELLS = {"coarse": 0.506, "medium": 1.0, "fine": 1.99}
+WF_MESH_STEPS = {"coarse": 0.707, "medium": 1.0, "fine": 1.414}
 
 # Unity seconds per step at 16 ranks for each kind (developed flow); filled from the test job.
 # Each entry: {ntasks: s_per_step}. Missing ntasks are scaled with the nearest entry (ideal scaling).
@@ -224,7 +228,8 @@ def est_steps(stage, c):
     if stage == "section2d":
         return STEPS_PER_CONV[n["level"]] * float(n["nconv"]) * co
     if stage == "stage2":
-        f = float(n.get("nseg") or TEX_NSEG_DEFAULT) / TEX_NSEG_DEFAULT if n["wall"] == "tex" else 1.0
+        f = (float(n.get("nseg") or TEX_NSEG_DEFAULT) / TEX_NSEG_DEFAULT if n["wall"] == "tex"
+             else WF_MESH_STEPS.get(n.get("wfmesh") or "medium", 1.0))
         return STEPS_PER_CONV_STAGE2[n["wall"]] * float(n["nconv"]) * co * f
     if n.get("lam") is None:
         return STEPS_PER_DU_ROTOR_STATIC * float(n["nconv"])
@@ -239,6 +244,8 @@ def cells_factor(stage, c):
     n = norm(stage, c)
     if stage == "stage2" and n["wall"] == "tex":
         return 1 + 0.53 * (float(n.get("nseg") or TEX_NSEG_DEFAULT) / TEX_NSEG_DEFAULT - 1)
+    if stage == "stage2" and n["wall"] == "wf":
+        return WF_MESH_CELLS.get(n.get("wfmesh") or "medium", 1.0)
     if stage == "rotor2d" and n.get("lam") is not None:
         return ROTOR_LEVEL_CELLS.get(n.get("level"), 1.0)
     return 1.0

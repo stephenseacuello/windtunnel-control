@@ -1,0 +1,58 @@
+{
+ "case": "/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a090.0_U23.0_SST_fine_Tu1.0_Co1.25n2",
+ "kind": "section",
+ "images": [
+  "cp_mean_near.png",
+  "cp_near.png",
+  "lic_mean_near.png",
+  "lic_near.png",
+  "mesh_cornerA_0p1mm.png",
+  "mesh_cornerA_0p8mm.png",
+  "mesh_cornerA_6mm.png",
+  "mesh_domain.png",
+  "mesh_near.png",
+  "nut_ratio_near.png",
+  "nut_ratio_wake.png",
+  "streamlines_mean_near.png",
+  "streamlines_near.png",
+  "surface_inst.png",
+  "surface_mean.png",
+  "velocity_mean_near.png",
+  "velocity_mean_wake.png",
+  "velocity_near.png",
+  "velocity_wake.png",
+  "vorticity_near.png",
+  "vorticity_wake.png"
+ ],
+ "notes": [
+  "no animation: 1 saved field time(s) (purgeWrite keeps the last 3; finished cases keep only the last)"
+ ],
+ "read_as": "reconstructed",
+ "time": 0.3130434783,
+ "times_available": [
+  0.0,
+  0.3130434783
+ ],
+ "wall_loops": [
+  {
+   "loop": "blade",
+   "faces": {
+    "blade": 1381
+   },
+   "walked": 1381,
+   "closed": true
+  }
+ ],
+ "yplus_inst": {
+  "min": 0.004174622639392522,
+  "mean": 0.158990238001937,
+  "max": 1.0157054979110753,
+  "p95": 0.36578496740205957
+ },
+ "yplus_mean": {
+  "min": 0.0028446047453833654,
+  "mean": 0.1587126928736889,
+  "max": 1.0153078414202594,
+  "p95": 0.3657566566855697
+ }
+}

@@ -61,7 +61,10 @@ COLUMNS = ["name", "wall", "alpha_deg", "U_ms", "Re_c", "model", "Ks_um", "KsEnd
            "St", "St_peak_frac", "n_cycles_avg", "Cd_drift", "Cl_drift",
            "yplus_blade_mean", "yplus_blade_max", "yplus_bladeEnds_mean", "yplus_bladeEnds_max",
            "ksplus_blade_mean", "ksplus_blade_max",
-           "dt_mean_s", "Co_max_mean", "n_steps", "wall_time_s", "run_time_s", "s_per_step", "omega_bounded_steps"]
+           "dt_mean_s", "Co_max_mean", "n_steps", "wall_time_s", "run_time_s", "s_per_step", "omega_bounded_steps",
+           # added 15 Nov 2026, at the end so no column moves: the wf mesh level (wfmesh; medium for every
+           # wf case before it) and the G-code texture profile (prof; tex_t_mm then gives its max |delta|)
+           "wf_mesh", "tex_profile"]
 KEYS = {"ks": float, "ksends": float, "cs": float, "t": float, "seed": int, "nseg": int, "tu": float,
         "maxco": float, "nouter": int, "nconv": float, "navg": float, "lt": float, "decay": str,
         "wfmesh": str, "prof": str}
@@ -177,6 +180,15 @@ def rebuild_csv():
             continue
         d = json.loads(r.read_text())
         if d.get("complete"):
+            try:
+                P = json.loads((r.parent / "case.json").read_text())
+            except (OSError, ValueError):
+                P = {}
+            d["wf_mesh"] = P.get("wfMesh", run_case.WF_MESH_DEFAULT) if d.get("wall") == "wf" else ""
+            d["tex_profile"] = P.get("texProfile", "")
+            if d["tex_profile"]:                    # texT is 0 for a profile case: give its max |delta|
+                d["tex_t_mm"] = round(P.get("texProfileMaxDelta", 0.0) * 1e3, 9)
+                d["tex_seed"] = ""
             rows.append(d)
     RESULTS.mkdir(exist_ok=True)
     with open(CSV, "w", newline="") as f:

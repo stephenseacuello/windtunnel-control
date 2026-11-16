@@ -44,11 +44,18 @@ def effects(rows, trip):
         if w == "wf":
             key = ("wf", r["alpha_deg"], r["U_ms"], r["model"], r.get("Cs"), r.get("KsEnds_um"),
                    r.get("Tu_body_pct"), run_suffix(r["name"]))
+            m = re.search(r"_wf([CF])(?=_)", r["name"])  # wf mesh study (15 Nov): compare within one mesh
+            if m:
+                key += (m.group(1),)
             x = ct.fnum(r.get("Ks_um"))
         elif w == "tex":
-            key = ("tex", r["alpha_deg"], r["U_ms"], r["model"], r.get("tex_seed"), r.get("Tu_body_pct"),
-                   re.search(r"_s\d+(_n\d+)?", r["name"]).group(0), run_suffix(r["name"]))
-            x = ct.fnum(r.get("tex_t_mm"))
+            # Every seed and every G-code profile (texP) is compared with the seed-1 t 0 run: t 0 meshes are
+            # the same for every seed. The key keeps its earlier form (seed '1', '_s1[_n..]'), so the seed-1
+            # groups and their order are unchanged.
+            n = re.search(r"_n\d+(?=_Tu)", r["name"])
+            key = ("tex", r["alpha_deg"], r["U_ms"], r["model"], "1", r.get("Tu_body_pct"),
+                   "_s1" + (n.group(0) if n else ""), run_suffix(r["name"]))
+            x = ct.fnum(r.get("tex_t_mm"))          # texP rows: the profile's max |delta| (queue.py)
         else:
             continue
         groups.setdefault(key, []).append((x, r))
