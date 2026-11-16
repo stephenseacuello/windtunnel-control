@@ -720,6 +720,51 @@ N.num("nBoneROneMedTwo", B1V["R1"][1], 4, f"{bsrc}: medium maxCo 2 Ks400 - Ks0 C
 N.num("nBoneROneCoarse", B1V["R1"][2], 4, f"{bsrc}: coarse Ks400 - Ks0 CQ_mean", sign=True)
 N.num("nBoneDone", sum(b1_row(*c) is not None for runs in B1.values() for c in runs), 0, f"{bsrc}: finished B1 cases in the tables")
 
+# S2h, the rough-wall mesh study (submitted 15 Nov with B1): the Ks-400 change on each wf mesh, its own Ks 0
+S2H = {al: {lev: (f"a{al}.0_U23.0_SST_wf_Ks0{tag}_Tu1.0_Co2.5n2", f"a{al}.0_U23.0_SST_wf_Ks400{tag}_Tu1.0_Co2.5n2")
+            for lev, tag in (("C", "_wfC"), ("M", ""), ("F", "_wfF"))} for al in ("090", "180")}
+ssrc = "stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5"
+for al, tag in (("090", "Ninety"), ("180", "OneEighty")):
+    for lev in ("C", "M", "F"):
+        a, b = (b1_row("stage2", n) for n in S2H[al][lev])
+        dcd = 100 * (float(b["Cd_mean"]) / float(a["Cd_mean"]) - 1) if a and b else None
+        dcl = 100 * (float(b["Cl_mean"]) / float(a["Cl_mean"]) - 1) if a and b else None
+        N.num(f"nWfMesh{tag}Cd{lev}", dcd, 1, f"{ssrc}: a{al} wf mesh {lev}, Ks400 vs Ks0 Cd_mean, %", sign=True)
+        N.num(f"nWfMesh{tag}Cl{lev}", dcl, 1, f"{ssrc}: a{al} wf mesh {lev}, Ks400 vs Ks0 Cl_mean, %", sign=True)
+    smooth = [b1_row("stage2", S2H[al][lev][0]) for lev in ("C", "M", "F")]
+    N.num(f"nWfMesh{tag}Level", spread([float(r["Cd_mean"]) if r else None for r in smooth]), 1,
+          f"{ssrc}: a{al} Ks0 Cd_mean on the three meshes, spread % of fine")
+N.num("nWfMeshDone", sum(b1_row("stage2", n) is not None for al in S2H.values() for pr in al.values() for n in pr) - 4, 0,
+      f"{ssrc}: finished S2h cases (the 4 medium partners not counted)")
+
+N.num("nMedCdSixTwoFive", cd("section2d", "a180.0_U23.0_SST_medium_Tu1.0_Co0.625n2"), 3,
+      "section_polars.csv: a180 medium Co0.625n2 Cd_mean (mean dt about that of the texture mesh at maxCo 2.5)")
+# alpha 0 restarts (B1 S2): last 100 c/U of each (stated_values.csv, from section_summary.py)
+stated("nRestartContCd", "restart_cont_cd", 2)
+stated("nRestartHystCd", "restart_hyst_cd", 2)
+# the smooth section's edge-on time step (medium mesh, maxCo 2.5 -> 1.25)
+_m90 = [b1_row("section2d", f"a090.0_U23.0_SST_medium_Tu1.0_{co}") or sec.get(f"a090.0_U23.0_SST_medium_Tu1.0_{co}") for co in ("Co2.5n2", "Co1.25n2")]
+N.num("nSecNinetyStep", pct(*(float(r["Cd_mean"]) if r else None for r in _m90[::-1])), 0,
+      "section_polars.csv: a090 medium Co1.25n2 vs Co2.5n2 Cd_mean, %", sign=True)
+
+# G-code profiles (cfd/geometry/gcode_profiles/, gcode_profile.py): each printed set's own mid-span layer
+import json as _json
+GC = {}
+for _s in ("Ra10", "Ra40", "Ra80"):
+    _rel = f"cfd/geometry/gcode_profiles/{_s}_z1226.json"
+    use(_rel)
+    GC[_s] = _json.loads((REPO / _rel).read_text())["stats"]
+gsrc = "cfd/geometry/gcode_profiles/<set>_z1226.json stats"
+for _s, tag in (("Ra10", "Ten"), ("Ra40", "Forty"), ("Ra80", "Eighty")):
+    N.num(f"nGcRa{tag}", GC[_s]["both"]["Ra_mm"] * 1e3, 1, f"{gsrc}: {_s} both faces Ra, um")
+_rt = [GC[_s]["both"]["Ra_mm"] / GC[_s]["synthetic"]["t_mm"] for _s in GC]
+N.num("nGcRatioLo", min(_rt), 2, f"{gsrc}: Ra / nominal t, smallest of Ra10, Ra40, Ra80")
+N.num("nGcRatioHi", max(_rt), 2, f"{gsrc}: Ra / nominal t, largest")
+for _s, tag in (("Ra40", "Forty"), ("Ra80", "Eighty")):
+    span, scan = GC[_s]["spanwise"]["Ra_lc025_mm"] * 1e3, GC[_s]["scans"]["Ra_lc025_um"]
+    N.num(f"nGcSpan{tag}", span, 1, f"{gsrc}: {_s} spanwise Ra after lambda_c 0.25 mm, um")
+    N.num(f"nGcOverScan{tag}", span / scan, 1, f"{gsrc}: {_s} spanwise Ra_lc025 / measured scan Ra_lc025 (surface_roughness.csv)")
+
 # =================================================================== figure 1: each effect next to its numerics
 fig, (axa, axb) = plt.subplots(1, 2, figsize=(7.3, 2.0), gridspec_kw={"width_ratios": [2.15, 1], "wspace": 0.42})
 fams = [("Rough wall, α 90°\nKs 400 µm", eff_wf90, None, step_wf90, ("", "no mesh study", "")),

@@ -41,14 +41,17 @@
 \vspace{0.6em}
 
 \begin{keybox}
-\textbf{In short.} No CFD model family has yet shown that its roughness effect exceeds its own mesh and
-time-step changes: halving the time step moves the single-blade drag by up to \nTsDropSST\,\%, and the
-rotor's fine and coarse meshes differ by \nRotMeshOverEff\ times its gain at Ks~400\um. The \nBoneJobs\
-verification runs (B1) went to Unity on 15 November. Whether our blades are ``high roughness'' depends on
-how the printed surface maps to a sand-grain height: from the scans, \Ksp\ \nKspSecLo--\nKspSecHi, where
-the model is nearly smooth and the rotor's net change is within its noise; from the slicer's nominal
-texture, FS~0.20 is the 400\um\ case that gained. The textured runs are a synthetic stand-in, not our
-surface. The main gap is experimental: there is no balance for the blade-force test.
+\textbf{In short.} The verification runs asked for on 1 November (B1, \nBoneDone\ of \nBoneQueueJobs\
+finished) give a mixed answer. The rough-wall model's edge-on drag rise at Ks~400\um\ holds on three
+meshes (\nWfMeshNinetyCdC, \nWfMeshNinetyCdM\ and \nWfMeshNinetyCdF\,\%). The wall-resolved runs do not
+yet hold: the smooth blade's drag keeps changing as the time step shrinks, and on a finer wall mesh the
+texture's drag rise at α~180 falls from +\nTexEffLong\ to \nBoneTTwoEff\,\%. Edge-on, never run before,
+the texture raises the drag by \nBoneTexNinetyA\ and \nBoneTexNinetyB\,\% at two time steps
+(indicative). At α~0 the model holds two flow states. The rotor's gain is mesh-dependent so far
+(\nBoneROneCoarse\ on the coarse mesh against \nRotEffTen\ on the medium); the fine mesh is pending.
+Whether our blades are ``high roughness'' depends on how the printed surface maps to a sand-grain height,
+and the printed blades measure several times smoother than their programmed texture. The main gap is
+experimental: there is no balance for the blade-force test.
 \end{keybox}
 
 {\small\textit{A note on how this was done: I am not trained in aerodynamics or CFD. The simulations were set up, run and analyzed with the help of AI tools (Claude), which also helped draft this summary. Please treat the results as preliminary.}}
@@ -67,12 +70,14 @@ Request & Status & Evidence now & What closes it \\
 \endhead
 \bottomrule
 \endlastfoot
-J1 mesh, time step: smooth blade & partial & Edge-on drag converges (GCI \nGciCdNinety\,\%), the rest does
-not; half the step: Cd(180) $-$\nTsDropSST\,\% & B1 (S1, E90, S2) \\
-J1: rough-wall blade & partial & Holds at half the step; no mesh study & Not in B1 \\
-J1: textured blade & need run & One mesh; half the step moves both levels \nTexDropTex--\nTexDropSmooth\,\%;
-only the sign is known & B1 (T1, T2a, E90) \\
-J1: rotor & need run & Mesh change \nRotMeshOverEff\ times the Ks-400 gain & B1 (R1) \\
+J1 mesh, time step: smooth blade & not shown & Cd(180) changes \nBoneSOneStep\,\% from maxCo 1.25 to 0.625;
+edge-on Cd \nSecNinetyStep\,\% from 2.5 to 1.25; α~0 has two states & A smaller step (B1 follow-up) \\
+J1: rough-wall blade & have (drag) & Edge-on drag rise \nWfMeshNinetyCdC, \nWfMeshNinetyCdM,
+\nWfMeshNinetyCdF\,\% on three meshes; lift less settled & --- \\
+J1: textured blade & partial & Half the step: holds (rise \nBoneTOneEff\,\%); 20\um\ wall: rise
+\nBoneTTwoEff\,\% (fails) & B2 at 20\um \\
+J1: rotor & partial & Coarse-mesh gain \nBoneROneCoarse\ against \nRotEffTen\ (medium) & B1 fine and
+maxCo~2 pairs, about 17 Nov \\
 J2 turbulence and roughness & have & Section~\ref{sec:j2} & --- \\
 J3 separation, pressure, forces through the turn & partial & Wall data of \nSurfCases\ blade runs, forces
 of \nPfRuns\ rotor runs; no turning-blade surfaces & B1 (E90), B2 \\
@@ -94,27 +99,36 @@ sets \\
 (GCI \nGciCdNinety\,\%) but the lift diverges (spread \nSpreadClNinety\,\%); at α~0 and 180 the meshes
 zig-zag by \nSpreadCdZero\ and \nSpreadCdOneEighty\,\%. Halving the time step lowers Cd(180) by
 \nTsDropSST\,\% (SST) and \nTsDropLM\,\% (LM) and stops the shedding; no smaller step has been run, and at
-fixed maxCo the step shrinks with the cells. \emph{Mesh-converged only for the edge-on drag, and only at
-maxCo~2.5; whether the edge-on forces hold at a smaller step is a B1 check.}
+fixed maxCo the step shrinks with the cells. B1: at α~180 the drag keeps falling as the step shrinks
+(medium mesh, maxCo 2.5, 1.25, 0.625: Cd \nMedCdTwoFive, \nMedCdOneTwoFive, then \nBoneSOneStep\,\% more),
+and at maxCo~1.25 the three meshes agree within \nBoneSOneSpread\,\%. Edge-on, halving the step lowers the
+drag by \nSecNinetyStep\,\%, and the lift does not settle on any mesh. At α~0 the model holds two flow
+states at the same settings: continued at maxCo~1.25, a low-drag run stays at Cd \nRestartContCd\ and a
+high-drag run at \nRestartHystCd; which one a run reaches depends on its start, not on the step. Only the
+tunnel can say which is real. \emph{Not time-step converged; a smaller step (maxCo about 0.3) is needed
+before these levels are quoted.}
 
 \textbf{Rough-wall blade} (SST, rough wall function). From maxCo 5 to 2.5 every roughness effect keeps its
-sign and moves by at most \nWfMaxMove\ point (α~90, Ks~400\um: +\nWfNinetyFive\ to +\nWfNinetyTwoFive\,\%);
-the smooth reference moves by up to \nWfLevelMove\,\%. No mesh study, none in B1. \emph{Time step adequate;
-mesh untested.}
+sign and moves by at most \nWfMaxMove\ point. B1 added a mesh study (coarse, medium and fine, ratio 1.41,
+same wall cell): the Ks-400 drag rise is \nWfMeshNinetyCdC, \nWfMeshNinetyCdM\ and \nWfMeshNinetyCdF\,\%
+edge-on and \nWfMeshOneEightyCdC, \nWfMeshOneEightyCdM\ and \nWfMeshOneEightyCdF\,\% at α~180; the smooth
+drag moves by at most \nWfMeshOneEightyLevel\,\%. The edge-on lift rise moves more (\nWfMeshNinetyClM\ to
+\nWfMeshNinetyClF\,\% on the fine mesh). \emph{Drag converged in mesh and step; this model's wall
+function still assumes a turbulent boundary layer (Section~\ref{sec:j2}).}
 
-\textbf{Textured blade} (one mesh, 40\um\ wall spacing). From maxCo 5 to 2.5 the drag at α~180 falls by
-\nTexDropSmooth\,\% (smooth) and \nTexDropTex\,\% (t~0.20~mm) over the same window, and the wake changes; the
-texture's drag rise is +\nTexEffFive\ and +\nTexEffTwoFiveShort\,\% (+\nTexEffLong\,\% over
-\nWinLongLo--\nWinLongHi\ c/U). This mesh's smooth Cd(180) is \nTexGapPct\,\% below the smooth-blade mesh's,
-but only \nTexGapMatched\,\% at matched time steps (windows \nWinShortLo--\nWinShortHi\ and
-\nWinLongLo--\nWinLongHi\ c/U): the step, not the wall spacing, is the likely cause.
-\emph{Only the sign of the drag rise is established.}
+\textbf{Textured blade} (40\um\ wall spacing). From maxCo 5 to 2.5 the drag at α~180 falls by
+\nTexDropSmooth\,\% (smooth) and \nTexDropTex\,\% (t~0.20~mm), and the texture's drag rise is
++\nTexEffLong\,\%. This mesh's smooth Cd(180) is \nTexGapPct\,\% below the smooth-blade mesh's because its
+time step is smaller: at about the same step (maxCo~0.625) the smooth-blade mesh gives Cd \nMedCdSixTwoFive,
+against \nTexCdSmooth\ on the texture mesh.
+B1: halving the step again changes little (smooth level \nBoneTOneLevel\,\%, rise \nBoneTOneEff\,\%), but a
+20\um\ wall spacing raises the smooth level by \nBoneTTwoLevel\,\% and cuts the rise to \nBoneTTwoEff\,\%,
+with a different wake. \emph{Only the sign of the drag rise at α~180 holds; the 40\um\ wall is too coarse.}
 
-\textbf{Rotor} (medium mesh, maxCo~4, 45 averaged revolutions). At λ~0.10 the fine and coarse meshes differ
-by \nRotMeshFC\pmu\nRotMeshFCU\ in C\textsubscript{Q} (\nRotNrevGrid-revolution means), against a Ks-400
-effect of \nRotEffTen\pmu\nRotEffTenU; the time step was checked only at λ~0.15 (maxCo 4 to 2:
-\nRotTs\pmu\nRotTsU). The 28 October summary assumed these errors cancel between smooth and rough runs;
-that is not shown. \emph{Not verified.}
+\textbf{Rotor} (medium mesh, maxCo~4, 45 averaged revolutions). The October Ks-400 gain was
+\nRotEffTen\pmu\nRotEffTenU\ in C\textsubscript{Q}. B1 repeats the pair on other meshes and at maxCo~2: on the
+coarse mesh it is \nBoneROneCoarse, about twice the medium value. The fine pair and the maxCo-2 pair finish
+about 17 November. \emph{Mesh-dependent so far.}
 
 \begin{figure}[tbp]
 \centering
@@ -133,8 +147,9 @@ The rotor gain stands if it is resolved on the fine mesh and at maxCo~2 and lies
 
 \begin{table}[tbp]
 \centering\footnotesize
-\caption{The B1 runs (submitted 15 November); ``now'': before B1. Results fill in as the runs finish
-(\nBoneDone\ of \nBoneQueueJobs\ so far); changes in \%, rotor in C\textsubscript{Q}.}\label{tab:b1}
+\caption{The B1 runs (submitted 15 November) and the rough-wall mesh study (S2h, added the same day);
+``now'': before B1. Results fill in as the runs finish (\nBoneDone\ of \nBoneQueueJobs\ B1 runs so far);
+changes in \%, coarse/medium/fine in that order, rotor in C\textsubscript{Q}.}\label{tab:b1}
 \begin{tabularx}{\linewidth}{@{}L{0.3} X L{0.36}@{}}
 \toprule
 Check (now) & Runs & B1 result \\
@@ -148,7 +163,11 @@ S1 smooth, α 180 (Cd \nMedCdTwoFive, \nMedCdOneTwoFive) & maxCo 0.625; coarse, 
 E90 smooth, edge-on (lift spread \nSpreadClNinety) & three meshes at maxCo 1.25 & Cd \nBoneNinetyCd; Cl
 \nBoneNinetyCl \\
 S2 smooth, α 0 (Cd \nZeroCdFive\ or \nZeroCdTwoFive) & 0.625; coarse, fine at 1.25; to 300 c/U; two
-restarts & Cd \nBoneSTwoMed, \nBoneSTwoCoarse, \nBoneSTwoFine; restarts \pending \\
+restarts & Cd \nBoneSTwoMed, \nBoneSTwoCoarse, \nBoneSTwoFine; restarts \nRestartContCd,
+\nRestartHystCd \\
+S2h rough wall, Ks 400 (no mesh study) & coarse and fine meshes, α 90 and 180 & rise α 90:
+\nWfMeshNinetyCdC, \nWfMeshNinetyCdM, \nWfMeshNinetyCdF; α 180: \nWfMeshOneEightyCdC, \nWfMeshOneEightyCdM,
+\nWfMeshOneEightyCdF \\
 R1 rotor, λ 0.10 (\nRotEffTen\pmu\nRotEffTenU) & Ks 0, 400\um: fine; medium at maxCo 2; coarse &
 \nBoneROneFine, \nBoneROneMedTwo, \nBoneROneCoarse; 2u \pending \\
 \bottomrule
@@ -185,8 +204,12 @@ Rotor, 3 blades (\nRunsRotor) & SST & Wall functions; \nCellsRotLo--\nCellsRotHi
 free-stream turbulence and pressure gradient, not roughness, and the rough wall function assumes a
 turbulent layer. Only the textured LM runs could show tripping, outside LM's calibration.
 (2)~\emph{Our surface.} Ks was never measured (it needs a drag test, not a scan). The textured mesh uses the
-slicer's nominal displacement, and in 2D it becomes ridges along the span, expected to trip a layer more
-easily than the print's random 3D texture.
+slicer's nominal displacement. The G-code of the printed sets carries the same programmed texture (Ra
+\nGcRaForty\ and \nGcRaEighty\um\ for FS~0.10 and 0.20, \nGcRatioLo--\nGcRatioHi\,t, as the synthetic
+one), but filtered along the span like the scans it would read \nGcOverScanForty\ and
+\nGcOverScanEighty\ times the measured Ra: the printed blades carry only part of it (smoothed by the
+extruded bead, or missed by the scans; inferred). In 2D the texture also becomes ridges along the span,
+expected to trip a layer more easily than the print's random 3D texture.
 (3)~\emph{The tunnel and rig}: Tu and length scale are assumed; there are no tunnel walls, arms, hub or
 blade tips, and the assembly is inferred from CAD.
 The families also disagree on the smooth blade (α~180, maxCo~2.5: Cd \nCdWfSmooth, \nMedCdTwoFive\ and
@@ -216,7 +239,12 @@ moving downwind edge-on): its drag about the relative wind rises by \nPfAdvCD\pm
 (\nPfRetCD\pmu\nPfRetCDU) and brakes. Torque by sector: advancing \nSecAdv\pmu\nSecAdvU, returning
 \nSecRet\pmu\nSecRetU, downwind \nSecDown\pmu\nSecDownU, upwind \nSecUp\pmu\nSecUpU. The blades differ by
 more than 2u in \nPfBladeShare\,\% of the azimuth bins (\nPfBladeExpect\,\% expected), so these intervals
-may be too narrow. Missing: surfaces on a turning blade (B2) and the texture edge-on (B1).
+may be too narrow.
+
+\textbf{Edge-on, texture} \indic. B1 ran the texture at α~90 for the first time: t~0.20~mm raises the drag
+by \nBoneTexNinetyA\,\% at maxCo~2.5 and \nBoneTexNinetyB\,\% at 1.25, the blade position where the
+rotor's gain sits, but on the 40\um\ wall that failed at α~180. Missing: its wall data and a 20\um\
+check (B2), and surfaces on a turning blade (B2).
 
 \begin{figure}[tbp]
 \centering
@@ -373,14 +401,16 @@ case (\nBladeOverOctLo--\nBladeOverOctHi\ × October) & Not feasible \\
 \end{table}
 
 \textbf{Decisions needed.} (1)~The force test (J5), about 24 November. (2)~B2: go or no-go, with R.\ Cassin, after
-reading B1 (about 23--25 November). (3)~A mesh check for the rough-wall blade, which B1 lacks: add it to
-B2? (4)~Second prints on one nozzle and layer height, with a matched Plain. (5)~A speed record for the new
+reading B1 (about 23--25 November); by the B1 rules its texture runs move to the 20\um\ wall (cost
+\nAccCostLo--\nAccCostHi\ times). (3)~A smaller-step check of the wall-resolved smooth blade (maxCo about
+0.3 at α~90 and 180), which B1 showed is not converged. (4)~Second prints on one nozzle and layer height, with a matched Plain. (5)~A speed record for the new
 sets (J7). (6)~The textured or LM rotor, a mesher for FS~0.40 and 0.805, or the 3D strip: after B2.
 
 \section{Corrections to the 28 October summary}\label{sec:corrections}
 (1)~It said the single-blade runs varied ``the printed texture shape itself''. The \nRunsTex\ texture runs
 use a synthetic stand-in: the slicer's nominal displacement as 2D ridges, with an Ra
-\nNomOverRaLo--\nNomOverRaHi\ times the measured one.
+\nNomOverRaLo--\nNomOverRaHi\ times the measured one. The printed sets' G-code has the same programmed
+texture, so the stand-in matches what was programmed, not what was printed (Section~\ref{sec:j2}).
 (2)~It said the 100\um\ cases ``are the closest to the real blades''. That holds only if Ks equals the
 scanned height; with the nominal texture, FS~0.10 and FS~0.20 correspond to about \nKsNomFsTen\ and
 \nKsNomFsTwenty\um, the latter the 400\um\ case that gained (Section~\ref{sec:j4}).

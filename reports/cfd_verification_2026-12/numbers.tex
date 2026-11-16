@@ -261,21 +261,49 @@
 \newcommand{\nPrintFsQuarterG}{38.46}% stated_values.csv print_fs025_g: as print_plain04_h
 \newcommand{\nPrintFsQuarterUsd}{5.77}% print_rate_usd_h x print_fs025_h + print_fs025_g / 1000 x filament_usd_kg
 \newcommand{\nPrintFsQuarterSet}{17.31}% 3 x nPrintFsQuarterUsd
-\newcommand{\nBoneTOneLevel}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.000 Co1.25n2 Cd_mean vs Co2.5n2, % [no data yet]
-\newcommand{\nBoneTOneEff}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.200 vs tex0.000, Co1.25n2, % [no data yet]
+\newcommand{\nBoneTOneLevel}{+1.9}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.000 Co1.25n2 Cd_mean vs Co2.5n2, %
+\newcommand{\nBoneTOneEff}{+16.9}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.200 vs tex0.000, Co1.25n2, %
 \newcommand{\nBoneTTwoLevel}{+16.0}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.000 n10 vs nseg 5, Co2.5n2, %
 \newcommand{\nBoneTTwoEff}{+5.9}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.200 vs tex0.000, n10, %
 \newcommand{\nBoneTexNinetyA}{+48.7}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 tex0.200 vs tex0.000, Co2.5n2, %
-\newcommand{\nBoneTexNinetyB}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 tex0.200 vs tex0.000, Co1.25n2, % [no data yet]
+\newcommand{\nBoneTexNinetyB}{+55.8}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 tex0.200 vs tex0.000, Co1.25n2, %
 \newcommand{\nBoneSOneStep}{\textminus{}26.0}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a180 medium Co0.625n2 vs Co1.25n2, %
 \newcommand{\nBoneSOneSpread}{5.0}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a180 coarse/medium/fine at Co1.25n2, spread % of fine
 \newcommand{\nBoneNinetyCd}{16.8}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 Co1.25n2 Cd spread % of fine
 \newcommand{\nBoneNinetyCl}{303.2}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a090 Co1.25n2 Cl spread % of fine
-\newcommand{\nBoneSTwoMed}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 medium Co0.625n2_N300A100 Cd_mean [no data yet]
+\newcommand{\nBoneSTwoMed}{3.15}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 medium Co0.625n2_N300A100 Cd_mean
 \newcommand{\nBoneSTwoCoarse}{1.65}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 coarse Co1.25n2_N300A100 Cd_mean
 \newcommand{\nBoneSTwoFine}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 fine Co1.25n2_N300A100 Cd_mean [no data yet]
 \newcommand{\nBoneROneFine}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): fine Ks400 - Ks0 CQ_mean [no data yet]
 \newcommand{\nBoneROneMedTwo}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): medium maxCo 2 Ks400 - Ks0 CQ_mean [no data yet]
 \newcommand{\nBoneROneCoarse}{+0.0106}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): coarse Ks400 - Ks0 CQ_mean
-\newcommand{\nBoneDone}{14}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): finished B1 cases in the tables
+\newcommand{\nBoneDone}{18}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): finished B1 cases in the tables
+\newcommand{\nWfMeshNinetyCdC}{+44.1}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 wf mesh C, Ks400 vs Ks0 Cd_mean, %
+\newcommand{\nWfMeshNinetyClC}{+66.6}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 wf mesh C, Ks400 vs Ks0 Cl_mean, %
+\newcommand{\nWfMeshNinetyCdM}{+45.4}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 wf mesh M, Ks400 vs Ks0 Cd_mean, %
+\newcommand{\nWfMeshNinetyClM}{+67.0}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 wf mesh M, Ks400 vs Ks0 Cl_mean, %
+\newcommand{\nWfMeshNinetyCdF}{+45.6}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 wf mesh F, Ks400 vs Ks0 Cd_mean, %
+\newcommand{\nWfMeshNinetyClF}{+72.5}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 wf mesh F, Ks400 vs Ks0 Cl_mean, %
+\newcommand{\nWfMeshNinetyLevel}{1.3}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 Ks0 Cd_mean on the three meshes, spread % of fine
+\newcommand{\nWfMeshOneEightyCdC}{+5.0}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a180 wf mesh C, Ks400 vs Ks0 Cd_mean, %
+\newcommand{\nWfMeshOneEightyClC}{\textminus{}6.4}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a180 wf mesh C, Ks400 vs Ks0 Cl_mean, %
+\newcommand{\nWfMeshOneEightyCdM}{+5.5}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a180 wf mesh M, Ks400 vs Ks0 Cd_mean, %
+\newcommand{\nWfMeshOneEightyClM}{\textminus{}7.3}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a180 wf mesh M, Ks400 vs Ks0 Cl_mean, %
+\newcommand{\nWfMeshOneEightyCdF}{+5.3}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a180 wf mesh F, Ks400 vs Ks0 Cd_mean, %
+\newcommand{\nWfMeshOneEightyClF}{\textminus{}8.3}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a180 wf mesh F, Ks400 vs Ks0 Cl_mean, %
+\newcommand{\nWfMeshOneEightyLevel}{1.6}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a180 Ks0 Cd_mean on the three meshes, spread % of fine
+\newcommand{\nWfMeshDone}{8}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: finished S2h cases (the 4 medium partners not counted)
+\newcommand{\nMedCdSixTwoFive}{0.903}% section_polars.csv: a180 medium Co0.625n2 Cd_mean (mean dt about that of the texture mesh at maxCo 2.5)
+\newcommand{\nRestartContCd}{1.63}% stated_values.csv restart_cont_cd: python3 cfd/post/section_summary.py cfd/section2d/runs/_cont_Co1p25to1p25_a000 --window 100 (16 Nov; local run folder)
+\newcommand{\nRestartHystCd}{3.20}% stated_values.csv restart_hyst_cd: python3 cfd/post/section_summary.py cfd/section2d/runs/_hyst_Co5to1p25_a000 --window 100 (16 Nov; local run folder)
+\newcommand{\nSecNinetyStep}{\textminus{}37}% section_polars.csv: a090 medium Co1.25n2 vs Co2.5n2 Cd_mean, %
+\newcommand{\nGcRaTen}{9.7}% cfd/geometry/gcode_profiles/<set>_z1226.json stats: Ra10 both faces Ra, um
+\newcommand{\nGcRaForty}{40.2}% cfd/geometry/gcode_profiles/<set>_z1226.json stats: Ra40 both faces Ra, um
+\newcommand{\nGcRaEighty}{79.6}% cfd/geometry/gcode_profiles/<set>_z1226.json stats: Ra80 both faces Ra, um
+\newcommand{\nGcRatioLo}{0.39}% cfd/geometry/gcode_profiles/<set>_z1226.json stats: Ra / nominal t, smallest of Ra10, Ra40, Ra80
+\newcommand{\nGcRatioHi}{0.40}% cfd/geometry/gcode_profiles/<set>_z1226.json stats: Ra / nominal t, largest
+\newcommand{\nGcSpanForty}{18.5}% cfd/geometry/gcode_profiles/<set>_z1226.json stats: Ra40 spanwise Ra after lambda_c 0.25 mm, um
+\newcommand{\nGcOverScanForty}{2.3}% cfd/geometry/gcode_profiles/<set>_z1226.json stats: Ra40 spanwise Ra_lc025 / measured scan Ra_lc025 (surface_roughness.csv)
+\newcommand{\nGcSpanEighty}{37.0}% cfd/geometry/gcode_profiles/<set>_z1226.json stats: Ra80 spanwise Ra after lambda_c 0.25 mm, um
+\newcommand{\nGcOverScanEighty}{3.6}% cfd/geometry/gcode_profiles/<set>_z1226.json stats: Ra80 spanwise Ra_lc025 / measured scan Ra_lc025 (surface_roughness.csv)
 \newcommand{\nSurfFigState}{}% cfd/analysis/2026-11-15/out/surface_profiles.csv: data

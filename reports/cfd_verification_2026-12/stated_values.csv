@@ -70,3 +70,5 @@ layer_slicer_mm,0.1,mm,"reports/roughness_2026-09/inputs/print_lab_20261012/READ
 layer_limit_mm,0.14,mm,"reports/roughness_2026-09/inputs/print_lab_20261012/README.md (Points to confirm)","max_layer_height of the P1S 0.2-nozzle profile"
 wf_ksplus_smooth,2.25,-,"cfd/docs/ROUGHNESS_KS.md section 1; cfd/stage2/README.md section 3 (nutkRoughWallFunction, v2606 source read 8 Oct)","below this Ks+ the roughness function is 1: the wall is hydraulically smooth"
 wf_ksplus_rough,90,-,"cfd/docs/ROUGHNESS_KS.md section 1 (v2606 source read 8 Oct)","transitional form up to this Ks+, fully rough above"
+restart_cont_cd,1.634,-,"python3 cfd/post/section_summary.py cfd/section2d/runs/_cont_Co1p25to1p25_a000 --window 100 (16 Nov; local run folder)","alpha 0, medium, maxCo 1.25, the 150-c/U low-drag run continued to 300 c/U; Cd over 200-300 c/U"
+restart_hyst_cd,3.195,-,"python3 cfd/post/section_summary.py cfd/section2d/runs/_hyst_Co5to1p25_a000 --window 100 (16 Nov; local run folder)","alpha 0, medium, the maxCo-5 high-drag run continued at maxCo 1.25 to 300 c/U; Cd over 200-300 c/U"
