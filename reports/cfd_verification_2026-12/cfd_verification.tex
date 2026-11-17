@@ -104,8 +104,9 @@ fixed maxCo the step shrinks with the cells. B1: at α~180 the drag keeps fallin
 and at maxCo~1.25 the three meshes agree within \nBoneSOneSpread\,\%. Edge-on, halving the step lowers the
 drag by \nSecNinetyStep\,\%, and the lift does not settle on any mesh. At α~0 the model holds two flow
 states at the same settings: continued at maxCo~1.25, a low-drag run stays at Cd \nRestartContCd\ and a
-high-drag run at \nRestartHystCd; which one a run reaches depends on its start, not on the step. Only the
-tunnel can say which is real. \emph{Not time-step converged; a smaller step (maxCo about 0.3) is needed
+high-drag run at \nRestartHystCd; which one a run reaches depends on its start, not on the step or the
+mesh (to 300~c/U: coarse \nBoneSTwoCoarse, medium at maxCo~0.625 \nBoneSTwoMed, fine \nBoneSTwoFine). Only
+the tunnel can say which is real. \emph{Not time-step converged; a smaller step (maxCo about 0.3) is needed
 before these levels are quoted.}
 
 \textbf{Rough-wall blade} (SST, rough wall function). From maxCo 5 to 2.5 every roughness effect keeps its
@@ -126,9 +127,14 @@ B1: halving the step again changes little (smooth level \nBoneTOneLevel\,\%, ris
 with a different wake. \emph{Only the sign of the drag rise at α~180 holds; the 40\um\ wall is too coarse.}
 
 \textbf{Rotor} (medium mesh, maxCo~4, 45 averaged revolutions). The October Ks-400 gain was
-\nRotEffTen\pmu\nRotEffTenU\ in C\textsubscript{Q}. B1 repeats the pair on other meshes and at maxCo~2: on the
-coarse mesh it is \nBoneROneCoarse, about twice the medium value. The fine pair and the maxCo-2 pair finish
-about 17 November. \emph{Mesh-dependent so far.}
+\nRotEffTen\pmu\nRotEffTenU\ in C\textsubscript{Q} (\nRotEffTenPct\,\%). B1 repeats the pair at maxCo~2 and
+on the coarse and fine meshes. At maxCo~2 it is \nBoneROneMedTwo\pmu\nBoneROneMedTwoU\
+(\nBoneROneMedTwoPct\,\%): the time step does not change it. On the coarse mesh it is
+\nBoneROneCoarse\pmu\nBoneROneCoarseU\ (\nBoneROneCoarsePct\,\%) and on the fine mesh
+\nBoneROneFine\pmu\nBoneROneFineU\ (\nBoneROneFinePct\,\%; \nBoneROneFineWin\ over the same 45 revolutions as
+the others). The smooth rotor's own C\textsubscript{Q} moves more: \nRotLevelCoarse, \nRotLevelMed\ and
+\nRotLevelFine\ on the three meshes, and \nRotLevelMedTwo\ at maxCo~2. \emph{The gain is positive and resolved
+on every mesh and step; its size is not mesh-converged.}
 
 \begin{figure}[tbp]
 \centering
@@ -169,7 +175,8 @@ S2h rough wall, Ks 400 (no mesh study) & coarse and fine meshes, α 90 and 180 &
 \nWfMeshNinetyCdC, \nWfMeshNinetyCdM, \nWfMeshNinetyCdF; α 180: \nWfMeshOneEightyCdC, \nWfMeshOneEightyCdM,
 \nWfMeshOneEightyCdF \\
 R1 rotor, λ 0.10 (\nRotEffTen\pmu\nRotEffTenU) & Ks 0, 400\um: fine; medium at maxCo 2; coarse &
-\nBoneROneFine, \nBoneROneMedTwo, \nBoneROneCoarse; 2u \pending \\
+\nBoneROneFine, \nBoneROneMedTwo, \nBoneROneCoarse; 2u \nBoneROneFineU, \nBoneROneMedTwoU,
+\nBoneROneCoarseU \\
 \bottomrule
 \end{tabularx}
 \end{table}

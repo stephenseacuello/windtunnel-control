@@ -1,0 +1,3 @@
+check,value,reference,passed
+medium_oct dCQ = 15 Oct rotor_roughness.csv,0.0051035,0.0051035,True
+medium_oct two_u = 15 Oct rotor_roughness.csv,0.00275831,0.00275831,True

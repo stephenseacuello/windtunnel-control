@@ -702,6 +702,25 @@ def dcq(i):
 
 B1V["R1"] = (dcq(0), dcq(2), dcq(4))
 bsrc = "B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv)"
+
+# B1 rotor pairs with the October 2u rule (cfd/analysis/2026-11-15/src/b1_rotor_pairs.py)
+B1P = {}
+if (REPO / f"{A1115}/b1_rotor_pairs.csv").exists():
+    B1P = {(r["pair"], r["window"]): r for r in read_csv(f"{A1115}/b1_rotor_pairs.csv")}
+psrc = f"{A1115}/b1_rotor_pairs.csv"
+for tag, key, i in (("Fine", ("fine", "last55"), 0), ("MedTwo", ("medium_co2", "last45"), 1), ("Coarse", ("coarse", "last45"), 2)):
+    r = B1P.get(key)
+    if r is not None and B1V["R1"][i] is not None and abs(float(r["dCQ"]) - B1V["R1"][i]) > 1e-6:
+        raise SystemExit(f"{psrc} {key}: dCQ {r['dCQ']} differs from rotor_cp.csv ({B1V['R1'][i]:.6g}); rerun b1_rotor_pairs.py")
+    ok = r is not None and B1V["R1"][i] is not None
+    N.num(f"nBoneROne{tag}U", float(r["two_u"]) if ok else None, 4, f"{psrc} {key[0]} {key[1]} two_u")
+    N.num(f"nBoneROne{tag}Pct", float(r["rel_change_pct"]) if ok else None, 0, f"{psrc} {key[0]} {key[1]} rel_change_pct", sign=True)
+    N.num(f"nRotLevel{tag}", float(r["CQ_Ks0"]) if ok else None, 4, f"{psrc} {key[0]} {key[1]} CQ_Ks0 (smooth C_Q, revolution means)")
+r = B1P.get(("fine", "rev6-50"))
+N.num("nBoneROneFineWin", float(r["dCQ"]) if r else None, 4, f"{psrc} fine rev6-50 dCQ (the 45-revolution window)", sign=True)
+N.num("nBoneROneFineWinU", float(r["two_u"]) if r else None, 4, f"{psrc} fine rev6-50 two_u")
+r = B1P.get(("medium_oct", "last45"))
+N.num("nRotLevelMed", float(r["CQ_Ks0"]) if r else None, 4, f"{psrc} medium_oct last45 CQ_Ks0")
 N.num("nBoneTOneLevel", B1V["T1"][0], 1, f"{bsrc}: tex0.000 Co1.25n2 Cd_mean vs Co2.5n2, %", sign=True)
 N.num("nBoneTOneEff", B1V["T1"][1], 1, f"{bsrc}: tex0.200 vs tex0.000, Co1.25n2, %", sign=True)
 N.num("nBoneTTwoLevel", B1V["T2a"][0], 1, f"{bsrc}: tex0.000 n10 vs nseg 5, Co2.5n2, %", sign=True)
@@ -866,10 +885,13 @@ ax = axs[2]
 cats = ["medium\nmaxCo 4", "fine", "medium\nmaxCo 2", "coarse"]
 ax.axhspan(float(p10["dCQ"]) - sv("acc_rotor"), float(p10["dCQ"]) + sv("acc_rotor"), xmin=0.28, xmax=0.97, color=NAVY, alpha=0.08, lw=0)
 ax.errorbar([0], [float(p10["dCQ"])], yerr=[float(p10["two_u"])], fmt="o", color=NAVY, ms=5, capsize=3, lw=0.9)
-for x, v in ((1, B1V["R1"][0]), (2, B1V["R1"][1]), (3, B1V["R1"][2])):
+for x, v, key in ((1, B1V["R1"][0], ("fine", "last55")), (2, B1V["R1"][1], ("medium_co2", "last45")),
+                  (3, B1V["R1"][2], ("coarse", "last45"))):
     if v is None:
         pending_at(ax, x)
     else:
+        if key in B1P:
+            ax.errorbar([x], [v], yerr=[float(B1P[key]["two_u"])], fmt="none", ecolor=INK, capsize=3, lw=0.9)
         ax.plot(x, v, "o", color=GOLD, ms=6, mec=INK)
 ax.axhline(0, color=INK2, lw=0.6)
 ax.set_xticks(range(len(cats)), cats, fontsize=7)

@@ -10,6 +10,7 @@ B1 runs (submitted 15 Nov) are checking.
 nice -n 10 python3 cfd/analysis/2026-11-15/src/surface_extract.py      # about 20 s
 nice -n 10 python3 cfd/analysis/2026-11-15/src/bl_ks_tables.py         # about 15 s
 nice -n 10 python3 cfd/analysis/2026-11-15/src/rotor_phase_force.py    # about 6 s
+nice -n 10 python3 cfd/analysis/2026-11-15/src/b1_rotor_pairs.py       # about 5 s; after pull_results.py
 ```
 
 | Script | Reads (read only) | Writes |
@@ -17,6 +18,7 @@ nice -n 10 python3 cfd/analysis/2026-11-15/src/rotor_phase_force.py    # about 6
 | `surface_extract.py` | the 69 complete Stage 2 runs (rough wall and texture, α 0/90/180) and 5 Stage 1 medium SST runs: mesh, `pMean`, `wallShearStressMean`, `UMean` | `out/surface_summary.csv` (one row per run), `out/surface_profiles.csv` (every 0.5 mm of wall), `out/surface_reversal*.csv`, `out/surface_check.csv`, `fig/surface_cp_cf.png` |
 | `bl_ks_tables.py` | the smooth wall-resolved runs (Stage 1 medium SST; Stage 2 texture t 0) | `out/bl_stations.csv` (δ99, δ*, θ, H, Re_θ, u_τ by station), `out/bl_ks_tables.csv` (Ks+, Ks/δ99, t/δ99, Re_k), `out/bl_utau_check.csv`, `fig/bl_ks_tables.png` |
 | `rotor_phase_force.py` | the 8 long rough-set rotor runs (`priorityE_rough.txt`): `forcesBlade{1,2,3}` histories | `out/rotor_phase_force.csv`, `out/rotor_phase_force_diff.csv` (Ks 400 and 100 minus Ks 0, same wall function), `out/rotor_phase_force_sectors.csv`, `out/rotor_phase_force_check.csv`, `fig/rotor_phase_force*.png` |
+| `b1_rotor_pairs.py` | the B1 rotor pairs (`priorityF_verify.txt`: fine, medium at maxCo 2, coarse) and the October medium pair: `forcesRotor` histories, `rotor_cp.csv` | `out/b1_rotor_pairs.csv` (Ks-400 change in C_Q with the October 2u, a 5-revolution batch 2u, and the fine pair also over revolutions 6–50), `out/b1_rotor_pairs_check.csv` (reproduces the October pair) |
 
 The conventions are in each script's docstring: Cp and Cf, the s/c origin at tip A, the azimuth θ as in
 `../2026-10-15/src/rotor_analysis.py`, and lift and drag about the relative wind.
@@ -29,6 +31,8 @@ The conventions are in each script's docstring: Cp and Cf, the s/c origin at tip
 - **`bl_utau_check.csv`.** All 25 checks pass (u_τ against the runs' y+ and Ks+ columns).
 - **`rotor_phase_force_check.csv`.** All 288 validation checks pass: the sector sums reproduce
   `../2026-10-15/out/rotor_roughness_sectors.csv` and `rotor_roughness_phase.csv`.
+- **`b1_rotor_pairs_check.csv`.** Both checks pass: the October medium pair's change and 2u are reproduced
+  (`../2026-10-15/out/rotor_roughness.csv`).
 
 ## A finding: the rotor's 2u may be too narrow
 The 12 flagged rows of `rotor_phase_force_check.csv` are diagnostics, not failures.

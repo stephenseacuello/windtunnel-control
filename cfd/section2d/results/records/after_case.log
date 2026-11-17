@@ -673,3 +673,8 @@
 [render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0_Co0.625n2_N300A100/fields)
 [record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_medium_Tu1.0_Co0.625n2_N300A100 : 4.34 MB, 42 files
 
+=== 2026-11-17 08:23:19 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/runs/a000.0_U23.0_SST_fine_Tu1.0_Co1.25n2_N300A100
+[record] a000.0_U23.0_SST_fine_Tu1.0_Co1.25n2_N300A100 (section, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_fine_Tu1.0_Co1.25n2_N300A100
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_fine_Tu1.0_Co1.25n2_N300A100/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/section2d/results/records/a000.0_U23.0_SST_fine_Tu1.0_Co1.25n2_N300A100 : 4.55 MB, 42 files
+
