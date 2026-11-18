@@ -721,6 +721,11 @@ N.num("nBoneROneFineWin", float(r["dCQ"]) if r else None, 4, f"{psrc} fine rev6-
 N.num("nBoneROneFineWinU", float(r["two_u"]) if r else None, 4, f"{psrc} fine rev6-50 two_u")
 r = B1P.get(("medium_oct", "last45"))
 N.num("nRotLevelMed", float(r["CQ_Ks0"]) if r else None, 4, f"{psrc} medium_oct last45 CQ_Ks0")
+rf = B1P.get(("fine", "last55"))
+N.num("nRotLevelFinePct", 100 * (float(rf["CQ_Ks0"]) / float(r["CQ_Ks0"]) - 1) if rf and r else None, 0,
+      f"{psrc} fine last55 CQ_Ks0 / medium_oct last45 CQ_Ks0 - 1, %", sign=True)
+N.num("nBoneROneFineOff", B1V["R1"][0] - float(p10["dCQ"]) if B1V["R1"][0] is not None else None, 4,
+      f"nBoneROneFine - nRotEffTen (rotor_cp.csv; {rsrc})")
 N.num("nBoneTOneLevel", B1V["T1"][0], 1, f"{bsrc}: tex0.000 Co1.25n2 Cd_mean vs Co2.5n2, %", sign=True)
 N.num("nBoneTOneEff", B1V["T1"][1], 1, f"{bsrc}: tex0.200 vs tex0.000, Co1.25n2, %", sign=True)
 N.num("nBoneTTwoLevel", B1V["T2a"][0], 1, f"{bsrc}: tex0.000 n10 vs nseg 5, Co2.5n2, %", sign=True)

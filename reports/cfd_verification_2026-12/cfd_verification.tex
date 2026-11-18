@@ -47,8 +47,10 @@ meshes (\nWfMeshNinetyCdC, \nWfMeshNinetyCdM\ and \nWfMeshNinetyCdF\,\%). The wa
 yet hold: the smooth blade's drag keeps changing as the time step shrinks, and on a finer wall mesh the
 texture's drag rise at α~180 falls from +\nTexEffLong\ to \nBoneTTwoEff\,\%. Edge-on, never run before,
 the texture raises the drag by \nBoneTexNinetyA\ and \nBoneTexNinetyB\,\% at two time steps
-(indicative). At α~0 the model holds two flow states. The rotor's gain is mesh-dependent so far
-(\nBoneROneCoarse\ on the coarse mesh against \nRotEffTen\ on the medium); the fine mesh is pending.
+(indicative). At α~0 the model holds two flow states. The rotor's gain keeps its sign on three meshes
+and at half the time step, but not its size (\nBoneROneCoarse, \nRotEffTen\ and \nBoneROneFine\ in
+C\textsubscript{Q} on the coarse, medium and fine meshes), so by the rule set beforehand it is
+mesh-dependent.
 Whether our blades are ``high roughness'' depends on how the printed surface maps to a sand-grain height,
 and the printed blades measure several times smoother than their programmed texture. The main gap is
 experimental: there is no balance for the blade-force test.
@@ -76,8 +78,8 @@ J1: rough-wall blade & have (drag) & Edge-on drag rise \nWfMeshNinetyCdC, \nWfMe
 \nWfMeshNinetyCdF\,\% on three meshes; lift less settled & --- \\
 J1: textured blade & partial & Half the step: holds (rise \nBoneTOneEff\,\%); 20\um\ wall: rise
 \nBoneTTwoEff\,\% (fails) & B2 at 20\um \\
-J1: rotor & partial & Coarse-mesh gain \nBoneROneCoarse\ against \nRotEffTen\ (medium) & B1 fine and
-maxCo~2 pairs, about 17 Nov \\
+J1: rotor & partial & Gain keeps its sign; size \nBoneROneCoarse, \nRotEffTen, \nBoneROneFine\ (coarse,
+medium, fine); same at maxCo~2 (\nBoneROneMedTwo) & B2 decision: rotor Ks sweep dropped by the rule \\
 J2 turbulence and roughness & have & Section~\ref{sec:j2} & --- \\
 J3 separation, pressure, forces through the turn & partial & Wall data of \nSurfCases\ blade runs, forces
 of \nPfRuns\ rotor runs; no turning-blade surfaces & B1 (E90), B2 \\
@@ -127,14 +129,16 @@ B1: halving the step again changes little (smooth level \nBoneTOneLevel\,\%, ris
 with a different wake. \emph{Only the sign of the drag rise at α~180 holds; the 40\um\ wall is too coarse.}
 
 \textbf{Rotor} (medium mesh, maxCo~4, 45 averaged revolutions). The October Ks-400 gain was
-\nRotEffTen\pmu\nRotEffTenU\ in C\textsubscript{Q} (\nRotEffTenPct\,\%). B1 repeats the pair at maxCo~2 and
+\nRotEffTen\pmu\nRotEffTenU\ in C\textsubscript{Q} (+\nRotEffTenPct\,\%). B1 repeats the pair at maxCo~2 and
 on the coarse and fine meshes. At maxCo~2 it is \nBoneROneMedTwo\pmu\nBoneROneMedTwoU\
 (\nBoneROneMedTwoPct\,\%): the time step does not change it. On the coarse mesh it is
 \nBoneROneCoarse\pmu\nBoneROneCoarseU\ (\nBoneROneCoarsePct\,\%) and on the fine mesh
 \nBoneROneFine\pmu\nBoneROneFineU\ (\nBoneROneFinePct\,\%; \nBoneROneFineWin\ over the same 45 revolutions as
 the others). The smooth rotor's own C\textsubscript{Q} moves more: \nRotLevelCoarse, \nRotLevelMed\ and
-\nRotLevelFine\ on the three meshes, and \nRotLevelMedTwo\ at maxCo~2. \emph{The gain is positive and resolved
-on every mesh and step; its size is not mesh-converged.}
+\nRotLevelFine\ on the three meshes (fine \nRotLevelFinePct\,\% above medium), and \nRotLevelMedTwo\ at
+maxCo~2. The fine-mesh gain lies \nBoneROneFineOff\ above the October value, outside the ±\nAccRot\ set
+before the runs. \emph{The gain's sign holds on every mesh and step; its size is mesh-dependent
+(\nBoneROneMedTwoPct\ to \nBoneROneCoarsePct\,\%).}
 
 \begin{figure}[tbp]
 \centering
@@ -154,7 +158,7 @@ The rotor gain stands if it is resolved on the fine mesh and at maxCo~2 and lies
 \begin{table}[tbp]
 \centering\footnotesize
 \caption{The B1 runs (submitted 15 November) and the rough-wall mesh study (S2h, added the same day);
-``now'': before B1. Results fill in as the runs finish (\nBoneDone\ of \nBoneQueueJobs\ B1 runs so far);
+``now'': before B1. \nBoneDone\ of \nBoneQueueJobs\ B1 runs finished;
 changes in \%, coarse/medium/fine in that order, rotor in C\textsubscript{Q}.}\label{tab:b1}
 \begin{tabularx}{\linewidth}{@{}L{0.3} X L{0.36}@{}}
 \toprule
@@ -304,11 +308,13 @@ at \nKLow--\nKHighHi\um, below the 2u of \nRotTwoULo--\nRotTwoUHi\ from \nRevNow
 it at \nKHighHi\um\ would take about \nRevNeeded\ revolutions per run.
 
 \textbf{From the nominal texture}, FS~0.20 is the 400\um\ case, where the rotor gained \nRotEffTenPct\ and
-\nRotEffTwelvePct\,\% (λ~0.10, 0.12). So ``gains only at high roughness'' may read ``gains at the Ks the
+\nRotEffTwelvePct\,\% (λ~0.10, 0.12; medium mesh; at λ~0.10 \nBoneROneFinePct\ and \nBoneROneCoarsePct\,\%
+on the fine and coarse meshes). So ``gains only at high roughness'' may read ``gains at the Ks the
 nominal texture implies, unresolved at the Ks the scans imply''. Only this mapping orders the sets as the
 gains do (FS~0.10: \nGainFsTen\,\% [\nGainFsTenLo, \nGainFsTenHi]; the scans give it the same or a lower Ks
-than Plain), but its Ra is \nNomOverRaLo--\nNomOverRaHi\ times the measured one. B2's Ks sweeps (rotor 25,
-50, 200\um; section 25--211\um) will give each FS an equivalent Ks: \pending. \Ksp\ describes a turbulent
+than Plain), but its Ra is \nNomOverRaLo--\nNomOverRaHi\ times the measured one. B2's section Ks sweep
+(25--211\um) will give each FS an equivalent Ks: \pending. The rotor sweep (25, 50, 200\um) is dropped by
+the B1 rule, since the rotor's gain is mesh-dependent. \Ksp\ describes a turbulent
 rough wall; tripping a laminar layer is a separate question that no family represents.
 
 \begin{figure}[tbp]
@@ -409,7 +415,7 @@ case (\nBladeOverOctLo--\nBladeOverOctHi\ × October) & Not feasible \\
 
 \textbf{Decisions needed.} (1)~The force test (J5), about 24 November. (2)~B2: go or no-go, with R.\ Cassin, after
 reading B1 (about 23--25 November); by the B1 rules its texture runs move to the 20\um\ wall (cost
-\nAccCostLo--\nAccCostHi\ times). (3)~A smaller-step check of the wall-resolved smooth blade (maxCo about
+\nAccCostLo--\nAccCostHi\ times) and the rotor Ks sweep is dropped. (3)~A smaller-step check of the wall-resolved smooth blade (maxCo about
 0.3 at α~90 and 180), which B1 showed is not converged. (4)~Second prints on one nozzle and layer height, with a matched Plain. (5)~A speed record for the new
 sets (J7). (6)~The textured or LM rotor, a mesher for FS~0.40 and 0.805, or the 3D strip: after B2.
 

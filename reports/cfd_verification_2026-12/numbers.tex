@@ -261,18 +261,20 @@
 \newcommand{\nPrintFsQuarterG}{38.46}% stated_values.csv print_fs025_g: as print_plain04_h
 \newcommand{\nPrintFsQuarterUsd}{5.77}% print_rate_usd_h x print_fs025_h + print_fs025_g / 1000 x filament_usd_kg
 \newcommand{\nPrintFsQuarterSet}{17.31}% 3 x nPrintFsQuarterUsd
-\newcommand{\nBoneROneFineU}{\pending}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine last55 two_u [no data yet]
-\newcommand{\nBoneROneFinePct}{\pending}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine last55 rel_change_pct [no data yet]
-\newcommand{\nRotLevelFine}{\pending}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine last55 CQ_Ks0 (smooth C_Q, revolution means) [no data yet]
+\newcommand{\nBoneROneFineU}{0.0025}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine last55 two_u
+\newcommand{\nBoneROneFinePct}{+36}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine last55 rel_change_pct
+\newcommand{\nRotLevelFine}{0.0261}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine last55 CQ_Ks0 (smooth C_Q, revolution means)
 \newcommand{\nBoneROneMedTwoU}{0.0027}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv medium_co2 last45 two_u
 \newcommand{\nBoneROneMedTwoPct}{+26}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv medium_co2 last45 rel_change_pct
 \newcommand{\nRotLevelMedTwo}{0.0212}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv medium_co2 last45 CQ_Ks0 (smooth C_Q, revolution means)
 \newcommand{\nBoneROneCoarseU}{0.0031}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv coarse last45 two_u
 \newcommand{\nBoneROneCoarsePct}{+62}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv coarse last45 rel_change_pct
 \newcommand{\nRotLevelCoarse}{0.0171}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv coarse last45 CQ_Ks0 (smooth C_Q, revolution means)
-\newcommand{\nBoneROneFineWin}{\pending}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine rev6-50 dCQ (the 45-revolution window) [no data yet]
-\newcommand{\nBoneROneFineWinU}{\pending}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine rev6-50 two_u [no data yet]
+\newcommand{\nBoneROneFineWin}{+0.0093}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine rev6-50 dCQ (the 45-revolution window)
+\newcommand{\nBoneROneFineWinU}{0.0028}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine rev6-50 two_u
 \newcommand{\nRotLevelMed}{0.0186}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv medium_oct last45 CQ_Ks0
+\newcommand{\nRotLevelFinePct}{+41}% cfd/analysis/2026-11-15/out/b1_rotor_pairs.csv fine last55 CQ_Ks0 / medium_oct last45 CQ_Ks0 - 1, %
+\newcommand{\nBoneROneFineOff}{0.0044}% nBoneROneFine - nRotEffTen (rotor_cp.csv; cfd/analysis/2026-10-15/out/rotor_roughness.csv)
 \newcommand{\nBoneTOneLevel}{+1.9}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.000 Co1.25n2 Cd_mean vs Co2.5n2, %
 \newcommand{\nBoneTOneEff}{+16.9}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.200 vs tex0.000, Co1.25n2, %
 \newcommand{\nBoneTTwoLevel}{+16.0}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): tex0.000 n10 vs nseg 5, Co2.5n2, %
@@ -286,10 +288,10 @@
 \newcommand{\nBoneSTwoMed}{3.15}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 medium Co0.625n2_N300A100 Cd_mean
 \newcommand{\nBoneSTwoCoarse}{1.65}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 coarse Co1.25n2_N300A100 Cd_mean
 \newcommand{\nBoneSTwoFine}{2.99}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): a000 fine Co1.25n2_N300A100 Cd_mean
-\newcommand{\nBoneROneFine}{\pending}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): fine Ks400 - Ks0 CQ_mean [no data yet]
+\newcommand{\nBoneROneFine}{+0.0095}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): fine Ks400 - Ks0 CQ_mean
 \newcommand{\nBoneROneMedTwo}{+0.0055}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): medium maxCo 2 Ks400 - Ks0 CQ_mean
 \newcommand{\nBoneROneCoarse}{+0.0106}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): coarse Ks400 - Ks0 CQ_mean
-\newcommand{\nBoneDone}{22}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): finished B1 cases in the tables
+\newcommand{\nBoneDone}{23}% B1 rows of the result tables (section_polars.csv, stage2_polars.csv, rotor_cp.csv): finished B1 cases in the tables
 \newcommand{\nWfMeshNinetyCdC}{+44.1}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 wf mesh C, Ks400 vs Ks0 Cd_mean, %
 \newcommand{\nWfMeshNinetyClC}{+66.6}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 wf mesh C, Ks400 vs Ks0 Cl_mean, %
 \newcommand{\nWfMeshNinetyCdM}{+45.4}% stage2_polars.csv, S2h_wf_mesh.txt cases (coarse/fine) and S2e_rerun.txt (medium), maxCo 2.5: a090 wf mesh M, Ks400 vs Ks0 Cd_mean, %

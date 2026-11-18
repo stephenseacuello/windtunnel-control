@@ -368,3 +368,8 @@
 [render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/records/A_rot_U23.0_lam0.100_SST_medium_Ks400_senseCCW_Co2n2_rev50a45/fields)
 [record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/records/A_rot_U23.0_lam0.100_SST_medium_Ks400_senseCCW_Co2n2_rev50a45 : 4.22 MB, 37 files
 
+=== 2026-11-17 11:54:02 after_case /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/runs/A_rot_U23.0_lam0.100_SST_fine_Ks400_senseCCW_rev60a55
+[record] A_rot_U23.0_lam0.100_SST_fine_Ks400_senseCCW_rev60a55 (rotor, finished) -> /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/records/A_rot_U23.0_lam0.100_SST_fine_Ks400_senseCCW_rev60a55
+[render] pvbatch render_fields.py (/Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/records/A_rot_U23.0_lam0.100_SST_fine_Ks400_senseCCW_rev60a55/fields)
+[record] /Users/stepheneacuello/Projects/windtunnel-control/cfd/rotor2d/results/records/A_rot_U23.0_lam0.100_SST_fine_Ks400_senseCCW_rev60a55 : 4.36 MB, 37 files
+
